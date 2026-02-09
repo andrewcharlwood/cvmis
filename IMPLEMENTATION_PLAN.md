@@ -220,7 +220,7 @@
     - "Delivered Medicines Use Reviews and New Medicine Service consultations"
     - "Maintained controlled drug compliance and clinical governance standards"
 
-- [ ] **Task 8: Build education, projects, contact, and footer sections**
+- [x] **Task 8: Build education, projects, contact, and footer sections**
 
   **Education section** (`#education`):
 

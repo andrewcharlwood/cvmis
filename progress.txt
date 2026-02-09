@@ -101,3 +101,17 @@
 - All CV content verified accurate: correct titles, orgs, dates, key numbers (£14.6M, 14,000, £2.6M, 70%, 200+, £220M, £1M+, 3,000+)
 - HTML tag balance verified: all section/div/ul/li/h3 tags matched correctly
 - No new codebase pattern learnings — timeline pattern straightforward with existing conventions
+
+### Iteration 8 — Task 8: Build education, projects, contact, and footer sections
+- Added education section with 2-column grid: MPharm (Hons) UEA (2011-2015, 2:1) and Mary Seacole Leadership Programme (NHS Leadership Academy, 2018)
+- Education cards use gradient top border via ::before pseudo-element (teal→coral) with overflow:hidden on card
+- A-Levels line below cards: Mathematics (A*), Chemistry (B), Politics (C)
+- Projects section with 2x2 grid: PharMetrics (with live link), Patient Pathway Analysis, Blueteq Generator, NMS Video
+- Project cards use the gradient border hover trick: ::before with mask-composite exclude, opacity 0→1 on hover
+- Contact section with 4-column grid using unicode icons: ☎ phone, ✉ email, ↗ LinkedIn, ○ location
+- Footer with decorative ECG waveform SVG (120x20, PQRST shape) and attribution text
+- Responsive 768px: projects grid → 1fr (single column), contact grid → 2x2
+- Responsive 480px: education grid → 1fr, contact grid → 2x2
+- All 13 content strings verified present, all HTML tags balanced (83 div pairs, 6 sections, 19 p, 9 a, 20 svg, etc.)
+- CSS was already pre-built in previous iterations (education, projects, contact, footer classes all existed) — only HTML content needed to be filled in
+- No new codebase pattern learnings — straightforward content population following established CSS patterns
