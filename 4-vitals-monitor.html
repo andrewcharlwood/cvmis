@@ -107,6 +107,41 @@
   }
 
   /* =========================================
+     ECG OVERLAY
+     ========================================= */
+
+  #ecg-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    pointer-events: none;
+  }
+
+  #ecg-overlay svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .ecg-line {
+    fill: none;
+    stroke: #00ff41;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 4px rgba(0, 255, 65, 0.6));
+  }
+
+  .ecg-heartbeat {
+    fill: none;
+    stroke: #00ff41;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 6px rgba(0, 255, 65, 0.7));
+  }
+
+  /* =========================================
      FINAL CV CONTENT (hidden behind boot)
      ========================================= */
 
@@ -126,6 +161,9 @@
 <div id="boot-screen">
   <div id="boot-lines"></div>
 </div>
+
+<!-- ECG Overlay (created dynamically but container lives here) -->
+<div id="ecg-overlay"></div>
 
 <!-- Final CV Content (hidden behind boot screen until transition) -->
 <div id="cv-content">
@@ -189,15 +227,176 @@
     }
   }, bootEndTime);
 
-  // After fade out (800ms), the boot screen stays black for the ECG phase (Task 2)
-  // For now, just hide the boot screen after fade and reveal CV content
+  // After fade out (800ms), start the ECG phase
   setTimeout(function() {
-    var bootScreen = document.getElementById('boot-screen');
-    bootScreen.style.display = 'none';
-
-    var cvContent = document.getElementById('cv-content');
-    cvContent.classList.add('revealed');
+    startECGPhase();
   }, bootEndTime + 800);
+
+  /* =========================================
+     ECG PHASE: Flatline + First Heartbeat
+     ========================================= */
+
+  function startECGPhase() {
+    var overlay = document.getElementById('ecg-overlay');
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var cy = Math.round(vh / 2);
+
+    // Create SVG
+    var svgNS = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + vw + ' ' + vh);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    overlay.appendChild(svg);
+
+    // --- FLATLINE ---
+    var flatlinePath = document.createElementNS(svgNS, 'path');
+    var flatlineD = 'M 0 ' + cy + ' L ' + vw + ' ' + cy;
+    flatlinePath.setAttribute('d', flatlineD);
+    flatlinePath.setAttribute('class', 'ecg-line');
+    svg.appendChild(flatlinePath);
+
+    var flatlineLen = flatlinePath.getTotalLength();
+    flatlinePath.style.strokeDasharray = flatlineLen;
+    flatlinePath.style.strokeDashoffset = flatlineLen;
+
+    // Animate flatline drawing left-to-right over 1000ms
+    requestAnimationFrame(function() {
+      flatlinePath.style.transition = 'stroke-dashoffset 1000ms linear';
+      flatlinePath.style.strokeDashoffset = '0';
+    });
+
+    // --- FIRST HEARTBEAT (after flatline completes) ---
+    setTimeout(function() {
+      drawHeartbeat(svg, svgNS, vw, vh, cy, 40, '#00ff41', 600, function() {
+        // After first heartbeat, hold 300ms then signal done (Task 3 will continue)
+        setTimeout(function() {
+          finishECGPhase();
+        }, 300);
+      });
+    }, 1050);
+  }
+
+  /**
+   * Draws a PQRST waveform centered horizontally on the screen.
+   * @param {SVGElement} svg - The SVG container
+   * @param {string} svgNS - SVG namespace
+   * @param {number} vw - Viewport width
+   * @param {number} vh - Viewport height
+   * @param {number} cy - Vertical center (baseline Y)
+   * @param {number} rHeight - Height of the R peak above baseline
+   * @param {string} color - Stroke color
+   * @param {number} duration - Animation duration in ms
+   * @param {function} onComplete - Callback when animation finishes
+   */
+  function drawHeartbeat(svg, svgNS, vw, vh, cy, rHeight, color, duration, onComplete) {
+    // PQRST waveform shape relative to center point
+    // Total width of the waveform: ~160px
+    var waveWidth = 160;
+    var startX = Math.round((vw - waveWidth) / 2);
+
+    // Build the PQRST path
+    // P wave: gentle upward bump, ~8px above baseline, ~30px wide
+    // Flat: ~10px
+    // Q dip: sharp dip ~10px below, ~8px wide
+    // R spike: sharp peak rHeight above baseline, ~12px wide
+    // S dip: sharp dip ~15px below, ~8px wide
+    // Flat: ~10px
+    // T wave: gentle upward bump, ~12px above, ~35px wide
+    // Return to baseline
+
+    var x = startX;
+    var d = 'M ' + x + ' ' + cy;
+
+    // Lead-in flat segment
+    d += ' L ' + (x + 10) + ' ' + cy;
+    x += 10;
+
+    // P wave (cubic bezier for smooth bump)
+    d += ' C ' + (x + 8) + ' ' + cy + ', ' + (x + 10) + ' ' + (cy - 8) + ', ' + (x + 15) + ' ' + (cy - 8);
+    d += ' C ' + (x + 20) + ' ' + (cy - 8) + ', ' + (x + 22) + ' ' + cy + ', ' + (x + 30) + ' ' + cy;
+    x += 30;
+
+    // Flat segment before QRS
+    d += ' L ' + (x + 10) + ' ' + cy;
+    x += 10;
+
+    // Q dip
+    d += ' L ' + (x + 4) + ' ' + (cy + 10);
+    x += 4;
+
+    // R spike (sharp peak)
+    d += ' L ' + (x + 6) + ' ' + (cy - rHeight);
+    x += 6;
+
+    // S dip
+    d += ' L ' + (x + 6) + ' ' + (cy + 15);
+    x += 6;
+
+    // Return to baseline
+    d += ' L ' + (x + 4) + ' ' + cy;
+    x += 4;
+
+    // Flat segment before T wave
+    d += ' L ' + (x + 10) + ' ' + cy;
+    x += 10;
+
+    // T wave (cubic bezier for smooth bump)
+    d += ' C ' + (x + 8) + ' ' + cy + ', ' + (x + 12) + ' ' + (cy - 12) + ', ' + (x + 17) + ' ' + (cy - 12);
+    d += ' C ' + (x + 22) + ' ' + (cy - 12) + ', ' + (x + 27) + ' ' + cy + ', ' + (x + 35) + ' ' + cy;
+    x += 35;
+
+    // Trail-out flat segment
+    d += ' L ' + (x + 10) + ' ' + cy;
+
+    var beatPath = document.createElementNS(svgNS, 'path');
+    beatPath.setAttribute('d', d);
+    beatPath.setAttribute('class', 'ecg-heartbeat');
+    beatPath.style.stroke = color;
+    svg.appendChild(beatPath);
+
+    var beatLen = beatPath.getTotalLength();
+    beatPath.style.strokeDasharray = beatLen;
+    beatPath.style.strokeDashoffset = beatLen;
+
+    // Animate the heartbeat drawing
+    requestAnimationFrame(function() {
+      beatPath.style.transition = 'stroke-dashoffset ' + duration + 'ms ease-in-out';
+      beatPath.style.strokeDashoffset = '0';
+    });
+
+    // Callback after animation
+    if (onComplete) {
+      setTimeout(onComplete, duration + 50);
+    }
+  }
+
+  /**
+   * Temporary: finish ECG phase by hiding overlays and revealing CV.
+   * Task 3 will expand this with second/third heartbeats and branching.
+   */
+  function finishECGPhase() {
+    var overlay = document.getElementById('ecg-overlay');
+    var bootScreen = document.getElementById('boot-screen');
+
+    // Fade out the ECG lines
+    overlay.style.transition = 'opacity 500ms ease';
+    overlay.style.opacity = '0';
+
+    // Transition boot screen background from black to white
+    bootScreen.style.transition = 'background 500ms ease';
+    bootScreen.style.background = '#FFFFFF';
+
+    setTimeout(function() {
+      // Remove overlays
+      overlay.style.display = 'none';
+      bootScreen.style.display = 'none';
+
+      // Reveal CV content
+      var cvContent = document.getElementById('cv-content');
+      cvContent.classList.add('revealed');
+    }, 500);
+  }
 
 })();
 </script>
