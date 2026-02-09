@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Andy Charlwood — MPharm | CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #FFFFFF;
+    --text: #334155;
+    --heading: #0F172A;
+    --teal: #00897B;
+    --teal-light: rgba(0, 137, 123, 0.08);
+    --teal-medium: rgba(0, 137, 123, 0.15);
+    --coral: #FF6B6B;
+    --coral-light: rgba(255, 107, 107, 0.08);
+    --muted: #94A3B8;
+    --border: #E2E8F0;
+    --card-bg: #FFFFFF;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.1);
+    --radius: 16px;
+    --font-primary: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-secondary: 'Inter Tight', system-ui, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-primary);
+    font-size: 15px;
+    line-height: 1.7;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* =========================================
+     BOOT SCREEN
+     ========================================= */
+
+  #boot-screen {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px;
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    overflow: hidden;
+  }
+
+  #boot-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 640px;
+  }
+
+  .boot-line {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 400ms ease-out, transform 400ms ease-out;
+    white-space: nowrap;
+    line-height: 1.6;
+  }
+
+  .boot-line.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .boot-line.fading {
+    opacity: 0;
+    transition: opacity 800ms ease;
+  }
+
+  .c-green { color: #00ff41; }
+  .c-green-bold { color: #00ff41; font-weight: 700; }
+  .c-cyan { color: #00e5ff; }
+  .c-dim { color: #3a6b45; }
+  .c-grey { color: #666; }
+
+  /* Blinking cursor */
+  #boot-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background: #00ff41;
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* =========================================
+     FINAL CV CONTENT (hidden behind boot)
+     ========================================= */
+
+  #cv-content {
+    opacity: 0;
+  }
+
+  #cv-content.revealed {
+    opacity: 1;
+    transition: opacity 600ms ease;
+  }
+</style>
+</head>
+<body>
+
+<!-- Boot Screen Overlay -->
+<div id="boot-screen">
+  <div id="boot-lines"></div>
+</div>
+
+<!-- Final CV Content (hidden behind boot screen until transition) -->
+<div id="cv-content">
+  <!-- CV sections will be built in subsequent tasks -->
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* =========================================
+     BOOT SEQUENCE
+     ========================================= */
+
+  var bootLines = [
+    { html: '<span class="c-green-bold">CLINICAL TERMINAL v3.2.1</span>', delay: 0 },
+    { html: '<span class="c-dim">Initialising pharmacist profile...</span>', delay: 220 },
+    { html: '<span class="c-dim">---</span>', delay: 220 },
+    { html: '<span class="c-cyan">SYSTEM   </span><span class="c-green">NHS Norfolk &amp; Waveney ICB</span>', delay: 220 },
+    { html: '<span class="c-cyan">USER     </span><span class="c-green">Andy Charlwood</span>', delay: 220 },
+    { html: '<span class="c-cyan">ROLE     </span><span class="c-green">Deputy Head of Population Health &amp; Data Analysis</span>', delay: 220 },
+    { html: '<span class="c-cyan">LOCATION </span><span class="c-green">Norwich, UK</span>', delay: 220 },
+    { html: '<span class="c-dim">---</span>', delay: 220 },
+    { html: '<span class="c-dim">Loading modules...</span>', delay: 220 },
+    { html: '<span class="c-green-bold">[OK]</span> <span class="c-dim">pharmacist_core.sys</span>', delay: 220 },
+    { html: '<span class="c-green-bold">[OK]</span> <span class="c-dim">population_health.mod</span>', delay: 220 },
+    { html: '<span class="c-green-bold">[OK]</span> <span class="c-dim">data_analytics.eng</span>', delay: 220 },
+    { html: '<span class="c-dim">---</span>', delay: 220 },
+    { html: '<span class="c-green-bold">&gt; READY — Rendering CV...</span><span id="boot-cursor"></span>', delay: 220 }
+  ];
+
+  var bootContainer = document.getElementById('boot-lines');
+  var totalBootTime = 0;
+
+  bootLines.forEach(function(line, index) {
+    totalBootTime += line.delay;
+    var el = document.createElement('div');
+    el.className = 'boot-line';
+    el.innerHTML = line.html;
+    bootContainer.appendChild(el);
+
+    setTimeout(function() {
+      el.classList.add('visible');
+    }, totalBootTime);
+  });
+
+  // After all lines are visible, wait 400ms then remove cursor and fade boot text
+  var bootEndTime = totalBootTime + 400;
+
+  setTimeout(function() {
+    // Remove cursor
+    var cursor = document.getElementById('boot-cursor');
+    if (cursor) {
+      cursor.remove();
+    }
+
+    // Fade out all boot lines
+    var allLines = bootContainer.querySelectorAll('.boot-line');
+    for (var i = 0; i < allLines.length; i++) {
+      allLines[i].classList.add('fading');
+    }
+  }, bootEndTime);
+
+  // After fade out (800ms), the boot screen stays black for the ECG phase (Task 2)
+  // For now, just hide the boot screen after fade and reveal CV content
+  setTimeout(function() {
+    var bootScreen = document.getElementById('boot-screen');
+    bootScreen.style.display = 'none';
+
+    var cvContent = document.getElementById('cv-content');
+    cvContent.classList.add('revealed');
+  }, bootEndTime + 800);
+
+})();
+</script>
+</body>
+</html>
