@@ -89,3 +89,15 @@
 - 18 skills total: 8 Technical (teal), 6 Clinical (coral), 4 Strategic (teal) — all with correct percentages
 - IntersectionObserver-based scroll animation with 100ms stagger is in place via `initSkillGauges()`
 - Learnings: SVG `width`/`height` attributes are presentation attributes; CSS can override them when a `viewBox` is set
+
+### Iteration 7 — Task 7: Build experience section with timeline and ECG decoration
+- Added complete experience section with 5 roles in a vertical timeline layout
+- Timeline has vertical line at 20% from left with dots (`.current` class fills dot with teal for active roles)
+- Decorative ECG waveform SVG (200x30, PQRST shape) beside section heading at 30% opacity
+- 5 timeline cards with role title, organisation (teal), date pill, and bullet points
+- Cards have hover effect: scale(1.01), shadow-md elevation, teal left border appears
+- Responsive 768px: timeline line and dots hidden, entries become full-width stacked
+- Responsive 480px: reduced card padding (16px), smaller ECG decoration (120px via CSS width)
+- All CV content verified accurate: correct titles, orgs, dates, key numbers (£14.6M, 14,000, £2.6M, 70%, 200+, £220M, £1M+, 3,000+)
+- HTML tag balance verified: all section/div/ul/li/h3 tags matched correctly
+- No new codebase pattern learnings — timeline pattern straightforward with existing conventions

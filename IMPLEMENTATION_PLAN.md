@@ -153,7 +153,7 @@
 
   **Scroll-triggered animation:** Use IntersectionObserver on the skills section. When it enters the viewport (threshold 0.15), animate each skill gauge's `stroke-dashoffset` to its target value. Stagger each gauge by `100ms` (first gauge starts immediately, second at 100ms, third at 200ms, etc.).
 
-- [ ] **Task 7: Build experience section with timeline and ECG decoration**
+- [x] **Task 7: Build experience section with timeline and ECG decoration**
 
   Experience section (`#experience`). Section heading "Experience" in `font-size: 24px; font-weight: 700; color: var(--heading);`.
 
