@@ -17,6 +17,9 @@
 - drawHeartbeat(svg, svgNS, vw, vh, cy, rHeight, color, duration, onComplete) — reusable PQRST waveform renderer. rHeight controls R peak amplitude. color and duration are per-beat customisable.
 - finishECGPhase() handles cleanup: fades ECG lines, transitions boot bg to white, removes overlays, reveals CV. Task 3 will replace the call to this with expanded branching logic.
 - requestAnimationFrame needed before setting CSS transitions on dynamically created SVG elements.
+- SVG Z (closepath) draws back to the M (moveTo) point, NOT to the last subpath start. Don't use Z when tracing from an external origin to a rectangle — use explicit L commands instead.
+- startBranching(svg, svgNS, vw, vh, cy, overlay, bootScreen) — creates branch paths from peak. finishECGPhase(overlay, bootScreen) — fades SVG, removes overlays from DOM, reveals CV content.
+- Color interpolation for 3 beats: #00ff41 (green) → #00C9A7 (midpoint) → #00897B (teal). Match glow filter color to stroke color.
 
 ## Iteration Log
 
@@ -38,3 +41,19 @@
 - Timing: boot ~4s + ECG ~2.4s = ~6.4s total (within 8-9s guardrail)
 - Learnings: SVG paths created via createElementNS need the SVG namespace 'http://www.w3.org/2000/svg'. requestAnimationFrame is needed before setting CSS transitions on dynamically created SVG elements to ensure the initial state is painted first.
 - The ECG overlay z-index is 1001 (above boot screen at 1000) so the lines render on top of the black background
+
+### Iteration 3 — Task 3: Build second and third heartbeats with overflow branching
+- Replaced finishECGPhase() call after 1st beat with chained sequence: 1st→2nd→3rd→branching→reveal
+- Second heartbeat: R peak 60px, stroke #00C9A7 (green-teal midpoint), bg lightens to #0A0A0A
+- Third heartbeat: R peak 100px, stroke #00897B (full teal), bg lightens to #141414
+- startBranching() creates 7 SVG branch paths from the 3rd R peak apex:
+  - Branch 1: traces pill nav bar outline (rounded rect with Q curves for corners)
+  - Branches 2-3: trace hero section left/right vertical edges
+  - Branches 4-7: trace four vital sign card outlines (Q curve from peak to card top-left, then L lines around rectangle)
+- Branches staggered by 50-150ms, 800ms draw with cubic-bezier easing
+- Background transitions to white during branching (800ms ease-out)
+- finishECGPhase() now accepts overlay/bootScreen params, removes elements from DOM (not just display:none)
+- Glow filter on heartbeat paths dynamically matched to stroke color
+- Total timing: ~8.5s (boot ~3.3s + flatline 1.05s + 3 beats ~2.55s + branching ~1.2s + fade 0.5s)
+- Learnings: Don't use SVG Z (closepath) when tracing from an external origin to a rectangle — Z draws back to M point (the peak), not the rectangle's start corner. Instead, explicitly L back to the first rectangle corner.
+- Learnings: When dynamically setting filter CSS on SVG elements, match the glow color to the stroke color for visual coherence.

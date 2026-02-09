@@ -56,7 +56,7 @@
 
   Position this waveform at the horizontal center of the screen. Animate it using `stroke-dasharray`/`stroke-dashoffset` to "draw" from left to right over ~600ms. The line color is `#00ff41` (green). The flatline behind the waveform remains visible. After this first beat, hold for 300ms.
 
-- [ ] **Task 3: Build second and third heartbeats with overflow branching**
+- [x] **Task 3: Build second and third heartbeats with overflow branching**
 
   **Second heartbeat:** Same PQRST shape but with larger amplitude: R peak at ~60px above baseline. Position it after a short flatline segment following the first beat. During this second beat, begin color-shifting the ECG line from green (`#00ff41`) toward teal (`#00897B`) by interpolating the stroke color. The page background begins lightening from `#000` toward `#0A0A0A`. Animate drawing over ~600ms. Hold 300ms.
 
