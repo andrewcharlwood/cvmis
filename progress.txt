@@ -1,0 +1,17 @@
+# Progress Log
+
+## Codebase Patterns
+- Single self-contained HTML file. All CSS in a single `<style>` tag. All JS in a single `<script>` tag wrapped in an IIFE with 'use strict'.
+- No frameworks, no build step. Only external dependency: Google Fonts via <link> tags.
+- Boot sequence is shared: pure black #000 bg, Fira Code font, blinking green cursor (#00ff41, step-end animation), boot text typed line by line (~220ms apart), [OK] lines bright green bold, SYSTEM/USER/ROLE/LOCATION labels cyan #00e5ff, values bright green, other lines dim green #3a6b45.
+- CV data source: Use the expanded CV_v4.md content. Key roles: Interim Head (May-Nov 2025), Deputy Head (Jul 2024-Present), High-Cost Drugs Pharmacist (May 2022-Jul 2024), Pharmacy Manager Tesco (Nov 2017-May 2022), Duty Pharmacy Manager Tesco (Aug 2016-Nov 2017).
+- Use IntersectionObserver for scroll animations (not scroll event listeners).
+- For smooth scroll on nav clicks: preventDefault, calculate offset, window.scrollTo with behavior:'smooth'.
+- Output HTML file name convention: 4-vitals-monitor.html.
+- ECG PQRST waveform shape: flat -> small P bump -> flat -> sharp Q dip -> tall R spike -> S dip -> flat -> gentle T wave -> flat.
+- Use SVG paths with stroke-dasharray/stroke-dashoffset for line drawing animations.
+- SVG circle skill gauges: circumference = 2*PI*r. stroke-dashoffset = circumference * (1 - level/100). rotate(-90deg) to start from top.
+- Google Fonts: Plus Jakarta Sans, Inter Tight.
+- Floating pill nav: NOT full width. max-width 600px, margin: 12px auto, border-radius 100px.
+
+## Iteration Log
