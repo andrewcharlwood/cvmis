@@ -38,7 +38,7 @@
 
   After the final line appears, wait 400ms, then remove the blinking cursor. The entire boot sequence should take approximately 4 seconds total. The boot screen sits on top of the final CV content (which is already in the DOM but hidden behind the boot screen).
 
-- [ ] **Task 2: Build the ECG flatline and first heartbeat**
+- [x] **Task 2: Build the ECG flatline and first heartbeat**
 
   After the boot sequence completes, fade the boot text to `opacity: 0` over `800ms`. Once faded, the black background remains. Create a full-viewport `<svg>` element overlaying the boot screen (`position: fixed; inset: 0; z-index: 1001;`).
 

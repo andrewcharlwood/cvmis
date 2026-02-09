@@ -13,6 +13,10 @@
 - SVG circle skill gauges: circumference = 2*PI*r. stroke-dashoffset = circumference * (1 - level/100). rotate(-90deg) to start from top.
 - Google Fonts: Plus Jakarta Sans, Inter Tight.
 - Floating pill nav: NOT full width. max-width 600px, margin: 12px auto, border-radius 100px.
+- ECG overlay: #ecg-overlay div at z-index 1001. SVG created dynamically with viewBox matching viewport dimensions.
+- drawHeartbeat(svg, svgNS, vw, vh, cy, rHeight, color, duration, onComplete) — reusable PQRST waveform renderer. rHeight controls R peak amplitude. color and duration are per-beat customisable.
+- finishECGPhase() handles cleanup: fades ECG lines, transitions boot bg to white, removes overlays, reveals CV. Task 3 will replace the call to this with expanded branching logic.
+- requestAnimationFrame needed before setting CSS transitions on dynamically created SVG elements.
 
 ## Iteration Log
 
@@ -24,3 +28,13 @@
 - Temporary: boot screen hides directly after fade (Task 2 will insert ECG phase between fade and reveal)
 - CSS variables, all 3 Google Font families loaded, IIFE strict mode JS
 - Learnings: setTimeout delay argument is evaluated at call-time, not in the closure callback, so using a cumulative var in forEach works correctly for staggered timing
+
+### Iteration 2 — Task 2: Build the ECG flatline and first heartbeat
+- Added ECG overlay phase between boot fade and CV reveal
+- Flatline draws left-to-right (1000ms linear) using SVG stroke-dasharray/dashoffset
+- First PQRST heartbeat (R peak 40px) draws over 600ms at viewport center
+- drawHeartbeat() is a reusable function accepting: svg, svgNS, vw, vh, cy, rHeight, color, duration, onComplete callback — Task 3 calls this with different amplitudes
+- finishECGPhase() is a temporary cleanup function that Task 3 will replace with expanded logic (2nd/3rd beats + branching)
+- Timing: boot ~4s + ECG ~2.4s = ~6.4s total (within 8-9s guardrail)
+- Learnings: SVG paths created via createElementNS need the SVG namespace 'http://www.w3.org/2000/svg'. requestAnimationFrame is needed before setting CSS transitions on dynamically created SVG elements to ensure the initial state is painted first.
+- The ECG overlay z-index is 1001 (above boot screen at 1000) so the lines render on top of the black background
