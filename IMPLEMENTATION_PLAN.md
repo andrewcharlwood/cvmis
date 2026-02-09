@@ -15,7 +15,7 @@
 
 ## Tasks
 
-- [ ] **Task 1: Build the boot screen foundation**
+- [x] **Task 1: Build the boot screen foundation**
 
   Create a single `index.html` file with all HTML, CSS, and JavaScript inline. The page starts as a pure black background (`#000`) filling the full viewport. Load Fira Code from Google Fonts (`https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap`). Create a boot screen container (`#boot-screen`) that is `position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; justify-content: center; padding: 40px; font-family: 'Fira Code', monospace; font-size: 14px; overflow: hidden;`.
 

@@ -15,3 +15,12 @@
 - Floating pill nav: NOT full width. max-width 600px, margin: 12px auto, border-radius 100px.
 
 ## Iteration Log
+
+### Iteration 1 — Task 1: Build the boot screen foundation
+- Created `4-vitals-monitor.html` with full boot screen implementation
+- Boot sequence follows guardrail format exactly: CLINICAL TERMINAL v3.2.1, profile init, SYSTEM/USER/ROLE/LOCATION, modules, [OK] lines, READY
+- Timing: 14 lines × 220ms = ~2860ms boot + 400ms pause + 800ms fade = ~4.06s total (within guardrail)
+- Boot text fades to opacity:0, then boot screen is removed and CV content revealed
+- Temporary: boot screen hides directly after fade (Task 2 will insert ECG phase between fade and reveal)
+- CSS variables, all 3 Google Font families loaded, IIFE strict mode JS
+- Learnings: setTimeout delay argument is evaluated at call-time, not in the closure callback, so using a cumulative var in forEach works correctly for staggered timing
