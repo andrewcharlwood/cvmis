@@ -74,7 +74,7 @@
 
   **Fade out and reveal:** After all branches have finished drawing (~1.5s total branching time), fade all SVG lines to `opacity: 0` over `500ms`. Simultaneously fade in the final page content from `opacity: 0` to `opacity: 1`. Remove the SVG overlay and boot screen from the DOM.
 
-- [ ] **Task 4: Build final design skeleton - CSS variables, floating pill nav, typography**
+- [x] **Task 4: Build final design skeleton - CSS variables, floating pill nav, typography**
 
   Below the boot screen in the HTML, build the full CV page structure. Load Google Fonts: `Plus Jakarta Sans` (400, 500, 600, 700) and `Inter Tight` (400, 500, 600) alongside Fira Code. URL: `https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600&display=swap`.
 

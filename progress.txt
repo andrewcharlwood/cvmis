@@ -57,3 +57,17 @@
 - Total timing: ~8.5s (boot ~3.3s + flatline 1.05s + 3 beats ~2.55s + branching ~1.2s + fade 0.5s)
 - Learnings: Don't use SVG Z (closepath) when tracing from an external origin to a rectangle — Z draws back to M point (the peak), not the rectangle's start corner. Instead, explicitly L back to the first rectangle corner.
 - Learnings: When dynamically setting filter CSS on SVG elements, match the glow color to the stroke color for visual coherence.
+
+### Iteration 4 — Task 4: Build final design skeleton with floating pill nav and typography
+- Added floating pill nav bar: position: fixed; top: 16px; centered via left: 50% + translateX(-50%); max-width: 600px; border-radius: 999px; with subtle border and shadow
+- Nav links use Inter Tight (--font-secondary) at 13px, muted color, with teal hover/active states
+- Active nav link has a 4px teal dot below via ::after pseudo-element
+- IntersectionObserver for active section tracking: threshold 0.3, rootMargin '-20% 0px -60% 0px'
+- Smooth scroll: preventDefault on nav clicks, scrollTo with offset -70 and behavior: 'smooth'
+- initNavTracking() called from finishECGPhase() after CV content is revealed (DOM must exist first)
+- Main container: max-width 1000px, padding 0 32px, sections 80px vertical padding
+- .section-heading utility class: 24px, 700 weight, heading color, margin-bottom 32px
+- Responsive 768px: pill nav becomes full-width scrollable (overflow-x: auto, hidden scrollbar), main padding 20px
+- Responsive 480px: nav links shrink to 11px/4px 8px padding, main padding 16px, section padding 48px
+- All 6 sections added as skeleton: about, skills, experience, education, projects, contact + footer
+- No new codebase pattern learnings — existing patterns from progress.txt covered all needs
