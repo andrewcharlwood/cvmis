@@ -242,6 +242,104 @@
   }
 
   /* =========================================
+     HERO SECTION
+     ========================================= */
+
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-family: var(--font-primary);
+    font-weight: 700;
+    font-size: clamp(36px, 5vw, 52px);
+    color: var(--heading);
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .hero-title {
+    font-size: 16px;
+    color: var(--muted);
+    margin: 8px 0;
+  }
+
+  .hero-location {
+    display: inline-block;
+    padding: 4px 16px;
+    border: 1px solid var(--teal);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--teal);
+    font-weight: 500;
+    margin-top: 4px;
+  }
+
+  .hero-summary {
+    font-size: 15px;
+    line-height: 1.8;
+    max-width: 560px;
+    color: var(--text);
+    margin: 24px auto 0;
+    text-align: center;
+  }
+
+  /* Vital sign metric cards */
+  .vitals-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .vital-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    box-shadow: var(--shadow-sm);
+    border-top: 3px solid var(--teal);
+    min-width: 160px;
+    text-align: center;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .vital-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .vital-value {
+    font-family: var(--font-primary);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--heading);
+    line-height: 1.2;
+  }
+
+  .vital-value.small {
+    font-size: 16px;
+  }
+
+  .vital-value.medium {
+    font-size: 18px;
+  }
+
+  .vital-label {
+    font-family: var(--font-secondary);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* =========================================
      RESPONSIVE: 768px
      ========================================= */
 
@@ -262,6 +360,11 @@
     .cv-main {
       padding: 0 20px;
     }
+
+    .vitals-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   /* =========================================
@@ -280,6 +383,15 @@
 
     .cv-main section {
       padding: 48px 0;
+    }
+
+    .hero h1 {
+      font-size: 28px;
+    }
+
+    .vitals-row {
+      display: grid;
+      grid-template-columns: 1fr;
     }
   }
 </style>
@@ -310,8 +422,30 @@
   <!-- Main CV Content -->
   <main class="cv-main">
 
-    <section id="about">
-      <!-- Task 5: Hero section with vital sign cards -->
+    <section id="about" class="hero">
+      <h1>Andy Charlwood</h1>
+      <p class="hero-title">Deputy Head of Population Health &amp; Data Analysis</p>
+      <span class="hero-location">Norwich, UK</span>
+      <p class="hero-summary">GPhC Registered Pharmacist specialising in medicines optimisation, population health analytics, and NHS efficiency programmes. Bridging clinical pharmacy with data science to drive meaningful improvements in patient outcomes.</p>
+
+      <div class="vitals-row">
+        <div class="vital-card">
+          <div class="vital-value">10+</div>
+          <div class="vital-label">Years Experience</div>
+        </div>
+        <div class="vital-card">
+          <div class="vital-value small">Python/SQL/BI</div>
+          <div class="vital-label">Analytics Stack</div>
+        </div>
+        <div class="vital-card">
+          <div class="vital-value medium">Pop. Health</div>
+          <div class="vital-label">Focus Area</div>
+        </div>
+        <div class="vital-card">
+          <div class="vital-value medium">NHS N&amp;W</div>
+          <div class="vital-label">System</div>
+        </div>
+      </div>
     </section>
 
     <section id="skills">
