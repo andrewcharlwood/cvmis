@@ -756,6 +756,72 @@
   }
 
   /* =========================================
+     SCROLL REVEAL ANIMATIONS
+     ========================================= */
+
+  .cv-main section {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .cv-main section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Hero section should be immediately visible (above fold) */
+  .cv-main section.hero {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  /* Staggered child card/item animations */
+  .cv-main section .vital-card,
+  .cv-main section .skill-item,
+  .cv-main section .timeline-entry,
+  .cv-main section .education-card,
+  .cv-main section .project-card,
+  .cv-main section .contact-item {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .cv-main section.visible .vital-card,
+  .cv-main section.visible .skill-item,
+  .cv-main section.visible .timeline-entry,
+  .cv-main section.visible .education-card,
+  .cv-main section.visible .project-card,
+  .cv-main section.visible .contact-item {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Re-enable hover transforms at matching specificity */
+  .cv-main section.visible .education-card:hover,
+  .cv-main section.visible .project-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .cv-main section.visible .timeline-entry .timeline-card:hover {
+    transform: scale(1.01);
+  }
+
+  /* Hero vital cards get their own reveal since hero is always visible */
+  .cv-main .hero .vital-card {
+    opacity: 1;
+    transform: none;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .cv-main .hero .vital-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  /* =========================================
      FOOTER
      ========================================= */
 
@@ -1686,9 +1752,10 @@
       var cvContent = document.getElementById('cv-content');
       cvContent.classList.add('revealed');
 
-      // Initialize nav tracking, smooth scroll, and skill gauges after reveal
+      // Initialize nav tracking, smooth scroll, skill gauges, and scroll reveal after reveal
       initNavTracking();
       initSkillGauges();
+      initScrollReveal();
     }, 500);
   }
 
@@ -1775,6 +1842,45 @@
     });
 
     gaugeObserver.observe(skillsSection);
+  }
+
+  /* =========================================
+     SCROLL REVEAL: Sections & staggered children
+     ========================================= */
+
+  function initScrollReveal() {
+    var sections = document.querySelectorAll('.cv-main section');
+
+    var revealObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var section = entry.target;
+          section.classList.add('visible');
+
+          // Stagger child cards/items
+          var children = section.querySelectorAll(
+            '.vital-card, .skill-item, .timeline-entry, .education-card, .project-card, .contact-item'
+          );
+          children.forEach(function(child, i) {
+            child.style.transitionDelay = (i * 60) + 'ms';
+          });
+
+          // Only animate once — stop observing after reveal
+          revealObserver.unobserve(section);
+        }
+      });
+    }, {
+      threshold: 0.15
+    });
+
+    sections.forEach(function(section) {
+      // Hero is always visible (above the fold), skip it
+      if (section.classList.contains('hero')) {
+        section.classList.add('visible');
+        return;
+      }
+      revealObserver.observe(section);
+    });
   }
 
 })();
