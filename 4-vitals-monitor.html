@@ -141,6 +141,15 @@
     filter: drop-shadow(0 0 6px rgba(0, 255, 65, 0.7));
   }
 
+  .ecg-branch {
+    fill: none;
+    stroke: #00897B;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 3px rgba(0, 137, 123, 0.5));
+  }
+
   /* =========================================
      FINAL CV CONTENT (hidden behind boot)
      ========================================= */
@@ -238,6 +247,7 @@
 
   function startECGPhase() {
     var overlay = document.getElementById('ecg-overlay');
+    var bootScreen = document.getElementById('boot-screen');
     var vw = window.innerWidth;
     var vh = window.innerHeight;
     var cy = Math.round(vh / 2);
@@ -266,15 +276,185 @@
       flatlinePath.style.strokeDashoffset = '0';
     });
 
-    // --- FIRST HEARTBEAT (after flatline completes) ---
+    // --- FIRST HEARTBEAT (R peak 40px, green) ---
     setTimeout(function() {
       drawHeartbeat(svg, svgNS, vw, vh, cy, 40, '#00ff41', 600, function() {
-        // After first heartbeat, hold 300ms then signal done (Task 3 will continue)
+        // Hold 300ms then second heartbeat
         setTimeout(function() {
-          finishECGPhase();
+
+          // --- SECOND HEARTBEAT (R peak 60px, transitioning color) ---
+          // Bg begins lightening slightly
+          bootScreen.style.transition = 'background 600ms ease';
+          bootScreen.style.background = '#0A0A0A';
+
+          drawHeartbeat(svg, svgNS, vw, vh, cy, 60, '#00C9A7', 600, function() {
+            // Hold 300ms then third heartbeat
+            setTimeout(function() {
+
+              // --- THIRD HEARTBEAT (R peak 100px, full teal) ---
+              bootScreen.style.transition = 'background 600ms ease';
+              bootScreen.style.background = '#141414';
+
+              drawHeartbeat(svg, svgNS, vw, vh, cy, 100, '#00897B', 600, function() {
+                // At the apex of the third beat — launch branching
+                startBranching(svg, svgNS, vw, vh, cy, overlay, bootScreen);
+              });
+            }, 300);
+          });
         }, 300);
       });
     }, 1050);
+  }
+
+  /**
+   * Creates the overflow branching effect from the third heartbeat peak.
+   * Branch lines shoot outward and trace the outlines of UI elements.
+   */
+  function startBranching(svg, svgNS, vw, vh, cy, overlay, bootScreen) {
+    var cx = Math.round(vw / 2);
+    var peakY = cy - 100; // Third beat R peak position
+
+    // Calculate UI element positions for branches to trace
+    // Pill nav: rounded rectangle at top center
+    var navW = Math.min(520, vw - 64);
+    var navH = 44;
+    var navX = Math.round((vw - navW) / 2);
+    var navY = 16;
+    var navR = 22; // border-radius
+
+    // Hero section: centered area
+    var heroW = Math.min(600, vw - 80);
+    var heroX = Math.round((vw - heroW) / 2);
+    var heroY = Math.round(vh * 0.2);
+    var heroH = Math.round(vh * 0.5);
+
+    // Card outlines (vital sign cards)
+    var cardW = 160;
+    var cardH = 80;
+    var cardGap = 16;
+    var totalCardsW = 4 * cardW + 3 * cardGap;
+    var cardsStartX = Math.round((vw - totalCardsW) / 2);
+    var cardsY = Math.round(vh * 0.65);
+
+    // Branch paths — each starts from the peak and traces outward
+    var branches = [];
+
+    // Branch 1: Shoots up to trace the pill nav bar outline
+    branches.push({
+      d: 'M ' + cx + ' ' + peakY +
+         ' Q ' + cx + ' ' + (navY + navH + 20) + ', ' + (navX + navR) + ' ' + (navY + navH) +
+         ' L ' + (navX + navR) + ' ' + (navY + navH) +
+         ' Q ' + navX + ' ' + (navY + navH) + ', ' + navX + ' ' + (navY + navH - navR) +
+         ' L ' + navX + ' ' + (navY + navR) +
+         ' Q ' + navX + ' ' + navY + ', ' + (navX + navR) + ' ' + navY +
+         ' L ' + (navX + navW - navR) + ' ' + navY +
+         ' Q ' + (navX + navW) + ' ' + navY + ', ' + (navX + navW) + ' ' + (navY + navR) +
+         ' L ' + (navX + navW) + ' ' + (navY + navH - navR) +
+         ' Q ' + (navX + navW) + ' ' + (navY + navH) + ', ' + (navX + navW - navR) + ' ' + (navY + navH) +
+         ' L ' + (navX + navR) + ' ' + (navY + navH),
+      delay: 0
+    });
+
+    // Branch 2: Shoots left to trace the left edge of hero container
+    branches.push({
+      d: 'M ' + cx + ' ' + peakY +
+         ' Q ' + (heroX + 40) + ' ' + (peakY - 30) + ', ' + heroX + ' ' + heroY +
+         ' L ' + heroX + ' ' + (heroY + heroH),
+      delay: 80
+    });
+
+    // Branch 3: Shoots right to trace the right edge of hero container
+    branches.push({
+      d: 'M ' + cx + ' ' + peakY +
+         ' Q ' + (heroX + heroW - 40) + ' ' + (peakY - 30) + ', ' + (heroX + heroW) + ' ' + heroY +
+         ' L ' + (heroX + heroW) + ' ' + (heroY + heroH),
+      delay: 80
+    });
+
+    // Branch 4: Down-left to first card outline (trace rectangle, no Z back to peak)
+    var c1x = cardsStartX;
+    branches.push({
+      d: 'M ' + cx + ' ' + peakY +
+         ' Q ' + (cx - 80) + ' ' + (cardsY - 40) + ', ' + c1x + ' ' + cardsY +
+         ' L ' + (c1x + cardW) + ' ' + cardsY +
+         ' L ' + (c1x + cardW) + ' ' + (cardsY + cardH) +
+         ' L ' + c1x + ' ' + (cardsY + cardH) +
+         ' L ' + c1x + ' ' + cardsY,
+      delay: 150
+    });
+
+    // Branch 5: Down to second card outline
+    var c2x = cardsStartX + cardW + cardGap;
+    branches.push({
+      d: 'M ' + cx + ' ' + peakY +
+         ' Q ' + (c2x + cardW / 2) + ' ' + (cardsY - 20) + ', ' + c2x + ' ' + cardsY +
+         ' L ' + (c2x + cardW) + ' ' + cardsY +
+         ' L ' + (c2x + cardW) + ' ' + (cardsY + cardH) +
+         ' L ' + c2x + ' ' + (cardsY + cardH) +
+         ' L ' + c2x + ' ' + cardsY,
+      delay: 200
+    });
+
+    // Branch 6: Down-right to third card outline
+    var c3x = cardsStartX + 2 * (cardW + cardGap);
+    branches.push({
+      d: 'M ' + cx + ' ' + peakY +
+         ' Q ' + (cx + 60) + ' ' + (cardsY - 30) + ', ' + c3x + ' ' + cardsY +
+         ' L ' + (c3x + cardW) + ' ' + cardsY +
+         ' L ' + (c3x + cardW) + ' ' + (cardsY + cardH) +
+         ' L ' + c3x + ' ' + (cardsY + cardH) +
+         ' L ' + c3x + ' ' + cardsY,
+      delay: 250
+    });
+
+    // Branch 7: Far right to fourth card outline
+    var c4x = cardsStartX + 3 * (cardW + cardGap);
+    branches.push({
+      d: 'M ' + cx + ' ' + peakY +
+         ' Q ' + (cx + 120) + ' ' + (cardsY - 20) + ', ' + c4x + ' ' + cardsY +
+         ' L ' + (c4x + cardW) + ' ' + cardsY +
+         ' L ' + (c4x + cardW) + ' ' + (cardsY + cardH) +
+         ' L ' + c4x + ' ' + (cardsY + cardH) +
+         ' L ' + c4x + ' ' + cardsY,
+      delay: 300
+    });
+
+    // Animate each branch with staggered timing
+    var branchDuration = 800;
+    var maxDelay = 0;
+
+    branches.forEach(function(branch) {
+      if (branch.delay > maxDelay) maxDelay = branch.delay;
+
+      setTimeout(function() {
+        var path = document.createElementNS(svgNS, 'path');
+        path.setAttribute('d', branch.d);
+        path.setAttribute('class', 'ecg-branch');
+        svg.appendChild(path);
+
+        var len = path.getTotalLength();
+        path.style.strokeDasharray = len;
+        path.style.strokeDashoffset = len;
+
+        requestAnimationFrame(function() {
+          path.style.transition = 'stroke-dashoffset ' + branchDuration + 'ms cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+          path.style.strokeDashoffset = '0';
+        });
+      }, branch.delay);
+    });
+
+    // Background rapidly transitions to white during branching
+    setTimeout(function() {
+      bootScreen.style.transition = 'background 800ms ease-out';
+      bootScreen.style.background = '#FFFFFF';
+    }, 200);
+
+    // After all branches finish drawing, fade out and reveal
+    var totalBranchTime = maxDelay + branchDuration + 100;
+
+    setTimeout(function() {
+      finishECGPhase(overlay, bootScreen);
+    }, totalBranchTime);
   }
 
   /**
@@ -353,6 +533,10 @@
     beatPath.setAttribute('d', d);
     beatPath.setAttribute('class', 'ecg-heartbeat');
     beatPath.style.stroke = color;
+    // Match the glow filter to the stroke color
+    if (color !== '#00ff41') {
+      beatPath.style.filter = 'drop-shadow(0 0 6px rgba(0, 137, 123, 0.7))';
+    }
     svg.appendChild(beatPath);
 
     var beatLen = beatPath.getTotalLength();
@@ -372,25 +556,17 @@
   }
 
   /**
-   * Temporary: finish ECG phase by hiding overlays and revealing CV.
-   * Task 3 will expand this with second/third heartbeats and branching.
+   * Final cleanup: fade out all SVG lines and reveal the CV content.
    */
-  function finishECGPhase() {
-    var overlay = document.getElementById('ecg-overlay');
-    var bootScreen = document.getElementById('boot-screen');
-
-    // Fade out the ECG lines
+  function finishECGPhase(overlay, bootScreen) {
+    // Fade out all SVG lines
     overlay.style.transition = 'opacity 500ms ease';
     overlay.style.opacity = '0';
 
-    // Transition boot screen background from black to white
-    bootScreen.style.transition = 'background 500ms ease';
-    bootScreen.style.background = '#FFFFFF';
-
     setTimeout(function() {
-      // Remove overlays
-      overlay.style.display = 'none';
-      bootScreen.style.display = 'none';
+      // Remove overlays from DOM
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      if (bootScreen.parentNode) bootScreen.parentNode.removeChild(bootScreen);
 
       // Reveal CV content
       var cvContent = document.getElementById('cv-content');
