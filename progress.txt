@@ -71,3 +71,12 @@
 - Responsive 480px: nav links shrink to 11px/4px 8px padding, main padding 16px, section padding 48px
 - All 6 sections added as skeleton: about, skills, experience, education, projects, contact + footer
 - No new codebase pattern learnings — existing patterns from progress.txt covered all needs
+
+### Iteration 5 — Task 5: Build hero section with vital sign cards
+- Added centered hero section (#about) with min-height: 100vh, flexbox centering
+- Content: h1 name (clamp 36-52px), muted job title, teal location pill, summary paragraph (max-width 560px)
+- 4 vital sign metric cards in a flex row with gap 16px, teal border-top, hover elevation
+- Card values use different font sizes: "10+" at 28px, "Python/SQL/BI" at 16px (.small), "Pop. Health" and "NHS N&W" at 18px (.medium)
+- Responsive: 768px → 2x2 CSS grid, 480px → single column stacked + h1 reduced to 28px
+- Vital cards have smooth hover transition: translateY(-2px) + shadow-md elevation
+- No new codebase pattern learnings — straightforward implementation following established patterns

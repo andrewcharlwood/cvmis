@@ -111,7 +111,7 @@
 
   **Main container:** `<main>` with `max-width: 1000px; margin: 0 auto; padding: 0 32px;`. Sections have `padding: 80px 0;`.
 
-- [ ] **Task 5: Build hero section with vital sign cards**
+- [x] **Task 5: Build hero section with vital sign cards**
 
   Hero section (`#about`): `min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;`.
 
