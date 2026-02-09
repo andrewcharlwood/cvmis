@@ -20,6 +20,8 @@
 - SVG Z (closepath) draws back to the M (moveTo) point, NOT to the last subpath start. Don't use Z when tracing from an external origin to a rectangle — use explicit L commands instead.
 - startBranching(svg, svgNS, vw, vh, cy, overlay, bootScreen) — creates branch paths from peak. finishECGPhase(overlay, bootScreen) — fades SVG, removes overlays from DOM, reveals CV content.
 - Color interpolation for 3 beats: #00ff41 (green) → #00C9A7 (midpoint) → #00897B (teal). Match glow filter color to stroke color.
+- Scroll reveal CSS specificity trap: compound selectors like `.cv-main section.visible .card` that set `transform` will override `.card:hover { transform }` because (0,3,0) > (0,2,0). Must add matching-specificity hover rules: `.cv-main section.visible .card:hover { transform: ... }`.
+- initScrollReveal() is called from finishECGPhase() alongside initNavTracking() and initSkillGauges().
 
 ## Iteration Log
 
@@ -115,3 +117,14 @@
 - All 13 content strings verified present, all HTML tags balanced (83 div pairs, 6 sections, 19 p, 9 a, 20 svg, etc.)
 - CSS was already pre-built in previous iterations (education, projects, contact, footer classes all existed) — only HTML content needed to be filled in
 - No new codebase pattern learnings — straightforward content population following established CSS patterns
+
+### Iteration 9 — Task 9: Implement scroll animations and responsive design
+- Added 3rd IntersectionObserver (`initScrollReveal()`) for section scroll-reveal animations
+- All sections (except hero) start at `opacity: 0; transform: translateY(24px)` and animate to visible with `transition: opacity 0.6s ease, transform 0.6s ease`
+- Hero section explicitly set to `opacity: 1; transform: none; transition: none` (always visible, above fold)
+- Child elements (vital-card, skill-item, timeline-entry, education-card, project-card, contact-item) have staggered reveal: `opacity: 0; translateY(16px)` → visible state, with JS-assigned `transitionDelay` of `i * 60ms`
+- Observer uses `threshold: 0.15` and `unobserve()` after reveal — animations only fire once
+- Critical fix: hover transforms on cards need matching specificity to the `.cv-main section.visible .card` selectors, otherwise the `transform: translateY(0)` from the visible state overrides hover `transform: translateY(-2px)`. Added explicit hover rules at `.cv-main section.visible .education-card:hover` etc.
+- Same specificity issue with `.cv-main .hero .vital-card` (0,3,0) overriding `.vital-card:hover` (0,2,0) — added `.cv-main .hero .vital-card:hover` at matching specificity
+- Learnings: When using compound selectors for scroll-reveal states that set `transform`, ALWAYS add matching-specificity hover rules for any elements that also have hover transforms. The cascade means the higher-specificity non-hover rule will win over a lower-specificity hover rule.
+- Responsive design was already largely complete from previous iterations (768px and 480px breakpoints). Task 9 primarily added the scroll animation layer on top.

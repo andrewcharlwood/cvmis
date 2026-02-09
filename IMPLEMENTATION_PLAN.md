@@ -260,7 +260,7 @@
 
   `<footer>` with `text-align: center; padding: 48px 0 32px; border-top: 1px solid var(--border);`. Contains a small decorative inline SVG ECG trace: a flatline (~120px wide) with a single small PQRST pulse in the center, `stroke: var(--teal); opacity: 0.3; stroke-width: 1.5; fill: none; height: 20px;`. Below: `font-size: 12px; color: var(--muted);` reading "Andy Charlwood -- MPharm, GPhC Registered Pharmacist".
 
-- [ ] **Task 9: Implement scroll animations and responsive design**
+- [x] **Task 9: Implement scroll animations and responsive design**
 
   **Scroll animations:**
 
