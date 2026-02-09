@@ -131,7 +131,7 @@
   - Card 3: Value "Pop. Health" (font-size 18px). Label "Focus Area".
   - Card 4: Value "NHS N&W" (font-size 18px). Label "System".
 
-- [ ] **Task 6: Build skills section with circular SVG progress gauges**
+- [x] **Task 6: Build skills section with circular SVG progress gauges**
 
   Skills section (`#skills`). Section heading "Skills & Expertise" in `font-size: 24px; font-weight: 700; color: var(--heading); margin-bottom: 32px; text-align: center;`.
 
