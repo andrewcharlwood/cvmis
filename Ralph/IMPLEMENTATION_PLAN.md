@@ -128,7 +128,7 @@ src/
 
   Create `components/Footer.tsx`. Decorative ECG waveform SVG, attribution text. Update `App.tsx` to orchestrate the three phases: 1) BootSequence (4s), 2) ECGAnimation (4s), 3) CV Content (with all sections). Use React state to track current phase. Ensure smooth transitions between phases.
 
-- [ ] **Task 11: Implement scroll animations and responsive design**
+- [x] **Task 11: Implement scroll animations and responsive design**
 
   Create `hooks/useScrollReveal.ts`. IntersectionObserver-based hook for scroll-triggered section reveals. Add scroll-reveal animations to all sections (opacity 0→1, translateY 24px→0). Ensure animations only trigger once. Add responsive breakpoints: tablet (768px), mobile (480px). Test all layouts.
 

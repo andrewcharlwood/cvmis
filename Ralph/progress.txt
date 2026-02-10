@@ -213,3 +213,32 @@
 - **Learnings**:
   - App.tsx already had three-phase orchestration working correctly
   - Footer scroll animation uses whileInView with once:true and margin:'-50px'
+  
+### Iteration 10 — Task 11: Implement scroll animations and responsive design
+- **Completed**: Task 11 - Implement scroll animations and responsive design
+- **Files modified**:
+  - `tailwind.config.js` - Added custom 'xs' screen at 480px for mobile breakpoint
+  - `src/App.tsx` - Added responsive padding (px-5 xs:px-6 md:px-8)
+  - `src/components/FloatingNav.tsx` - Responsive width and font/padding on mobile
+  - `src/components/Hero.tsx` - Responsive section padding, vitals grid, title font size
+  - `src/components/Skills.tsx` - Responsive grid (2→3→auto-fit), gauge size, padding
+  - `src/components/Experience.tsx` - Responsive card padding, ECG decoration size
+  - `src/components/Education.tsx` - Responsive section padding
+  - `src/components/Projects.tsx` - Responsive grid (1 col at tablet, 2 cols at desktop)
+  - `src/components/Contact.tsx` - Responsive section padding
+  - `src/components/Footer.tsx` - Responsive padding
+- **Design decisions**:
+  - Added 'xs' breakpoint at 480px to match concept.html mobile breakpoint
+  - Scroll-reveal animations standardized to opacity 0→1, translateY 24px→0 across all sections
+  - Responsive patterns from concept.html:
+    - 768px (md): 2-col grids, smaller nav padding, vitals 2-col grid
+    - 480px (xs): 1-col grids, smaller fonts, smaller gauges (64px), reduced padding
+  - Main container uses px-5 xs:px-6 md:px-8 for responsive horizontal padding
+  - Section padding uses py-12 xs:py-16 md:py-20 for consistent vertical rhythm
+  - Skills grid: 2 cols mobile, 3 cols tablet, auto-fit desktop
+  - Hero vitals: stacked mobile, 2-col tablet, flex row desktop
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - Tailwind custom screens allow precise breakpoint matching to design specs
+  - Using w-16 h-16 xs:w-20 xs:h-20 for SVG gauges maintains aspect ratio while scaling
+  - Grid-based responsive layouts more reliable than flex-wrap for consistent card sizing
