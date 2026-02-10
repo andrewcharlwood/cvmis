@@ -12,14 +12,27 @@
       "errors": [
         "ProviderModelNotFoundError: ProviderModelNotFoundError"
       ]
+    },
+    {
+      "iteration": 2,
+      "startedAt": "2026-02-10T15:15:43.399Z",
+      "endedAt": "2026-02-10T15:15:44.907Z",
+      "durationMs": 1047,
+      "toolsUsed": {},
+      "filesModified": [],
+      "exitCode": 0,
+      "completionDetected": false,
+      "errors": [
+        "ProviderModelNotFoundError: ProviderModelNotFoundError"
+      ]
     }
   ],
-  "totalDurationMs": 1054,
+  "totalDurationMs": 2101,
   "struggleIndicators": {
     "repeatedErrors": {
-      "ProviderModelNotFoundError: ProviderModelNotFoundError": 1
+      "ProviderModelNotFoundError: ProviderModelNotFoundError": 2
     },
-    "noProgressIterations": 1,
-    "shortIterations": 1
+    "noProgressIterations": 2,
+    "shortIterations": 2
   }
 }
