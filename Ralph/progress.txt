@@ -152,3 +152,25 @@
   - Framer Motion's delay prop uses seconds, not milliseconds
   - Used `dangerouslySetInnerHTML` for colored spans within boot lines (matches concept.html structure)
   - CSS classes for blink/seed-pulse animations already existed in index.css from Task 1
+
+### Iteration 7 — Task 8: Build Experience section with timeline
+- **Completed**: Task 8 - Build Experience section with timeline
+- **Files created**:
+  - `src/components/Experience.tsx` - Timeline component with 5 roles and ECG decoration
+- **Files modified**:
+  - `src/App.tsx` - Replaced Experience placeholder with Experience component
+  - `src/hooks/useScrollReveal.ts` - Fixed ref type for React 18+ compatibility
+- **Design decisions**:
+  - Vertical timeline with 20% left offset for timeline line and dots
+  - ECG waveform SVG decoration beside heading (matches concept.html)
+  - Timeline dots filled (bg-teal) for current roles, outline for past roles
+  - Cards have hover effects: scale(1.01), shadow-md, left border teal/30
+  - Framer Motion for staggered entry animations (100ms delay per card)
+  - useScrollReveal hook triggers animations when section is 10% visible
+  - Responsive: timeline line and dots hidden on mobile (md:block)
+- **Experience data**: 5 roles from Interim Head (May-Nov 2025) to Duty Pharmacy Manager (Aug 2016-Nov 2017)
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - React 18+ RefObject types require non-nullable type param for ref props
+  - Fixed useScrollReveal to return `RefObject<T>` instead of `RefObject<T | null>`
+  - data-visible attribute pattern works well for CSS transitions based on JS state

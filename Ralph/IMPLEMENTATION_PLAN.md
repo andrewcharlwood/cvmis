@@ -110,7 +110,7 @@ src/
 
   Create `components/Skills.tsx`. Three skill categories: Technical (8 skills, teal), Clinical (6 skills, coral), Strategic (4 skills, teal). Each skill has circular SVG progress gauge using calculated stroke-dashoffset. Scroll-triggered animation: gauges fill when section enters viewport, staggered by 100ms. Port all 18 skills with correct percentages from concept.html.
 
-- [ ] **Task 8: Build Experience section with timeline**
+- [x] **Task 8: Build Experience section with timeline**
 
   Create `components/Experience.tsx`. Vertical timeline with 5 roles: Interim Head (May-Nov 2025), Deputy Head (Jul 2024-Present), High-Cost Drugs (May 2022-Jul 2024), Pharmacy Manager (Nov 2017-May 2022), Duty Pharmacy Manager (Aug 2016-Nov 2017). Decorative ECG waveform SVG beside heading. Timeline dot filled for current roles. Cards with hover effect (scale, shadow, left border). Responsive: hide timeline line on mobile, stack cards.
 
