@@ -5,6 +5,7 @@ import { ECGAnimation } from './components/ECGAnimation'
 import { FloatingNav } from './components/FloatingNav'
 import { Hero } from './components/Hero'
 import { Skills } from './components/Skills'
+import { Experience } from './components/Experience'
 
 function App() {
   const [phase, setPhase] = useState<Phase>('boot')
@@ -27,12 +28,7 @@ function App() {
             
             <Skills />
 
-            <section id="experience" className="py-20">
-              <h2 className="font-primary text-2xl font-bold text-heading text-center mb-8">
-                Experience
-              </h2>
-              <p className="text-muted text-center">Experience section will be built in Task 8</p>
-            </section>
+            <Experience />
 
             <section id="education" className="py-20">
               <h2 className="font-primary text-2xl font-bold text-heading text-center mb-8">
