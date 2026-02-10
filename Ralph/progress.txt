@@ -1,0 +1,27 @@
+# Progress Log — React Conversion Phase
+
+## Codebase Patterns
+- **Source of truth**: `References/concept.html` contains the complete working HTML implementation. All animations, timing, colors, and styling must be preserved exactly when porting to React.
+- **Tech stack**: React 18+, TypeScript, Vite, Tailwind CSS, Framer Motion, Lucide React
+- **Project structure**: Components in `src/components/`, hooks in `src/hooks/`, types in `src/types/`, utilities in `src/lib/`
+- **Animation approach**: Framer Motion for complex sequences (boot, ECG), CSS transitions for simple hover effects, IntersectionObserver (via hook) for scroll-triggered animations
+- **SVG animations**: Use Framer Motion's `pathLength` prop for drawing effects, or CSS `stroke-dasharray`/`stroke-dashoffset` for skill gauges
+- **Skill gauge math**: `circumference = 2 * Math.PI * radius`, `strokeDashoffset = circumference * (1 - level / 100)`, rotate -90deg to start from top
+- **Boot sequence timing**: 14 lines × 220ms = ~3080ms, plus 400ms pause, 800ms fade = ~4.28s total
+- **ECG timing**: Flatline 1000ms + 3 beats × 600ms + holds 300ms + branching 1500ms + fade 500ms = ~5.5s
+- **Color palette**: 
+  - ECG phase: #000 (black), #00ff41 (green), #00e5ff (cyan), #3a6b45 (dim green)
+  - Final design: #00897B (teal), #FF6B6B (coral), #0F172A (heading), #334155 (text), #94A3B8 (muted)
+- **Fonts**: Fira Code (boot), Plus Jakarta Sans (primary), Inter Tight (secondary)
+- **Responsive breakpoints**: 768px (tablet), 480px (mobile)
+
+## Iteration Log
+
+### Phase Transition — React Conversion Setup
+- Previous phase completed: Single HTML file `concept.html` fully built with all 9 tasks
+- New phase started: Convert HTML concept to React + TypeScript + Vite project
+- IMPLEMENTATION_PLAN.md updated with 12 React-specific tasks
+- RALPH_PROMPT.md updated with explicit /frontend-design skill requirement for all visual components
+- This progress.txt reset for new phase
+
+<!-- Iterations will be logged here as tasks are completed -->

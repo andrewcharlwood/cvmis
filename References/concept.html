@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Andy Charlwood — MPharm | CV</title>
+<title>Andy Charlwood â€” MPharm | CV</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
@@ -117,37 +117,36 @@
     pointer-events: none;
   }
 
-  #ecg-overlay svg {
+  #ecg-overlay canvas {
     width: 100%;
     height: 100%;
     display: block;
   }
 
-  .ecg-line {
-    fill: none;
-    stroke: #00ff41;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    filter: drop-shadow(0 0 4px rgba(0, 255, 65, 0.6));
+  .ecg-seed-dot {
+    display: inline;
+    color: #00ff41;
   }
 
-  .ecg-heartbeat {
-    fill: none;
-    stroke: #00ff41;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    filter: drop-shadow(0 0 6px rgba(0, 255, 65, 0.7));
+  .ecg-seed-dot.glowing {
+    text-shadow: 0 0 8px #00ff41, 0 0 16px #00ff41;
+    animation: seedPulse 0.6s ease-in-out infinite;
   }
 
-  .ecg-branch {
-    fill: none;
-    stroke: #00897B;
-    stroke-width: 1.5;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    filter: drop-shadow(0 0 3px rgba(0, 137, 123, 0.5));
+  #travel-dot {
+    position: fixed;
+    z-index: 1002;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #00ff41;
+    box-shadow: 0 0 12px #00ff41, 0 0 24px rgba(0, 255, 65, 0.4);
+    pointer-events: none;
+  }
+
+  @keyframes seedPulse {
+    0%, 100% { text-shadow: 0 0 8px #00ff41, 0 0 16px #00ff41; }
+    50% { text-shadow: 0 0 14px #00ff41, 0 0 28px #00ff41, 0 0 40px rgba(0,255,65,0.3); }
   }
 
   /* =========================================
@@ -1381,7 +1380,7 @@
     { html: '<span class="c-green-bold">[OK]</span> <span class="c-dim">population_health.mod</span>', delay: 220 },
     { html: '<span class="c-green-bold">[OK]</span> <span class="c-dim">data_analytics.eng</span>', delay: 220 },
     { html: '<span class="c-dim">---</span>', delay: 220 },
-    { html: '<span class="c-green-bold">&gt; READY — Rendering CV...</span><span id="boot-cursor"></span>', delay: 220 }
+    { html: '<span class="c-green-bold">&gt; READY â€” Rendering CV..<span class="ecg-seed-dot" id="ecg-seed-dot">.</span></span><span id="boot-cursor"></span>', delay: 220 }
   ];
 
   var bootContainer = document.getElementById('boot-lines');
@@ -1399,14 +1398,35 @@
     }, totalBootTime);
   });
 
-  // After all lines are visible, wait 400ms then remove cursor and fade boot text
+  // After all lines visible, activate seed dot glow
   var bootEndTime = totalBootTime + 400;
 
   setTimeout(function() {
-    // Remove cursor
+    var seedDot = document.getElementById('ecg-seed-dot');
+    if (seedDot) seedDot.classList.add('glowing');
+  }, totalBootTime);
+
+  setTimeout(function() {
     var cursor = document.getElementById('boot-cursor');
-    if (cursor) {
-      cursor.remove();
+    if (cursor) cursor.remove();
+
+    // Capture seed dot position before fading
+    var seedDot = document.getElementById('ecg-seed-dot');
+    var seedRect = seedDot ? seedDot.getBoundingClientRect() : null;
+
+    // Create traveling dot at seed dot position
+    if (seedRect) {
+      var travelDot = document.createElement('div');
+      travelDot.id = 'travel-dot';
+      travelDot.style.left = (seedRect.left + seedRect.width / 2 - 4) + 'px';
+      travelDot.style.top = (seedRect.top + seedRect.height / 2 - 4) + 'px';
+      document.body.appendChild(travelDot);
+
+      requestAnimationFrame(function() {
+        travelDot.style.transition = 'all 700ms cubic-bezier(0.4, 0, 0.2, 1)';
+        travelDot.style.left = '-4px';
+        travelDot.style.top = (window.innerHeight / 2 - 4) + 'px';
+      });
     }
 
     // Fade out all boot lines
@@ -1416,343 +1436,321 @@
     }
   }, bootEndTime);
 
-  // After fade out (800ms), start the ECG phase
+  // After fade + dot travel, start ECG name animation
   setTimeout(function() {
-    startECGPhase();
+    var td = document.getElementById('travel-dot');
+    if (td) td.remove();
+    startECGNameAnimation();
   }, bootEndTime + 800);
 
   /* =========================================
-     ECG PHASE: Flatline + First Heartbeat
+     ECG NAME ANIMATION (ported from Remotion)
      ========================================= */
 
-  function startECGPhase() {
+  function generateHeartbeatPoints(amplitude) {
+    var points = [];
+    var steps = 200;
+    for (var i = 0; i <= steps; i++) {
+      var t = i / steps;
+      var y = 0;
+      if (t >= 0.05 && t < 0.2) { y = 0.12 * Math.sin(((t - 0.05) / 0.15) * Math.PI); }
+      else if (t >= 0.25 && t < 0.32) { y = -0.1 * Math.sin(((t - 0.25) / 0.07) * Math.PI); }
+      else if (t >= 0.32 && t < 0.42) { y = 1.0 * Math.sin(((t - 0.32) / 0.1) * Math.PI); }
+      else if (t >= 0.42 && t < 0.5) { y = -0.25 * Math.sin(((t - 0.42) / 0.08) * Math.PI); }
+      else if (t >= 0.55 && t < 0.75) { y = 0.2 * Math.sin(((t - 0.55) / 0.2) * Math.PI); }
+      points.push({ x: t, y: y * amplitude });
+    }
+    return points;
+  }
+
+  var ECG_LETTERS = {
+    A: [{x:0,y:0},{x:0.48,y:1},{x:0.53,y:0.42},{x:0.6,y:0.42},{x:1,y:0}],
+    N: [{x:0,y:0},{x:0.12,y:1},{x:0.72,y:0},{x:0.88,y:1},{x:1,y:0}],
+    D: [{x:0,y:0},{x:0.1,y:1},{x:0.5,y:1},{x:0.85,y:0.55},{x:1,y:0}],
+    R: [{x:0,y:0},{x:0.1,y:1},{x:0.35,y:1},{x:0.5,y:0.6},{x:0.55,y:0.45},{x:1,y:0}],
+    E: [{x:0,y:0},{x:0.1,y:1},{x:0.4,y:1},{x:0.45,y:0.5},{x:0.65,y:0.5},{x:0.7,y:0},{x:1,y:0}],
+    W: [{x:0,y:0},{x:0.05,y:1},{x:0.27,y:0},{x:0.5,y:0.65},{x:0.73,y:0},{x:0.95,y:1},{x:1,y:0}],
+    C: [{x:0,y:0},{x:0.08,y:0.6},{x:0.18,y:1},{x:0.6,y:1},{x:0.8,y:0.5},{x:0.95,y:0.1},{x:1,y:0}],
+    H: [{x:0,y:0},{x:0.1,y:1},{x:0.18,y:0.5},{x:0.82,y:0.5},{x:0.9,y:1},{x:1,y:0}],
+    L: [{x:0,y:0},{x:0.12,y:1},{x:0.3,y:1},{x:0.38,y:0},{x:1,y:0}],
+    O: [{x:0,y:0},{x:0.2,y:0.85},{x:0.35,y:1},{x:0.65,y:1},{x:0.8,y:0.85},{x:1,y:0}]
+  };
+
+  function interpolateLetterY(points, t) {
+    if (t <= points[0].x) return points[0].y;
+    if (t >= points[points.length - 1].x) return points[points.length - 1].y;
+    for (var i = 0; i < points.length - 1; i++) {
+      if (t >= points[i].x && t <= points[i + 1].x) {
+        var seg = (t - points[i].x) / (points[i + 1].x - points[i].x);
+        return points[i].y + (points[i + 1].y - points[i].y) * seg;
+      }
+    }
+    return 0;
+  }
+
+  var ECG_TEXT = 'ANDREW CHARLWOOD';
+
+  function ecgLayoutText(offsetX, lw, lg, sw) {
+    var layout = [];
+    var cursor = offsetX;
+    for (var i = 0; i < ECG_TEXT.length; i++) {
+      var ch = ECG_TEXT[i];
+      if (ch === ' ') { cursor += sw; continue; }
+      layout.push({ char: ch, startX: cursor, endX: cursor + lw, centerX: cursor + lw / 2 });
+      cursor += lw + lg;
+    }
+    return layout;
+  }
+
+  function ecgGetTextWidth(lw, lg, sw) {
+    var chars = ECG_TEXT.replace(/ /g, '').length;
+    var spaces = ECG_TEXT.split(' ').length - 1;
+    return chars * (lw + lg) - lg + spaces * sw;
+  }
+
+  function startECGNameAnimation() {
     var overlay = document.getElementById('ecg-overlay');
     var bootScreen = document.getElementById('boot-screen');
     var vw = window.innerWidth;
     var vh = window.innerHeight;
-    var cy = Math.round(vh / 2);
+    var dpr = window.devicePixelRatio || 1;
 
-    // Create SVG
-    var svgNS = 'http://www.w3.org/2000/svg';
-    var svg = document.createElementNS(svgNS, 'svg');
-    svg.setAttribute('viewBox', '0 0 ' + vw + ' ' + vh);
-    svg.setAttribute('preserveAspectRatio', 'none');
-    overlay.appendChild(svg);
+    var canvas = document.createElement('canvas');
+    canvas.width = vw * dpr;
+    canvas.height = vh * dpr;
+    overlay.appendChild(canvas);
+    var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
 
-    // --- FLATLINE ---
-    var flatlinePath = document.createElementNS(svgNS, 'path');
-    var flatlineD = 'M 0 ' + cy + ' L ' + vw + ' ' + cy;
-    flatlinePath.setAttribute('d', flatlineD);
-    flatlinePath.setAttribute('class', 'ecg-line');
-    svg.appendChild(flatlinePath);
+    // Responsive scale
+    var scale = Math.min(1.2, Math.max(0.35, vw / 1400));
+    var LETTER_W = 72 * scale;
+    var LETTER_G = 10 * scale;
+    var SPACE_W = 30 * scale;
+    var TRACE_SPEED = 450 * scale;
+    var FLAT_GAP = 0.4;
+    var HOLD_TIME = 0.75;
+    var EXIT_TIME = 0.8;
+    var baselineY = vh * 0.5;
+    var ecgMaxDefl = vh * 0.25;
+    var textMaxDefl = vh * 0.08;
+    var lineColor = '#00ff41';
 
-    var flatlineLen = flatlinePath.getTotalLength();
-    flatlinePath.style.strokeDasharray = flatlineLen;
-    flatlinePath.style.strokeDashoffset = flatlineLen;
+    // Beats (time-based, widths scaled)
+    var beats = [
+      { startTime: 0.5, widthPx: 60 * scale, amplitude: 0.3 },
+      { startTime: 1.2, widthPx: 90 * scale, amplitude: 0.55 },
+      { startTime: 2.0, widthPx: 120 * scale, amplitude: 0.85 },
+      { startTime: 2.8, widthPx: 140 * scale, amplitude: 1.0 }
+    ];
+    beats.forEach(function(b) { b.startWX = b.startTime * TRACE_SPEED; });
 
-    // Animate flatline drawing left-to-right over 1000ms
-    requestAnimationFrame(function() {
-      flatlinePath.style.transition = 'stroke-dashoffset 1000ms linear';
-      flatlinePath.style.strokeDashoffset = '0';
-    });
+    var lastBeat = beats[beats.length - 1];
+    var lastBeatEndWX = lastBeat.startWX + lastBeat.widthPx;
+    var textStartWX = lastBeatEndWX + FLAT_GAP * TRACE_SPEED;
+    var totalTextW = ecgGetTextWidth(LETTER_W, LETTER_G, SPACE_W);
+    var textEndWX = textStartWX + totalTextW;
+    var textLayout = ecgLayoutText(textStartWX, LETTER_W, LETTER_G, SPACE_W);
+    var fontSize = Math.round(textMaxDefl / 0.715);
 
-    // --- FIRST HEARTBEAT (R peak 40px, green) ---
-    setTimeout(function() {
-      drawHeartbeat(svg, svgNS, vw, vh, cy, 40, '#00ff41', 600, function() {
-        // Hold 300ms then second heartbeat
-        setTimeout(function() {
+    var headScreenRatio = 0.75;
+    var finalHeadSX = (vw - totalTextW) / 2 + totalTextW;
+    var textEndTime = textEndWX / TRACE_SPEED;
+    var holdEndTime = textEndTime + HOLD_TIME;
+    var exitEndTime = holdEndTime + EXIT_TIME;
 
-          // --- SECOND HEARTBEAT (R peak 60px, transitioning color) ---
-          // Bg begins lightening slightly
-          bootScreen.style.transition = 'background 600ms ease';
-          bootScreen.style.background = '#0A0A0A';
-
-          drawHeartbeat(svg, svgNS, vw, vh, cy, 60, '#00C9A7', 600, function() {
-            // Hold 300ms then third heartbeat
-            setTimeout(function() {
-
-              // --- THIRD HEARTBEAT (R peak 100px, full teal) ---
-              bootScreen.style.transition = 'background 600ms ease';
-              bootScreen.style.background = '#141414';
-
-              drawHeartbeat(svg, svgNS, vw, vh, cy, 100, '#00897B', 600, function() {
-                // At the apex of the third beat — launch branching
-                startBranching(svg, svgNS, vw, vh, cy, overlay, bootScreen);
-              });
-            }, 300);
-          });
-        }, 300);
-      });
-    }, 1050);
-  }
-
-  /**
-   * Creates the overflow branching effect from the third heartbeat peak.
-   * Branch lines shoot outward and trace the outlines of UI elements.
-   */
-  function startBranching(svg, svgNS, vw, vh, cy, overlay, bootScreen) {
-    var cx = Math.round(vw / 2);
-    var peakY = cy - 100; // Third beat R peak position
-
-    // Calculate UI element positions for branches to trace
-    // Pill nav: rounded rectangle at top center
-    var navW = Math.min(520, vw - 64);
-    var navH = 44;
-    var navX = Math.round((vw - navW) / 2);
-    var navY = 16;
-    var navR = 22; // border-radius
-
-    // Hero section: centered area
-    var heroW = Math.min(600, vw - 80);
-    var heroX = Math.round((vw - heroW) / 2);
-    var heroY = Math.round(vh * 0.2);
-    var heroH = Math.round(vh * 0.5);
-
-    // Card outlines (vital sign cards)
-    var cardW = 160;
-    var cardH = 80;
-    var cardGap = 16;
-    var totalCardsW = 4 * cardW + 3 * cardGap;
-    var cardsStartX = Math.round((vw - totalCardsW) / 2);
-    var cardsY = Math.round(vh * 0.65);
-
-    // Branch paths — each starts from the peak and traces outward
-    var branches = [];
-
-    // Branch 1: Shoots up to trace the pill nav bar outline
-    branches.push({
-      d: 'M ' + cx + ' ' + peakY +
-         ' Q ' + cx + ' ' + (navY + navH + 20) + ', ' + (navX + navR) + ' ' + (navY + navH) +
-         ' L ' + (navX + navR) + ' ' + (navY + navH) +
-         ' Q ' + navX + ' ' + (navY + navH) + ', ' + navX + ' ' + (navY + navH - navR) +
-         ' L ' + navX + ' ' + (navY + navR) +
-         ' Q ' + navX + ' ' + navY + ', ' + (navX + navR) + ' ' + navY +
-         ' L ' + (navX + navW - navR) + ' ' + navY +
-         ' Q ' + (navX + navW) + ' ' + navY + ', ' + (navX + navW) + ' ' + (navY + navR) +
-         ' L ' + (navX + navW) + ' ' + (navY + navH - navR) +
-         ' Q ' + (navX + navW) + ' ' + (navY + navH) + ', ' + (navX + navW - navR) + ' ' + (navY + navH) +
-         ' L ' + (navX + navR) + ' ' + (navY + navH),
-      delay: 0
-    });
-
-    // Branch 2: Shoots left to trace the left edge of hero container
-    branches.push({
-      d: 'M ' + cx + ' ' + peakY +
-         ' Q ' + (heroX + 40) + ' ' + (peakY - 30) + ', ' + heroX + ' ' + heroY +
-         ' L ' + heroX + ' ' + (heroY + heroH),
-      delay: 80
-    });
-
-    // Branch 3: Shoots right to trace the right edge of hero container
-    branches.push({
-      d: 'M ' + cx + ' ' + peakY +
-         ' Q ' + (heroX + heroW - 40) + ' ' + (peakY - 30) + ', ' + (heroX + heroW) + ' ' + heroY +
-         ' L ' + (heroX + heroW) + ' ' + (heroY + heroH),
-      delay: 80
-    });
-
-    // Branch 4: Down-left to first card outline (trace rectangle, no Z back to peak)
-    var c1x = cardsStartX;
-    branches.push({
-      d: 'M ' + cx + ' ' + peakY +
-         ' Q ' + (cx - 80) + ' ' + (cardsY - 40) + ', ' + c1x + ' ' + cardsY +
-         ' L ' + (c1x + cardW) + ' ' + cardsY +
-         ' L ' + (c1x + cardW) + ' ' + (cardsY + cardH) +
-         ' L ' + c1x + ' ' + (cardsY + cardH) +
-         ' L ' + c1x + ' ' + cardsY,
-      delay: 150
-    });
-
-    // Branch 5: Down to second card outline
-    var c2x = cardsStartX + cardW + cardGap;
-    branches.push({
-      d: 'M ' + cx + ' ' + peakY +
-         ' Q ' + (c2x + cardW / 2) + ' ' + (cardsY - 20) + ', ' + c2x + ' ' + cardsY +
-         ' L ' + (c2x + cardW) + ' ' + cardsY +
-         ' L ' + (c2x + cardW) + ' ' + (cardsY + cardH) +
-         ' L ' + c2x + ' ' + (cardsY + cardH) +
-         ' L ' + c2x + ' ' + cardsY,
-      delay: 200
-    });
-
-    // Branch 6: Down-right to third card outline
-    var c3x = cardsStartX + 2 * (cardW + cardGap);
-    branches.push({
-      d: 'M ' + cx + ' ' + peakY +
-         ' Q ' + (cx + 60) + ' ' + (cardsY - 30) + ', ' + c3x + ' ' + cardsY +
-         ' L ' + (c3x + cardW) + ' ' + cardsY +
-         ' L ' + (c3x + cardW) + ' ' + (cardsY + cardH) +
-         ' L ' + c3x + ' ' + (cardsY + cardH) +
-         ' L ' + c3x + ' ' + cardsY,
-      delay: 250
-    });
-
-    // Branch 7: Far right to fourth card outline
-    var c4x = cardsStartX + 3 * (cardW + cardGap);
-    branches.push({
-      d: 'M ' + cx + ' ' + peakY +
-         ' Q ' + (cx + 120) + ' ' + (cardsY - 20) + ', ' + c4x + ' ' + cardsY +
-         ' L ' + (c4x + cardW) + ' ' + cardsY +
-         ' L ' + (c4x + cardW) + ' ' + (cardsY + cardH) +
-         ' L ' + c4x + ' ' + (cardsY + cardH) +
-         ' L ' + c4x + ' ' + cardsY,
-      delay: 300
-    });
-
-    // Animate each branch with staggered timing
-    var branchDuration = 800;
-    var maxDelay = 0;
-
-    branches.forEach(function(branch) {
-      if (branch.delay > maxDelay) maxDelay = branch.delay;
-
-      setTimeout(function() {
-        var path = document.createElementNS(svgNS, 'path');
-        path.setAttribute('d', branch.d);
-        path.setAttribute('class', 'ecg-branch');
-        svg.appendChild(path);
-
-        var len = path.getTotalLength();
-        path.style.strokeDasharray = len;
-        path.style.strokeDashoffset = len;
-
-        requestAnimationFrame(function() {
-          path.style.transition = 'stroke-dashoffset ' + branchDuration + 'ms cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-          path.style.strokeDashoffset = '0';
-        });
-      }, branch.delay);
-    });
-
-    // Background rapidly transitions to white during branching
-    setTimeout(function() {
-      bootScreen.style.transition = 'background 800ms ease-out';
-      bootScreen.style.background = '#FFFFFF';
-    }, 200);
-
-    // After all branches finish drawing, fade out and reveal
-    var totalBranchTime = maxDelay + branchDuration + 100;
-
-    setTimeout(function() {
-      finishECGPhase(overlay, bootScreen);
-    }, totalBranchTime);
-  }
-
-  /**
-   * Draws a PQRST waveform centered horizontally on the screen.
-   * @param {SVGElement} svg - The SVG container
-   * @param {string} svgNS - SVG namespace
-   * @param {number} vw - Viewport width
-   * @param {number} vh - Viewport height
-   * @param {number} cy - Vertical center (baseline Y)
-   * @param {number} rHeight - Height of the R peak above baseline
-   * @param {string} color - Stroke color
-   * @param {number} duration - Animation duration in ms
-   * @param {function} onComplete - Callback when animation finishes
-   */
-  function drawHeartbeat(svg, svgNS, vw, vh, cy, rHeight, color, duration, onComplete) {
-    // PQRST waveform shape relative to center point
-    // Total width of the waveform: ~160px
-    var waveWidth = 160;
-    var startX = Math.round((vw - waveWidth) / 2);
-
-    // Build the PQRST path
-    // P wave: gentle upward bump, ~8px above baseline, ~30px wide
-    // Flat: ~10px
-    // Q dip: sharp dip ~10px below, ~8px wide
-    // R spike: sharp peak rHeight above baseline, ~12px wide
-    // S dip: sharp dip ~15px below, ~8px wide
-    // Flat: ~10px
-    // T wave: gentle upward bump, ~12px above, ~35px wide
-    // Return to baseline
-
-    var x = startX;
-    var d = 'M ' + x + ' ' + cy;
-
-    // Lead-in flat segment
-    d += ' L ' + (x + 10) + ' ' + cy;
-    x += 10;
-
-    // P wave (cubic bezier for smooth bump)
-    d += ' C ' + (x + 8) + ' ' + cy + ', ' + (x + 10) + ' ' + (cy - 8) + ', ' + (x + 15) + ' ' + (cy - 8);
-    d += ' C ' + (x + 20) + ' ' + (cy - 8) + ', ' + (x + 22) + ' ' + cy + ', ' + (x + 30) + ' ' + cy;
-    x += 30;
-
-    // Flat segment before QRS
-    d += ' L ' + (x + 10) + ' ' + cy;
-    x += 10;
-
-    // Q dip
-    d += ' L ' + (x + 4) + ' ' + (cy + 10);
-    x += 4;
-
-    // R spike (sharp peak)
-    d += ' L ' + (x + 6) + ' ' + (cy - rHeight);
-    x += 6;
-
-    // S dip
-    d += ' L ' + (x + 6) + ' ' + (cy + 15);
-    x += 6;
-
-    // Return to baseline
-    d += ' L ' + (x + 4) + ' ' + cy;
-    x += 4;
-
-    // Flat segment before T wave
-    d += ' L ' + (x + 10) + ' ' + cy;
-    x += 10;
-
-    // T wave (cubic bezier for smooth bump)
-    d += ' C ' + (x + 8) + ' ' + cy + ', ' + (x + 12) + ' ' + (cy - 12) + ', ' + (x + 17) + ' ' + (cy - 12);
-    d += ' C ' + (x + 22) + ' ' + (cy - 12) + ', ' + (x + 27) + ' ' + cy + ', ' + (x + 35) + ' ' + cy;
-    x += 35;
-
-    // Trail-out flat segment
-    d += ' L ' + (x + 10) + ' ' + cy;
-
-    var beatPath = document.createElementNS(svgNS, 'path');
-    beatPath.setAttribute('d', d);
-    beatPath.setAttribute('class', 'ecg-heartbeat');
-    beatPath.style.stroke = color;
-    // Match the glow filter to the stroke color
-    if (color !== '#00ff41') {
-      beatPath.style.filter = 'drop-shadow(0 0 6px rgba(0, 137, 123, 0.7))';
+    function getYAtX(wx) {
+      for (var i = 0; i < beats.length; i++) {
+        var b = beats[i];
+        if (wx >= b.startWX && wx <= b.startWX + b.widthPx) {
+          var prog = (wx - b.startWX) / b.widthPx;
+          var pts = generateHeartbeatPoints(b.amplitude);
+          var idx = Math.min(Math.floor(prog * (pts.length - 1)), pts.length - 1);
+          return baselineY - pts[idx].y * ecgMaxDefl;
+        }
+      }
+      for (var j = 0; j < textLayout.length; j++) {
+        var item = textLayout[j];
+        if (wx >= item.startX && wx <= item.endX) {
+          var t = (wx - item.startX) / (item.endX - item.startX);
+          var ld = ECG_LETTERS[item.char];
+          if (ld) return baselineY - interpolateLetterY(ld, t) * textMaxDefl;
+        }
+      }
+      return baselineY;
     }
-    svg.appendChild(beatPath);
 
-    var beatLen = beatPath.getTotalLength();
-    beatPath.style.strokeDasharray = beatLen;
-    beatPath.style.strokeDashoffset = beatLen;
+    var startTs = null;
+    var bgTransitioned = false;
 
-    // Animate the heartbeat drawing
-    requestAnimationFrame(function() {
-      beatPath.style.transition = 'stroke-dashoffset ' + duration + 'ms ease-in-out';
-      beatPath.style.strokeDashoffset = '0';
-    });
+    function animate(timestamp) {
+      if (!startTs) startTs = timestamp;
+      var elapsed = (timestamp - startTs) / 1000;
 
-    // Callback after animation
-    if (onComplete) {
-      setTimeout(onComplete, duration + 50);
+      if (elapsed >= exitEndTime) {
+        finishAnimation(overlay, bootScreen);
+        return;
+      }
+
+      ctx.clearRect(0, 0, vw, vh);
+
+      var headWX = elapsed * TRACE_SPEED;
+      var isTextDone = elapsed >= textEndTime;
+      var isExitPhase = elapsed >= holdEndTime;
+
+      if (isExitPhase) {
+        headWX = textEndWX + (elapsed - holdEndTime) * TRACE_SPEED * 1.5;
+      }
+
+      // Camera/viewport
+      var headSX, viewOff;
+      var headSXEcg = headScreenRatio * vw;
+
+      if (headWX <= textStartWX) {
+        viewOff = Math.max(0, headWX - headSXEcg);
+        headSX = headWX - viewOff;
+      } else if (headWX >= textEndWX || isExitPhase) {
+        viewOff = textEndWX - finalHeadSX;
+        headSX = headWX - viewOff;
+      } else {
+        var p = (headWX - textStartWX) / (textEndWX - textStartWX);
+        headSX = headSXEcg + p * (finalHeadSX - headSXEcg);
+        viewOff = headWX - headSX;
+      }
+
+      var fadeAlpha = isExitPhase ? Math.max(0, 1 - (elapsed - holdEndTime) / EXIT_TIME) : 1;
+
+      if (!bgTransitioned && elapsed >= textEndTime - 0.3) {
+        bgTransitioned = true;
+        bootScreen.style.transition = 'background 1200ms ease-out';
+        bootScreen.style.background = '#FFFFFF';
+      }
+
+      ctx.save();
+      ctx.globalAlpha = fadeAlpha;
+
+      // Draw trace
+      var traceStart = Math.max(0, Math.floor(viewOff));
+      var traceEnd = Math.min(Math.ceil(isExitPhase ? textEndWX : headWX), Math.ceil(viewOff + vw));
+
+      if (traceEnd > traceStart) {
+        // Glow layer
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(0, 255, 65, 0.25)';
+        ctx.lineWidth = 6;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.shadowColor = lineColor;
+        ctx.shadowBlur = 14;
+        for (var wx = traceStart; wx <= traceEnd; wx++) {
+          var sx = wx - viewOff;
+          var sy = getYAtX(wx);
+          if (wx === traceStart) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+        }
+        ctx.stroke();
+
+        // Core line
+        ctx.beginPath();
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 4;
+        for (var wx2 = traceStart; wx2 <= traceEnd; wx2++) {
+          var sx2 = wx2 - viewOff;
+          var sy2 = getYAtX(wx2);
+          if (wx2 === traceStart) ctx.moveTo(sx2, sy2); else ctx.lineTo(sx2, sy2);
+        }
+        ctx.stroke();
+      }
+
+      // Exit flatline after text
+      if (isExitPhase) {
+        var exitStartSX = textEndWX - viewOff;
+        var exitEndSX = headWX - viewOff;
+        ctx.beginPath();
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 8;
+        ctx.moveTo(exitStartSX, baselineY);
+        ctx.lineTo(exitEndSX, baselineY);
+        ctx.stroke();
+      }
+
+      // Draw revealed text characters
+      ctx.shadowColor = lineColor;
+      ctx.shadowBlur = 8;
+      ctx.font = 'bold ' + fontSize + 'px Arial, Helvetica, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'alphabetic';
+      ctx.lineWidth = 1.5 * scale;
+      ctx.strokeStyle = lineColor;
+      ctx.fillStyle = 'transparent';
+
+      for (var k = 0; k < textLayout.length; k++) {
+        var item = textLayout[k];
+        var letterProgress = (headWX - item.startX) / (item.endX - item.startX);
+        if (letterProgress > 0.3) {
+          var alpha = Math.min(1, (letterProgress - 0.3) * 1.43);
+          ctx.globalAlpha = fadeAlpha * alpha;
+          var lsx = item.centerX - viewOff;
+          ctx.strokeText(item.char, lsx, baselineY);
+        }
+      }
+
+      // Head dot
+      ctx.globalAlpha = fadeAlpha;
+      ctx.shadowBlur = 0;
+      if (headSX >= -20 && headSX <= vw + 20) {
+        var headY = isExitPhase ? baselineY : getYAtX(headWX);
+        var grad = ctx.createRadialGradient(headSX, headY, 0, headSX, headY, 20 * scale);
+        grad.addColorStop(0, 'rgba(255,255,255,0.8)');
+        grad.addColorStop(0.3, 'rgba(0,255,65,0.6)');
+        grad.addColorStop(1, 'rgba(0,255,65,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(headSX, headY, 20 * scale, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = lineColor;
+        ctx.beginPath();
+        ctx.arc(headSX, headY, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+
+      // Scanlines overlay
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      for (var sly = 0; sly < vh; sly += 4) {
+        ctx.fillRect(0, sly + 2, vw, 2);
+      }
+
+      // Vignette
+      var vig = ctx.createRadialGradient(vw / 2, vh / 2, vh * 0.3, vw / 2, vh / 2, vh * 0.85);
+      vig.addColorStop(0, 'rgba(0,0,0,0)');
+      vig.addColorStop(1, 'rgba(0,0,0,0.4)');
+      ctx.fillStyle = vig;
+      ctx.fillRect(0, 0, vw, vh);
+
+      requestAnimationFrame(animate);
     }
+
+    requestAnimationFrame(animate);
   }
 
   /**
-   * Final cleanup: fade out all SVG lines and reveal the CV content.
+   * Final cleanup: fade out canvas and reveal the CV content.
    */
-  function finishECGPhase(overlay, bootScreen) {
-    // Fade out all SVG lines
+  function finishAnimation(overlay, bootScreen) {
     overlay.style.transition = 'opacity 500ms ease';
     overlay.style.opacity = '0';
 
     setTimeout(function() {
-      // Remove overlays from DOM
       if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
       if (bootScreen.parentNode) bootScreen.parentNode.removeChild(bootScreen);
 
-      // Reveal CV content
       var cvContent = document.getElementById('cv-content');
       cvContent.classList.add('revealed');
 
-      // Initialize nav tracking, smooth scroll, skill gauges, and scroll reveal after reveal
       initNavTracking();
       initSkillGauges();
       initScrollReveal();
@@ -1865,7 +1863,7 @@
             child.style.transitionDelay = (i * 60) + 'ms';
           });
 
-          // Only animate once — stop observing after reveal
+          // Only animate once â€” stop observing after reveal
           revealObserver.unobserve(section);
         }
       });
