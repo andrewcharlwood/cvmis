@@ -196,3 +196,20 @@
   - CSS gradient border hover effect uses mask-composite: exclude technique
   - Lucide icons are tree-shakable - import only what's needed
   - Contact items with href conditionally render as anchor tags
+
+### Iteration 9 — Task 10: Build Footer component and main App.tsx
+- **Completed**: Task 10 - Build Footer component and main App.tsx
+- **Files created**:
+  - `src/components/Footer.tsx` - Footer with decorative ECG waveform SVG
+- **Files modified**:
+  - `src/App.tsx` - Added Footer import and component to content phase
+- **Design decisions**:
+  - ECG waveform SVG matches concept.html: 120x20 viewBox with PQRST pattern
+  - Framer Motion for scroll-triggered entrance (opacity 0→1, y 16→0)
+  - Teal stroke at 30% opacity for subtle branding
+  - Font-secondary for text-xs muted attribution
+  - Footer placed outside main element as per semantic HTML
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - App.tsx already had three-phase orchestration working correctly
+  - Footer scroll animation uses whileInView with once:true and margin:'-50px'
