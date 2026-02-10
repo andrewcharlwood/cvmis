@@ -102,7 +102,7 @@ src/
 
   Create `components/FloatingNav.tsx`. Floating pill navigation bar fixed at top center. Links: About, Skills, Experience, Education, Projects, Contact. Active link tracking via `useActiveSection` hook (IntersectionObserver). Smooth scroll to sections on click. Responsive: horizontal scroll on mobile. Styling: white bg, rounded-full, shadow-md, teal active state with dot indicator.
 
-- [ ] **Task 6: Build Hero section component**
+- [x] **Task 6: Build Hero section component**
 
   Create `components/Hero.tsx`. Port hero section from concept.html: centered layout, name (clamp 36-52px), job title (muted), location pill (teal border), summary paragraph (max-width 560px). Four vital sign metric cards in a row: "10+ Years Experience", "Python/SQL/BI Analytics Stack", "Pop. Health Focus Area", "NHS N&W System". Cards have teal border-top, hover elevation. Responsive: 2x2 grid on tablet, stacked on mobile.
 

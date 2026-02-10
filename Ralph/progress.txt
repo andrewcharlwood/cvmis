@@ -46,6 +46,25 @@
 
   <!-- Iterations will be logged here as tasks are completed -->
   
+### Iteration 5 — Task 6: Build Hero section component
+- **Completed**: Task 6 - Build Hero section component
+- **Files created**:
+  - `src/components/Hero.tsx` - Hero section with name, title, location, summary, and vital cards
+- **Files modified**:
+  - `src/App.tsx` - Replaced inline hero section with Hero component import
+- **Design decisions**:
+  - Used Framer Motion for staggered entrance animations (name first, then title, location, summary, then vital cards with 0.1s delays)
+  - VitalCard component with three value size variants: default (28px), small (16px), medium (18px)
+  - Hover effects: elevation (-translate-y-0.5) and shadow-md transition
+  - Responsive: flex-wrap with gap-4 for automatic wrapping on smaller screens
+  - Preserved exact content from concept.html including full summary paragraph
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - CSS clamp() for responsive font sizing works well inline with Framer Motion
+  - Using a separate VitalCard component with delay prop creates clean staggered animation pattern
+
+  <!-- Iterations will be logged here as tasks are completed -->
+  
 ### Iteration 3 — Task 4: Build ECGAnimation component
 - **Completed**: Task 4 - Build ECGAnimation component
 - **Files created**:
