@@ -65,3 +65,16 @@ body {
 .animate-seed-pulse {
   animation: seedPulse 0.6s ease-in-out infinite;
 }
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  scroll-behavior: smooth;
+}
