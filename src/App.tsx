@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Phase } from './types'
 import { BootSequence } from './components/BootSequence'
+import { ECGAnimation } from './components/ECGAnimation'
 
 function App() {
   const [phase, setPhase] = useState<Phase>('boot')
@@ -12,14 +13,7 @@ function App() {
       )}
       
       {phase === 'ecg' && (
-        <div className="fixed inset-0 bg-black flex flex-col justify-center items-center">
-          <button 
-            onClick={() => setPhase('content')}
-            className="text-ecg-green font-mono hover:opacity-80 transition-opacity"
-          >
-            ECG Animation (placeholder - click to continue)
-          </button>
-        </div>
+        <ECGAnimation onComplete={() => setPhase('content')} />
       )}
       
       {phase === 'content' && (
