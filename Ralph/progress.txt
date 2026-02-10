@@ -174,3 +174,25 @@
   - React 18+ RefObject types require non-nullable type param for ref props
   - Fixed useScrollReveal to return `RefObject<T>` instead of `RefObject<T | null>`
   - data-visible attribute pattern works well for CSS transitions based on JS state
+
+### Iteration 8 — Task 9: Build Education, Projects, Contact sections
+- **Completed**: Task 9 - Build Education, Projects, Contact sections
+- **Files created**:
+  - `src/components/Education.tsx` - Education cards with gradient top border
+  - `src/components/Projects.tsx` - Project cards with gradient border hover effect
+  - `src/components/Contact.tsx` - Contact grid with Lucide icons
+- **Files modified**:
+  - `src/App.tsx` - Replaced placeholder sections with actual components
+- **Design decisions**:
+  - **Education**: 2-column grid with gradient top border (teal→coral), hover elevation effect
+  - **Projects**: 2x2 grid with gradient border hover effect using CSS mask technique
+  - **Contact**: 4-column grid (2x2 on mobile), Lucide icons (Phone, Mail, Linkedin, MapPin)
+  - Framer Motion for staggered entry animations (100ms delay per card)
+  - useScrollReveal hook for scroll-triggered visibility
+  - ExternalLink icon from Lucide for project links
+  - Contact links use teal color with hover transition
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - CSS gradient border hover effect uses mask-composite: exclude technique
+  - Lucide icons are tree-shakable - import only what's needed
+  - Contact items with href conditionally render as anchor tags

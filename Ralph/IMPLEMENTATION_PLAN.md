@@ -114,7 +114,7 @@ src/
 
   Create `components/Experience.tsx`. Vertical timeline with 5 roles: Interim Head (May-Nov 2025), Deputy Head (Jul 2024-Present), High-Cost Drugs (May 2022-Jul 2024), Pharmacy Manager (Nov 2017-May 2022), Duty Pharmacy Manager (Aug 2016-Nov 2017). Decorative ECG waveform SVG beside heading. Timeline dot filled for current roles. Cards with hover effect (scale, shadow, left border). Responsive: hide timeline line on mobile, stack cards.
 
-- [ ] **Task 9: Build Education, Projects, Contact sections**
+- [x] **Task 9: Build Education, Projects, Contact sections**
 
   Create `components/Education.tsx`, `components/Projects.tsx`, `components/Contact.tsx`.
   
