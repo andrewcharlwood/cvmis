@@ -242,3 +242,22 @@
   - Tailwind custom screens allow precise breakpoint matching to design specs
   - Using w-16 h-16 xs:w-20 xs:h-20 for SVG gauges maintains aspect ratio while scaling
   - Grid-based responsive layouts more reliable than flex-wrap for consistent card sizing
+
+### Iteration 11 — Task 12: Final integration, testing, and polish
+- **Completed**: Task 12 - Final integration, testing, and polish
+- **Quality checks verified**:
+  - `npm run typecheck` ✓ - No TypeScript errors
+  - `npm run lint` ✓ - No ESLint errors
+  - `npm run build` ✓ - Production build completes (290KB JS, 18KB CSS gzipped to 94KB/4.5KB)
+- **CV content accuracy verified** against CV_v4.md:
+  - Hero: Name, title, location, summary all match
+  - Experience: 5 roles in correct order with accurate dates and bullet points
+  - Education: MPharm UEA, Mary Seacole Programme with correct details
+  - Skills: 18 skills across Technical/Clinical/Strategic categories
+  - Projects: 4 projects with descriptions and PharMetrics link
+  - Contact: Phone, email, LinkedIn, location all accurate
+- **All 12 tasks completed** - React conversion finished
+- **Learnings**:
+  - Production build size is reasonable at ~94KB gzipped for JS
+  - All components properly typed with TypeScript strict mode
+  - IntersectionObserver hooks cleanup correctly on unmount
