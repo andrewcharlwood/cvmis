@@ -106,7 +106,7 @@ src/
 
   Create `components/Hero.tsx`. Port hero section from concept.html: centered layout, name (clamp 36-52px), job title (muted), location pill (teal border), summary paragraph (max-width 560px). Four vital sign metric cards in a row: "10+ Years Experience", "Python/SQL/BI Analytics Stack", "Pop. Health Focus Area", "NHS N&W System". Cards have teal border-top, hover elevation. Responsive: 2x2 grid on tablet, stacked on mobile.
 
-- [ ] **Task 7: Build Skills section with SVG gauges**
+- [x] **Task 7: Build Skills section with SVG gauges**
 
   Create `components/Skills.tsx`. Three skill categories: Technical (8 skills, teal), Clinical (6 skills, coral), Strategic (4 skills, teal). Each skill has circular SVG progress gauge using calculated stroke-dashoffset. Scroll-triggered animation: gauges fill when section enters viewport, staggered by 100ms. Port all 18 skills with correct percentages from concept.html.
 

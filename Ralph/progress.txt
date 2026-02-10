@@ -64,6 +64,28 @@
   - Using a separate VitalCard component with delay prop creates clean staggered animation pattern
 
   <!-- Iterations will be logged here as tasks are completed -->
+
+### Iteration 6 — Task 7: Build Skills section with SVG gauges
+- **Completed**: Task 7 - Build Skills section with SVG gauges
+- **Files created**:
+  - `src/hooks/useScrollReveal.ts` - IntersectionObserver hook for scroll-triggered animations
+  - `src/components/Skills.tsx` - Skills section with SVG circular progress gauges
+- **Files modified**:
+  - `src/App.tsx` - Replaced skills placeholder with Skills component
+- **Design decisions**:
+  - SkillGauge component with SVG circular progress using stroke-dashoffset animation
+  - IntersectionObserver triggers when section is 15% visible
+  - Staggered animation: 100ms delay between each gauge
+  - Gauge radius 34px, circumference 213.628, rotates -90deg to start from top
+  - Transition duration 1.2s ease-out for gauge fill animation
+  - Framer Motion for card entrance animations (opacity 0→1, y 16→0)
+  - Color-coded: Technical (teal), Clinical (coral), Strategic (teal)
+  - Responsive grid: auto-fit with minmax(140px, 1fr)
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - SVG stroke-dashoffset animation triggered via React state + CSS transition works smoothly
+  - IntersectionObserver cleanup is critical to avoid memory leaks
+  - Calculating baseDelay per category allows grouped stagger effects
   
 ### Iteration 3 — Task 4: Build ECGAnimation component
 - **Completed**: Task 4 - Build ECGAnimation component
