@@ -5,7 +5,10 @@
       "Bash(powershell -Command \"$lines = Get-Content ''4-vitals-monitor.html''; $before = $lines[0..1757]; $after = $lines[2028..\\($lines.Length-1\\)]; $result = $before + $after; $result | Set-Content ''4-vitals-monitor.html'' -Encoding UTF8\")",
       "Bash(powershell -ExecutionPolicy Bypass -File:*)",
       "Bash(del \"C:\\\\Users\\\\Andy\\\\Ralph Local\\\\Tasks\\\\cv-4-vitals-monitor\\\\remove-lines.ps1\")",
-      "Bash(start \"\" \"C:\\\\Users\\\\Andy\\\\Ralph Local\\\\Tasks\\\\cv-4-vitals-monitor\\\\4-vitals-monitor.html\")"
+      "Bash(start \"\" \"C:\\\\Users\\\\Andy\\\\Ralph Local\\\\Tasks\\\\cv-4-vitals-monitor\\\\4-vitals-monitor.html\")",
+      "Bash(npx skills find:*)",
+      "WebSearch",
+      "Bash(ls \"C:\\\\Users\\\\Andy\\\\Ralph Local\\\\Tasks\\\\New CV website\\\\designs\"\" 2>nul || echo \"Directory does not exist \")"
     ]
   }
 }
