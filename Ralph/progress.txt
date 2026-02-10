@@ -24,4 +24,25 @@
 - RALPH_PROMPT.md updated with explicit /frontend-design skill requirement for all visual components
 - This progress.txt reset for new phase
 
-<!-- Iterations will be logged here as tasks are completed -->
+ <!-- Iterations will be logged here as tasks are completed -->
+ 
+### Iteration 1 — Task 1: Initialize React project
+- **Completed**: Task 1 - Initialize React project with Vite + TypeScript + Tailwind
+- **Files created**:
+  - `package.json` with dependencies: React 18, Framer Motion, Lucide React, Tailwind
+  - `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json` for TypeScript
+  - `vite.config.ts` with path alias `@/` -> `./src/`
+  - `tailwind.config.js` with custom colors (teal, coral, ecg-green), fonts, shadows
+  - `postcss.config.js` for Tailwind processing
+  - `index.html` with Google Fonts (Fira Code, Plus Jakarta Sans, Inter Tight)
+  - `src/index.css` with Tailwind directives and CSS custom properties
+  - `src/main.tsx` entry point
+  - `src/App.tsx` placeholder component
+  - `src/types/index.ts` with TypeScript interfaces
+  - `src/lib/utils.ts` with skill gauge calculation helper
+  - `eslint.config.js` with React hooks and refresh rules
+- **Project structure created**: `src/components/`, `src/hooks/`, `src/lib/`, `src/types/`
+- **Quality checks**: `npm run typecheck` ✓, `npm run build` ✓, `npm run lint` ✓
+- **Learnings**: 
+  - Need `src/vite-env.d.ts` with `/// <reference types="vite/client" />` for CSS imports
+  - Vite refuses to scaffold in non-empty directory, so manual setup was needed

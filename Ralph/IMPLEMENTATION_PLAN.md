@@ -75,7 +75,7 @@ src/
 
 ## Tasks
 
-- [ ] **Task 1: Initialize React project with Vite + TypeScript + Tailwind**
+- [x] **Task 1: Initialize React project with Vite + TypeScript + Tailwind**
 
   Run `npm create vite@latest . -- --template react-ts` to scaffold the project. Install dependencies: `npm install framer-motion lucide-react`. Initialize Tailwind: `npm install -D tailwindcss postcss autoprefixer && npx tailwindcss init -p`. Configure `tailwind.config.js` with custom colors (teal #00897B, coral #FF6B6B, etc.). Set up `src/index.css` with Tailwind directives and CSS custom properties matching concept.html.
 
