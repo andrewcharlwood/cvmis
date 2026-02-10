@@ -28,15 +28,13 @@ function SkillGauge({ skill, delay, isVisible }: SkillGaugeProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 24 }}
+      animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{ duration: 0.5, delay: delay / 1000, ease: 'easeOut' }}
-      className={`flex flex-col items-center p-4 rounded-2xl transition-colors duration-300 ${hoverBg}`}
+      className={`flex flex-col items-center p-3 xs:p-4 rounded-2xl transition-colors duration-300 ${hoverBg}`}
     >
       <svg
-        className="skill-gauge block"
-        width="80"
-        height="80"
+        className="skill-gauge block w-16 h-16 xs:w-20 xs:h-20"
         viewBox="0 0 80 80"
       >
         <circle
@@ -98,7 +96,7 @@ function SkillCategory({ label, skills, isVisible, baseDelay }: SkillCategoryPro
       <h3 className="font-secondary text-xs font-semibold uppercase tracking-widest text-muted mb-5 pl-1">
         {label}
       </h3>
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-6">
+      <div className="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 xs:gap-6">
         {skills.map((skill, index) => (
           <SkillGauge
             key={skill.name}
@@ -162,7 +160,7 @@ export function Skills() {
   const strategicSkills = skillsData.filter(s => s.category === 'Strategic')
 
   return (
-    <section id="skills" ref={sectionRef} className="py-20">
+    <section id="skills" ref={sectionRef} className="py-12 xs:py-16 md:py-20">
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
         animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}

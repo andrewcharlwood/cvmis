@@ -66,7 +66,7 @@ const experiences: ExperienceType[] = [
 
 const ECGDecoration = () => (
   <svg
-    className="shrink-0 w-[200px] h-[30px] md:w-[200px] w-[120px]"
+    className="shrink-0 w-[120px] xs:w-[200px] h-[30px]"
     viewBox="0 0 200 30"
     fill="none"
     aria-hidden="true"
@@ -94,8 +94,8 @@ const TimelineEntry = ({
   return (
     <motion.div
       className="relative pl-0 md:pl-[calc(20%+32px)] mb-8 last:mb-0"
-      initial={{ opacity: 0, y: 16 }}
-      animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 24 }}
+      animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
     >
       <div
@@ -104,7 +104,7 @@ const TimelineEntry = ({
         }`}
       />
       <motion.div
-        className="bg-white rounded-2xl p-6 shadow-sm border-l-[3px] border-transparent hover:shadow-md hover:scale-[1.01] hover:border-l-teal/30 transition-all duration-300"
+        className="bg-white rounded-2xl p-4 xs:p-6 shadow-sm border-l-[3px] border-transparent hover:shadow-md hover:scale-[1.01] hover:border-l-teal/30 transition-all duration-300"
         whileHover={{ scale: 1.01 }}
         transition={{ duration: 0.2 }}
       >
@@ -137,7 +137,7 @@ export function Experience() {
     <div
       id="experience"
       ref={sectionRef}
-      className="py-20 opacity-0 translate-y-6 transition-all duration-600 ease-out data-[visible=true]:opacity-100 data-[visible=true]:translate-y-0"
+      className="py-12 xs:py-16 md:py-20 opacity-0 translate-y-6 transition-all duration-600 ease-out data-[visible=true]:opacity-100 data-[visible=true]:translate-y-0"
       data-visible={isVisible}
     >
       <div className="flex items-center justify-center gap-4 mb-8">

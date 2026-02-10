@@ -35,14 +35,14 @@ export function Hero() {
   return (
     <section 
       id="about" 
-      className="min-h-screen flex flex-col justify-center items-center text-center py-20"
+      className="min-h-screen flex flex-col justify-center items-center text-center py-12 xs:py-16 md:py-20"
     >
       <motion.h1
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className="font-primary font-bold text-heading leading-tight"
-        style={{ fontSize: 'clamp(36px, 5vw, 52px)' }}
+        style={{ fontSize: 'clamp(28px, 5vw, 52px)' }}
       >
         Andy Charlwood
       </motion.h1>
@@ -74,7 +74,7 @@ export function Hero() {
         GPhC Registered Pharmacist specialising in medicines optimisation, population health analytics, and NHS efficiency programmes. Bridging clinical pharmacy with data science to drive meaningful improvements in patient outcomes.
       </motion.p>
 
-      <div className="flex gap-4 mt-10 justify-center flex-wrap">
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:flex gap-4 mt-10 justify-center md:flex-wrap">
         <VitalCard value="10+" label="Years Experience" delay={0.4} />
         <VitalCard value="Python/SQL/BI" label="Analytics Stack" valueSize="small" delay={0.5} />
         <VitalCard value="Pop. Health" label="Focus Area" valueSize="medium" delay={0.6} />

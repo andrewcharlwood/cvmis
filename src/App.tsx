@@ -27,7 +27,7 @@ function App() {
       {phase === 'content' && (
         <>
           <FloatingNav />
-          <main className="max-w-[1000px] mx-auto px-8">
+          <main className="max-w-[1000px] mx-auto px-5 xs:px-6 md:px-8">
             <Hero />
             
             <Skills />

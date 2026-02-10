@@ -28,8 +28,8 @@ const EducationCard = ({
 }) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 24 }}
+      animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{ duration: 0.5, delay, ease: 'easeOut' }}
       className="relative bg-white rounded-2xl p-6 shadow-sm overflow-hidden transition-shadow hover:shadow-md hover:-translate-y-0.5"
     >
@@ -52,7 +52,7 @@ export function Education() {
   })
 
   return (
-    <section id="education" ref={sectionRef} className="py-20">
+    <section id="education" ref={sectionRef} className="py-12 xs:py-16 md:py-20">
       <motion.h2
         initial={{ opacity: 0, y: 12 }}
         animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
@@ -62,7 +62,7 @@ export function Education() {
         Education
       </motion.h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {educationData.map((education, index) => (
           <EducationCard
             key={education.degree}

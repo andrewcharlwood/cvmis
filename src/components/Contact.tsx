@@ -48,8 +48,8 @@ const ContactItemCard = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 24 }}
+      animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{ duration: 0.5, delay, ease: 'easeOut' }}
       className="text-center"
     >
@@ -83,7 +83,7 @@ export function Contact() {
   })
 
   return (
-    <section id="contact" ref={sectionRef} className="py-20">
+    <section id="contact" ref={sectionRef} className="py-12 xs:py-16 md:py-20">
       <motion.h2
         initial={{ opacity: 0, y: 12 }}
         animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}

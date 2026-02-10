@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="text-center pt-12 pb-8 border-t border-slate-200"
+      className="text-center pt-8 xs:pt-12 pb-6 xs:pb-8 border-t border-slate-200"
     >
       <svg
         className="block mx-auto mb-3"

@@ -28,7 +28,7 @@ export function FloatingNav() {
 
   return (
     <motion.nav
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] max-w-[600px] w-auto bg-white rounded-full py-2 px-6 shadow-md flex items-center gap-1 border border-border overflow-x-auto scrollbar-hide"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] max-w-[600px] w-[calc(100%-32px)] md:w-auto bg-white rounded-full py-2 px-4 md:px-6 shadow-md flex items-center gap-1 border border-border overflow-x-auto scrollbar-hide"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -41,7 +41,7 @@ export function FloatingNav() {
             key={link.id}
             onClick={() => scrollToSection(link.id)}
             className={`
-              relative font-secondary text-[13px] font-medium py-1.5 px-3.5 rounded-full
+              relative font-secondary text-[11px] xs:text-[13px] font-medium py-1.5 px-2.5 xs:px-3.5 rounded-full
               transition-colors duration-300 ease-out whitespace-nowrap
               ${isActive 
                 ? 'text-teal font-semibold' 
