@@ -87,7 +87,7 @@ src/
 
   Create `components/BootSequence.tsx`. Implement terminal typing animation using Framer Motion or CSS transitions. Display boot lines with correct colors (cyan labels, green values, dim text). Use exact boot text from concept.html: "CLINICAL TERMINAL v3.2.1", "Initialising pharmacist profile...", SYSTEM/USER/ROLE/LOCATION, module loading, [OK] lines, READY. Duration: ~4 seconds. Emit `onComplete` callback when finished. Styling: black background, Fira Code font.
 
-- [ ] **Task 4: Build ECGAnimation component**
+- [x] **Task 4: Build ECGAnimation component**
 
   Create `components/ECGAnimation.tsx`. Port the ECG logic from concept.html:
   - SVG flatline drawing left-to-right (1000ms)

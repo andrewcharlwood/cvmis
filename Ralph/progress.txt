@@ -24,8 +24,35 @@
 - RALPH_PROMPT.md updated with explicit /frontend-design skill requirement for all visual components
 - This progress.txt reset for new phase
 
- <!-- Iterations will be logged here as tasks are completed -->
- 
+  <!-- Iterations will be logged here as tasks are completed -->
+  
+### Iteration 3 — Task 4: Build ECGAnimation component
+- **Completed**: Task 4 - Build ECGAnimation component
+- **Files created**:
+  - `src/components/ECGAnimation.tsx` - Canvas-based ECG animation with heartbeat waveforms and name drawing
+- **Files modified**:
+  - `src/App.tsx` - Updated to use ECGAnimation component instead of placeholder
+- **Design decisions**:
+  - Used canvas API with requestAnimationFrame for smooth 60fps animation
+  - Ported exact ECG waveform generation from concept.html (PQRST pattern)
+  - Ported letter waveform interpolation for "ANDREW CHARLWOOD" name drawing
+  - Implemented glow effects using canvas shadowBlur
+  - Added scanline overlay (4px horizontal lines) for retro effect
+  - Added radial gradient vignette for atmosphere
+  - Background transitions from black to white during exit phase
+  - Used Framer Motion AnimatePresence for component-level exit animation
+- **Animation timing preserved**:
+  - 4 heartbeat complexes with amplitudes: 0.3, 0.55, 0.85, 1.0
+  - Trace speed: 450px/s (scaled responsively)
+  - Hold time after text: 0.75s
+  - Exit fade: 0.8s
+  - Total duration: ~5-6 seconds
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - Canvas-based animations need careful cleanup on unmount (cancelAnimationFrame)
+  - Device pixel ratio (dpr) handling required for crisp rendering on high-DPI displays
+  - Responsive scaling: `Math.min(1.2, Math.max(0.35, vw / 1400))`
+
 ### Iteration 1 — Task 1: Initialize React project
 - **Completed**: Task 1 - Initialize React project with Vite + TypeScript + Tailwind
 - **Files created**:
