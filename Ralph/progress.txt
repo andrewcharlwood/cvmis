@@ -24,6 +24,26 @@
 - RALPH_PROMPT.md updated with explicit /frontend-design skill requirement for all visual components
 - This progress.txt reset for new phase
 
+### Iteration 4 — Task 5: Build FloatingNav component
+- **Completed**: Task 5 - Build FloatingNav component
+- **Files created**:
+  - `src/hooks/useActiveSection.ts` - IntersectionObserver hook for tracking active nav section
+  - `src/components/FloatingNav.tsx` - Floating pill navigation with active tracking
+- **Files modified**:
+  - `src/index.css` - Added scrollbar-hide utility and smooth scroll behavior
+  - `src/App.tsx` - Integrated FloatingNav and added section IDs for scroll targets
+- **Design decisions**:
+  - Used IntersectionObserver with rootMargin '-20% 0px -70% 0px' for accurate section detection
+  - Framer Motion layoutId for smooth indicator dot animation between nav items
+  - Active section is the topmost visible section (sorted by DOM order)
+  - Navigation uses button elements for accessibility and proper click handling
+  - Smooth scroll behavior via CSS `scroll-behavior: smooth` on html element
+  - Responsive: horizontal scroll with hidden scrollbar on mobile
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - IntersectionObserver thresholds array allows precise tracking of section visibility
+  - Using a ref to track visible sections prevents React re-render race conditions
+
   <!-- Iterations will be logged here as tasks are completed -->
   
 ### Iteration 3 — Task 4: Build ECGAnimation component

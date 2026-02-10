@@ -98,7 +98,7 @@ src/
   - Emit `onComplete` callback when animation finishes
   Use Framer Motion for path drawing animations (pathLength).
 
-- [ ] **Task 5: Build FloatingNav component**
+- [x] **Task 5: Build FloatingNav component**
 
   Create `components/FloatingNav.tsx`. Floating pill navigation bar fixed at top center. Links: About, Skills, Experience, Education, Projects, Contact. Active link tracking via `useActiveSection` hook (IntersectionObserver). Smooth scroll to sections on click. Responsive: horizontal scroll on mobile. Styling: white bg, rounded-full, shadow-md, teal active state with dot indicator.
 
