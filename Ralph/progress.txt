@@ -46,3 +46,21 @@
 - **Learnings**: 
   - Need `src/vite-env.d.ts` with `/// <reference types="vite/client" />` for CSS imports
   - Vite refuses to scaffold in non-empty directory, so manual setup was needed
+
+### Iteration 2 — Task 2 & 3: Project structure and BootSequence
+- **Completed**: Task 2 (Set up project structure and types) - was already done in Task 1
+- **Completed**: Task 3 - Build BootSequence component
+- **Files created**:
+  - `src/components/BootSequence.tsx` - Terminal typing animation using Framer Motion
+- **Design decisions**:
+  - Used Framer Motion's `motion.div` with `initial`/`animate` props for line reveals
+  - Each line animates with opacity 0→1, translateY 8px→0 over 400ms
+  - Staggered delays calculated from cumulative 220ms per line
+  - Blinking cursor implemented with CSS animation class `animate-blink`
+  - Used `AnimatePresence` for smooth exit fade (800ms)
+- **Boot sequence timing preserved**: 14 lines × 220ms + 400ms pause + 800ms fade = ~4.28s
+- **Quality checks**: `npm run typecheck` ✓, `npm run build` ✓, `npm run lint` ✓
+- **Learnings**:
+  - Framer Motion's delay prop uses seconds, not milliseconds
+  - Used `dangerouslySetInnerHTML` for colored spans within boot lines (matches concept.html structure)
+  - CSS classes for blink/seed-pulse animations already existed in index.css from Task 1

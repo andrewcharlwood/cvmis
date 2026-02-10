@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Phase } from './types'
+import { BootSequence } from './components/BootSequence'
 
 function App() {
   const [phase, setPhase] = useState<Phase>('boot')
@@ -7,13 +8,16 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       {phase === 'boot' && (
-        <div className="fixed inset-0 bg-black flex flex-col justify-center p-10 font-mono text-sm">
-          <div className="text-ecg-green">CLINICAL TERMINAL v3.2.1</div>
+        <BootSequence onComplete={() => setPhase('ecg')} />
+      )}
+      
+      {phase === 'ecg' && (
+        <div className="fixed inset-0 bg-black flex flex-col justify-center items-center">
           <button 
             onClick={() => setPhase('content')}
-            className="mt-8 text-ecg-cyan hover:text-ecg-green transition-colors"
+            className="text-ecg-green font-mono hover:opacity-80 transition-opacity"
           >
-            Press to skip boot sequence (placeholder)
+            ECG Animation (placeholder - click to continue)
           </button>
         </div>
       )}

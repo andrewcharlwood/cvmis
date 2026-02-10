@@ -79,11 +79,11 @@ src/
 
   Run `npm create vite@latest . -- --template react-ts` to scaffold the project. Install dependencies: `npm install framer-motion lucide-react`. Initialize Tailwind: `npm install -D tailwindcss postcss autoprefixer && npx tailwindcss init -p`. Configure `tailwind.config.js` with custom colors (teal #00897B, coral #FF6B6B, etc.). Set up `src/index.css` with Tailwind directives and CSS custom properties matching concept.html.
 
-- [ ] **Task 2: Set up project structure and types**
+- [x] **Task 2: Set up project structure and types**
 
   Create the folder structure (`components/`, `hooks/`, `lib/`, `types/`). Define TypeScript interfaces in `types/index.ts` for: `Skill` (name, level, category, color), `Experience` (role, org, date, bullets), `Education` (degree, institution, period, detail), `Project` (title, description, link?). Create `lib/utils.ts` with helper function `calculateSkillOffset(level: number, radius: number): number` that returns `2 * Math.PI * radius * (1 - level / 100)`.
 
-- [ ] **Task 3: Build BootSequence component**
+- [x] **Task 3: Build BootSequence component**
 
   Create `components/BootSequence.tsx`. Implement terminal typing animation using Framer Motion or CSS transitions. Display boot lines with correct colors (cyan labels, green values, dim text). Use exact boot text from concept.html: "CLINICAL TERMINAL v3.2.1", "Initialising pharmacist profile...", SYSTEM/USER/ROLE/LOCATION, module loading, [OK] lines, READY. Duration: ~4 seconds. Emit `onComplete` callback when finished. Styling: black background, Fira Code font.
 
