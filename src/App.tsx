@@ -6,6 +6,9 @@ import { FloatingNav } from './components/FloatingNav'
 import { Hero } from './components/Hero'
 import { Skills } from './components/Skills'
 import { Experience } from './components/Experience'
+import { Education } from './components/Education'
+import { Projects } from './components/Projects'
+import { Contact } from './components/Contact'
 
 function App() {
   const [phase, setPhase] = useState<Phase>('boot')
@@ -30,26 +33,11 @@ function App() {
 
             <Experience />
 
-            <section id="education" className="py-20">
-              <h2 className="font-primary text-2xl font-bold text-heading text-center mb-8">
-                Education
-              </h2>
-              <p className="text-muted text-center">Education section will be built in Task 9</p>
-            </section>
+            <Education />
 
-            <section id="projects" className="py-20">
-              <h2 className="font-primary text-2xl font-bold text-heading text-center mb-8">
-                Projects
-              </h2>
-              <p className="text-muted text-center">Projects section will be built in Task 9</p>
-            </section>
+            <Projects />
 
-            <section id="contact" className="py-20">
-              <h2 className="font-primary text-2xl font-bold text-heading text-center mb-8">
-                Contact
-              </h2>
-              <p className="text-muted text-center">Contact section will be built in Task 9</p>
-            </section>
+            <Contact />
           </main>
         </>
       )}
