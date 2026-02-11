@@ -42,11 +42,21 @@ The "patient" is Andy's career. Users navigate a genuine NHS clinical software i
 
 10. **Commit the progress update**: Stage and commit the updated `IMPLEMENTATION_PLAN.md` and `progress.txt`.
 
-11. **Check for completion**: If ALL items in the task checklist are now checked (`- [x]`), output the following completion signal on its own line:
+11. **Determine if another iteration is needed**: Review your work and the codebase. The project needs another iteration if ANY of these are true:
+    - Any task in the checklist is unchecked (`- [ ]`) or blocked (`- [B]`)
+    - Quality checks would fail (run them to verify)
+    - There are uncommitted changes
+    - progress.txt has open questions or guidance for "next iteration"
+    - The implementation doesn't fully satisfy the plan requirements
+    - You have lingering doubts about correctness or completeness
+
+12. **Send completion signal ONLY if truly complete**: If and ONLY if the project definitely does NOT need another iteration — all tasks verified done, quality checks pass, no guidance for next iteration — output this exact signal on its own line:
 
 ```
 <promise>COMPLETE</promise>
 ```
+
+DO NOT output this string if there's any chance another iteration is needed. When in doubt, do NOT send the promise — leave it for the next iteration to determine.
 
 ## Critical Rules
 
