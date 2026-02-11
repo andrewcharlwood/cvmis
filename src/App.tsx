@@ -3,20 +3,13 @@ import type { Phase } from './types'
 import { BootSequence } from './components/BootSequence'
 import { ECGAnimation } from './components/ECGAnimation'
 import { LoginScreen } from './components/LoginScreen'
-import { FloatingNav } from './components/FloatingNav'
-import { Hero } from './components/Hero'
-import { Skills } from './components/Skills'
-import { Experience } from './components/Experience'
-import { Education } from './components/Education'
-import { Projects } from './components/Projects'
-import { Contact } from './components/Contact'
-import { Footer } from './components/Footer'
+import { PMRInterface } from './components/PMRInterface'
 
 function App() {
   const [phase, setPhase] = useState<Phase>('boot')
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       {phase === 'boot' && (
         <BootSequence onComplete={() => setPhase('ecg')} />
       )}
@@ -26,28 +19,10 @@ function App() {
       )}
       
       {phase === 'login' && (
-        <LoginScreen onComplete={() => setPhase('content')} />
+        <LoginScreen onComplete={() => setPhase('pmr')} />
       )}
       
-      {phase === 'content' && (
-        <>
-          <FloatingNav />
-          <main className="max-w-[1000px] mx-auto px-5 xs:px-6 md:px-8">
-            <Hero />
-            
-            <Skills />
-
-            <Experience />
-
-            <Education />
-
-            <Projects />
-
-            <Contact />
-          </main>
-          <Footer />
-        </>
-      )}
+      {phase === 'pmr' && <PMRInterface />}
     </div>
   )
 }

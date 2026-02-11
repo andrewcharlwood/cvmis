@@ -33,7 +33,7 @@ export interface ContactItem {
   href?: string
 }
 
-export type Phase = 'boot' | 'ecg' | 'login' | 'content'
+export type Phase = 'boot' | 'ecg' | 'login' | 'pmr'
 
 export interface BootLine {
   html: string
