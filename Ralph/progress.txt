@@ -1,263 +1,85 @@
-# Progress Log — React Conversion Phase
+# Progress Log — Clinical Record PMR Phase
+
+## Phase Transition
+
+**Previous phase completed:** React conversion of ECG Heartbeat CV (all 12 tasks done)
+**New phase started:** Clinical Record PMR System — Design 7 implementation
+**Date:** 2026-02-11
+
+This is a complete redesign of the CV presentation, moving from the ECG animation concept to a Patient Medical Record system interface. All previous components (Hero, Skills, Experience, etc.) will be replaced with PMR-specific views and components.
 
 ## Codebase Patterns
-- **Source of truth**: `References/concept.html` contains the complete working HTML implementation. All animations, timing, colors, and styling must be preserved exactly when porting to React.
-- **Tech stack**: React 18+, TypeScript, Vite, Tailwind CSS, Framer Motion, Lucide React
-- **Project structure**: Components in `src/components/`, hooks in `src/hooks/`, types in `src/types/`, utilities in `src/lib/`
-- **Animation approach**: Framer Motion for complex sequences (boot, ECG), CSS transitions for simple hover effects, IntersectionObserver (via hook) for scroll-triggered animations
-- **SVG animations**: Use Framer Motion's `pathLength` prop for drawing effects, or CSS `stroke-dasharray`/`stroke-dashoffset` for skill gauges
-- **Skill gauge math**: `circumference = 2 * Math.PI * radius`, `strokeDashoffset = circumference * (1 - level / 100)`, rotate -90deg to start from top
-- **Boot sequence timing**: 14 lines × 220ms = ~3080ms, plus 400ms pause, 800ms fade = ~4.28s total
-- **ECG timing**: Flatline 1000ms + 3 beats × 600ms + holds 300ms + branching 1500ms + fade 500ms = ~5.5s
-- **Color palette**: 
-  - ECG phase: #000 (black), #00ff41 (green), #00e5ff (cyan), #3a6b45 (dim green)
-  - Final design: #00897B (teal), #FF6B6B (coral), #0F172A (heading), #334155 (text), #94A3B8 (muted)
-- **Fonts**: Fira Code (boot), Plus Jakarta Sans (primary), Inter Tight (secondary)
-- **Responsive breakpoints**: 768px (tablet), 480px (mobile)
+
+### PMR Design System
+- **Source of truth**: `designs/07-the-clinical-record.md` — Complete specification for the PMR interface
+- **Color palette (light-mode only)**:
+  - Main content: `#F5F7FA` (cool light gray)
+  - Cards: `#FFFFFF` (white)
+  - Sidebar: `#1E293B` (dark blue-gray)
+  - Patient banner: `#334155` (lighter blue-gray)
+  - NHS blue: `#005EB8` (primary interactive)
+  - Green: `#22C55E` (active/resolved)
+  - Amber: `#F59E0B` (alerts/in-progress)
+  - Red: `#EF4444` (urgent)
+  - Borders: `#E5E7EB` (gray-200)
+- **Typography**: Inter for general text, Geist Mono for coded entries/data values
+- **Spacing**: 4px base unit, tighter than previous design (clinical system density)
+- **Borders**: 1px solid gray-200, 4px radius (clinical systems use minimal rounding)
+- **Table rows**: 40px height, alternating colors
+
+### Data Architecture
+- All PMR content lives in `src/data/` as typed arrays
+- Separation of data from components enables easy CV updates
+- Types defined in `src/types/pmr.ts`
+
+### Animation Approach
+- **Login typing**: `setInterval` with character-by-character reveal (30ms/char username, 20ms/dot password)
+- **View switching**: Instant (no animation) — matches clinical system behavior
+- **Consultation expand**: Height 0→auto, 200ms, ease-out
+- **Alert entrance**: Slide down with spring, 250ms
+- **Alert dismiss**: Icon → checkmark (200ms) → collapse (200ms)
+- **Patient banner condensation**: Smooth height transition, 200ms
+- **Reduced motion**: Typing instant, slides become fades, expand instant
+
+### Clinical System Authenticity
+- Navigation is instant — no crossfade
+- Tables use explicit borders on all cells
+- Traffic lights are 8px circles with text labels (never sole indicator)
+- Consultation format: History / Examination / Plan (clinical SOAP note structure)
+- Medications table mimics actual prescribing lists
+- Coded entries use [XXX000] format (SNOMED-style)
+
+### Responsive Breakpoints
+- Desktop (>1024px): 220px sidebar, full tables
+- Tablet (768-1024px): 56px icon-only sidebar, scrollable tables
+- Mobile (<768px): Bottom nav bar, card layouts instead of tables
+
+### Accessibility Requirements
+- Tables must be proper `<table>` markup with `scope="col"`
+- Clinical alert uses `role="alert"` and `aria-live="assertive"`
+- Keyboard shortcuts: Alt+1-7 for navigation
+- Focus management after view changes and expansions
+- Screen reader announces views and table structure
 
 ## Iteration Log
 
-### Phase Transition — React Conversion Setup
-- Previous phase completed: Single HTML file `concept.html` fully built with all 9 tasks
-- New phase started: Convert HTML concept to React + TypeScript + Vite project
-- IMPLEMENTATION_PLAN.md updated with 12 React-specific tasks
-- RALPH_PROMPT.md updated with explicit /frontend-design skill requirement for all visual components
-- This progress.txt reset for new phase
-
-### Iteration 4 — Task 5: Build FloatingNav component
-- **Completed**: Task 5 - Build FloatingNav component
+### Iteration 1 — Task 1: Create PMR data layer and TypeScript types
+- **Completed**: Task 1 - Created PMR data layer with TypeScript interfaces and data files
 - **Files created**:
-  - `src/hooks/useActiveSection.ts` - IntersectionObserver hook for tracking active nav section
-  - `src/components/FloatingNav.tsx` - Floating pill navigation with active tracking
-- **Files modified**:
-  - `src/index.css` - Added scrollbar-hide utility and smooth scroll behavior
-  - `src/App.tsx` - Integrated FloatingNav and added section IDs for scroll targets
+  - `src/types/pmr.ts` - All PMR TypeScript interfaces (Patient, Consultation, Medication, Problem, Investigation, Document, etc.)
+  - `src/data/consultations.ts` - 5 roles mapped to consultation format with History/Examination/Plan structure
+  - `src/data/medications.ts` - 18 skills mapped to medication format across 3 categories (Active, Clinical, PRN)
+  - `src/data/problems.ts` - 11 problems with traffic light status (3 Active, 2 In Progress, 6 Resolved)
+  - `src/data/investigations.ts` - 5 projects as investigations with methodology/results
+  - `src/data/documents.ts` - 5 education/certification documents
+  - `src/data/patient.ts` - Patient demographic data
 - **Design decisions**:
-  - Used IntersectionObserver with rootMargin '-20% 0px -70% 0px' for accurate section detection
-  - Framer Motion layoutId for smooth indicator dot animation between nav items
-  - Active section is the topmost visible section (sorted by DOM order)
-  - Navigation uses button elements for accessibility and proper click handling
-  - Smooth scroll behavior via CSS `scroll-behavior: smooth` on html element
-  - Responsive: horizontal scroll with hidden scrollbar on mobile
+  - Used SNOMED-style codes for coded entries (EFF001, ALG001, AUT001, etc.)
+  - Mapped employer colors: NHS blue (#005EB8) for ICB, Teal (#00897B) for Tesco
+  - Proficiency percentages estimated from CV skill descriptions
+  - Prescribing history for each skill shows progression over time
 - **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
 - **Learnings**:
-  - IntersectionObserver thresholds array allows precise tracking of section visibility
-  - Using a ref to track visible sections prevents React re-render race conditions
-
-  <!-- Iterations will be logged here as tasks are completed -->
-  
-### Iteration 5 — Task 6: Build Hero section component
-- **Completed**: Task 6 - Build Hero section component
-- **Files created**:
-  - `src/components/Hero.tsx` - Hero section with name, title, location, summary, and vital cards
-- **Files modified**:
-  - `src/App.tsx` - Replaced inline hero section with Hero component import
-- **Design decisions**:
-  - Used Framer Motion for staggered entrance animations (name first, then title, location, summary, then vital cards with 0.1s delays)
-  - VitalCard component with three value size variants: default (28px), small (16px), medium (18px)
-  - Hover effects: elevation (-translate-y-0.5) and shadow-md transition
-  - Responsive: flex-wrap with gap-4 for automatic wrapping on smaller screens
-  - Preserved exact content from concept.html including full summary paragraph
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - CSS clamp() for responsive font sizing works well inline with Framer Motion
-  - Using a separate VitalCard component with delay prop creates clean staggered animation pattern
-
-  <!-- Iterations will be logged here as tasks are completed -->
-
-### Iteration 6 — Task 7: Build Skills section with SVG gauges
-- **Completed**: Task 7 - Build Skills section with SVG gauges
-- **Files created**:
-  - `src/hooks/useScrollReveal.ts` - IntersectionObserver hook for scroll-triggered animations
-  - `src/components/Skills.tsx` - Skills section with SVG circular progress gauges
-- **Files modified**:
-  - `src/App.tsx` - Replaced skills placeholder with Skills component
-- **Design decisions**:
-  - SkillGauge component with SVG circular progress using stroke-dashoffset animation
-  - IntersectionObserver triggers when section is 15% visible
-  - Staggered animation: 100ms delay between each gauge
-  - Gauge radius 34px, circumference 213.628, rotates -90deg to start from top
-  - Transition duration 1.2s ease-out for gauge fill animation
-  - Framer Motion for card entrance animations (opacity 0→1, y 16→0)
-  - Color-coded: Technical (teal), Clinical (coral), Strategic (teal)
-  - Responsive grid: auto-fit with minmax(140px, 1fr)
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - SVG stroke-dashoffset animation triggered via React state + CSS transition works smoothly
-  - IntersectionObserver cleanup is critical to avoid memory leaks
-  - Calculating baseDelay per category allows grouped stagger effects
-  
-### Iteration 3 — Task 4: Build ECGAnimation component
-- **Completed**: Task 4 - Build ECGAnimation component
-- **Files created**:
-  - `src/components/ECGAnimation.tsx` - Canvas-based ECG animation with heartbeat waveforms and name drawing
-- **Files modified**:
-  - `src/App.tsx` - Updated to use ECGAnimation component instead of placeholder
-- **Design decisions**:
-  - Used canvas API with requestAnimationFrame for smooth 60fps animation
-  - Ported exact ECG waveform generation from concept.html (PQRST pattern)
-  - Ported letter waveform interpolation for "ANDREW CHARLWOOD" name drawing
-  - Implemented glow effects using canvas shadowBlur
-  - Added scanline overlay (4px horizontal lines) for retro effect
-  - Added radial gradient vignette for atmosphere
-  - Background transitions from black to white during exit phase
-  - Used Framer Motion AnimatePresence for component-level exit animation
-- **Animation timing preserved**:
-  - 4 heartbeat complexes with amplitudes: 0.3, 0.55, 0.85, 1.0
-  - Trace speed: 450px/s (scaled responsively)
-  - Hold time after text: 0.75s
-  - Exit fade: 0.8s
-  - Total duration: ~5-6 seconds
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - Canvas-based animations need careful cleanup on unmount (cancelAnimationFrame)
-  - Device pixel ratio (dpr) handling required for crisp rendering on high-DPI displays
-  - Responsive scaling: `Math.min(1.2, Math.max(0.35, vw / 1400))`
-
-### Iteration 1 — Task 1: Initialize React project
-- **Completed**: Task 1 - Initialize React project with Vite + TypeScript + Tailwind
-- **Files created**:
-  - `package.json` with dependencies: React 18, Framer Motion, Lucide React, Tailwind
-  - `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json` for TypeScript
-  - `vite.config.ts` with path alias `@/` -> `./src/`
-  - `tailwind.config.js` with custom colors (teal, coral, ecg-green), fonts, shadows
-  - `postcss.config.js` for Tailwind processing
-  - `index.html` with Google Fonts (Fira Code, Plus Jakarta Sans, Inter Tight)
-  - `src/index.css` with Tailwind directives and CSS custom properties
-  - `src/main.tsx` entry point
-  - `src/App.tsx` placeholder component
-  - `src/types/index.ts` with TypeScript interfaces
-  - `src/lib/utils.ts` with skill gauge calculation helper
-  - `eslint.config.js` with React hooks and refresh rules
-- **Project structure created**: `src/components/`, `src/hooks/`, `src/lib/`, `src/types/`
-- **Quality checks**: `npm run typecheck` ✓, `npm run build` ✓, `npm run lint` ✓
-- **Learnings**: 
-  - Need `src/vite-env.d.ts` with `/// <reference types="vite/client" />` for CSS imports
-  - Vite refuses to scaffold in non-empty directory, so manual setup was needed
-
-### Iteration 2 — Task 2 & 3: Project structure and BootSequence
-- **Completed**: Task 2 (Set up project structure and types) - was already done in Task 1
-- **Completed**: Task 3 - Build BootSequence component
-- **Files created**:
-  - `src/components/BootSequence.tsx` - Terminal typing animation using Framer Motion
-- **Design decisions**:
-  - Used Framer Motion's `motion.div` with `initial`/`animate` props for line reveals
-  - Each line animates with opacity 0→1, translateY 8px→0 over 400ms
-  - Staggered delays calculated from cumulative 220ms per line
-  - Blinking cursor implemented with CSS animation class `animate-blink`
-  - Used `AnimatePresence` for smooth exit fade (800ms)
-- **Boot sequence timing preserved**: 14 lines × 220ms + 400ms pause + 800ms fade = ~4.28s
-- **Quality checks**: `npm run typecheck` ✓, `npm run build` ✓, `npm run lint` ✓
-- **Learnings**:
-  - Framer Motion's delay prop uses seconds, not milliseconds
-  - Used `dangerouslySetInnerHTML` for colored spans within boot lines (matches concept.html structure)
-  - CSS classes for blink/seed-pulse animations already existed in index.css from Task 1
-
-### Iteration 7 — Task 8: Build Experience section with timeline
-- **Completed**: Task 8 - Build Experience section with timeline
-- **Files created**:
-  - `src/components/Experience.tsx` - Timeline component with 5 roles and ECG decoration
-- **Files modified**:
-  - `src/App.tsx` - Replaced Experience placeholder with Experience component
-  - `src/hooks/useScrollReveal.ts` - Fixed ref type for React 18+ compatibility
-- **Design decisions**:
-  - Vertical timeline with 20% left offset for timeline line and dots
-  - ECG waveform SVG decoration beside heading (matches concept.html)
-  - Timeline dots filled (bg-teal) for current roles, outline for past roles
-  - Cards have hover effects: scale(1.01), shadow-md, left border teal/30
-  - Framer Motion for staggered entry animations (100ms delay per card)
-  - useScrollReveal hook triggers animations when section is 10% visible
-  - Responsive: timeline line and dots hidden on mobile (md:block)
-- **Experience data**: 5 roles from Interim Head (May-Nov 2025) to Duty Pharmacy Manager (Aug 2016-Nov 2017)
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - React 18+ RefObject types require non-nullable type param for ref props
-  - Fixed useScrollReveal to return `RefObject<T>` instead of `RefObject<T | null>`
-  - data-visible attribute pattern works well for CSS transitions based on JS state
-
-### Iteration 8 — Task 9: Build Education, Projects, Contact sections
-- **Completed**: Task 9 - Build Education, Projects, Contact sections
-- **Files created**:
-  - `src/components/Education.tsx` - Education cards with gradient top border
-  - `src/components/Projects.tsx` - Project cards with gradient border hover effect
-  - `src/components/Contact.tsx` - Contact grid with Lucide icons
-- **Files modified**:
-  - `src/App.tsx` - Replaced placeholder sections with actual components
-- **Design decisions**:
-  - **Education**: 2-column grid with gradient top border (teal→coral), hover elevation effect
-  - **Projects**: 2x2 grid with gradient border hover effect using CSS mask technique
-  - **Contact**: 4-column grid (2x2 on mobile), Lucide icons (Phone, Mail, Linkedin, MapPin)
-  - Framer Motion for staggered entry animations (100ms delay per card)
-  - useScrollReveal hook for scroll-triggered visibility
-  - ExternalLink icon from Lucide for project links
-  - Contact links use teal color with hover transition
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - CSS gradient border hover effect uses mask-composite: exclude technique
-  - Lucide icons are tree-shakable - import only what's needed
-  - Contact items with href conditionally render as anchor tags
-
-### Iteration 9 — Task 10: Build Footer component and main App.tsx
-- **Completed**: Task 10 - Build Footer component and main App.tsx
-- **Files created**:
-  - `src/components/Footer.tsx` - Footer with decorative ECG waveform SVG
-- **Files modified**:
-  - `src/App.tsx` - Added Footer import and component to content phase
-- **Design decisions**:
-  - ECG waveform SVG matches concept.html: 120x20 viewBox with PQRST pattern
-  - Framer Motion for scroll-triggered entrance (opacity 0→1, y 16→0)
-  - Teal stroke at 30% opacity for subtle branding
-  - Font-secondary for text-xs muted attribution
-  - Footer placed outside main element as per semantic HTML
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - App.tsx already had three-phase orchestration working correctly
-  - Footer scroll animation uses whileInView with once:true and margin:'-50px'
-  
-### Iteration 10 — Task 11: Implement scroll animations and responsive design
-- **Completed**: Task 11 - Implement scroll animations and responsive design
-- **Files modified**:
-  - `tailwind.config.js` - Added custom 'xs' screen at 480px for mobile breakpoint
-  - `src/App.tsx` - Added responsive padding (px-5 xs:px-6 md:px-8)
-  - `src/components/FloatingNav.tsx` - Responsive width and font/padding on mobile
-  - `src/components/Hero.tsx` - Responsive section padding, vitals grid, title font size
-  - `src/components/Skills.tsx` - Responsive grid (2→3→auto-fit), gauge size, padding
-  - `src/components/Experience.tsx` - Responsive card padding, ECG decoration size
-  - `src/components/Education.tsx` - Responsive section padding
-  - `src/components/Projects.tsx` - Responsive grid (1 col at tablet, 2 cols at desktop)
-  - `src/components/Contact.tsx` - Responsive section padding
-  - `src/components/Footer.tsx` - Responsive padding
-- **Design decisions**:
-  - Added 'xs' breakpoint at 480px to match concept.html mobile breakpoint
-  - Scroll-reveal animations standardized to opacity 0→1, translateY 24px→0 across all sections
-  - Responsive patterns from concept.html:
-    - 768px (md): 2-col grids, smaller nav padding, vitals 2-col grid
-    - 480px (xs): 1-col grids, smaller fonts, smaller gauges (64px), reduced padding
-  - Main container uses px-5 xs:px-6 md:px-8 for responsive horizontal padding
-  - Section padding uses py-12 xs:py-16 md:py-20 for consistent vertical rhythm
-  - Skills grid: 2 cols mobile, 3 cols tablet, auto-fit desktop
-  - Hero vitals: stacked mobile, 2-col tablet, flex row desktop
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - Tailwind custom screens allow precise breakpoint matching to design specs
-  - Using w-16 h-16 xs:w-20 xs:h-20 for SVG gauges maintains aspect ratio while scaling
-  - Grid-based responsive layouts more reliable than flex-wrap for consistent card sizing
-
-### Iteration 11 — Task 12: Final integration, testing, and polish
-- **Completed**: Task 12 - Final integration, testing, and polish
-- **Quality checks verified**:
-  - `npm run typecheck` ✓ - No TypeScript errors
-  - `npm run lint` ✓ - No ESLint errors
-  - `npm run build` ✓ - Production build completes (290KB JS, 18KB CSS gzipped to 94KB/4.5KB)
-- **CV content accuracy verified** against CV_v4.md:
-  - Hero: Name, title, location, summary all match
-  - Experience: 5 roles in correct order with accurate dates and bullet points
-  - Education: MPharm UEA, Mary Seacole Programme with correct details
-  - Skills: 18 skills across Technical/Clinical/Strategic categories
-  - Projects: 4 projects with descriptions and PharMetrics link
-  - Contact: Phone, email, LinkedIn, location all accurate
-- **All 12 tasks completed** - React conversion finished
-- **Learnings**:
-  - Production build size is reasonable at ~94KB gzipped for JS
-  - All components properly typed with TypeScript strict mode
-  - IntersectionObserver hooks cleanup correctly on unmount
+  - CV has 5 roles but only 4 explicitly listed dates - inferred Duty Pharmacy Manager from GPhC registration date (Aug 2016)
+  - Key numbers verified: £14.6M efficiency, 14,000 patients, £2.6M savings, 70% reduction, 200 hours, £1M revenue, £220M budget
+  - Skills categorized into Active (technical), Clinical (healthcare domain), PRN (strategic/leadership)
