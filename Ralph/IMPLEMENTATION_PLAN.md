@@ -123,7 +123,7 @@ src/
 
   Create `src/components/PatientBanner.tsx` with two modes. Full banner (80px): patient name "CHARLWOOD, Andrew (Mr)", DOB "14/02/1993", NHS No "221 181 0" (GPhC number formatted), address "Norwich, NR1", phone, email, status "Active" (green dot), badge "Open to opportunities". Action buttons: Download CV, Email, LinkedIn. Condensed banner (48px, sticky after 100px scroll): name, NHS No, status dot, action buttons only. Use `useScrollCondensation` hook with IntersectionObserver. Smooth height transition (200ms). Banner spans full viewport width.
 
-- [ ] **Task 5: Build ClinicalSidebar component with navigation and search**
+- [x] **Task 5: Build ClinicalSidebar component with navigation and search**
 
   Create `src/components/ClinicalSidebar.tsx`. 220px width (desktop), dark blue-gray (#1E293B) background. Header: "CareerRecord PMR v1.0.0". 7 navigation items with Lucide icons: Summary (ClipboardList), Consultations (FileText), Medications (Pill), Problems (AlertTriangle), Investigations (FlaskConical), Documents (FolderOpen), Referrals (Send). Active state: 3px NHS blue left border, white background tint. Separator line after Summary. Footer: "Session: A.CHARLWOOD" and current time. Search input in header with fuse.js integration. Clicking item updates active view instantly (no animation). URL hash updates (#summary, #consultations, etc.).
 

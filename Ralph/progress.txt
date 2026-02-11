@@ -153,3 +153,38 @@ This is a complete redesign of the CV presentation, moving from the ECG animatio
   - IntersectionObserver with rootMargin provides cleaner scroll detection than scroll event listeners
   - Sentinel element at top of viewport triggers condensation when it leaves view
   - Sticky positioning requires no JavaScript for the sticky behavior itself
+
+### Iteration 5 — Task 5: Build ClinicalSidebar component with navigation and search
+- **Completed**: Task 5 - Created ClinicalSidebar with navigation and search functionality
+- **Files created**:
+  - `src/components/ClinicalSidebar.tsx` - Sidebar navigation with 7 items
+  - `src/components/PMRInterface.tsx` - Main PMR layout container
+- **Files modified**:
+  - `src/App.tsx` - Changed from 'content' to 'pmr' phase, uses PMRInterface
+  - `src/types/index.ts` - Updated Phase type: 'content' → 'pmr'
+- **Design decisions**:
+  - 220px fixed width sidebar with dark blue-gray background (#1E293B)
+  - Header: "CareerRecord PMR v1.0.0" in 50% opacity white
+  - 7 navigation items with Lucide icons (ClipboardList, FileText, Pill, AlertTriangle, FlaskConical, FolderOpen, Send)
+  - Separator line between Summary and Consultations
+  - Active state: 3px NHS blue left border, white text, background rgba(255,255,255,0.12)
+  - Hover state: white text at 100%, background rgba(255,255,255,0.08)
+  - Search input in header with basic filtering (fuse.js not installed yet)
+  - Footer with "Session: A.CHARLWOOD" and current time (updates every minute)
+  - URL hash routing (#summary, #consultations, etc.)
+  - Keyboard shortcuts: Alt+1-7 for navigation, / to focus search, Escape to clear search
+- **Navigation behavior**:
+  - Instant view switching (no animation) — matches clinical system authenticity
+  - Click updates URL hash and activeView state simultaneously
+  - On page load, hash is read to set initial view
+- **Accessibility**:
+  - `role="navigation"` and `aria-label` on sidebar
+  - `aria-current="page"` on active nav item
+  - Keyboard navigation with Alt+1-7 shortcuts
+  - Search has escape key to clear and blur
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - Lucide React already installed, provides all required icons
+  - fuse.js not installed — basic search filtering implemented, can enhance later
+  - Sticky positioning with `h-screen sticky top-0` keeps sidebar fixed while content scrolls
+  - PMRInterface wraps PatientBanner + sidebar + main content layout
