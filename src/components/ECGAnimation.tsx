@@ -124,12 +124,15 @@ export function ECGAnimation({ onComplete }: ECGAnimationProps) {
     const SPACE_W = 30 * scale
     const TRACE_SPEED = 450 * scale
     const FLAT_GAP = 0.4
-    const HOLD_TIME = 0.75
-    const EXIT_TIME = 0.8
+    const FLATLINE_HOLD = 0.3
+    const FLATLINE_DRAW = 0.3
+    const FADE_TO_BLACK = 0.2
+    const BG_TRANSITION = 0.2
     const baselineY = vh * 0.5
     const ecgMaxDefl = vh * 0.25
     const textMaxDefl = vh * 0.08
     const lineColor = '#00ff41'
+    const loginBgColor = '#1E293B'
 
     const beats: Beat[] = [
       { startTime: 0.5, widthPx: 60 * scale, amplitude: 0.3, startWX: 0 },
@@ -150,8 +153,11 @@ export function ECGAnimation({ onComplete }: ECGAnimationProps) {
     const headScreenRatio = 0.75
     const finalHeadSX = (vw - totalTextW) / 2 + totalTextW
     const textEndTime = textEndWX / TRACE_SPEED
-    const holdEndTime = textEndTime + HOLD_TIME
-    const exitEndTime = holdEndTime + EXIT_TIME
+    const holdEndTime = textEndTime + FLATLINE_HOLD
+    const flatlineEndTime = holdEndTime + FLATLINE_DRAW
+    const fadeEndTime = flatlineEndTime + FADE_TO_BLACK
+    const bgTransitionEndTime = fadeEndTime + BG_TRANSITION
+    const exitEndTime = bgTransitionEndTime
 
     const getYAtX = (wx: number): number => {
       for (let i = 0; i < beats.length; i++) {
@@ -186,10 +192,12 @@ export function ECGAnimation({ onComplete }: ECGAnimationProps) {
       ctx.clearRect(0, 0, vw, vh)
 
       let headWX = elapsed * TRACE_SPEED
-      const isExitPhase = elapsed >= holdEndTime
+      const isFlatlinePhase = elapsed >= holdEndTime && elapsed < flatlineEndTime
+      const isFadePhase = elapsed >= flatlineEndTime && elapsed < fadeEndTime
+      const isBgTransitionPhase = elapsed >= fadeEndTime
 
-      if (isExitPhase) {
-        headWX = textEndWX + (elapsed - holdEndTime) * TRACE_SPEED * 1.5
+      if (elapsed >= textEndTime) {
+        headWX = textEndWX
       }
 
       let headSX: number
@@ -199,7 +207,7 @@ export function ECGAnimation({ onComplete }: ECGAnimationProps) {
       if (headWX <= textStartWX) {
         viewOff = Math.max(0, headWX - headSXEcg)
         headSX = headWX - viewOff
-      } else if (headWX >= textEndWX || isExitPhase) {
+      } else if (headWX >= textEndWX || elapsed >= textEndTime) {
         viewOff = textEndWX - finalHeadSX
         headSX = headWX - viewOff
       } else {
@@ -208,19 +216,24 @@ export function ECGAnimation({ onComplete }: ECGAnimationProps) {
         viewOff = headWX - headSX
       }
 
-      const fadeAlpha = isExitPhase ? Math.max(0, 1 - (elapsed - holdEndTime) / EXIT_TIME) : 1
+      let fadeAlpha = 1
+      if (isFadePhase) {
+        fadeAlpha = Math.max(0, 1 - (elapsed - flatlineEndTime) / FADE_TO_BLACK)
+      } else if (isBgTransitionPhase) {
+        fadeAlpha = 0
+      }
 
-      if (!bgTransitionedRef.current && elapsed >= textEndTime - 0.3) {
+      if (!bgTransitionedRef.current && elapsed >= flatlineEndTime) {
         bgTransitionedRef.current = true
-        container.style.transition = 'background 1200ms ease-out'
-        container.style.background = '#FFFFFF'
+        container.style.transition = `background ${BG_TRANSITION * 1000}ms ease-out`
+        container.style.background = loginBgColor
       }
 
       ctx.save()
       ctx.globalAlpha = fadeAlpha
 
       const traceStart = Math.max(0, Math.floor(viewOff))
-      const traceEnd = Math.min(Math.ceil(isExitPhase ? textEndWX : headWX), Math.ceil(viewOff + vw))
+      const traceEnd = Math.min(Math.ceil(elapsed >= textEndTime ? textEndWX : headWX), Math.ceil(viewOff + vw))
 
       if (traceEnd > traceStart) {
         ctx.beginPath()
@@ -251,15 +264,16 @@ export function ECGAnimation({ onComplete }: ECGAnimationProps) {
         ctx.stroke()
       }
 
-      if (isExitPhase) {
-        const exitStartSX = textEndWX - viewOff
-        const exitEndSX = headWX - viewOff
+      if (isFlatlinePhase) {
+        const flatlineProgress = (elapsed - holdEndTime) / FLATLINE_DRAW
+        const flatlineEndSX = finalHeadSX + flatlineProgress * (vw - finalHeadSX + 50)
         ctx.beginPath()
         ctx.strokeStyle = lineColor
         ctx.lineWidth = 2
         ctx.shadowBlur = 8
-        ctx.moveTo(exitStartSX, baselineY)
-        ctx.lineTo(exitEndSX, baselineY)
+        ctx.shadowColor = lineColor
+        ctx.moveTo(finalHeadSX, baselineY)
+        ctx.lineTo(flatlineEndSX, baselineY)
         ctx.stroke()
       }
 
@@ -284,8 +298,8 @@ export function ECGAnimation({ onComplete }: ECGAnimationProps) {
 
       ctx.globalAlpha = fadeAlpha
       ctx.shadowBlur = 0
-      if (headSX >= -20 && headSX <= vw + 20) {
-        const headY = isExitPhase ? baselineY : getYAtX(headWX)
+      if (headSX >= -20 && headSX <= vw + 20 && elapsed < flatlineEndTime) {
+        const headY = isFlatlinePhase ? baselineY : getYAtX(headWX)
         const grad = ctx.createRadialGradient(headSX, headY, 0, headSX, headY, 20 * scale)
         grad.addColorStop(0, 'rgba(255,255,255,0.8)')
         grad.addColorStop(0.3, 'rgba(0,255,65,0.6)')
