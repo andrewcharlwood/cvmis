@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { ChevronDown, ChevronUp, ExternalLink, Circle } from 'lucide-react'
 import { investigations } from '@/data/investigations'
 import type { Investigation } from '@/types/pmr'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
 
 type InvestigationStatus = 'Complete' | 'Ongoing' | 'Live'
 
@@ -151,7 +152,7 @@ function InvestigationRow({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-nhsblue text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-pmr-nhsblue text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors"
                   >
                     View Results
                     <ExternalLink className="w-4 h-4" />
@@ -166,15 +167,120 @@ function InvestigationRow({
   )
 }
 
+function MobileInvestigationCard({
+  investigation,
+  isExpanded,
+  onToggle,
+}: {
+  investigation: Investigation
+  isExpanded: boolean
+  onToggle: () => void
+}) {
+  return (
+    <div className="bg-white border border-gray-200 rounded">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full p-4 text-left"
+        aria-expanded={isExpanded}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-inter font-medium text-sm text-gray-900">
+              {investigation.name}
+            </h3>
+            <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
+              <span className="font-geist">{investigation.requestedYear}</span>
+              <span>•</span>
+              <StatusBadge status={investigation.status} />
+            </div>
+            <p className="text-xs text-gray-700 mt-2 line-clamp-2">
+              {investigation.resultSummary}
+            </p>
+          </div>
+          <div className="flex-shrink-0 mt-1">
+            {isExpanded ? (
+              <ChevronUp size={16} className="text-gray-400" />
+            ) : (
+              <ChevronDown size={16} className="text-gray-400" />
+            )}
+          </div>
+        </div>
+      </button>
+      {isExpanded && (
+        <div className="px-4 pb-4 border-t border-gray-100">
+          <div className="pt-3 font-mono text-xs text-gray-700 leading-relaxed space-y-2">
+            <div className="flex">
+              <span className="text-gray-400 w-28 shrink-0">Date Requested:</span>
+              <span>{investigation.requestedYear}</span>
+            </div>
+            <div className="flex">
+              <span className="text-gray-400 w-28 shrink-0">Date Reported:</span>
+              <span>{investigation.reportedYear ?? 'Pending'}</span>
+            </div>
+            <div className="flex">
+              <span className="text-gray-400 w-28 shrink-0">Status:</span>
+              <span>
+                {investigation.status}
+                {investigation.status === 'Live' && investigation.externalUrl && (
+                  <> — Live at {investigation.externalUrl.replace('https://', '')}</>
+                )}
+              </span>
+            </div>
+            <div className="flex">
+              <span className="text-gray-400 w-28 shrink-0">Clinician:</span>
+              <span>{investigation.requestingClinician}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-gray-400 w-28 shrink-0">Methodology:</span>
+              <span className="mt-1">{investigation.methodology}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-gray-400 w-28 shrink-0">Results:</span>
+              <ul className="mt-1 space-y-0.5">
+                {investigation.results.map((result, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <span className="text-gray-300 mt-0.5">-</span>
+                    <span>{result}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex">
+              <span className="text-gray-400 w-28 shrink-0">Tech Stack:</span>
+              <span>{investigation.techStack.join(', ')}</span>
+            </div>
+          </div>
+          {investigation.externalUrl && (
+            <div className="mt-4">
+              <a
+                href={investigation.externalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-pmr-nhsblue text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
+              >
+                View Results
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function InvestigationsView() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const { isMobile } = useBreakpoint()
 
   const handleToggle = (id: string) => {
     setExpandedId(expandedId === id ? null : id)
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded">
+    <div className="bg-white border border-gray-200 rounded overflow-hidden">
       <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
         <h2 className="font-inter font-semibold text-sm uppercase tracking-wider text-gray-500">
           Investigation Results
@@ -183,54 +289,67 @@ export function InvestigationsView() {
           Projects presented as diagnostic investigations — tests that were ordered, performed, and returned results.
         </p>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-50">
-              <th
-                scope="col"
-                className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400"
-              >
-                Test Name
-              </th>
-              <th
-                scope="col"
-                className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-24"
-              >
-                Requested
-              </th>
-              <th
-                scope="col"
-                className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-28"
-              >
-                Status
-              </th>
-              <th
-                scope="col"
-                className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400"
-              >
-                Result
-              </th>
-              <th
-                scope="col"
-                className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-10"
-              >
-                <span className="sr-only">Expand</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {investigations.map((investigation) => (
-              <InvestigationRow
-                key={investigation.id}
-                investigation={investigation}
-                isExpanded={expandedId === investigation.id}
-                onToggle={() => handleToggle(investigation.id)}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {isMobile ? (
+        <div className="p-3 space-y-3 bg-pmr-content">
+          {investigations.map((investigation) => (
+            <MobileInvestigationCard
+              key={investigation.id}
+              investigation={investigation}
+              isExpanded={expandedId === investigation.id}
+              onToggle={() => handleToggle(investigation.id)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-50">
+                <th
+                  scope="col"
+                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400"
+                >
+                  Test Name
+                </th>
+                <th
+                  scope="col"
+                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-24"
+                >
+                  Requested
+                </th>
+                <th
+                  scope="col"
+                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-28"
+                >
+                  Status
+                </th>
+                <th
+                  scope="col"
+                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400"
+                >
+                  Result
+                </th>
+                <th
+                  scope="col"
+                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-10"
+                >
+                  <span className="sr-only">Expand</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {investigations.map((investigation) => (
+                <InvestigationRow
+                  key={investigation.id}
+                  investigation={investigation}
+                  isExpanded={expandedId === investigation.id}
+                  onToggle={() => handleToggle(investigation.id)}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       {investigations.length === 0 && (
         <div className="p-4 text-sm text-gray-500 text-center">No investigation results</div>
       )}

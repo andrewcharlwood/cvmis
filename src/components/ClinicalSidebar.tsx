@@ -22,6 +22,7 @@ interface NavItem {
 interface ClinicalSidebarProps {
   activeView: ViewId
   onViewChange: (view: ViewId) => void
+  isTablet?: boolean
 }
 
 const navItems: NavItem[] = [
@@ -42,11 +43,12 @@ function getCurrentTime(): string {
   })
 }
 
-export function ClinicalSidebar({ activeView, onViewChange }: ClinicalSidebarProps) {
+export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: ClinicalSidebarProps) {
   const [currentTime, setCurrentTime] = useState(getCurrentTime)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
+  const [hoveredItem, setHoveredItem] = useState<ViewId | null>(null)
   const navButtonRefs = useRef<(HTMLButtonElement | null)[]>([])
   const { focusAfterLoginRef } = useAccessibility()
 
@@ -160,6 +162,69 @@ export function ClinicalSidebar({ activeView, onViewChange }: ClinicalSidebarPro
       item.label.toLowerCase().includes(query)
     )
   }, [searchQuery])
+
+  if (isTablet) {
+    return (
+      <aside
+        role="navigation"
+        aria-label="Clinical record navigation"
+        className="hidden md:flex lg:hidden flex-col w-14 h-screen sticky top-0 bg-pmr-sidebar text-white"
+      >
+        <div className="p-2 border-b border-white/10">
+          <div className="font-inter font-medium text-[10px] text-white/50 text-center leading-tight">
+            PMR
+          </div>
+        </div>
+
+        <nav className="flex-1 py-2 overflow-y-auto">
+          <ul role="menu" aria-label="Record sections">
+            {navItems.map((item, index) => (
+              <li key={item.id} role="none" className="relative">
+                {index === 1 && (
+                  <div className="mx-2 my-1 border-t border-white/10" role="separator" aria-hidden="true" />
+                )}
+                <button
+                  ref={el => { navButtonRefs.current[index] = el }}
+                  type="button"
+                  role="menuitem"
+                  tabIndex={focusedIndex === null ? (index === 0 ? 0 : -1) : (focusedIndex === index ? 0 : -1)}
+                  aria-current={activeView === item.id ? 'page' : undefined}
+                  aria-label={item.label}
+                  onClick={() => handleNavClick(item.id)}
+                  onKeyDown={e => handleNavKeyDown(e, index)}
+                  onMouseEnter={() => setHoveredItem(item.id)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  className={`
+                    w-full flex items-center justify-center h-11
+                    transition-colors relative
+                    ${activeView === item.id
+                      ? 'text-white bg-white/12 border-l-[3px] border-pmr-nhsblue'
+                      : 'text-white/70 hover:text-white hover:bg-white/8'}
+                  `}
+                >
+                  <span className={activeView === item.id ? 'text-white' : 'text-white/60'}>
+                    {item.icon}
+                  </span>
+                  {hoveredItem === item.id && (
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50 font-inter">
+                      {item.label}
+                    </div>
+                  )}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="p-2 border-t border-white/10">
+          <div className="font-inter text-[9px] text-slate-400 text-center leading-relaxed">
+            <div>A.C</div>
+            <div>{currentTime}</div>
+          </div>
+        </div>
+      </aside>
+    )
+  }
 
   return (
     <aside

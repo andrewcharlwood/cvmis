@@ -1,9 +1,30 @@
-import { Download, Mail, Linkedin } from 'lucide-react'
+import { Download, Mail, Linkedin, MoreHorizontal } from 'lucide-react'
+import { useState } from 'react'
 import { patient } from '@/data/patient'
 import { useScrollCondensation } from '@/hooks/useScrollCondensation'
 
-export function PatientBanner() {
+interface PatientBannerProps {
+  isMobile?: boolean
+  isTablet?: boolean
+}
+
+export function PatientBanner({ isMobile = false, isTablet = false }: PatientBannerProps) {
   const { isCondensed, sentinelRef } = useScrollCondensation({ threshold: 100 })
+
+  if (isMobile) {
+    return (
+      <>
+        <div
+          ref={sentinelRef}
+          className="h-0 w-full absolute top-0"
+          aria-hidden="true"
+        />
+        <MobileBanner />
+      </>
+    )
+  }
+
+  const shouldCondense = isTablet || isCondensed
 
   return (
     <>
@@ -17,17 +38,89 @@ export function PatientBanner() {
           sticky top-0 z-40 w-full
           bg-pmr-banner border-b border-slate-600
           transition-all duration-200 ease-out
-          ${isCondensed ? 'h-12' : 'h-20'}
+          ${shouldCondense ? 'h-12' : 'h-20'}
         `}
         role="banner"
       >
-        {isCondensed ? (
+        {shouldCondense ? (
           <CondensedBanner />
         ) : (
           <FullBanner />
         )}
       </header>
     </>
+  )
+}
+
+function MobileBanner() {
+  const [showOverflow, setShowOverflow] = useState(false)
+
+  return (
+    <header
+      className="sticky top-0 z-40 w-full h-12 bg-pmr-banner border-b border-slate-600"
+      role="banner"
+    >
+      <div className="h-full px-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <h1 className="font-inter font-semibold text-white text-sm tracking-tight truncate">
+            CHARLWOOD, A (Mr)
+          </h1>
+          <span className="text-slate-500">|</span>
+          <span className="font-geist text-xs text-slate-300">
+            221 181 0
+          </span>
+          <StatusDot status="Active" />
+        </div>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setShowOverflow(!showOverflow)}
+            className="p-2 text-white/70 hover:text-white transition-colors"
+            aria-label="Actions menu"
+            aria-expanded={showOverflow}
+          >
+            <MoreHorizontal size={18} />
+          </button>
+          {showOverflow && (
+            <>
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setShowOverflow(false)}
+                aria-hidden="true"
+              />
+              <div className="absolute right-0 top-full mt-1 w-40 bg-white border border-gray-200 rounded shadow-lg z-50 py-1">
+                <a
+                  href="/cv.pdf"
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  onClick={() => setShowOverflow(false)}
+                >
+                  <Download size={14} />
+                  Download CV
+                </a>
+                <a
+                  href={`mailto:${patient.email}`}
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  onClick={() => setShowOverflow(false)}
+                >
+                  <Mail size={14} />
+                  Email
+                </a>
+                <a
+                  href={`https://${patient.linkedin}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  onClick={() => setShowOverflow(false)}
+                >
+                  <Linkedin size={14} />
+                  LinkedIn
+                </a>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </header>
   )
 }
 

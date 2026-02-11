@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { ChevronDown, ChevronUp, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { medications } from '@/data/medications'
 import type { Medication } from '@/types/pmr'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
 
 type SortField = 'name' | 'dose' | 'frequency' | 'startYear' | 'status'
 type SortDirection = 'asc' | 'desc' | null
@@ -12,15 +13,16 @@ interface SortState {
 }
 
 const categoryTabs = [
-  { id: 'Active', label: 'Active Medications', description: 'Technical skills (daily use)' },
-  { id: 'Clinical', label: 'Clinical Medications', description: 'Healthcare domain skills' },
-  { id: 'PRN', label: 'PRN (As Required)', description: 'Strategic & leadership skills' },
+  { id: 'Active', label: 'Active Medications', shortLabel: 'Active', description: 'Technical skills (daily use)' },
+  { id: 'Clinical', label: 'Clinical Medications', shortLabel: 'Clinical', description: 'Healthcare domain skills' },
+  { id: 'PRN', label: 'PRN (As Required)', shortLabel: 'PRN', description: 'Strategic & leadership skills' },
 ] as const
 
 export function MedicationsView() {
   const [activeTab, setActiveTab] = useState<'Active' | 'Clinical' | 'PRN'>('Active')
   const [expandedRow, setExpandedRow] = useState<string | null>(null)
   const [sort, setSort] = useState<SortState>({ field: 'name', direction: null })
+  const { isMobile } = useBreakpoint()
 
   const prefersReducedMotion = typeof window !== 'undefined'
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -117,104 +119,189 @@ export function MedicationsView() {
                 `}
               >
                 <span className={`font-inter font-medium text-sm ${activeTab === tab.id ? 'text-gray-900' : 'text-gray-600'}`}>
-                  {tab.label}
+                  {isMobile ? tab.shortLabel : tab.label}
                 </span>
-                <span className="block font-inter text-xs text-gray-500 mt-0.5">
-                  {tab.description}
-                </span>
+                {!isMobile && (
+                  <span className="block font-inter text-xs text-gray-500 mt-0.5">
+                    {tab.description}
+                  </span>
+                )}
               </button>
             ))}
           </nav>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full" role="grid">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th scope="col" className="w-8"></th>
-                <th scope="col" className="text-left">
-                  <button
-                    type="button"
-                    onClick={() => handleSort('name')}
-                    className="w-full px-4 py-3 flex items-center gap-2 hover:bg-gray-100 transition-colors"
-                  >
-                    <span className="font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
-                      Drug Name
-                    </span>
-                    {getSortIcon('name')}
-                  </button>
-                </th>
-                <th scope="col" className="text-left">
-                  <button
-                    type="button"
-                    onClick={() => handleSort('dose')}
-                    className="w-full px-4 py-3 flex items-center gap-2 hover:bg-gray-100 transition-colors"
-                  >
-                    <span className="font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
-                      Dose
-                    </span>
-                    {getSortIcon('dose')}
-                  </button>
-                </th>
-                <th scope="col" className="text-left">
-                  <button
-                    type="button"
-                    onClick={() => handleSort('frequency')}
-                    className="w-full px-4 py-3 flex items-center gap-2 hover:bg-gray-100 transition-colors"
-                  >
-                    <span className="font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
-                      Frequency
-                    </span>
-                    {getSortIcon('frequency')}
-                  </button>
-                </th>
-                <th scope="col" className="text-left">
-                  <button
-                    type="button"
-                    onClick={() => handleSort('startYear')}
-                    className="w-full px-4 py-3 flex items-center gap-2 hover:bg-gray-100 transition-colors"
-                  >
-                    <span className="font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
-                      Start
-                    </span>
-                    {getSortIcon('startYear')}
-                  </button>
-                </th>
-                <th scope="col" className="text-left">
-                  <button
-                    type="button"
-                    onClick={() => handleSort('status')}
-                    className="w-full px-4 py-3 flex items-center gap-2 hover:bg-gray-100 transition-colors"
-                  >
-                    <span className="font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
-                      Status
-                    </span>
-                    {getSortIcon('status')}
-                  </button>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedMedications.map((med, index) => (
-                <MedicationRow
-                  key={med.id}
-                  medication={med}
-                  isExpanded={expandedRow === med.id}
-                  isAlternating={index % 2 === 1}
-                  onToggle={() => toggleRow(med.id)}
-                  prefersReducedMotion={prefersReducedMotion}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {isMobile ? (
+          <MobileMedicationList
+            medications={sortedMedications}
+            expandedRow={expandedRow}
+            onToggle={toggleRow}
+            prefersReducedMotion={prefersReducedMotion}
+          />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full" role="grid">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th scope="col" className="w-8"></th>
+                  <th scope="col" className="text-left">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('name')}
+                      className="w-full px-4 py-3 flex items-center gap-2 hover:bg-gray-100 transition-colors"
+                    >
+                      <span className="font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
+                        Drug Name
+                      </span>
+                      {getSortIcon('name')}
+                    </button>
+                  </th>
+                  <th scope="col" className="text-left">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('dose')}
+                      className="w-full px-4 py-3 flex items-center gap-2 hover:bg-gray-100 transition-colors"
+                    >
+                      <span className="font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
+                        Dose
+                      </span>
+                      {getSortIcon('dose')}
+                    </button>
+                  </th>
+                  <th scope="col" className="text-left">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('frequency')}
+                      className="w-full px-4 py-3 flex items-center gap-2 hover:bg-gray-100 transition-colors"
+                    >
+                      <span className="font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
+                        Frequency
+                      </span>
+                      {getSortIcon('frequency')}
+                    </button>
+                  </th>
+                  <th scope="col" className="text-left">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('startYear')}
+                      className="w-full px-4 py-3 flex items-center gap-2 hover:bg-gray-100 transition-colors"
+                    >
+                      <span className="font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
+                        Start
+                      </span>
+                      {getSortIcon('startYear')}
+                    </button>
+                  </th>
+                  <th scope="col" className="text-left">
+                    <button
+                      type="button"
+                      onClick={() => handleSort('status')}
+                      className="w-full px-4 py-3 flex items-center gap-2 hover:bg-gray-100 transition-colors"
+                    >
+                      <span className="font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
+                        Status
+                      </span>
+                      {getSortIcon('status')}
+                    </button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedMedications.map((med, index) => (
+                  <MedicationRow
+                    key={med.id}
+                    medication={med}
+                    isExpanded={expandedRow === med.id}
+                    isAlternating={index % 2 === 1}
+                    onToggle={() => toggleRow(med.id)}
+                    prefersReducedMotion={prefersReducedMotion}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
           <p className="font-inter text-xs text-gray-500">
-            {sortedMedications.length} medications in this category. Click a row to view prescribing history.
+            {sortedMedications.length} medications in this category. {isMobile ? 'Tap' : 'Click'} a row to view prescribing history.
           </p>
         </div>
       </div>
+    </div>
+  )
+}
+
+interface MobileMedicationListProps {
+  medications: Medication[]
+  expandedRow: string | null
+  onToggle: (id: string) => void
+  prefersReducedMotion: boolean
+}
+
+function MobileMedicationList({ medications, expandedRow, onToggle, prefersReducedMotion }: MobileMedicationListProps) {
+  const statusColors = {
+    'Active': 'bg-green-500',
+    'Historical': 'bg-gray-400',
+  }
+
+  return (
+    <div className="divide-y divide-gray-200">
+      {medications.map((med) => (
+        <div key={med.id} className="bg-white">
+          <button
+            type="button"
+            onClick={() => onToggle(med.id)}
+            className="w-full p-4 text-left"
+            aria-expanded={expandedRow === med.id}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-inter font-medium text-sm text-gray-900">
+                  {med.name}
+                </h3>
+                <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
+                  <span className="font-geist">{med.dose}%</span>
+                  <span>•</span>
+                  <span>{med.frequency}</span>
+                  <span>•</span>
+                  <span className="font-geist">Since {med.startYear}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className={`w-2 h-2 rounded-full ${statusColors[med.status]}`} />
+                <span className="text-xs text-gray-600">{med.status}</span>
+                {expandedRow === med.id ? (
+                  <ChevronUp size={16} className="text-gray-400" />
+                ) : (
+                  <ChevronDown size={16} className="text-gray-400" />
+                )}
+              </div>
+            </div>
+          </button>
+          {expandedRow === med.id && (
+            <div className={`px-4 pb-4 ${prefersReducedMotion ? '' : 'animate-fadeIn'}`}>
+              <div className="bg-gray-50 rounded p-3">
+                <p className="font-inter font-medium text-xs uppercase tracking-wide text-gray-400 mb-2">
+                  Prescribing History
+                </p>
+                <div className="space-y-1.5">
+                  {med.prescribingHistory.map((entry, index) => (
+                    <div key={index} className="flex gap-3">
+                      <span className="font-geist font-medium text-xs text-gray-500 w-10 flex-shrink-0">
+                        {entry.year}
+                      </span>
+                      <span className="font-geist text-xs text-gray-600">
+                        {entry.description}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   )
 }
