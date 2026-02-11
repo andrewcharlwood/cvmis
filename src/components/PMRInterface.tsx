@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
+import { motion, Variants } from 'framer-motion'
 import { Search, X, ArrowLeft } from 'lucide-react'
 import type { ViewId } from '../types/pmr'
 import { ClinicalSidebar } from './ClinicalSidebar'
@@ -38,6 +39,45 @@ function PMRContent({ children }: PMRInterfaceProps) {
   const viewHeadingRef = useRef<HTMLDivElement>(null)
   const { requestFocusAfterViewChange, expandedItemId, setExpandedItem } = useAccessibility()
   const { isMobile, isTablet } = useBreakpoint()
+
+  const prefersReducedMotion = typeof window !== 'undefined' 
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+    : false
+
+  const bannerVariants = useMemo<Variants>(() => ({
+    hidden: prefersReducedMotion ? {} : { y: -80, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: prefersReducedMotion ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }
+    }
+  }), [prefersReducedMotion])
+
+  const sidebarVariants = useMemo<Variants>(() => ({
+    hidden: prefersReducedMotion ? {} : { x: -220, opacity: 0 },
+    visible: { 
+      x: 0, 
+      opacity: 1,
+      transition: prefersReducedMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut', delay: 0.05 }
+    }
+  }), [prefersReducedMotion])
+
+  const contentVariants = useMemo<Variants>(() => ({
+    hidden: prefersReducedMotion ? {} : { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: prefersReducedMotion ? { duration: 0 } : { duration: 0.3, delay: 0.15 }
+    }
+  }), [prefersReducedMotion])
+
+  const mobileNavVariants = useMemo<Variants>(() => ({
+    hidden: prefersReducedMotion ? {} : { y: 56, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: prefersReducedMotion ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }
+    }
+  }), [prefersReducedMotion])
 
   useEffect(() => {
     requestFocusAfterViewChange()
@@ -107,17 +147,26 @@ function PMRContent({ children }: PMRInterfaceProps) {
   }
 
   return (
-    <div className="min-h-screen bg-pmr-content">
-      <PatientBanner isMobile={isMobile} isTablet={isTablet} />
+    <motion.div 
+      className="min-h-screen bg-pmr-content"
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div variants={bannerVariants}>
+        <PatientBanner isMobile={isMobile} isTablet={isTablet} />
+      </motion.div>
       <div className="flex">
         {!isMobile && (
-          <ClinicalSidebar 
-            activeView={activeView} 
-            onViewChange={handleViewChange}
-            isTablet={isTablet}
-          />
+          <motion.div variants={sidebarVariants}>
+            <ClinicalSidebar 
+              activeView={activeView} 
+              onViewChange={handleViewChange}
+              isTablet={isTablet}
+            />
+          </motion.div>
         )}
-        <main
+        <motion.main
+          variants={contentVariants}
           role="main"
           aria-label={`${activeView} view`}
           className={`
@@ -154,16 +203,18 @@ function PMRContent({ children }: PMRInterfaceProps) {
           )}
           
           {children || renderView()}
-        </main>
+        </motion.main>
       </div>
       
       {isMobile && (
-        <MobileBottomNav 
-          activeView={activeView} 
-          onViewChange={handleViewChange}
-        />
+        <motion.div variants={mobileNavVariants}>
+          <MobileBottomNav 
+            activeView={activeView} 
+            onViewChange={handleViewChange}
+          />
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   )
 }
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { motion } from 'framer-motion'
 import { Shield } from 'lucide-react'
 import { useAccessibility } from '../contexts/AccessibilityContext'
 
@@ -13,6 +14,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   const [isTypingUsername, setIsTypingUsername] = useState(true)
   const [isTypingPassword, setIsTypingPassword] = useState(false)
   const [buttonPressed, setButtonPressed] = useState(false)
+  const [isExiting, setIsExiting] = useState(false)
   const { requestFocusAfterLogin } = useAccessibility()
   
   const fullUsername = 'A.CHARLWOOD'
@@ -22,6 +24,14 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
     : false
 
+  const triggerComplete = useCallback(() => {
+    setIsExiting(true)
+    setTimeout(() => {
+      requestFocusAfterLogin()
+      onComplete()
+    }, prefersReducedMotion ? 0 : 200)
+  }, [onComplete, requestFocusAfterLogin, prefersReducedMotion])
+
   const startLoginSequence = useCallback(() => {
     if (prefersReducedMotion) {
       setUsername(fullUsername)
@@ -29,9 +39,8 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       setTimeout(() => {
         setButtonPressed(true)
         setTimeout(() => {
-          requestFocusAfterLogin()
-          onComplete()
-        }, 200)
+          triggerComplete()
+        }, 100)
       }, 300)
       return
     }
@@ -61,16 +70,15 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               setTimeout(() => {
                 setButtonPressed(true)
                 setTimeout(() => {
-                  requestFocusAfterLogin()
-                  onComplete()
-                }, 200)
+                  triggerComplete()
+                }, 100)
               }, 150)
             }
           }, 20)
         }, 150)
       }
     }, 30)
-  }, [onComplete, prefersReducedMotion, requestFocusAfterLogin])
+  }, [triggerComplete, prefersReducedMotion])
 
   useEffect(() => {
     const cursorInterval = setInterval(() => {
@@ -87,13 +95,15 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       className="fixed inset-0 flex items-center justify-center z-50"
       style={{ backgroundColor: '#1E293B' }}
     >
-      <div 
+      <motion.div 
         className="bg-white rounded-xl shadow-lg p-8"
         style={{ 
           width: '320px',
           borderRadius: '12px',
           boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
         }}
+        animate={isExiting ? { scale: 1.03, opacity: 0 } : { scale: 1, opacity: 1 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
       >
         <div className="flex flex-col items-center mb-6">
           <div 
@@ -196,7 +206,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
             Secure clinical system login
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
