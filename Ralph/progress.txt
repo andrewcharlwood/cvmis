@@ -188,3 +188,33 @@ This is a complete redesign of the CV presentation, moving from the ECG animatio
   - fuse.js not installed — basic search filtering implemented, can enhance later
   - Sticky positioning with `h-screen sticky top-0` keeps sidebar fixed while content scrolls
   - PMRInterface wraps PatientBanner + sidebar + main content layout
+
+### Iteration 6 — Task 6: Build SummaryView component with clinical alert
+- **Completed**: Task 6 - Created SummaryView with Clinical Alert and summary cards
+- **Files created**:
+  - `src/components/views/SummaryView.tsx` - Full Summary view with Clinical Alert and 4 cards
+- **Files modified**:
+  - `src/components/PMRInterface.tsx` - Updated to render SummaryView when activeView is 'summary'
+- **Design decisions**:
+  - Clinical Alert: amber background (#FEF3C7), 4px amber left border, AlertTriangle icon
+  - Alert animates in with max-height transition (300ms delay after view loads)
+  - Acknowledge button: on click, icon cross-fades to green Check (200ms), then alert collapses (200ms)
+  - Patient Demographics card: full width, two-column key-value layout with right-aligned labels
+  - Active Problems card: shows 3 active/in-progress problems with traffic light dots and dates
+  - Current Medications Quick View: 4-column table (Drug, Dose, Freq, Status), top 5 Active meds
+  - Last Consultation card: shows most recent role with truncated history text
+  - Traffic lights: 8px circles, green for Active/Resolved, amber for In Progress
+  - All tables use proper semantic `<table>` markup with `scope="col"`
+  - "View Full List" / "View Full Record" links navigate to corresponding views
+- **Accessibility**:
+  - `role="alert"` and `aria-live="assertive"` on Clinical Alert
+  - `aria-label` on main content area with current view name
+  - Proper table semantics for medications table
+  - Traffic lights always accompanied by text labels (never sole indicator)
+  - Respects `prefers-reduced-motion`: alert appears instantly, no animations
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - Alert animation uses max-height transition for smooth expand/collapse
+  - Clinical Alert text uses amber-800 (#92400E) for contrast against amber-100 background
+  - Grid layout: demographics full width, problems/medications side-by-side, last consultation full width
+  - `line-clamp-2` and `line-clamp-3` utilities work well for truncating text in cards

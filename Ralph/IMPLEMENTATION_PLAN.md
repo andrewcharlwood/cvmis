@@ -127,7 +127,7 @@ src/
 
   Create `src/components/ClinicalSidebar.tsx`. 220px width (desktop), dark blue-gray (#1E293B) background. Header: "CareerRecord PMR v1.0.0". 7 navigation items with Lucide icons: Summary (ClipboardList), Consultations (FileText), Medications (Pill), Problems (AlertTriangle), Investigations (FlaskConical), Documents (FolderOpen), Referrals (Send). Active state: 3px NHS blue left border, white background tint. Separator line after Summary. Footer: "Session: A.CHARLWOOD" and current time. Search input in header with fuse.js integration. Clicking item updates active view instantly (no animation). URL hash updates (#summary, #consultations, etc.).
 
-- [ ] **Task 6: Build SummaryView component with clinical alert**
+- [x] **Task 6: Build SummaryView component with clinical alert**
 
   Create `src/components/views/SummaryView.tsx`. Grid layout with cards: Patient Demographics (full width, two-column key-value table), Active Problems (left column, green/amber dots with dates), Current Medications Quick View (right column, 4-column table showing top 5 skills), Last Consultation preview (full width, truncated to 2-3 lines with "View Full Record" link). Clinical Alert banner: amber background (#FEF3C7), amber left border, warning icon, text "ALERT: This patient has identified £14.6M in prescribing efficiency savings...", Acknowledge button. Alert slides down with spring animation (250ms) after view loads. Clicking Acknowledge: icon changes to green checkmark (200ms), then alert collapses upward (200ms).
 
