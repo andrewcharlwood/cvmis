@@ -423,3 +423,37 @@ This is a complete redesign of the CV presentation, moving from the ECG animatio
   - useRef array for button refs enables dynamic nav item count
   - Global Escape handler in context prevents need for per-view handlers
   - Focus after login requires ref forwarding from sidebar to context
+
+### Iteration 14 — Task 14: Implement responsive design (tablet and mobile)
+- **Completed**: Task 14 - Implemented full responsive design for tablet and mobile breakpoints
+- **Files created**:
+  - `src/hooks/useBreakpoint.ts` - Custom hook for responsive breakpoint detection (mobile <768px, tablet 768-1024px, desktop >1024px)
+  - `src/components/MobileBottomNav.tsx` - Bottom navigation bar component for mobile with 7 icon buttons and safe area padding
+- **Files modified**:
+  - `src/components/ClinicalSidebar.tsx` - Added tablet mode (56px icon-only sidebar with tooltips) via isTablet prop
+  - `src/components/PatientBanner.tsx` - Added mobile minimal banner and tablet always-condensed mode via isMobile/isTablet props
+  - `src/components/PMRInterface.tsx` - Integrated responsive layout with mobile bottom nav, search bar, and back navigation
+  - `src/components/views/MedicationsView.tsx` - Added mobile card layout with stacked medication cards
+  - `src/components/views/ProblemsView.tsx` - Added mobile card layout for problem entries
+  - `src/components/views/InvestigationsView.tsx` - Added mobile card layout for investigation entries
+  - `src/components/views/DocumentsView.tsx` - Added mobile card layout for document entries
+- **Design decisions**:
+  - Desktop (>1024px): Full 220px sidebar with labels, full/condensed patient banner, standard tables
+  - Tablet (768-1024px): 56px icon-only sidebar with hover tooltips, always-condensed patient banner, tables with horizontal scroll
+  - Mobile (<768px): Bottom navigation bar (56px), minimal patient banner with overflow menu, card layouts instead of tables, search bar at top of each view, back navigation arrow
+  - Mobile card layouts: Each table row becomes a stacked card with expandable content
+  - Touch targets: Minimum 48px height for mobile buttons
+  - Safe area padding: `env(safe-area-inset-bottom)` for bottom nav on devices with home indicator
+- **Responsive patterns**:
+  - `useBreakpoint` hook returns `{ isMobile, isTablet, isDesktop, breakpoint }`
+  - Views conditionally render table or card layout based on `isMobile`
+  - Bottom nav uses fixed positioning with z-index 50
+  - Mobile search bar replaces sidebar search input
+  - Back navigation returns to Summary view from any other view
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓ (1 pre-existing warning), `npm run build` ✓
+- **Learnings**:
+  - Card layouts work better than horizontal-scrolling tables on mobile
+  - Bottom navigation provides familiar mobile app experience (matches NHS App pattern)
+  - isTablet/isMobile props passed from PMRInterface down to components
+  - useBreakpoint hook avoids resize event listener thrashing with proper cleanup
+  - Mobile overflow menu for banner actions reduces clutter on small screens

@@ -159,7 +159,7 @@ src/
 
   Add keyboard navigation throughout. Global shortcuts: Alt+1-7 activate sidebar items, Escape closes expanded items/menus, / focuses search. Sidebar: Up/Down arrows navigate items, Enter activates. Implement focus management: after login, focus moves to first sidebar item; after view change, focus moves to view heading; after expanding item, focus moves to content. Add ARIA: `role="navigation"` on sidebar, `aria-current="page"` on active item, `role="alert"` on clinical alert, proper table markup with `scope="col"`, `aria-expanded` on expandable items. Test with screen reader: views announced, tables navigable, alert read immediately.
 
-- [ ] **Task 14: Implement responsive design (tablet and mobile)**
+- [x] **Task 14: Implement responsive design (tablet and mobile)**
 
   Tablet (768-1024px): Sidebar collapses to 56px icon-only with tooltips on hover. Patient banner always condensed (48px). Tables may horizontally scroll with indicator. Mobile (<768px): Sidebar becomes bottom navigation bar (56px height, 7 icon buttons, safe area padding). Patient banner becomes minimal top bar. Tables switch to card layout (each row becomes stacked card). Search moves to top of each view. Add back navigation arrow in each view. Test all breakpoints: desktop (>1024), tablet (768-1024), mobile (<768). Ensure touch targets minimum 48px. Test on actual mobile device or emulator.
 
