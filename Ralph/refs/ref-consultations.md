@@ -107,3 +107,103 @@ This visual grouping helps the user quickly scan which organization each entry b
 - **Expand/collapse:** Height animation, 200ms, ease-out. No opacity fade — the content simply grows/shrinks.
 - Only one consultation can be expanded at a time. Expanding a new entry collapses the previous one.
 - The expand chevron rotates 180 degrees (pointing up when expanded).
+
+---
+
+## Design Guidance (from /frontend-design)
+
+### Aesthetic Direction
+
+**Utilitarian clinical information system.** Zero decorative flourish. Border-heavy, table-heavy, functional. Light-mode only. The design language of EMIS Web and SystmOne—systems that every NHS pharmacist interacts with daily.
+
+This is a **faithful digital clinical information system**—structured, database-driven, tabular, with the distinctive UI patterns of actual NHS clinical software: patient banner, tabbed clinical views, consultation history as a reverse-chronological journal, coded entries with SNOMED-style references, traffic-light status indicators, and action buttons styled as clinical system controls.
+
+**What makes this unforgettable:** The History / Examination / Plan structure maps perfectly to Context / Analysis / Outcome. A clinician seeing this will immediately recognize the consultation journal format. A recruiter gets highly structured, scannable career data. The accordion behavior, coded entries, and status indicators all draw from real clinical software patterns.
+
+### Key Design Decisions
+
+1. **SOAP Notes Format (H/E/P Structure)**
+   - Maps clinical consultation format to career content:
+     - **History** → Context / Background (why the role existed, reporting lines)
+     - **Examination** → Analysis / Findings (what was discovered, built, analyzed)
+     - **Plan** → Outcomes / Delivery (what was achieved, impact measured)
+   - Section headers styled as clinical system dividers: Inter 600, 12px, uppercase, letter-spacing 0.05em, gray-400
+
+2. **Height-Only Expand Animation (200ms)**
+   - No opacity fade on content—content simply grows/shrinks
+   - Duration: 200ms with ease-out timing
+   - Only one entry expanded at a time
+   - Chevron rotates 180 degrees when expanded
+
+3. **Color-Coded Left Border (3px)**
+   - NHS Norfolk & Waveney ICB: NHS blue (`#005EB8`)
+   - Tesco PLC: Teal (`#00897B`)
+
+4. **Typography System**
+   - Inter for text content
+   - Geist Mono for dates, codes, timestamps
+   - Border radius: 4px throughout
+   - Borders: 1px solid #E5E7EB
+
+### Implementation Patterns
+
+**ConsultationEntry Type:**
+```typescript
+interface ConsultationEntry {
+  id: string
+  date: string              // e.g., "14 May 2025"
+  organization: string      // e.g., "NHS Norfolk & Waveney ICB"
+  role: string              // e.g., "Interim Head, Population Health & Data Analysis"
+  duration: string          // e.g., "May 2025 - Nov 2025"
+  isCurrent: boolean        // Green dot if true, gray if false
+  borderColor: '#005EB8' | '#00897B'
+  keyAchievement: { code: string; description: string }
+  history: string[]         // Paragraphs for HISTORY section
+  examination: string[]     // Bullet points for EXAMINATION section
+  plan: string[]            // Bullet points for PLAN section
+  codedEntries: { code: string; description: string }[]
+}
+```
+
+**Animation Pattern:**
+```typescript
+// Height-only animation via Framer Motion
+<motion.div
+  initial={false}
+  animate={{ height: isExpanded ? 'auto' : 0 }}
+  transition={{ duration: 0.2, ease: 'easeOut' }}
+  className="overflow-hidden"
+>
+  {/* Expanded content */}
+</motion.div>
+
+// Chevron rotation
+<motion.div
+  animate={{ rotate: isExpanded ? 180 : 0 }}
+  transition={{ duration: 0.2 }}
+>
+  <ChevronDown />
+</motion.div>
+```
+
+**Section Header Pattern:**
+```tsx
+<h4 className="font-sans text-xs font-semibold uppercase tracking-wider text-gray-400">
+  History
+</h4>
+```
+
+**Coded Entry Pattern:**
+```tsx
+<span className="font-mono text-xs text-gray-500">
+  [EFF001] Efficiency programme: £14.6M identified
+</span>
+```
+
+**Status Dot Pattern:**
+```tsx
+<div className={cn(
+  "w-2 h-2 rounded-full",
+  isCurrent ? "bg-green-500" : "bg-gray-400"
+)} />
+```

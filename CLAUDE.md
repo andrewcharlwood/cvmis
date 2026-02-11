@@ -58,7 +58,6 @@ All data types live in `src/types/index.ts`. Strict TypeScript — no `any` type
 - ECG animation timing/amplitudes/color transitions must match the concept reference.
 - CV content sourced from `References/CV_v4.md` — roles, dates, and achievement numbers must be accurate.
 - Icons via `lucide-react`, not unicode symbols.
-- When writing components with visual styling or animations, invoke the `/frontend-design` skill first.
 
 ## Project Structure
 

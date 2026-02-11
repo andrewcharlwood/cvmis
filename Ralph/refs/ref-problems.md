@@ -58,3 +58,141 @@ Each problem row can be expanded to show a full narrative: what the problem was,
 ## Traffic Light Status Indicators
 
 Traffic lights are 8px circles with the status colors (green, amber, red, gray). They appear inline before the code column. This is exactly how clinical systems indicate problem severity/status — it's an immediately scannable visual language.
+
+---
+
+## Design Guidance (from /frontend-design)
+
+### Aesthetic Direction
+
+**Clinical Utilitarian** — This is not a place for flashy gradients or playful animation. The metaphor demands the disciplined, functional aesthetic of an actual NHS clinical system. Think EMIS/SystmOne: white backgrounds, precise table layouts, 1px borders, quiet colour discipline. The visual power comes from the *content structure*, not decoration. The traffic light dots and expandable narratives do all the heavy lifting. Every pixel serves a clinical purpose.
+
+The distinctiveness comes from the *concept itself* — framing career achievements as a Problem List is the creative act. The execution must be restrained to sell the metaphor.
+
+### Key Design Decisions
+
+1. **Traffic Light Status Indicators (WCAG Critical)**
+   - 8px circles: green (`#22C55E`) for resolved, amber (`#F59E0B`) for in-progress
+   - **MUST ALWAYS be paired with text labels** — never dots alone (WCAG 1.4.1 requirement)
+   - Each status shows both the colored dot AND the text label (e.g., "● Resolved", "● In Progress")
+   - Implementation uses flexbox with gap-2 for dot-label pairing
+
+2. **Typography System**
+   - **Inter** for all body text, headers, and UI labels — clean, clinical, readable
+   - **Geist Mono** for codes and dates — SNOMED-style codes like `[EFF001]`, `[MGT001]` must be monospace
+   - Font sizes: 13px for table headers (uppercase, tracking-wider), 14px for body text
+   - Header styling: `font-inter font-semibold text-xs uppercase tracking-wider text-gray-400`
+
+3. **Color Palette (Locked)**
+   - Light-mode ONLY (clinical systems are light-mode by design)
+   - NHS Blue: `#005EB8` (Tailwind `text-pmr-nhsblue`) — used for links and accents
+   - Borders: `1px solid #E5E7EB` (gray-200) — consistent table borders
+   - Row hover: `#EFF6FF` (blue-50) — subtle clinical highlight
+   - Background: White cards on `#F5F7FA` (pmr-content) background
+   - Border radius: 4px max — clinical systems use sharp corners
+
+4. **Table Structure**
+   - Semantic HTML: `<table>`, `<thead>`, `<th scope="col">`, `<tbody>`, `<tr>`, `<td>`
+   - Two separate tables: Active Problems (4 columns) and Resolved Problems (6 columns)
+   - Column widths fixed for Status (w-28), Code (w-28), Since/Resolved (w-28)
+   - Alternating row backgrounds not used — clean white with hover state only
+
+5. **Expandable Rows Pattern**
+   - Chevron icon in rightmost column indicates expandability
+   - Expanded content shows in a full-width sub-row below
+   - Animation: height transition 200ms ease-out (respects prefers-reduced-motion)
+   - Expanded background: `#F9FAFB` (gray-50) with narrative text and linked consultations
+
+6. **Mobile Layout**
+   - Card-based layout below breakpoint (isMobile from useBreakpoint hook)
+   - Each problem becomes a rounded card with stacked information
+   - Status and code on same line, problem description prominent
+   - Expandable via button press, showing narrative and linked consultations
+
+### Implementation Patterns
+
+**TrafficLight Component (WCAG Compliant):**
+```tsx
+function TrafficLight({ status }: { status: ProblemStatus }) {
+  const colorMap: Record<ProblemStatus, { bg: string; label: string }> = {
+    Active: { bg: 'bg-green-500', label: 'Active' },
+    'In Progress': { bg: 'bg-amber-500', label: 'In Progress' },
+    Resolved: { bg: 'bg-green-500', label: 'Resolved' },
+  }
+
+  const { bg, label } = colorMap[status]
+
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        className={`w-2 h-2 rounded-full ${bg}`}
+        aria-label={`Status: ${label}`}
+        role="img"
+      />
+      <span className="text-xs text-gray-600">{label}</span>
+    </div>
+  )
+}
+```
+
+**Code Column (Geist Mono):**
+```tsx
+<td className="border border-gray-200 px-3 py-2.5">
+  <span className="font-mono text-xs text-gray-500">[{problem.code}]</span>
+</td>
+```
+
+**Row Hover Effect:**
+```tsx
+<tr className={`cursor-pointer hover:bg-blue-50 transition-colors ${
+  isExpanded ? 'bg-blue-50' : ''
+}`}>
+```
+
+**Expandable Row Animation:**
+```tsx
+<div
+  style={{
+    height: isExpanded ? contentHeight : 0,
+    overflow: 'hidden',
+    transition: prefersReducedMotion ? 'none' : 'height 200ms ease-out',
+  }}
+>
+  <div ref={contentRef} className="bg-gray-50 p-4">
+    {/* Narrative content */}
+  </div>
+</div>
+```
+
+**Linked Consultations Navigation:**
+```tsx
+<button
+  onClick={(e) => {
+    e.stopPropagation()
+    handleLinkedClick(consultation.id)
+  }}
+  className="inline-flex items-center gap-1 text-xs text-pmr-nhsblue hover:underline"
+>
+  <ExternalLink className="w-3 h-3" />
+  {consultation.organization} — {consultation.role}
+</button>
+```
+
+### Mobile Card Layout
+
+On mobile devices (`isMobile` from useBreakpoint hook), the table transforms into cards:
+- White background cards with `border border-gray-200 rounded`
+- Status dot + code on one line
+- Problem description as card title
+- Since/Resolved date below
+- Chevron indicates expandability
+- Expanded state shows narrative and linked consultations below
+
+### Accessibility Requirements
+
+1. **WCAG 1.4.1 Use of Color**: Never rely on color alone — traffic lights MUST have text labels
+2. **Semantic HTML**: Proper `<table>` structure with `<th scope="col">` for headers
+3. **ARIA**: `aria-expanded` on toggle buttons, `aria-label` on status dots
+4. **Motion**: Respect `prefers-reduced-motion` for expand/collapse animations
+5. **Focus management**: Linked consultation buttons are keyboard navigable
+
