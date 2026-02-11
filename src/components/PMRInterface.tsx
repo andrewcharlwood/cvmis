@@ -8,6 +8,7 @@ import { MedicationsView } from './views/MedicationsView'
 import { ProblemsView } from './views/ProblemsView'
 import { InvestigationsView } from './views/InvestigationsView'
 import { DocumentsView } from './views/DocumentsView'
+import { ReferralsView } from './views/ReferralsView'
 
 interface PMRInterfaceProps {
   children?: React.ReactNode
@@ -52,6 +53,8 @@ export function PMRInterface({ children }: PMRInterfaceProps) {
         return <InvestigationsView />
       case 'documents':
         return <DocumentsView />
+      case 'referrals':
+        return <ReferralsView />
       default:
         return (
           <div className="bg-white border border-gray-200 rounded p-6">
