@@ -155,7 +155,7 @@ src/
 
   Create `src/components/views/ReferralsView.tsx`. Contact presented as clinical referral form. Form fields: Referring to (pre-filled: CHARLWOOD, Andrew), NHS Number (pre-filled), Priority toggle (radio: Urgent [red], Routine [blue/selected], Two-Week Wait [amber] with tongue-in-cheek tooltips), Referrer Name/Email/Org inputs, Reason for Referral textarea, Contact Method radio (Email/Phone/LinkedIn). Submit button: NHS blue, full width right half. On submit: loading spinner, then success message with reference number (REF-2026-0210-001 format). Below form: Direct Contact table with Email, Phone, LinkedIn, Location as clickable links.
 
-- [ ] **Task 13: Implement keyboard shortcuts and accessibility**
+- [x] **Task 13: Implement keyboard shortcuts and accessibility**
 
   Add keyboard navigation throughout. Global shortcuts: Alt+1-7 activate sidebar items, Escape closes expanded items/menus, / focuses search. Sidebar: Up/Down arrows navigate items, Enter activates. Implement focus management: after login, focus moves to first sidebar item; after view change, focus moves to view heading; after expanding item, focus moves to content. Add ARIA: `role="navigation"` on sidebar, `aria-current="page"` on active item, `role="alert"` on clinical alert, proper table markup with `scope="col"`, `aria-expanded` on expandable items. Test with screen reader: views announced, tables navigable, alert read immediately.
 
@@ -166,3 +166,6 @@ src/
 - [ ] **Task 15: Final integration, testing, and polish**
 
   Wire up App.tsx with three phases: BootSequence (4s) → ECGAnimation (modified for flatline) → LoginScreen (1.2s) → PMRInterface. Ensure smooth transitions between phases. Run all quality checks. Verify TypeScript strict mode (no `any` types). Verify all CV content accuracy against CV_v4.md (dates, numbers, achievements). Test all interactive elements: sidebar nav, consultation expand, medication sort, alert acknowledge, referral form submit. Verify responsive layouts at all breakpoints. Test accessibility with keyboard navigation and screen reader. Verify search finds content across all sections. Final production build test.
+- [ ] Task 16: Review against original design plan
+      - Review the completed build against the spec in ./goal.md
+      - Go through the complete plan, and cross reference against the implementation list above. Unmark, or add any further tasks as needed to realise the vision in the original design document. Use skills as needed.

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
   ClipboardList,
   FileText,
@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react'
 import type { ViewId } from '../types/pmr'
+import { useAccessibility } from '../contexts/AccessibilityContext'
 
 interface NavItem {
   id: ViewId
@@ -45,6 +46,51 @@ export function ClinicalSidebar({ activeView, onViewChange }: ClinicalSidebarPro
   const [currentTime, setCurrentTime] = useState(getCurrentTime)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
+  const navButtonRefs = useRef<(HTMLButtonElement | null)[]>([])
+  const { focusAfterLoginRef } = useAccessibility()
+
+  const handleNavClick = useCallback(
+    (view: ViewId) => {
+      onViewChange(view)
+      window.location.hash = view
+    },
+    [onViewChange]
+  )
+
+  const handleNavKeyDown = useCallback((e: React.KeyboardEvent, index: number) => {
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault()
+        if (index < navItems.length - 1) {
+          setFocusedIndex(index + 1)
+          navButtonRefs.current[index + 1]?.focus()
+        }
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        if (index > 0) {
+          setFocusedIndex(index - 1)
+          navButtonRefs.current[index - 1]?.focus()
+        }
+        break
+      case 'Enter':
+      case ' ':
+        e.preventDefault()
+        handleNavClick(navItems[index].id)
+        break
+      case 'Home':
+        e.preventDefault()
+        setFocusedIndex(0)
+        navButtonRefs.current[0]?.focus()
+        break
+      case 'End':
+        e.preventDefault()
+        setFocusedIndex(navItems.length - 1)
+        navButtonRefs.current[navItems.length - 1]?.focus()
+        break
+    }
+  }, [handleNavClick])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -88,13 +134,11 @@ export function ClinicalSidebar({ activeView, onViewChange }: ClinicalSidebarPro
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onViewChange, isSearchFocused])
 
-  const handleNavClick = useCallback(
-    (view: ViewId) => {
-      onViewChange(view)
-      window.location.hash = view
-    },
-    [onViewChange]
-  )
+  useEffect(() => {
+    if (navButtonRefs.current[0]) {
+      ;(focusAfterLoginRef as React.MutableRefObject<HTMLButtonElement | null>).current = navButtonRefs.current[0]
+    }
+  }, [focusAfterLoginRef])
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
@@ -179,17 +223,20 @@ export function ClinicalSidebar({ activeView, onViewChange }: ClinicalSidebarPro
       </div>
 
       <nav className="flex-1 py-2 overflow-y-auto">
-        <ul role="list">
+        <ul role="menu" aria-label="Record sections">
           {navItems.map((item, index) => (
-            <li key={item.id}>
+            <li key={item.id} role="none">
               {index === 1 && (
-                <div className="mx-3 my-1 border-t border-white/10" role="separator" />
+                <div className="mx-3 my-1 border-t border-white/10" role="separator" aria-hidden="true" />
               )}
               <button
+                ref={el => { navButtonRefs.current[index] = el }}
                 type="button"
                 role="menuitem"
+                tabIndex={focusedIndex === null ? (index === 0 ? 0 : -1) : (focusedIndex === index ? 0 : -1)}
                 aria-current={activeView === item.id ? 'page' : undefined}
                 onClick={() => handleNavClick(item.id)}
+                onKeyDown={e => handleNavKeyDown(e, index)}
                 className={`w-full flex items-center gap-3 h-11 px-4 text-left transition-colors ${
                   activeView === item.id
                     ? 'text-white bg-white/12 border-l-[3px] border-pmr-nhsblue font-semibold'

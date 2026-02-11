@@ -279,16 +279,16 @@ function QuickMedsCard({ medications, onNavigate }: QuickMedsCardProps) {
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className="px-4 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
+              <th scope="col" className="px-4 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
                 Drug
               </th>
-              <th className="px-4 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
+              <th scope="col" className="px-4 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
                 Dose
               </th>
-              <th className="px-4 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
+              <th scope="col" className="px-4 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
                 Freq
               </th>
-              <th className="px-4 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
+              <th scope="col" className="px-4 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wide text-gray-400">
                 Status
               </th>
             </tr>

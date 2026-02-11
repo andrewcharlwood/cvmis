@@ -4,26 +4,29 @@ import { BootSequence } from './components/BootSequence'
 import { ECGAnimation } from './components/ECGAnimation'
 import { LoginScreen } from './components/LoginScreen'
 import { PMRInterface } from './components/PMRInterface'
+import { AccessibilityProvider } from './contexts/AccessibilityContext'
 
 function App() {
   const [phase, setPhase] = useState<Phase>('boot')
 
   return (
-    <div className="min-h-screen">
-      {phase === 'boot' && (
-        <BootSequence onComplete={() => setPhase('ecg')} />
-      )}
-      
-      {phase === 'ecg' && (
-        <ECGAnimation onComplete={() => setPhase('login')} />
-      )}
-      
-      {phase === 'login' && (
-        <LoginScreen onComplete={() => setPhase('pmr')} />
-      )}
-      
-      {phase === 'pmr' && <PMRInterface />}
-    </div>
+    <AccessibilityProvider>
+      <div className="min-h-screen">
+        {phase === 'boot' && (
+          <BootSequence onComplete={() => setPhase('ecg')} />
+        )}
+        
+        {phase === 'ecg' && (
+          <ECGAnimation onComplete={() => setPhase('login')} />
+        )}
+        
+        {phase === 'login' && (
+          <LoginScreen onComplete={() => setPhase('pmr')} />
+        )}
+        
+        {phase === 'pmr' && <PMRInterface />}
+      </div>
+    </AccessibilityProvider>
   )
 }
 

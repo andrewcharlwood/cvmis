@@ -395,3 +395,31 @@ This is a complete redesign of the CV presentation, moving from the ECG animatio
   - Reference number uses current date plus random sequence for uniqueness
   - Direct Contact table uses same key-value layout as Patient Demographics card
 
+### Iteration 13 — Task 13: Implement keyboard shortcuts and accessibility
+- **Completed**: Task 13 - Implemented keyboard shortcuts and accessibility features across the PMR interface
+- **Files created**:
+  - `src/contexts/AccessibilityContext.tsx` - Global context for focus management and expanded item state
+- **Files modified**:
+  - `src/components/ClinicalSidebar.tsx` - Added roving tabindex with Up/Down arrow navigation, Enter/Space activation, Home/End support
+  - `src/components/PMRInterface.tsx` - Added focus management after view change, integrated with AccessibilityContext
+  - `src/components/LoginScreen.tsx` - Triggers focus on first sidebar item after login completion
+  - `src/components/App.tsx` - Wrapped with AccessibilityProvider
+  - `src/components/views/ConsultationsView.tsx` - Added focus management when expanding consultation entries
+  - `src/components/views/SummaryView.tsx` - Added scope="col" to table headers
+- **Accessibility features implemented**:
+  - **Roving tabindex**: Sidebar navigation supports Up/Down arrows, Home/End, Enter/Space
+  - **Focus management**: Focus moves to sidebar after login, focus moves to view heading after view change, focus moves to expanded content
+  - **Global Escape**: Closes any expanded item across all views
+  - **ARIA attributes**: role="menu" on nav, role="menuitem" on nav items, aria-current="page" on active, tabIndex management
+  - **Table accessibility**: scope="col" on all table headers across all views
+- **Design decisions**:
+  - Created AccessibilityContext to manage global expanded state and focus targets
+  - Focus moves to expanded content immediately after expansion (not waiting for animation)
+  - Screen reader announces view changes via heading focus
+  - First nav button always receives tabindex=0 (roving tabindex pattern)
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓ (1 warning about fast refresh), `npm run build` ✓
+- **Learnings**:
+  - Roving tabindex requires explicit tabIndex management based on focus state
+  - useRef array for button refs enables dynamic nav item count
+  - Global Escape handler in context prevents need for per-view handlers
+  - Focus after login requires ref forwarding from sidebar to context

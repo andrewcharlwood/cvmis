@@ -58,6 +58,7 @@ function ConsultationEntry({
   prefersReducedMotion,
 }: ConsultationEntryProps) {
   const contentRef = useRef<HTMLDivElement>(null)
+  const expandedContentRef = useRef<HTMLDivElement>(null)
   const [height, setHeight] = useState<number | undefined>(isExpanded ? undefined : 0)
 
   useEffect(() => {
@@ -74,6 +75,12 @@ function ConsultationEntry({
     }
     setHeight(0)
   }, [isExpanded, prefersReducedMotion])
+
+  useEffect(() => {
+    if (isExpanded && expandedContentRef.current) {
+      expandedContentRef.current.focus()
+    }
+  }, [isExpanded])
 
   const keyCodedEntry = consultation.codedEntries[0]
 
@@ -134,6 +141,7 @@ function ConsultationEntry({
           <ExpandedContent
             consultation={consultation}
             prefersReducedMotion={prefersReducedMotion}
+            contentRef={expandedContentRef}
           />
         )}
       </div>
@@ -162,15 +170,18 @@ function StatusDot({ isCurrent }: StatusDotProps) {
 interface ExpandedContentProps {
   consultation: Consultation
   prefersReducedMotion: boolean
+  contentRef: React.RefObject<HTMLDivElement>
 }
 
-function ExpandedContent({ consultation, prefersReducedMotion }: ExpandedContentProps) {
+function ExpandedContent({ consultation, prefersReducedMotion, contentRef }: ExpandedContentProps) {
   const opacity = prefersReducedMotion ? 1 : undefined
   const transition = prefersReducedMotion ? 'none' : 'opacity 150ms ease-out'
 
   return (
     <div
-      className="px-4 pb-4"
+      ref={contentRef}
+      tabIndex={-1}
+      className="px-4 pb-4 outline-none"
       style={{ opacity, transition }}
     >
       <div className="pl-5 border-l border-gray-200 ml-1">

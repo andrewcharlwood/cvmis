@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Shield } from 'lucide-react'
+import { useAccessibility } from '../contexts/AccessibilityContext'
 
 interface LoginScreenProps {
   onComplete: () => void
@@ -12,6 +13,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   const [isTypingUsername, setIsTypingUsername] = useState(true)
   const [isTypingPassword, setIsTypingPassword] = useState(false)
   const [buttonPressed, setButtonPressed] = useState(false)
+  const { requestFocusAfterLogin } = useAccessibility()
   
   const fullUsername = 'A.CHARLWOOD'
   const passwordLength = 8
@@ -26,7 +28,10 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       setPasswordDots(passwordLength)
       setTimeout(() => {
         setButtonPressed(true)
-        setTimeout(onComplete, 200)
+        setTimeout(() => {
+          requestFocusAfterLogin()
+          onComplete()
+        }, 200)
       }, 300)
       return
     }
@@ -55,14 +60,17 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               
               setTimeout(() => {
                 setButtonPressed(true)
-                setTimeout(onComplete, 200)
+                setTimeout(() => {
+                  requestFocusAfterLogin()
+                  onComplete()
+                }, 200)
               }, 150)
             }
           }, 20)
         }, 150)
       }
     }, 30)
-  }, [onComplete, prefersReducedMotion])
+  }, [onComplete, prefersReducedMotion, requestFocusAfterLogin])
 
   useEffect(() => {
     const cursorInterval = setInterval(() => {
