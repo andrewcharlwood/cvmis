@@ -4,6 +4,7 @@ import { ClinicalSidebar } from './ClinicalSidebar'
 import { PatientBanner } from './PatientBanner'
 import { SummaryView } from './views/SummaryView'
 import { ConsultationsView } from './views/ConsultationsView'
+import { MedicationsView } from './views/MedicationsView'
 
 interface PMRInterfaceProps {
   children?: React.ReactNode
@@ -40,6 +41,8 @@ export function PMRInterface({ children }: PMRInterfaceProps) {
         return <SummaryView onNavigate={handleNavigate} />
       case 'consultations':
         return <ConsultationsView />
+      case 'medications':
+        return <MedicationsView />
       default:
         return (
           <div className="bg-white border border-gray-200 rounded p-6">
