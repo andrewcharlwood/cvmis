@@ -143,7 +143,7 @@ src/
 
   Create `src/components/views/ProblemsView.tsx`. Two sections: Active Problems and Resolved Problems. Table columns: Status (traffic light dot), Code (SNOMED-style in Geist Mono), Problem description, Since/Resolved date, Outcome (for resolved). Traffic lights: 8px circles — green (resolved/current), amber (in progress), gray (inactive/historical). Active problems: £220M budget oversight, SQL transformation, data literacy programme. Resolved problems: 8 achievements with specific outcomes ("Python algorithm: 14,000 pts, £2.6M/yr", "70% reduction, 200hrs saved", etc.). Click row to expand full narrative with "linked consultations" navigation.
 
-- [ ] **Task 10: Build InvestigationsView with results panel**
+- [x] **Task 10: Build InvestigationsView with results panel**
 
   Create `src/components/views/InvestigationsView.tsx`. Projects presented as diagnostic investigations. Table: Test Name | Requested | Status | Result. Status badges: Complete (green dot), Ongoing (amber dot), Live (pulsing green dot for PharMetrics). 5 investigations: PharMetrics Interactive Platform, Patient Switching Algorithm, Blueteq Generator, CD Monitoring System, Sankey Chart Analysis Tool. Click row to expand "results panel" with tree-indented structure: Date Requested, Date Reported, Status, Requesting Clinician, Methodology, Results, Tech Stack. PharMetrics has "View Results" button linking to medicines.charlwood.xyz.
 

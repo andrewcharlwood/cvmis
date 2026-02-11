@@ -306,3 +306,33 @@ This is a complete redesign of the CV presentation, moving from the ECG animatio
   - `problem.linkedConsultations` needed null coalescing since it's optional in the type
   - Height animation uses refs to measure content height for smooth expansion
   - Linked consultations use external link icon to indicate navigation
+
+### Iteration 10 — Task 10: Build InvestigationsView with results panel
+- **Completed**: Task 10 - Created InvestigationsView with expandable rows and results panel
+- **Files created**:
+  - `src/components/views/InvestigationsView.tsx` - Full Investigations view with 5 project entries
+- **Files modified**:
+  - `src/components/PMRInterface.tsx` - Added InvestigationsView to renderView switch
+- **Design decisions**:
+  - Status badges: Complete (green dot), Ongoing (amber dot), Live (pulsing green dot with ping animation)
+  - Table columns: Test Name, Requested, Status, Result
+  - Expandable rows: click to show tree-indented results panel
+  - Results panel uses key-value layout with fixed-width labels (w-40) for alignment
+  - Methodology and Results sections display multi-line content
+  - Tech Stack displayed as comma-separated list
+  - PharMetrics has "View Results" button linking to medicines.charlwood.xyz
+  - Height animation: 200ms ease-out for expand/collapse
+  - Accordion behavior: only one row expanded at a time (global)
+  - Hover state: blue-50 (#EFF6FF) background tint
+- **Accessibility**:
+  - Proper semantic `<table>` markup with `scope="col"` on headers
+  - `aria-expanded` on clickable rows
+  - Status badges have `aria-label` with status text
+  - Traffic lights always accompanied by text labels
+  - External link has proper target="_blank" rel="noopener noreferrer"
+  - Respects `prefers-reduced-motion`: height transition disabled
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - Live status uses Tailwind animate-ping for pulsing effect (requires relative container)
+  - Tree-indented structure uses flex with fixed-width labels for clean alignment
+  - Results as bullet list provides better readability than comma-separated text
