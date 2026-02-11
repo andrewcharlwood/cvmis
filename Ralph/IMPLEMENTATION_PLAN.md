@@ -119,7 +119,7 @@ src/
 
   Create `src/components/LoginScreen.tsx`. Dark blue-gray background (#1E293B). Centered white login card (320px wide, 12px radius, subtle shadow). NHS-blue shield icon at top. Username field: types "A.CHARLWOOD" character-by-character (30ms per char, Geist Mono font). Password field: fills with 8 dots (20ms per dot). "Log In" button: NHS blue (#005EB8), full width. After 150ms pause, button shows pressed state (darkens, 100ms), then emits `onComplete` callback. Total login animation: ~1.2s. Respect `prefers-reduced-motion`: with reduced motion, username appears instantly and login completes in ~500ms.
 
-- [ ] **Task 4: Build PatientBanner component (full and condensed)**
+- [x] **Task 4: Build PatientBanner component (full and condensed)**
 
   Create `src/components/PatientBanner.tsx` with two modes. Full banner (80px): patient name "CHARLWOOD, Andrew (Mr)", DOB "14/02/1993", NHS No "221 181 0" (GPhC number formatted), address "Norwich, NR1", phone, email, status "Active" (green dot), badge "Open to opportunities". Action buttons: Download CV, Email, LinkedIn. Condensed banner (48px, sticky after 100px scroll): name, NHS No, status dot, action buttons only. Use `useScrollCondensation` hook with IntersectionObserver. Smooth height transition (200ms). Banner spans full viewport width.
 

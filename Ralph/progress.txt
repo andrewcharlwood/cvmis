@@ -129,3 +129,27 @@ This is a complete redesign of the CV presentation, moving from the ECG animatio
 - **Learnings**:
   - Geist Mono not available via Google Fonts, using Fira Code as fallback
   - Total login animation timing: ~1.2s (350ms username + 150ms pause + 160ms password + 150ms pause + 100ms button + 200ms hold)
+
+### Iteration 4 — Task 4: Build PatientBanner component with full and condensed modes
+- **Completed**: Task 4 - Created PatientBanner component with scroll-based condensation
+- **Files created**:
+  - `src/hooks/useScrollCondensation.ts` - IntersectionObserver hook for scroll detection
+  - `src/components/PatientBanner.tsx` - Full (80px) and condensed (48px) banner modes
+- **Design decisions**:
+  - IntersectionObserver with rootMargin -100px to detect scroll past threshold
+  - Smooth height transition using CSS `transition-all duration-200 ease-out`
+  - Sticky positioning with z-40 for persistent visibility
+  - Status dot: 8px circle, green for Active
+  - Badge: NHS blue background, white text, small pill shape
+  - Action buttons: outlined with NHS blue, fill on hover
+  - GPhC number formatted with spaces like NHS number (221 181 0)
+  - Tooltip on NHS No field explaining it's GPhC Registration Number
+- **Accessibility**:
+  - `role="banner"` on header element
+  - `aria-label` on status dot
+  - Proper link semantics for phone and email
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - IntersectionObserver with rootMargin provides cleaner scroll detection than scroll event listeners
+  - Sentinel element at top of viewport triggers condensation when it leaves view
+  - Sticky positioning requires no JavaScript for the sticky behavior itself
