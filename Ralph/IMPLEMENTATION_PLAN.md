@@ -115,7 +115,7 @@ src/
 
   Modify `src/components/ECGAnimation.tsx` to change the exit phase. Instead of fading to white and revealing the CV, the animation should: 1) Complete the name tracing as normal, 2) Hold for 300ms, 3) Draw a flatline extending rightward from the name over 300ms (patient monitor flatline visual), 4) Fade entire canvas to black over 200ms, 5) Transition background to dark blue-gray (#1E293B) over 200ms. Emit `onComplete` callback to trigger LoginScreen. Total ECG phase: ~5-6 seconds. Preserve all existing animation timing for heartbeats and letter tracing.
 
-- [ ] **Task 3: Build LoginScreen component with typing animation**
+- [x] **Task 3: Build LoginScreen component with typing animation**
 
   Create `src/components/LoginScreen.tsx`. Dark blue-gray background (#1E293B). Centered white login card (320px wide, 12px radius, subtle shadow). NHS-blue shield icon at top. Username field: types "A.CHARLWOOD" character-by-character (30ms per char, Geist Mono font). Password field: fills with 8 dots (20ms per dot). "Log In" button: NHS blue (#005EB8), full width. After 150ms pause, button shows pressed state (darkens, 100ms), then emits `onComplete` callback. Total login animation: ~1.2s. Respect `prefers-reduced-motion`: with reduced motion, username appears instantly and login completes in ~500ms.
 

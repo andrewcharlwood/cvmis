@@ -106,3 +106,26 @@ This is a complete redesign of the CV presentation, moving from the ECG animatio
 - **Learnings**:
   - Canvas fade must complete before background transition for clean visual
   - The flatline extension needs to go slightly past viewport edge (+50px) for smooth visual
+
+### Iteration 3 — Task 3: Build LoginScreen component with typing animation
+- **Completed**: Task 3 - Created LoginScreen component with authentic clinical login typing animation
+- **Files created/modified**:
+  - `src/components/LoginScreen.tsx` - New component with typing animation
+  - `src/App.tsx` - Added 'login' phase between 'ecg' and 'content'
+  - `src/types/index.ts` - Added 'login' to Phase type
+  - `index.html` - Added Inter font family
+  - `tailwind.config.js` - Added PMR colors (sidebar, banner, nhsblue, etc.) and fonts (inter, geist)
+- **Design decisions**:
+  - Username types at 30ms per character (A.CHARLWOOD = 11 chars + space = ~350ms)
+  - Password fills 8 dots at 20ms per dot (~160ms)
+  - Button shows pressed state (darker, scale) before onComplete callback
+  - Blinking cursor at 530ms interval during typing
+  - Uses Fira Code as monospace font (Geist Mono not available via Google Fonts)
+  - NHS blue shield icon for clinical system branding
+  - White login card: 320px wide, 12px radius, subtle shadow
+- **Accessibility**:
+  - Respects prefers-reduced-motion: instant text appearance, ~500ms total
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - Geist Mono not available via Google Fonts, using Fira Code as fallback
+  - Total login animation timing: ~1.2s (350ms username + 150ms pause + 160ms password + 150ms pause + 100ms button + 200ms hold)
