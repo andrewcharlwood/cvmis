@@ -244,3 +244,35 @@ This is a complete redesign of the CV presentation, moving from the ECG animatio
   - Height animation uses `height: auto` which requires setting height to undefined after animation
   - Content inside expanded area uses separate opacity transition for smooth appearance
   - Border-left styling with explicit width/color in style prop for dynamic org colors
+
+### Iteration 8 — Task 8: Build MedicationsView with sortable table and prescribing history
+- **Completed**: Task 8 - Created MedicationsView with sortable table and category tabs
+- **Files created**:
+  - `src/components/views/MedicationsView.tsx` - Full Medications view with 3 category tabs
+- **Files modified**:
+  - `src/components/PMRInterface.tsx` - Added MedicationsView to renderView switch
+  - `src/index.css` - Added fadeIn animation for expanded content
+- **Design decisions**:
+  - Three category tabs: Active Medications (technical), Clinical Medications (healthcare), PRN (strategic)
+  - Tabs have descriptive subtitles to explain the mapping
+  - Sortable columns: clicking header toggles asc/desc/null with visual indicators
+  - Sort icons: ArrowUpDown (unsorted), ArrowUp (asc), ArrowDown (desc) in NHS blue
+  - Table columns: Drug Name, Dose (%), Frequency, Start (year), Status
+  - Row height: ~40px with 10px py padding
+  - Alternating row colors: white / gray-50
+  - Hover state: blue-50 (#EFF6FF) tint
+  - Traffic light status dots: 8px circles (green=Active, gray=Historical) with text labels
+  - Expandable rows: click to show "Prescribing History" mini-timeline
+  - Prescribing history: year + description, styled in Geist Mono
+  - fadeIn animation (200ms ease-out) for expanded content
+- **Accessibility**:
+  - Proper semantic `<table>` markup with `scope="col"` on headers
+  - `role="tablist"` and `aria-selected` on tab buttons
+  - `aria-expanded` on expandable rows
+  - Traffic lights always accompanied by text labels
+  - Respects `prefers-reduced-motion`: fadeIn disabled
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - Case block lexical declarations need curly braces wrapping to satisfy ESLint
+  - Sort state with three values (null/asc/desc) provides intuitive toggle behavior
+  - Frequency sort uses custom order object mapping

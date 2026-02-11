@@ -135,7 +135,7 @@ src/
 
   Create `src/components/views/ConsultationsView.tsx`. Reverse-chronological journal of 5 roles. Each entry: collapsed state shows date, organization (NHS blue), role title, key coded entry, expand chevron. Click to expand: shows Duration, HISTORY section (context/background), EXAMINATION section (bullet list of analysis/findings), PLAN section (bullet list of outcomes), CODED ENTRIES (SNOMED-style codes like [EFF001], [ALG001]). Section headers styled as clinical consultation dividers (uppercase, letter-spacing). Only one entry expanded at a time. Color-coded left border: NHS blue for NHS N&W ICB, Teal (#00897B) for Tesco PLC. Expand animation: height 0→auto (200ms, ease-out).
 
-- [ ] **Task 8: Build MedicationsView with sortable table and prescribing history**
+- [x] **Task 8: Build MedicationsView with sortable table and prescribing history**
 
   Create `src/components/views/MedicationsView.tsx`. Three category tabs: Active Medications (technical skills), Clinical Medications (healthcare domain skills), PRN (strategic skills). Each tab shows a table: Drug Name | Dose (%) | Frequency | Start | Status. Sortable columns: clicking header sorts (asc/desc toggle). Default sort: by category grouping. Table styling: gray-200 borders, alternating row colors, 40px row height. Hover: subtle blue tint (#EFF6FF). Click row to expand "Prescribing History" — mini-timeline showing skill progression (year + description). History styled in Geist Mono. 18 total medications mapped from CV skills with accurate proficiency percentages and usage frequencies.
 
