@@ -33,11 +33,22 @@ export default {
           dim: '#3a6b45',
           grey: '#666666',
         },
+        pmr: {
+          sidebar: '#1E293B',
+          banner: '#334155',
+          content: '#F5F7FA',
+          nhsblue: '#005EB8',
+          green: '#22C55E',
+          amber: '#F59E0B',
+          red: '#EF4444',
+        },
       },
       fontFamily: {
         primary: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
         secondary: ['Inter Tight', 'system-ui', 'sans-serif'],
         mono: ['Fira Code', 'monospace'],
+        inter: ['Inter', 'system-ui', 'sans-serif'],
+        geist: ['Geist Mono', 'Fira Code', 'monospace'],
       },
       boxShadow: {
         'sm': '0 1px 3px rgba(0,0,0,0.06)',

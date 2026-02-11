@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Phase } from './types'
 import { BootSequence } from './components/BootSequence'
 import { ECGAnimation } from './components/ECGAnimation'
+import { LoginScreen } from './components/LoginScreen'
 import { FloatingNav } from './components/FloatingNav'
 import { Hero } from './components/Hero'
 import { Skills } from './components/Skills'
@@ -21,7 +22,11 @@ function App() {
       )}
       
       {phase === 'ecg' && (
-        <ECGAnimation onComplete={() => setPhase('content')} />
+        <ECGAnimation onComplete={() => setPhase('login')} />
+      )}
+      
+      {phase === 'login' && (
+        <LoginScreen onComplete={() => setPhase('content')} />
       )}
       
       {phase === 'content' && (
