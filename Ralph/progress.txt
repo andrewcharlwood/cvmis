@@ -91,3 +91,58 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 
 ### ECG Reference Implementation
 `ECGCombined.tsx` in the project root is a Remotion version of the ECG animation with a superior mask-based text reveal technique. Task 1b references this for the canvas implementation.
+
+### Iteration 2 — Task 1b: Rebuild boot sequence and ECG animation
+**Completed:** Task 1b
+**Changes made:**
+- **BootSequence.tsx**: Completely refactored from hardcoded HTML strings to config-driven architecture
+  - Created type-safe `BootConfig`, `BootLine`, `BootLineType` interfaces
+  - Individual line components: `BootLineHeader`, `BootLineStatus`, `BootLineSeparator`, `BootLineField`, `BootLineModule`, `BootLineReady`
+  - Added CRT scanlines overlay during boot phase
+  - Cursor now captures its screen position via ref and passes to parent via `onCursorPositionReady` callback
+  - Cursor morph animation: block cursor scales down to 0 width over 300ms before ECG starts
+  - Reduced motion support: instant boot completion, skips to ECG immediately
+  
+- **ECGAnimation.tsx**: Rebuilt with mask-based text reveal technique from ECGCombined.tsx
+  - Added `startPosition` prop to receive cursor position from BootSequence
+  - ECG trace now starts from cursor position (with `startOffsetX`) instead of x=0
+  - Implemented offscreen canvas pre-rendering for text stroke
+  - Mask-based text reveal: clipping region follows trace head, revealing pre-rendered text
+  - Added connector lines between letters at baseline using `CONNECTOR_PROFILES`
+  - Letter profiles define connector insets for natural-looking baseline connections
+  - Multi-layer neon glow: outer (6px, 25% opacity), inner (2px solid)
+  - Flatline draw phase extends to right edge after text completion
+  - Background transitions from black to `#1E293B` (login background)
+  - Reduced motion support: instant transition to PMR phase
+  
+- **App.tsx**: Updated to pass cursor position between BootSequence and ECGAnimation
+  - Added `cursorPosition` state
+  - `handleCursorPositionReady` captures position from BootSequence
+  - Passed to ECGAnimation as `startPosition` prop
+
+**Codebase patterns discovered:**
+- Canvas animation performance: pre-render text to offscreen canvas, then drawImage through clip region
+- Cursor-to-dot transition requires DOM ref position capture, not just CSS animation
+- World-space coordinates (headWX) vs screen-space coordinates (headSX) separation is critical
+- Viewport scrolling logic: offset calculated as `headWX - headSX` keeps trace visible
+- Connector profiles per character (C, O, D, L, E have special insets) make letter connections look natural
+- Background color transition handled via CSS transition on container, not canvas fill
+
+**Quality checks:** All passed (typecheck, lint, build)
+- TypeScript: No errors
+- ESLint: 1 pre-existing warning in AccessibilityContext.tsx (not our changes)
+- Build: Successful, 388KB bundle
+
+**Visual review:** N/A (animation component — visual verification would require browser screenshot)
+
+**Issues encountered:** None
+
+**Design decisions:**
+- Kept Fira Code for terminal/boot phase (it's the authentic clinical terminal aesthetic)
+- Used ECGCombined.tsx's mask technique but adapted for canvas API (not SVG like the Remotion version)
+- Beat amplitudes: 0.3 → 0.55 → 0.85 → 1.0 (same as original implementation)
+- Letter spacing: LETTER_W 72px, LETTER_G 10px, SPACE_W 30px (matches original, tighter than ECGCombined)
+- Morph animation uses Framer Motion scaleX/width/opacity for smooth cursor-to-dot transition
+
+**Next task:** Task 2 — Rebuild LoginScreen component
+
