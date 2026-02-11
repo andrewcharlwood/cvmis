@@ -336,3 +336,31 @@ This is a complete redesign of the CV presentation, moving from the ECG animatio
   - Live status uses Tailwind animate-ping for pulsing effect (requires relative container)
   - Tree-indented structure uses flex with fixed-width labels for clean alignment
   - Results as bullet list provides better readability than comma-separated text
+
+### Iteration 11 — Task 11: Build DocumentsView for education/certifications
+- **Completed**: Task 11 - Created DocumentsView with expandable rows and preview panel
+- **Files created**:
+  - `src/components/views/DocumentsView.tsx` - Full Documents view with 5 document entries
+- **Files modified**:
+  - `src/components/PMRInterface.tsx` - Added DocumentsView to renderView switch
+- **Design decisions**:
+  - Document type icons: FileText (Certificate), Award (Registration), GraduationCap (Results), FlaskConical (Research)
+  - Table columns: Type (icon), Document, Date, Source
+  - Expandable rows: click to show tree-indented preview panel
+  - Preview panel uses key-value layout with fixed-width labels (w-40) for alignment
+  - Shows: Type, Date Awarded, Institution, Classification, Duration, Research (with grade), Notes
+  - Height animation: 200ms ease-out for expand/collapse
+  - Accordion behavior: only one row expanded at a time (global)
+  - Hover state: blue-50 (#EFF6FF) background tint
+  - Consistent with InvestigationsView expanded view style
+- **Accessibility**:
+  - Proper semantic `<table>` markup with `scope="col"` on headers
+  - `aria-expanded` on clickable rows
+  - Screen reader-only column header for expand button
+  - Respects `prefers-reduced-motion`: height transition disabled
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - Document type icons from Lucide match design spec exactly
+  - Research documents show both detail and grade in same field with line break
+  - Tree-indented structure consistency across Investigations and Documents views
+

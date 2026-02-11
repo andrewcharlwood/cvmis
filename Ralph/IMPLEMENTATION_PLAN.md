@@ -147,7 +147,7 @@ src/
 
   Create `src/components/views/InvestigationsView.tsx`. Projects presented as diagnostic investigations. Table: Test Name | Requested | Status | Result. Status badges: Complete (green dot), Ongoing (amber dot), Live (pulsing green dot for PharMetrics). 5 investigations: PharMetrics Interactive Platform, Patient Switching Algorithm, Blueteq Generator, CD Monitoring System, Sankey Chart Analysis Tool. Click row to expand "results panel" with tree-indented structure: Date Requested, Date Reported, Status, Requesting Clinician, Methodology, Results, Tech Stack. PharMetrics has "View Results" button linking to medicines.charlwood.xyz.
 
-- [ ] **Task 11: Build DocumentsView for education/certifications**
+- [x] **Task 11: Build DocumentsView for education/certifications**
 
   Create `src/components/views/DocumentsView.tsx`. Education presented as attached documents. Table: Type (icon), Document, Date, Source. Icons: FileText (certificates), Award (registrations), GraduationCap (academic), FlaskConical (research). 4 documents: MPharm (Hons) 2:1 UEA 2015, GPhC Registration 2016, Mary Seacole Programme 2018, A-Levels 2011 + Drug Delivery Research. Click to expand "preview" panel with tree-indented details: Type, Date Awarded, Institution, Classification, Duration, Research details, Notes. Consistent with Investigations expanded view style.
 
