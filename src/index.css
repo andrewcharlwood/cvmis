@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  /* Original design system tokens (for boot/ECG phases) */
   --bg: #FFFFFF;
   --text: #334155;
   --heading: #0F172A;
@@ -20,6 +21,28 @@
   --radius: 16px;
   --font-primary: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-secondary: 'Inter Tight', system-ui, sans-serif;
+
+  /* PMR-specific tokens */
+  --pmr-content: #F5F7FA;
+  --pmr-card: #FFFFFF;
+  --pmr-sidebar: #1E293B;
+  --pmr-banner: #334155;
+  --pmr-nhs-blue: #005EB8;
+  --pmr-green: #22C55E;
+  --pmr-amber: #F59E0B;
+  --pmr-red: #EF4444;
+  --pmr-text-primary: #111827;
+  --pmr-text-secondary: #6B7280;
+  --pmr-border: #E5E7EB;
+  --pmr-border-dark: #D1D5DB;
+  --pmr-selected: #EFF6FF;
+  --pmr-alert-bg: #FEF3C7;
+  --pmr-alert-border: #F59E0B;
+  --pmr-alert-text: #92400E;
+  --pmr-radius: 4px;
+  --pmr-radius-login: 12px;
+  --font-inter: 'Inter', system-ui, sans-serif;
+  --font-geist-mono: 'Geist Mono', 'Fira Code', monospace;
 }
 
 * {
@@ -45,6 +68,17 @@ body {
   }
   .font-mono {
     font-family: 'Fira Code', monospace;
+  }
+  .font-inter {
+    font-family: var(--font-inter);
+  }
+  .font-geist-mono {
+    font-family: var(--font-geist-mono);
+  }
+  .pmr-theme {
+    background-color: var(--pmr-content);
+    color: var(--pmr-text-primary);
+    font-family: var(--font-inter);
   }
 }
 
