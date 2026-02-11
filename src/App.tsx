@@ -11,7 +11,7 @@ function App() {
 
   return (
     <AccessibilityProvider>
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-black">
         {phase === 'boot' && (
           <BootSequence onComplete={() => setPhase('ecg')} />
         )}

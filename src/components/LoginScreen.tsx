@@ -91,62 +91,96 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   }, [startLoginSequence])
 
   return (
-    <div 
+    <div
       className="fixed inset-0 flex items-center justify-center z-50"
       style={{ backgroundColor: '#1E293B' }}
     >
-      <motion.div 
-        className="bg-white rounded-xl shadow-lg p-8"
-        style={{ 
+      <motion.div
+        className="bg-white p-8"
+        style={{
           width: '320px',
           borderRadius: '12px',
-          boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1)',
         }}
+        initial={{ opacity: 0 }}
         animate={isExiting ? { scale: 1.03, opacity: 0 } : { scale: 1, opacity: 1 }}
         transition={{ duration: 0.2, ease: 'easeOut' }}
       >
-        <div className="flex flex-col items-center mb-6">
-          <div 
-            className="p-3 rounded-lg mb-4"
-            style={{ backgroundColor: 'rgba(0, 94, 184, 0.1)' }}
+        {/* Branding */}
+        <div className="flex flex-col items-center mb-8">
+          <div
+            className="p-3 rounded-lg mb-3"
+            style={{ backgroundColor: 'rgba(0, 94, 184, 0.08)' }}
           >
-            <Shield 
-              size={32} 
+            <Shield
+              size={28}
               style={{ color: '#005EB8' }}
-              strokeWidth={2}
+              strokeWidth={2.5}
             />
           </div>
-          <span 
-            className="text-sm font-medium"
-            style={{ color: '#6B7280' }}
+          <span
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#64748B',
+              letterSpacing: '0.01em',
+            }}
           >
             CareerRecord PMR
           </span>
+          <span
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '11px',
+              fontWeight: 400,
+              color: '#94A3B8',
+              marginTop: '2px',
+            }}
+          >
+            Clinical Information System
+          </span>
         </div>
 
-        <div className="space-y-4">
+        {/* Login Form */}
+        <div className="space-y-5">
+          {/* Username Field */}
           <div>
-            <label 
-              className="block text-xs font-medium mb-1.5"
-              style={{ color: '#6B7280' }}
+            <label
+              style={{
+                display: 'block',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '12px',
+                fontWeight: 500,
+                color: '#64748B',
+                marginBottom: '6px',
+              }}
             >
               Username
             </label>
-            <div 
-              className="w-full px-3 py-2.5 rounded text-sm"
-              style={{ 
-                fontFamily: "'Fira Code', monospace",
-                backgroundColor: '#F9FAFB',
-                border: '1px solid #E5E7EB',
+            <div
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                fontFamily: "'Geist Mono', 'Courier New', monospace",
+                fontSize: '13px',
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #D1D5DB',
+                borderRadius: '4px',
                 color: '#111827',
+                minHeight: '38px',
+                display: 'flex',
+                alignItems: 'center',
               }}
             >
               <span>{username}</span>
               {isTypingUsername && (
-                <span 
-                  style={{ 
+                <span
+                  style={{
                     opacity: showCursor ? 1 : 0,
                     color: '#005EB8',
+                    marginLeft: '1px',
                   }}
                 >
                   |
@@ -155,29 +189,43 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
             </div>
           </div>
 
+          {/* Password Field */}
           <div>
-            <label 
-              className="block text-xs font-medium mb-1.5"
-              style={{ color: '#6B7280' }}
+            <label
+              style={{
+                display: 'block',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '12px',
+                fontWeight: 500,
+                color: '#64748B',
+                marginBottom: '6px',
+              }}
             >
               Password
             </label>
-            <div 
-              className="w-full px-3 py-2.5 rounded text-sm"
-              style={{ 
-                fontFamily: "'Fira Code', monospace",
-                backgroundColor: '#F9FAFB',
-                border: '1px solid #E5E7EB',
+            <div
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                fontFamily: "'Geist Mono', 'Courier New', monospace",
+                fontSize: '13px',
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #D1D5DB',
+                borderRadius: '4px',
                 color: '#111827',
-                letterSpacing: '0.1em',
+                letterSpacing: '0.15em',
+                minHeight: '38px',
+                display: 'flex',
+                alignItems: 'center',
               }}
             >
               <span>{'\u2022'.repeat(passwordDots)}</span>
               {isTypingPassword && (
-                <span 
-                  style={{ 
+                <span
+                  style={{
                     opacity: showCursor ? 1 : 0,
                     color: '#005EB8',
+                    marginLeft: '2px',
                   }}
                 >
                   |
@@ -186,22 +234,43 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
             </div>
           </div>
 
+          {/* Log In Button */}
           <button
-            className="w-full py-2.5 rounded text-sm font-semibold text-white transition-all duration-100"
-            style={{ 
+            style={{
+              width: '100%',
+              padding: '11px 16px',
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '14px',
+              fontWeight: 600,
+              color: '#FFFFFF',
               backgroundColor: buttonPressed ? '#004494' : '#005EB8',
+              border: 'none',
               borderRadius: '4px',
-              transform: buttonPressed ? 'scale(0.98)' : 'scale(1)',
+              cursor: 'pointer',
+              transition: 'background-color 100ms ease-out',
+              marginTop: '8px',
             }}
           >
             Log In
           </button>
         </div>
 
-        <div className="mt-6 pt-4 border-t border-gray-100">
-          <p 
-            className="text-xs text-center"
-            style={{ color: '#9CA3AF' }}
+        {/* Footer */}
+        <div
+          style={{
+            marginTop: '24px',
+            paddingTop: '20px',
+            borderTop: '1px solid #E5E7EB',
+          }}
+        >
+          <p
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '11px',
+              color: '#94A3B8',
+              textAlign: 'center',
+              lineHeight: '1.4',
+            }}
           >
             Secure clinical system login
           </p>

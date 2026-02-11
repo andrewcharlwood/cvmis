@@ -7,6 +7,7 @@ interface BootLine {
 }
 
 const bootLines: BootLine[] = [
+  
   { html: '<span class="text-[#00ff41] font-bold">CLINICAL TERMINAL v3.2.1</span>', delay: 0 },
   { html: '<span class="text-[#3a6b45]">Initialising pharmacist profile...</span>', delay: 220 },
   { html: '<span class="text-[#3a6b45]">---</span>', delay: 220 },
@@ -23,34 +24,35 @@ const bootLines: BootLine[] = [
   { html: '<span class="text-[#00ff41] font-bold">&gt; READY — Rendering CV..<span class="ecg-seed-dot" id="ecg-seed-dot">.</span></span>', delay: 220 },
 ]
 
+// Precompute cumulative delays so the first render can use them
+const bootLineDelays: number[] = (() => {
+  const delays: number[] = []
+  let total = 0
+  bootLines.forEach((line) => {
+    delays.push(total)
+    total += line.delay
+  })
+  return delays
+})()
+
 interface BootSequenceProps {
   onComplete: () => void
 }
 
 export function BootSequence({ onComplete }: BootSequenceProps) {
   const [isVisible, setIsVisible] = useState(true)
-  const [lineDelays, setLineDelays] = useState<number[]>([])
-  
   useEffect(() => {
-    const delays: number[] = []
-    let totalDelay = 0
-    bootLines.forEach((line) => {
-      delays.push(totalDelay)
-      totalDelay += line.delay
-    })
-    setLineDelays(delays)
-    
-    const totalBootTime = totalDelay
+    const totalBootTime = bootLines.reduce((sum, l) => sum + l.delay, 0)
     const fadeStartTime = totalBootTime + 400
-    
+
     const fadeTimer = setTimeout(() => {
       setIsVisible(false)
     }, fadeStartTime)
-    
+
     const completeTimer = setTimeout(() => {
       onComplete()
-    }, fadeStartTime + 800)
-    
+    }, fadeStartTime+2000)
+
     return () => {
       clearTimeout(fadeTimer)
       clearTimeout(completeTimer)
@@ -63,10 +65,10 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
         <motion.div
           className="fixed inset-0 z-50 flex flex-col justify-center bg-black p-10 font-mono text-sm overflow-hidden"
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
+          exit={{ opacity: 1 }}
+          transition={{ delay: 2, duration: 0.8, ease: 'easeOut' }}
         >
-          <div className="flex flex-col gap-1 max-w-[640px]">
+          <div className="flex flex-col gap-1 max-w-[640px] transform -translate-y-1/2">
             {bootLines.map((line, index) => (
               <motion.div
                 key={index}
@@ -74,7 +76,7 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  delay: lineDelays[index] / 1000,
+                  delay: (bootLineDelays[index] ?? 0) / 1000,
                   duration: 0.4,
                   ease: 'easeOut',
                 }}
@@ -85,7 +87,7 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
               className="inline-block w-2 h-4 bg-[#00ff41] ml-1 animate-blink"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: lineDelays[lineDelays.length - 1] / 1000 }}
+              transition={{ delay: 2 + (bootLineDelays[bootLineDelays.length + 1] ?? 0) / 1000 }}
             />
           </div>
         </motion.div>

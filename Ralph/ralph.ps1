@@ -15,7 +15,8 @@
     - Same error repeated N consecutive iterations (stuck)
 
 .PARAMETER Model
-    Claude model to use. Default: "opus".
+    Initial Claude model to use. Default: "sonnet". The agent can dynamically switch
+    models between iterations via <next-model>opus|sonnet</next-model> signals.
 
 .PARAMETER BranchName
     Optional git branch name. If provided, creates/checks out the branch before starting.
@@ -34,7 +35,7 @@
 #>
 
 param(
-    [string]$Model = "opus",
+    [string]$Model = "sonnet",
     [string]$BranchName,
     [int]$MaxNoProgress = 3,
     [int]$MaxSameError = 3
@@ -142,11 +143,38 @@ if (Test-Path $progressFile) {
 
 Write-Host ""
 Write-Host "===== Ralph Wiggum Loop (Visualization Improvements) =====" -ForegroundColor Cyan
-Write-Host "Model: $Model | Runs until COMPLETE" -ForegroundColor Cyan
+Write-Host "Model: $Model (dynamic switching enabled) | Visual review: ON | Runs until COMPLETE" -ForegroundColor Cyan
 Write-Host "Circuit breakers: no-progress=$MaxNoProgress, same-error=$MaxSameError" -ForegroundColor Cyan
 if ($BranchName) { Write-Host "Branch: $BranchName" -ForegroundColor Cyan }
 if ($existingIterations -gt 0) { Write-Host "Previous iterations: $existingIterations" -ForegroundColor Cyan }
 Write-Host "===========================================" -ForegroundColor Cyan
+Write-Host ""
+
+# --- Dev Server (for visual review via Claude in Chrome) ---
+$devServerPort = 5173
+$devServerPid = $null
+
+try {
+    $null = Invoke-WebRequest -Uri "http://localhost:$devServerPort" -TimeoutSec 2 -ErrorAction Stop
+    Write-Host "Dev server detected on port $devServerPort" -ForegroundColor Green
+} catch {
+    Write-Host "Starting dev server (port $devServerPort)..." -ForegroundColor Cyan
+    $devProc = Start-Process -FilePath "npm.cmd" -ArgumentList "run", "dev" -PassThru -WindowStyle Minimized
+    $devServerPid = $devProc.Id
+
+    for ($w = 1; $w -le 20; $w++) {
+        Start-Sleep -Seconds 1
+        try {
+            $null = Invoke-WebRequest -Uri "http://localhost:$devServerPort" -TimeoutSec 2 -ErrorAction Stop
+            Write-Host "Dev server ready on port $devServerPort" -ForegroundColor Green
+            break
+        } catch {
+            if ($w -eq 20) {
+                Write-Warning "Dev server may not be ready - visual review steps may fail"
+            }
+        }
+    }
+}
 Write-Host ""
 
 $i = 0
@@ -306,6 +334,7 @@ while ($true) {
             Write-Host "===== CIRCUIT BREAKER: NO PROGRESS =====" -ForegroundColor Red
             Write-Host "No git commits for $MaxNoProgress consecutive iterations. The loop is stalled." -ForegroundColor Red
             Write-Host "Check progress.txt and logs/ for details on what went wrong." -ForegroundColor Red
+            if ($devServerPid) { taskkill /T /F /PID $devServerPid 2>$null | Out-Null }
             exit 1
         }
     } else {
@@ -326,6 +355,7 @@ while ($true) {
                 Write-Host "Same error pattern for $MaxSameError consecutive iterations:" -ForegroundColor Red
                 Write-Host "  $currentErrorSignature" -ForegroundColor Red
                 Write-Host "Check progress.txt and logs/ for details." -ForegroundColor Red
+                if ($devServerPid) { taskkill /T /F /PID $devServerPid 2>$null | Out-Null }
                 exit 1
             }
         } elseif ($currentErrorSignature) {
@@ -337,15 +367,14 @@ while ($true) {
         $lastErrorSignature = ""
     }
 
-    # --- Push to Remote ---
-    $hasRemote = git remote 2>$null
-    if ($hasRemote) {
-        $currentBranch = git branch --show-current
-        git push origin $currentBranch 2>$null
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "  Pushed to remote." -ForegroundColor Green
+    # --- Dynamic Model Selection ---
+    if ($outputString -match "<next-model>(opus|sonnet)</next-model>") {
+        $nextModel = $Matches[1]
+        if ($nextModel -ne $Model) {
+            Write-Host "  [Model Switch] $Model -> $nextModel (agent recommendation)" -ForegroundColor Magenta
+            $Model = $nextModel
         } else {
-            Write-Host "  Push failed or no remote configured - continuing." -ForegroundColor DarkYellow
+            Write-Host "  [Model] Staying on $Model" -ForegroundColor DarkGray
         }
     }
 
@@ -354,6 +383,7 @@ while ($true) {
         Write-Host ""
         Write-Host "===== COMPLETE =====" -ForegroundColor Green
         Write-Host "Visualization improvements finished after $i iteration(s) this run ($totalIteration total)." -ForegroundColor Green
+        if ($devServerPid) { taskkill /T /F /PID $devServerPid 2>$null | Out-Null }
         exit 0
     }
 

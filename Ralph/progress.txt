@@ -85,3 +85,9 @@
 - Kept legacy tokens in place to avoid breaking boot/ECG components
 - Used --pmr- namespace for all PMR tokens to distinguish from legacy design system
 - Extended Tailwind colors rather than replacing them — allows both themes to work simultaneously
+
+### IMPORTANT — Design Guidance is Pre-Baked
+Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the output is embedded in each ref file under "Design Guidance (from /frontend-design)". Previous iterations STALLED because the skill output consumed the entire context window. The guidance is now in the ref files — just read and implement.
+
+### ECG Reference Implementation
+`ECGCombined.tsx` in the project root is a Remotion version of the ECG animation with a superior mask-based text reveal technique. Task 1b references this for the canvas implementation.
