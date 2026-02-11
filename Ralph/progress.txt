@@ -364,3 +364,34 @@ This is a complete redesign of the CV presentation, moving from the ECG animatio
   - Research documents show both detail and grade in same field with line break
   - Tree-indented structure consistency across Investigations and Documents views
 
+### Iteration 12 — Task 12: Build ReferralsView with clinical referral form
+- **Completed**: Task 12 - Created ReferralsView with clinical referral form and direct contact section
+- **Files created**:
+  - `src/components/views/ReferralsView.tsx` - Full Referrals view with form and contact table
+- **Files modified**:
+  - `src/components/PMRInterface.tsx` - Added ReferralsView to renderView switch
+- **Design decisions**:
+  - Form layout: two-column grid for patient info and referrer fields
+  - Pre-filled patient info: CHARLWOOD, Andrew (Mr); NHS Number: 221 181 0
+  - Priority radio buttons: Urgent (red), Routine (NHS blue, default), Two-Week Wait (amber)
+  - Tongue-in-cheek tooltips on priority options
+  - Form fields: Referrer Name (required), Referrer Email (required, validated), Referrer Org (optional), Reason (textarea)
+  - Contact method radio: Email, Phone, LinkedIn
+  - Submit button: NHS blue (#005EB8), loading spinner on submit
+  - Success state: green checkmark, reference number (REF-YYYY-MMDD-NNN), 24-48hr response message
+  - Direct Contact table below form: Email (mailto), Phone (tel), LinkedIn (external link), Location
+  - Form validation with inline error messages
+  - Input styling: 1px border-gray-300, 4px radius, 8px 12px padding, NHS blue focus ring
+- **Accessibility**:
+  - Proper form labels with `htmlFor` associations
+  - Required field indicators (red asterisk)
+  - Error messages announced
+  - Radio buttons properly grouped with hidden inputs and visible styled indicators
+  - Respects `prefers-reduced-motion`: no animations
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - Form validation uses simple state-based approach with error objects
+  - Radio buttons styled with hidden `<input>` and custom styled `<span>` for visual control
+  - Reference number uses current date plus random sequence for uniqueness
+  - Direct Contact table uses same key-value layout as Patient Demographics card
+

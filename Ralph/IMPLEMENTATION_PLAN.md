@@ -151,7 +151,7 @@ src/
 
   Create `src/components/views/DocumentsView.tsx`. Education presented as attached documents. Table: Type (icon), Document, Date, Source. Icons: FileText (certificates), Award (registrations), GraduationCap (academic), FlaskConical (research). 4 documents: MPharm (Hons) 2:1 UEA 2015, GPhC Registration 2016, Mary Seacole Programme 2018, A-Levels 2011 + Drug Delivery Research. Click to expand "preview" panel with tree-indented details: Type, Date Awarded, Institution, Classification, Duration, Research details, Notes. Consistent with Investigations expanded view style.
 
-- [ ] **Task 12: Build ReferralsView with clinical referral form**
+- [x] **Task 12: Build ReferralsView with clinical referral form**
 
   Create `src/components/views/ReferralsView.tsx`. Contact presented as clinical referral form. Form fields: Referring to (pre-filled: CHARLWOOD, Andrew), NHS Number (pre-filled), Priority toggle (radio: Urgent [red], Routine [blue/selected], Two-Week Wait [amber] with tongue-in-cheek tooltips), Referrer Name/Email/Org inputs, Reason for Referral textarea, Contact Method radio (Email/Phone/LinkedIn). Submit button: NHS blue, full width right half. On submit: loading spinner, then success message with reference number (REF-2026-0210-001 format). Below form: Direct Contact table with Email, Phone, LinkedIn, Location as clickable links.
 
