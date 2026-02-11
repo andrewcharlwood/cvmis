@@ -1,187 +1,53 @@
-# Implementation Plan — Clinical Record PMR System
+# Implementation Plan — Design 7: The Clinical Record (v2)
 
 ## Project Overview
 
-Transform the existing React CV application into a **Patient Medical Record (PMR) system** — a faithful digital clinical information system that presents Andy's CV as a clinician would view a patient record. This is Design 7: The Clinical Record, completely replacing the previous ECG-based design.
+Redesign of the Clinical Record PMR interface to achieve **absolute thematic fidelity** to real NHS clinical software (EMIS Web, SystmOne). The codebase has existing components from a prior iteration that are functionally complete but lack the visual density, authentic clinical system feel, and design quality described in the specification. This plan rebuilds each visual component to production-showcase quality.
 
-**Core Concept:**
-The "patient" is Andy's career. Users navigate a genuine PMR interface (similar to EMIS Web, SystmOne, Vision) with:
-- Patient banner with persistent demographic context
-- Sidebar navigation with clinical record categories (Summary, Consultations, Medications, Problems, Investigations, Documents, Referrals)
-- Consultation-journal format for experience (History/Examination/Plan structure)
-- Tabular medications list for skills with proficiency "dosages"
-- Clinical alert system for standout achievements
-- Light-mode only (authentic to clinical systems)
-- Border-heavy, table-heavy, functional aesthetic
+**Core principle:** This is NOT a clinical "theme" loosely applied — it's a **faithful digital clinical information system**. Every element must look like it belongs in actual NHS software. Border-heavy, table-heavy, functional — zero decorative flourish.
 
-**Key Features:**
-- ECG exit animation → Login sequence → PMR interface materialization (~2.7s total transition)
-- Animated login screen with typing username/password
-- 7 sidebar views with instant content swapping (authentic clinical system behavior)
-- Expandable consultation entries with coded entries (SNOMED-style references)
-- Sortable medications table with prescribing history expansion
-- Traffic-light status system (green/amber/red/gray)
-- Clinical alert banner with acknowledge interaction
-- Responsive: desktop sidebar → tablet icon-only → mobile bottom nav
-- Full keyboard navigation (Alt+1-7 shortcuts)
-- Search across all PMR sections with fuse.js
-
-**Tech Stack:**
-- React 18+ with TypeScript
-- Vite for build tooling
-- Tailwind CSS for styling
-- Framer Motion for login animation and transitions
-- Lucide React for clinical icons
-- fuse.js for fuzzy search
-
-**Project Structure:**
-```
-src/
-├── components/
-│   ├── BootSequence.tsx          # Existing terminal animation (preserved)
-│   ├── ECGAnimation.tsx          # Modified for PMR transition
-│   ├── LoginScreen.tsx           # Animated login sequence
-│   ├── PMRInterface.tsx          # Main PMR layout container
-│   ├── PatientBanner.tsx         # Full + condensed banner
-│   ├── ClinicalSidebar.tsx       # Navigation sidebar
-│   ├── ClinicalAlert.tsx         # Dismissible alert banner
-│   ├── Breadcrumb.tsx            # Navigation breadcrumb
-│   ├── views/
-│   │   ├── SummaryView.tsx       # Patient summary landing
-│   │   ├── ConsultationsView.tsx # Experience as consultations
-│   │   ├── MedicationsView.tsx   # Skills as medications
-│   │   ├── ProblemsView.tsx      # Achievements as problems
-│   │   ├── InvestigationsView.tsx# Projects as investigations
-│   │   ├── DocumentsView.tsx     # Education as documents
-│   │   └── ReferralsView.tsx     # Contact as referral form
-│   ├── ui/
-│   │   ├── ConsultationEntry.tsx # Expandable consultation
-│   │   ├── MedicationTable.tsx   # Sortable skills table
-│   │   ├── ProblemEntry.tsx      # Problem list item
-│   │   ├── InvestigationEntry.tsx# Investigation result
-│   │   └── DocumentEntry.tsx     # Document list item
-├── hooks/
-│   ├── useScrollCondensation.ts  # Patient banner scroll behavior
-│   └── useSearch.ts              # Fuse.js search hook
-├── data/
-│   ├── consultations.ts          # Experience data
-│   ├── medications.ts            # Skills data
-│   ├── problems.ts               # Achievements data
-│   ├── investigations.ts         # Projects data
-│   └── documents.ts              # Education data
-├── types/
-│   └── pmr.ts                    # All PMR TypeScript interfaces
-├── lib/
-│   └── utils.ts                  # Utility functions
-├── App.tsx                       # Phase manager (boot → ecg → login → pmr)
-└── index.css                     # Tailwind + PMR CSS variables
-```
-
-**Reference Materials:**
-- `designs/07-the-clinical-record.md` — Complete design specification
-- `References/CV_v4.md` — Source CV content
-- `References/concept.html` — Previous ECG implementation (timing reference only)
-
----
+**Data files are correct and complete** (`src/data/*`). The existing type system (`src/types/pmr.ts`) is sound. The phase management in `App.tsx` works. This plan focuses on **rebuilding the visual layer** to match the specification.
 
 ## Quality Checks
 
-- `npm run dev` — Development server starts without errors
-- `npm run build` — Production build completes without errors
-- `npm run lint` — No ESLint errors
-- `npm run typecheck` — No TypeScript errors
-- Manual verification:
-  - Boot sequence plays (4s) → ECG flatlines → Login screen types username/password → PMR interface materializes
-  - Patient banner condenses on scroll (80px → 48px)
-  - All 7 sidebar views render correctly with proper data
-  - Consultation entries expand/collapse with History/Examination/Plan sections
-  - Medications table sorts correctly by all columns
-  - Clinical alert appears on Summary view and dismisses with animation
-  - Search finds content across all sections
-  - Keyboard shortcuts work (Alt+1-7)
-  - Responsive layouts work at 1024px, 768px, and 480px
-  - No console errors
-  - Accessibility: screen reader announces views, tables are navigable
+Run ALL of these after each task. All must pass before committing.
 
----
+- `npm run typecheck`
+- `npm run lint`
+- `npm run build`
+
+## Reference Files
+
+Each task below references a specific file in `Ralph/refs/` — read ONLY that file for the task context. Do NOT read goal.md directly (it's 1100+ lines and will overwhelm your context).
 
 ## Tasks
 
-- [x] **Task 1: Create PMR data layer and TypeScript types**
+- [x] **Task 1: Design system foundation and font setup.** Read `Ralph/refs/ref-design-system.md`. Audit and fix the Tailwind config (`tailwind.config.js`) and global CSS (`src/index.css`) to ensure ALL PMR color tokens, typography, and spacing match the design system spec exactly. Specific fixes needed: (a) Ensure Geist Mono font is loaded via Google Fonts or local import — currently the project uses Fira Code for monospace but the spec requires Geist Mono for coded entries, timestamps, and data values. (b) Verify all PMR color tokens exist in Tailwind config: main content `#F5F7FA`, cards `#FFFFFF`, sidebar `#1E293B`, patient banner `#334155`, NHS blue `#005EB8`, green `#22C55E`, amber `#F59E0B`, red `#EF4444`, text primary `#111827`, text secondary `#6B7280`. (c) Ensure border-radius defaults to 4px for cards/inputs (not 8px or 12px — clinical systems use minimal rounding). (d) Add a `.pmr-theme` class or CSS custom properties layer for PMR-specific tokens if not already present. (e) Verify Inter font is loaded and configured as the primary font family. Do NOT invoke /frontend-design for this task — it's pure configuration.
 
-  Create `src/types/pmr.ts` with interfaces for: `Patient`, `Consultation` (History/Examination/Plan/CodedEntries), `Medication` (with PrescribingHistory), `Problem` (status, code, outcome), `Investigation` (with results), `Document`, `ReferralForm`. Create `src/data/` directory with files: `consultations.ts` (5 roles from CV_v4.md mapped to consultation format), `medications.ts` (18 skills mapped to medication format with prescribing history), `problems.ts` (8-10 achievements with traffic light status), `investigations.ts` (4 projects with methodology/results), `documents.ts` (MPharm, Mary Seacole, A-Levels, Research). All data must match CV_v4.md exactly with specific numbers (£14.6M, 14,000 patients, etc.).
+- [ ] **Task 2: Rebuild LoginScreen component.** Read `Ralph/refs/ref-transition-login.md` and `Ralph/refs/ref-design-system.md`. Invoke `/frontend-design` skill BEFORE writing code. Rebuild `src/components/LoginScreen.tsx` to match the login sequence specification exactly: (a) Dark blue-gray `#1E293B` background. (b) White card: 320px wide, **12px border-radius** (exception to the 4px rule — login cards can be rounder), subtle shadow. (c) NHS-blue shield icon at top with "CareerRecord PMR" branding text. (d) Username field types `A.CHARLWOOD` at 30ms/char in **Geist Mono** font. (e) Password field fills 8 dots at 20ms/dot. (f) Blinking cursor (530ms interval) in active field. (g) "Log In" button: NHS blue `#005EB8`, full width, pressed state darkens to `#004494`. (h) After submit: card scales to 103% and fades out over 200ms. (i) Respect `prefers-reduced-motion`. The login must feel like actually logging into NHS software at 8am on a Monday.
 
-- [x] **Task 2: Modify ECGAnimation for PMR flatline transition**
+- [ ] **Task 3: Rebuild PatientBanner component.** Read `Ralph/refs/ref-banner-sidebar.md` and `Ralph/refs/ref-design-system.md`. Invoke `/frontend-design` skill BEFORE writing code. Rebuild `src/components/PatientBanner.tsx` to match the specification exactly: (a) Full banner 80px: background `#334155`, bottom border `1px solid #475569`. Name in Inter 600 **20px** (not 18px), details in Inter 400 14px. Layout must match the ASCII art in the ref file — surname-first format "CHARLWOOD, Andrew (Mr)", DOB/NHS No/Address on second row, phone/email/buttons on third row. (b) Status: green dot + "Active" text. Badge: "Open to opportunities" as blue pill. (c) Action buttons: outlined rectangles with NHS blue text and 1px border, 4px radius. Hover fills with NHS blue bg + white text. (d) Condensed banner 48px: single line with name, NHS number, status, action buttons only. Triggers at 100px scroll via IntersectionObserver. Smooth 200ms height transition. (e) Mobile banner: minimal top bar `CHARLWOOD, A (Mr) | 2211810 | dot` with overflow "..." menu. NHS Number tooltip: "GPhC Registration Number".
 
-  Modify `src/components/ECGAnimation.tsx` to change the exit phase. Instead of fading to white and revealing the CV, the animation should: 1) Complete the name tracing as normal, 2) Hold for 300ms, 3) Draw a flatline extending rightward from the name over 300ms (patient monitor flatline visual), 4) Fade entire canvas to black over 200ms, 5) Transition background to dark blue-gray (#1E293B) over 200ms. Emit `onComplete` callback to trigger LoginScreen. Total ECG phase: ~5-6 seconds. Preserve all existing animation timing for heartbeats and letter tracing.
+- [ ] **Task 4: Rebuild ClinicalSidebar component.** Read `Ralph/refs/ref-banner-sidebar.md` and `Ralph/refs/ref-design-system.md`. Invoke `/frontend-design` skill BEFORE writing code. Rebuild `src/components/ClinicalSidebar.tsx` to match the specification exactly: (a) 220px fixed width, `#1E293B` background, `1px solid #334155` right border. (b) Header: "CareerRecord PMR / v1.0.0" in Inter 500, 13px, white at 50% opacity. (c) Search input: "Search record..." placeholder, integrated in sidebar below header. (d) **Navigation labels use CV-friendly terms**: Summary, Experience, Skills, Achievements, Projects, Education, Contact (NOT clinical jargon like Consultations, Medications, etc.). Same Lucide icons as before. Items: 44px height, 16px left padding, icons 18px + labels Inter 500 14px. Exact states: default white/70%, hover white/100% + `rgba(255,255,255,0.08)` bg, active white/100% + 3px NHS blue left border + `rgba(255,255,255,0.12)` bg + Inter 600 bold. (e) Separator line between Summary and Experience. (f) Footer: "Session: A.CHARLWOOD / Logged in: [time]" in Inter 400, 11px, `#64748B`. Time updates on mount. (g) Tablet mode: 56px icon-only with tooltips. (h) URL hash routing (`#summary`, `#experience`, `#skills`, `#achievements`, `#projects`, `#education`, `#contact`). (i) Alt+1-7 keyboard shortcuts, arrow key navigation, "/" for search focus. (j) Update the ViewId type in `src/types/pmr.ts` if needed to match the new labels.
 
-- [x] **Task 3: Build LoginScreen component with typing animation**
+- [ ] **Task 5: Rebuild PMRInterface layout and add Breadcrumb.** Read `Ralph/refs/ref-banner-sidebar.md` and `Ralph/refs/ref-design-system.md`. Rebuild `src/components/PMRInterface.tsx` to ensure correct layout composition: (a) Fixed sidebar (220px) + sticky patient banner + scrollable main content area with `#F5F7FA` background. (b) Main content padding: 24px. No max-width — content fills available space. (c) Create `src/components/Breadcrumb.tsx`: displays "Patient Record > [Current View]" at the top of the main content area (using CV-friendly view names: Experience, Skills, Achievements, etc.). When a consultation/skill/achievement is expanded, the breadcrumb deepens to show the item name. Styled in Inter 400, 13px, gray-400, with chevron separators. Clickable links navigate back. (d) Interface materialization animations: patient banner slides down (200ms ease-out), sidebar slides from left (250ms ease-out, 50ms delay), content fades in (300ms, 100ms delay after sidebar). (e) View switching must be INSTANT — no crossfade or slide between views. (f) Ensure mobile layout uses bottom nav bar (56px height with safe area padding). (g) Update the view switching logic to use the new CV-friendly ViewId values (summary, experience, skills, achievements, projects, education, contact).
 
-  Create `src/components/LoginScreen.tsx`. Dark blue-gray background (#1E293B). Centered white login card (320px wide, 12px radius, subtle shadow). NHS-blue shield icon at top. Username field: types "A.CHARLWOOD" character-by-character (30ms per char, Geist Mono font). Password field: fills with 8 dots (20ms per dot). "Log In" button: NHS blue (#005EB8), full width. After 150ms pause, button shows pressed state (darkens, 100ms), then emits `onComplete` callback. Total login animation: ~1.2s. Respect `prefers-reduced-motion`: with reduced motion, username appears instantly and login completes in ~500ms.
+- [ ] **Task 6: Rebuild SummaryView with Clinical Alert.** Read `Ralph/refs/ref-summary-alert.md` and `Ralph/refs/ref-design-system.md`. Invoke `/frontend-design` skill BEFORE writing code. Rebuild `src/components/views/SummaryView.tsx` and the clinical alert: (a) Clinical Alert: amber `#FEF3C7` background, 4px left border `#F59E0B`, text `#92400E`. Slides down with **spring animation** (not ease-out — use Framer Motion `type: "spring"` with appropriate damping). Acknowledge button: amber outlined. On click: warning icon cross-fades to green checkmark (200ms), holds 200ms, then alert height collapses (200ms ease-out). (b) 2-column card grid on desktop, single column on mobile. Cards have: header bar with title in Inter 600, 14px, uppercase, on `#F9FAFB` background with `1px solid #E5E7EB` bottom border. Card body: 16px padding, `1px solid #E5E7EB` border, 4px radius. (c) Demographics card: two-column key-value layout. Labels right-aligned Inter 500 13px gray-500, values left-aligned Inter 400 14px gray-900. (d) Active Problems card: traffic light dots + problem text + date in Geist Mono 12px. (e) Quick Meds card: 4-column table with top 5 skills. "View Full List ->" link. (f) Last Consultation card: preview with "View Full Record ->" link. All navigation links must actually switch the sidebar view.
 
-- [x] **Task 4: Build PatientBanner component (full and condensed)**
+- [ ] **Task 7: Rebuild ConsultationsView.** Read `Ralph/refs/ref-consultations.md` and `Ralph/refs/ref-design-system.md`. Invoke `/frontend-design` skill BEFORE writing code. Rebuild `src/components/views/ConsultationsView.tsx`: (a) Collapsed entries: date in Geist Mono 13px gray-500, organization in Inter 400 13px NHS blue, role in Inter 600 15px gray-900, "Key:" prefix in Inter 500 gray-500 with single-line achievement. Chevron button right-aligned. (b) Status dot: green for current, gray for historical. (c) 3px left border color-coded by employer (NHS blue `#005EB8` or Tesco teal `#00897B`). (d) Expanded state: Duration line, then HISTORY / EXAMINATION / PLAN sections with headers in Inter 600, 12px, uppercase, letter-spacing 0.05em, gray-400. Plan items as bullet lists. (e) CODED ENTRIES section at bottom: Geist Mono 12px, gray-500, bracket codes. (f) Height-only expand animation, 200ms ease-out. NO opacity fade on content — content simply grows/shrinks. (g) Only one expanded at a time. (h) Implement the second clinical alert (Python switching algorithm alert) that appears on first navigation to Consultations view, dismissible with same Acknowledge pattern.
 
-  Create `src/components/PatientBanner.tsx` with two modes. Full banner (80px): patient name "CHARLWOOD, Andrew (Mr)", DOB "14/02/1993", NHS No "221 181 0" (GPhC number formatted), address "Norwich, NR1", phone, email, status "Active" (green dot), badge "Open to opportunities". Action buttons: Download CV, Email, LinkedIn. Condensed banner (48px, sticky after 100px scroll): name, NHS No, status dot, action buttons only. Use `useScrollCondensation` hook with IntersectionObserver. Smooth height transition (200ms). Banner spans full viewport width.
+- [ ] **Task 8: Rebuild MedicationsView.** Read `Ralph/refs/ref-medications.md` and `Ralph/refs/ref-design-system.md`. Invoke `/frontend-design` skill BEFORE writing code. Rebuild `src/components/views/MedicationsView.tsx`: (a) Three category tabs: "Active Medications" (technical), "Clinical Medications" (healthcare domain), "PRN (As Required)" (strategic/leadership). Tab styling: active tab has white bg + NHS blue bottom border. (b) Full table with proper `<table>` markup: Drug Name | Dose | Frequency | Start | Status. Table headers: Inter 600, 13px, uppercase, `#F9FAFB` bg. Row height: 40px. All borders: `1px solid #E5E7EB`. Alternating `#FFFFFF`/`#F9FAFB` row backgrounds. (c) Hover: `#EFF6FF` background only — no transform, no lift. (d) Sortable columns: click header to sort, arrow indicator in active column. (e) Status dots: 6px green circles + "Active" text. (f) Expandable prescribing history: Geist Mono 12px, year markers bold, descriptions regular. (g) Mobile: card layout (stacked fields per card, not table).
 
-- [x] **Task 5: Build ClinicalSidebar component with navigation and search**
+- [ ] **Task 9: Rebuild ProblemsView.** Read `Ralph/refs/ref-problems.md` and `Ralph/refs/ref-design-system.md`. Invoke `/frontend-design` skill BEFORE writing code. Rebuild `src/components/views/ProblemsView.tsx`: (a) Two sections: "ACTIVE PROBLEMS" and "RESOLVED PROBLEMS" with section headers in clinical style. (b) Table columns — Active: Status | Code | Problem | Since. Resolved: Status | Code | Problem | Resolved | Outcome. (c) Traffic light dots: 8px circles (green=resolved, amber=in-progress). Always paired with text labels — never the sole indicator. (d) Code column in Geist Mono. (e) Expandable rows showing full narrative + linked consultation buttons that navigate to Consultations view. (f) Row hover: `#EFF6FF`. (g) Mobile: card layout.
 
-  Create `src/components/ClinicalSidebar.tsx`. 220px width (desktop), dark blue-gray (#1E293B) background. Header: "CareerRecord PMR v1.0.0". 7 navigation items with Lucide icons: Summary (ClipboardList), Consultations (FileText), Medications (Pill), Problems (AlertTriangle), Investigations (FlaskConical), Documents (FolderOpen), Referrals (Send). Active state: 3px NHS blue left border, white background tint. Separator line after Summary. Footer: "Session: A.CHARLWOOD" and current time. Search input in header with fuse.js integration. Clicking item updates active view instantly (no animation). URL hash updates (#summary, #consultations, etc.).
+- [ ] **Task 10: Rebuild InvestigationsView and DocumentsView.** Read `Ralph/refs/ref-investigations-documents.md` and `Ralph/refs/ref-design-system.md`. Invoke `/frontend-design` skill BEFORE writing code. Rebuild both views: (a) InvestigationsView: table with Test Name | Requested | Status | Result. Status badges: green "Complete", amber "Ongoing", pulsing green "Live". Expanded view uses tree-indented monospace structure with box-drawing characters (pipe symbols). "View Results" NHS blue button for PharMetrics only. (b) DocumentsView: table with Type icon | Document | Date | Source. Lucide icons per document type (FileText, Award, GraduationCap, FlaskConical). Expanded preview uses same tree-indented structure. (c) Both views share the expandable-row pattern — maintain visual consistency. (d) Mobile: card layouts for both.
 
-- [x] **Task 6: Build SummaryView component with clinical alert**
+- [ ] **Task 11: Rebuild ReferralsView.** Read `Ralph/refs/ref-referrals.md` and `Ralph/refs/ref-design-system.md`. Invoke `/frontend-design` skill BEFORE writing code. Rebuild `src/components/views/ReferralsView.tsx`: (a) Form header: "New Referral" with pre-filled patient info (non-editable). (b) Priority radio buttons: Urgent (red), Routine (blue, default), Two-Week Wait (amber). Each with tongue-in-cheek tooltips. (c) Form fields: standard clinical inputs with `1px solid #D1D5DB` border, 4px radius, `8px 12px` padding. Labels in Inter 500, 13px, gray-600 above inputs. Focus: NHS blue border + `box-shadow: 0 0 0 3px rgba(0,94,184,0.15)`. (d) Contact Method radio group. (e) Submit: "Send Referral" NHS blue button. Loading spinner state. Success state with reference number (REF-YYYY-MMDD-NNN format), checkmark, "24-48 hours" response time. (f) Direct Contact table below form: Email, Phone, LinkedIn, Location with action buttons.
 
-  Create `src/components/views/SummaryView.tsx`. Grid layout with cards: Patient Demographics (full width, two-column key-value table), Active Problems (left column, green/amber dots with dates), Current Medications Quick View (right column, 4-column table showing top 5 skills), Last Consultation preview (full width, truncated to 2-3 lines with "View Full Record" link). Clinical Alert banner: amber background (#FEF3C7), amber left border, warning icon, text "ALERT: This patient has identified £14.6M in prescribing efficiency savings...", Acknowledge button. Alert slides down with spring animation (250ms) after view loads. Clicking Acknowledge: icon changes to green checkmark (200ms), then alert collapses upward (200ms).
+- [ ] **Task 12: Implement fuzzy search with fuse.js.** Read `Ralph/refs/ref-interactions.md`. Install fuse.js (`npm install fuse.js`). Rebuild the search functionality in the sidebar: (a) Build a search index on mount from ALL content: consultation titles/descriptions, medication names, problem descriptions, investigation names, document titles. (b) Search options: `{ keys: ['title', 'description', 'name'], threshold: 0.3, includeScore: true }`. (c) Results dropdown grouped by section (Consultations, Medications, Problems, etc.) with section icon, matching text, and relevance indicator. (d) Clicking a result navigates to the section AND expands/highlights the matching item. (e) Dropdown styled: white bg, `1px solid #E5E7EB`, 4px radius, shadow. Items in Inter 400 14px, 36px height. (f) Escape closes dropdown. (g) Mobile: search bar at top of each view instead of sidebar.
 
-- [x] **Task 7: Build ConsultationsView with History/Examination/Plan structure**
+- [ ] **Task 13: Implement context menus.** Read `Ralph/refs/ref-interactions.md`. Add right-click/long-press context menus: (a) On consultation entries: "Expand", "Copy to clipboard", "View coded entries". (b) On medication rows: "View prescribing history", "Copy to clipboard". (c) On problem entries: "View linked consultations", "Copy to clipboard". (d) Styled: white bg, `1px solid #E5E7EB` border, 4px radius, `box-shadow: 0 4px 12px rgba(0,0,0,0.1)`. Items: Inter 400, 14px, 36px row height. (e) Escape closes menu. Focus returns to trigger element on close. (f) Use Headless UI or a custom implementation — accessible with keyboard navigation.
 
-  Create `src/components/views/ConsultationsView.tsx`. Reverse-chronological journal of 5 roles. Each entry: collapsed state shows date, organization (NHS blue), role title, key coded entry, expand chevron. Click to expand: shows Duration, HISTORY section (context/background), EXAMINATION section (bullet list of analysis/findings), PLAN section (bullet list of outcomes), CODED ENTRIES (SNOMED-style codes like [EFF001], [ALG001]). Section headers styled as clinical consultation dividers (uppercase, letter-spacing). Only one entry expanded at a time. Color-coded left border: NHS blue for NHS N&W ICB, Teal (#00897B) for Tesco PLC. Expand animation: height 0→auto (200ms, ease-out).
+- [ ] **Task 14: Responsive design audit and fix.** Read `Ralph/refs/ref-interactions.md`. Systematically test and fix all three breakpoints: (a) Desktop (>1024px): full sidebar 220px, full patient banner 80px condensing to 48px, full tables. (b) Tablet (768-1024px): sidebar collapses to 56px icon-only with tooltips on hover/tap. Patient banner always condensed. Tables may horizontally scroll. Context menus via long-press. (c) Mobile (<768px): bottom nav bar with 7 icon buttons (56px height + safe area). Minimal top bar. ALL tables convert to card layout (stacked fields). Search bar at top of views. Back arrow to Summary. Touch targets minimum 48px. (d) Run `npm run build` and verify no layout breaks.
 
-- [x] **Task 8: Build MedicationsView with sortable table and prescribing history**
-
-  Create `src/components/views/MedicationsView.tsx`. Three category tabs: Active Medications (technical skills), Clinical Medications (healthcare domain skills), PRN (strategic skills). Each tab shows a table: Drug Name | Dose (%) | Frequency | Start | Status. Sortable columns: clicking header sorts (asc/desc toggle). Default sort: by category grouping. Table styling: gray-200 borders, alternating row colors, 40px row height. Hover: subtle blue tint (#EFF6FF). Click row to expand "Prescribing History" — mini-timeline showing skill progression (year + description). History styled in Geist Mono. 18 total medications mapped from CV skills with accurate proficiency percentages and usage frequencies.
-
-- [x] **Task 9: Build ProblemsView with traffic light system**
-
-  Create `src/components/views/ProblemsView.tsx`. Two sections: Active Problems and Resolved Problems. Table columns: Status (traffic light dot), Code (SNOMED-style in Geist Mono), Problem description, Since/Resolved date, Outcome (for resolved). Traffic lights: 8px circles — green (resolved/current), amber (in progress), gray (inactive/historical). Active problems: £220M budget oversight, SQL transformation, data literacy programme. Resolved problems: 8 achievements with specific outcomes ("Python algorithm: 14,000 pts, £2.6M/yr", "70% reduction, 200hrs saved", etc.). Click row to expand full narrative with "linked consultations" navigation.
-
-- [x] **Task 10: Build InvestigationsView with results panel**
-
-  Create `src/components/views/InvestigationsView.tsx`. Projects presented as diagnostic investigations. Table: Test Name | Requested | Status | Result. Status badges: Complete (green dot), Ongoing (amber dot), Live (pulsing green dot for PharMetrics). 5 investigations: PharMetrics Interactive Platform, Patient Switching Algorithm, Blueteq Generator, CD Monitoring System, Sankey Chart Analysis Tool. Click row to expand "results panel" with tree-indented structure: Date Requested, Date Reported, Status, Requesting Clinician, Methodology, Results, Tech Stack. PharMetrics has "View Results" button linking to medicines.charlwood.xyz.
-
-- [x] **Task 11: Build DocumentsView for education/certifications**
-
-  Create `src/components/views/DocumentsView.tsx`. Education presented as attached documents. Table: Type (icon), Document, Date, Source. Icons: FileText (certificates), Award (registrations), GraduationCap (academic), FlaskConical (research). 4 documents: MPharm (Hons) 2:1 UEA 2015, GPhC Registration 2016, Mary Seacole Programme 2018, A-Levels 2011 + Drug Delivery Research. Click to expand "preview" panel with tree-indented details: Type, Date Awarded, Institution, Classification, Duration, Research details, Notes. Consistent with Investigations expanded view style.
-
-- [x] **Task 12: Build ReferralsView with clinical referral form**
-
-  Create `src/components/views/ReferralsView.tsx`. Contact presented as clinical referral form. Form fields: Referring to (pre-filled: CHARLWOOD, Andrew), NHS Number (pre-filled), Priority toggle (radio: Urgent [red], Routine [blue/selected], Two-Week Wait [amber] with tongue-in-cheek tooltips), Referrer Name/Email/Org inputs, Reason for Referral textarea, Contact Method radio (Email/Phone/LinkedIn). Submit button: NHS blue, full width right half. On submit: loading spinner, then success message with reference number (REF-2026-0210-001 format). Below form: Direct Contact table with Email, Phone, LinkedIn, Location as clickable links.
-
-- [x] **Task 13: Implement keyboard shortcuts and accessibility**
-
-  Add keyboard navigation throughout. Global shortcuts: Alt+1-7 activate sidebar items, Escape closes expanded items/menus, / focuses search. Sidebar: Up/Down arrows navigate items, Enter activates. Implement focus management: after login, focus moves to first sidebar item; after view change, focus moves to view heading; after expanding item, focus moves to content. Add ARIA: `role="navigation"` on sidebar, `aria-current="page"` on active item, `role="alert"` on clinical alert, proper table markup with `scope="col"`, `aria-expanded` on expandable items. Test with screen reader: views announced, tables navigable, alert read immediately.
-
-- [x] **Task 14: Implement responsive design (tablet and mobile)**
-
-  Tablet (768-1024px): Sidebar collapses to 56px icon-only with tooltips on hover. Patient banner always condensed (48px). Tables may horizontally scroll with indicator. Mobile (<768px): Sidebar becomes bottom navigation bar (56px height, 7 icon buttons, safe area padding). Patient banner becomes minimal top bar. Tables switch to card layout (each row becomes stacked card). Search moves to top of each view. Add back navigation arrow in each view. Test all breakpoints: desktop (>1024), tablet (768-1024), mobile (<768). Ensure touch targets minimum 48px. Test on actual mobile device or emulator.
-
-- [x] **Task 15: Final integration, testing, and polish**
-
-  Wire up App.tsx with three phases: BootSequence (4s) → ECGAnimation (modified for flatline) → LoginScreen (1.2s) → PMRInterface. Ensure smooth transitions between phases. Run all quality checks. Verify TypeScript strict mode (no `any` types). Verify all CV content accuracy against CV_v4.md (dates, numbers, achievements). Test all interactive elements: sidebar nav, consultation expand, medication sort, alert acknowledge, referral form submit. Verify responsive layouts at all breakpoints. Test accessibility with keyboard navigation and screen reader. Verify search finds content across all sections. Final production build test.
-- [x] Task 16: Review against original design plan
-      - Review the completed build against the spec in ./goal.md
-      - Go through the complete plan, and cross reference against the implementation list above. Unmark, or add any further tasks as needed to realise the vision in the original design document. Use skills as needed.
-      
-  **Review completed** - Core PMR system fully functional. Known gaps (documented as scope decisions):
-  - Breadcrumb navigation: Not implemented (navigation via sidebar sufficient)
-  - Context menus: Not implemented (not essential for CV presentation)
-  - Full search: Only filters nav items (fuse.js across all content deferred)
-  - Download CV: Placeholder button (no PDF generation - out of scope)
-  - Second Consultations alert: Optional in spec, not implemented
-
-## Project Status: COMPLETE
-
-All 16 tasks in the implementation plan are complete. The Clinical Record PMR system is fully functional with:
-- Boot sequence → ECG flatline → Login animation → PMR interface transitions
-- All 7 views implemented (Summary, Consultations, Medications, Problems, Investigations, Documents, Referrals)
-- Responsive design (desktop, tablet, mobile)
-- Keyboard navigation and accessibility features
-- Clinical system aesthetic with proper NHS blue, traffic lights, and table formatting
+- [ ] **Task 15: Accessibility audit and final polish.** Read `Ralph/refs/ref-interactions.md`. Audit and fix accessibility: (a) Semantic HTML: sidebar `<nav>` with `aria-label`, main `<main>`, banner `<header>`, tables with `scope="col"`. (b) ARIA: `aria-current="page"` on active sidebar item, `aria-expanded` on expandable items, `role="alert"` on clinical alerts. (c) Focus management: after login focus to sidebar, after view switch focus to first heading, after expand focus to section heading, after alert dismiss focus to main content. (d) Keyboard: Tab order, roving tabindex in sidebar, Escape closes everything. (e) Screen reader: announce view changes, table headers, alert text. (f) `prefers-reduced-motion`: login instant, alert no slide, expand/collapse instant, banner condensation instant. (g) Color contrast: verify all text meets WCAG 2.1 AA. Traffic lights always have text labels. (h) Final visual polish pass: ensure consistent spacing, borders, fonts across all views.

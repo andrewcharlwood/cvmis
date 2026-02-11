@@ -1,502 +1,87 @@
-# Progress Log — Clinical Record PMR Phase
-
-## Phase Transition
-
-**Previous phase completed:** React conversion of ECG Heartbeat CV (all 12 tasks done)
-**New phase started:** Clinical Record PMR System — Design 7 implementation
-**Date:** 2026-02-11
-
-This is a complete redesign of the CV presentation, moving from the ECG animation concept to a Patient Medical Record system interface. All previous components (Hero, Skills, Experience, etc.) will be replaced with PMR-specific views and components.
+# Progress Log
 
 ## Codebase Patterns
 
-### PMR Design System
-- **Source of truth**: `designs/07-the-clinical-record.md` — Complete specification for the PMR interface
-- **Color palette (light-mode only)**:
-  - Main content: `#F5F7FA` (cool light gray)
-  - Cards: `#FFFFFF` (white)
-  - Sidebar: `#1E293B` (dark blue-gray)
-  - Patient banner: `#334155` (lighter blue-gray)
-  - NHS blue: `#005EB8` (primary interactive)
-  - Green: `#22C55E` (active/resolved)
-  - Amber: `#F59E0B` (alerts/in-progress)
-  - Red: `#EF4444` (urgent)
-  - Borders: `#E5E7EB` (gray-200)
-- **Typography**: Inter for general text, Geist Mono for coded entries/data values
-- **Spacing**: 4px base unit, tighter than previous design (clinical system density)
-- **Borders**: 1px solid gray-200, 4px radius (clinical systems use minimal rounding)
-- **Table rows**: 40px height, alternating colors
+### Project Structure
+- Components in `src/components/`, views in `src/components/views/`
+- Data files in `src/data/` — consultations.ts, medications.ts, problems.ts, investigations.ts, documents.ts, patient.ts
+- Types in `src/types/pmr.ts` (PMR interfaces) and `src/types/index.ts` (Phase type)
+- Hooks in `src/hooks/` — useScrollCondensation.ts, useBreakpoint.ts
+- Contexts in `src/contexts/` — AccessibilityContext.tsx
+- Path alias: `@/` maps to `./src/`
 
-### Data Architecture
-- All PMR content lives in `src/data/` as typed arrays
-- Separation of data from components enables easy CV updates
-- Types defined in `src/types/pmr.ts`
+### Phase Management
+- App.tsx controls phase: 'boot' -> 'ecg' -> 'login' -> 'pmr'
+- BootSequence.tsx handles terminal animation
+- ECGAnimation.tsx handles heartbeat + letter tracing + flatline exit
+- LoginScreen.tsx bridges to PMRInterface.tsx
 
-### Animation Approach
-- **Login typing**: `setInterval` with character-by-character reveal (30ms/char username, 20ms/dot password)
-- **View switching**: Instant (no animation) — matches clinical system behavior
-- **Consultation expand**: Height 0→auto, 200ms, ease-out
-- **Alert entrance**: Slide down with spring, 250ms
-- **Alert dismiss**: Icon → checkmark (200ms) → collapse (200ms)
-- **Patient banner condensation**: Smooth height transition, 200ms
-- **Reduced motion**: Typing instant, slides become fades, expand instant
+### Data Architecture (CORRECT — do not modify)
+- All data files are populated with accurate CV content from References/CV_v4.md
+- 5 consultation entries (roles), 18 medications (skills), 11 problems (achievements), 6 investigations (projects), 5 documents (education)
+- Types are properly defined in pmr.ts — Consultation, Medication, Problem, Investigation, Document, Patient, ViewId
 
-### Clinical System Authenticity
-- Navigation is instant — no crossfade
-- Tables use explicit borders on all cells
-- Traffic lights are 8px circles with text labels (never sole indicator)
-- Consultation format: History / Examination / Plan (clinical SOAP note structure)
-- Medications table mimics actual prescribing lists
-- Coded entries use [XXX000] format (SNOMED-style)
+### Design System Requirements (from ref-design-system.md)
+- Light-mode ONLY — no dark mode
+- NHS blue: #005EB8 (primary interactive)
+- Border radius: 4px for cards/inputs (clinical systems use minimal rounding)
+- Borders dominate — 1px solid #E5E7EB everywhere
+- Table row height: 40px, card padding: 16px, main content padding: 24px
+- Fonts: Inter (general text), Geist Mono (coded entries, timestamps, data values)
+- Base spacing unit: 4px — clinical density, not marketing site spacing
 
-### Responsive Breakpoints
-- Desktop (>1024px): 220px sidebar, full tables
-- Tablet (768-1024px): 56px icon-only sidebar, scrollable tables
-- Mobile (<768px): Bottom nav bar, card layouts instead of tables
+### Known Dependencies
+- React 18.3.1, TypeScript, Vite
+- Tailwind CSS for utility classes
+- Framer Motion 11.15.0 for animations
+- Lucide React 0.468.0 for icons
+- fuse.js will need to be installed for Task 12
 
-### Accessibility Requirements
-- Tables must be proper `<table>` markup with `scope="col"`
-- Clinical alert uses `role="alert"` and `aria-live="assertive"`
-- Keyboard shortcuts: Alt+1-7 for navigation
-- Focus management after view changes and expansions
-- Screen reader announces views and table structure
+### Sidebar Label Convention (IMPORTANT)
+- Sidebar uses CV-friendly labels, NOT clinical jargon
+- Summary (same), Experience (not Consultations), Skills (not Medications), Achievements (not Problems), Projects (not Investigations), Education (not Documents), Contact (not Referrals)
+- The clinical metaphor is in the VIEW LAYOUT, not the navigation labels
+- Each view should look like its clinical equivalent but the nav label tells the user what CV section they're looking at
+
+### Visual Review (Claude in Chrome)
+- Dev server runs on `http://localhost:5173` throughout the loop
+- Use browser tools (`tabs_context_mcp`, `navigate`, `computer` screenshot) to verify visual output
+- App has boot→ECG→login→PMR sequence (~15s on first load). Wait before screenshotting.
+- Once in PMR phase, navigate views via hash routes: `#summary`, `#experience`, `#skills`, `#achievements`, `#projects`, `#education`, `#contact`
+- If browser tools fail, skip visual review and note in iteration log — don't block progress
+
+### Critical Styling Notes
+- Geist Mono font must be loaded (NOT Fira Code) for coded entries and timestamps
+- Patient banner name must be 20px Inter 600 (not 18px)
+- Clinical alert must use spring animation (Framer Motion type: "spring"), not ease-out
+- View switching must be INSTANT — no crossfade, no slide between views
+- Consultation expand/collapse: height animation ONLY, no opacity fade on content
 
 ## Iteration Log
 
-### Iteration 1 — Task 1: Create PMR data layer and TypeScript types
-- **Completed**: Task 1 - Created PMR data layer with TypeScript interfaces and data files
-- **Files created**:
-  - `src/types/pmr.ts` - All PMR TypeScript interfaces (Patient, Consultation, Medication, Problem, Investigation, Document, etc.)
-  - `src/data/consultations.ts` - 5 roles mapped to consultation format with History/Examination/Plan structure
-  - `src/data/medications.ts` - 18 skills mapped to medication format across 3 categories (Active, Clinical, PRN)
-  - `src/data/problems.ts` - 11 problems with traffic light status (3 Active, 2 In Progress, 6 Resolved)
-  - `src/data/investigations.ts` - 5 projects as investigations with methodology/results
-  - `src/data/documents.ts` - 5 education/certification documents
-  - `src/data/patient.ts` - Patient demographic data
-- **Design decisions**:
-  - Used SNOMED-style codes for coded entries (EFF001, ALG001, AUT001, etc.)
-  - Mapped employer colors: NHS blue (#005EB8) for ICB, Teal (#00897B) for Tesco
-  - Proficiency percentages estimated from CV skill descriptions
-  - Prescribing history for each skill shows progression over time
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - CV has 5 roles but only 4 explicitly listed dates - inferred Duty Pharmacy Manager from GPhC registration date (Aug 2016)
-  - Key numbers verified: £14.6M efficiency, 14,000 patients, £2.6M savings, 70% reduction, 200 hours, £1M revenue, £220M budget
-  - Skills categorized into Active (technical), Clinical (healthcare domain), PRN (strategic/leadership)
+### Iteration 1 — Task 1: Design system foundation and font setup
+**Completed:** Task 1
+**Changes made:**
+- Added Geist Mono font to Google Fonts import in index.html (replacing reliance on Fira Code for PMR components)
+- Extended Tailwind config PMR color tokens: added card, text-primary, text-secondary, text-on-dark variants, border colors, selected-row, alert colors
+- Fixed borderRadius.card from 16px to 4px (clinical system requirement)
+- Added borderRadius.login: 12px (exception for login card per spec)
+- Added boxShadow.pmr: minimal clinical shadow
+- Added PMR-specific CSS custom properties in index.css (--pmr-* variables)
+- Added utility classes: .pmr-theme, .font-inter, .font-geist-mono
 
-### Iteration 2 — Task 2: Modify ECGAnimation for PMR flatline transition
-- **Completed**: Task 2 - Modified ECGAnimation exit phase for clinical flatline → login transition
-- **Files modified**:
-  - `src/components/ECGAnimation.tsx` - Changed exit from fade-to-white to flatline → black → login background
-- **Changes made**:
-  - Replaced HOLD_TIME (0.75s) and EXIT_TIME (0.8s) with precise phase timings:
-    - FLATLINE_HOLD: 300ms (hold after name trace)
-    - FLATLINE_DRAW: 300ms (horizontal line extending rightward)
-    - FADE_TO_BLACK: 200ms (canvas opacity fade)
-    - BG_TRANSITION: 200ms (background to #1E293B login color)
-  - New timing phases: isFlatlinePhase, isFadePhase, isBgTransitionPhase
-  - Background now transitions to login screen color (#1E293B) instead of white
-  - Flatline drawn from final name position to right edge of viewport
-  - Scanline head dot hidden during fade/bg phases
-- **Design decisions**:
-  - Flatline visually reads as patient monitor flatline (deliberate metaphor)
-  - Total ECG phase still ~5-6 seconds, exit adds ~1 second
-  - Background transition uses CSS transition for smooth handoff to LoginScreen
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - Canvas fade must complete before background transition for clean visual
-  - The flatline extension needs to go slightly past viewport edge (+50px) for smooth visual
+**Codebase patterns discovered:**
+- The project uses both legacy design tokens (for boot/ECG phases) AND new PMR tokens (for clinical interface) — both need to coexist
+- Geist Mono is the correct font for coded entries, timestamps, and clinical codes in PMR (NOT Fira Code)
+- Border radius convention: 4px default for clinical components, 12px for login card only, 16px for legacy components
+- CSS custom properties namespaced with --pmr- prefix for clarity
 
-### Iteration 3 — Task 3: Build LoginScreen component with typing animation
-- **Completed**: Task 3 - Created LoginScreen component with authentic clinical login typing animation
-- **Files created/modified**:
-  - `src/components/LoginScreen.tsx` - New component with typing animation
-  - `src/App.tsx` - Added 'login' phase between 'ecg' and 'content'
-  - `src/types/index.ts` - Added 'login' to Phase type
-  - `index.html` - Added Inter font family
-  - `tailwind.config.js` - Added PMR colors (sidebar, banner, nhsblue, etc.) and fonts (inter, geist)
-- **Design decisions**:
-  - Username types at 30ms per character (A.CHARLWOOD = 11 chars + space = ~350ms)
-  - Password fills 8 dots at 20ms per dot (~160ms)
-  - Button shows pressed state (darker, scale) before onComplete callback
-  - Blinking cursor at 530ms interval during typing
-  - Uses Fira Code as monospace font (Geist Mono not available via Google Fonts)
-  - NHS blue shield icon for clinical system branding
-  - White login card: 320px wide, 12px radius, subtle shadow
-- **Accessibility**:
-  - Respects prefers-reduced-motion: instant text appearance, ~500ms total
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - Geist Mono not available via Google Fonts, using Fira Code as fallback
-  - Total login animation timing: ~1.2s (350ms username + 150ms pause + 160ms password + 150ms pause + 100ms button + 200ms hold)
+**Quality checks:** All passed (typecheck, lint, build)
+**Visual review:** N/A (configuration task, no visual component)
 
-### Iteration 4 — Task 4: Build PatientBanner component with full and condensed modes
-- **Completed**: Task 4 - Created PatientBanner component with scroll-based condensation
-- **Files created**:
-  - `src/hooks/useScrollCondensation.ts` - IntersectionObserver hook for scroll detection
-  - `src/components/PatientBanner.tsx` - Full (80px) and condensed (48px) banner modes
-- **Design decisions**:
-  - IntersectionObserver with rootMargin -100px to detect scroll past threshold
-  - Smooth height transition using CSS `transition-all duration-200 ease-out`
-  - Sticky positioning with z-40 for persistent visibility
-  - Status dot: 8px circle, green for Active
-  - Badge: NHS blue background, white text, small pill shape
-  - Action buttons: outlined with NHS blue, fill on hover
-  - GPhC number formatted with spaces like NHS number (221 181 0)
-  - Tooltip on NHS No field explaining it's GPhC Registration Number
-- **Accessibility**:
-  - `role="banner"` on header element
-  - `aria-label` on status dot
-  - Proper link semantics for phone and email
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - IntersectionObserver with rootMargin provides cleaner scroll detection than scroll event listeners
-  - Sentinel element at top of viewport triggers condensation when it leaves view
-  - Sticky positioning requires no JavaScript for the sticky behavior itself
+**Issues encountered:** None
 
-### Iteration 5 — Task 5: Build ClinicalSidebar component with navigation and search
-- **Completed**: Task 5 - Created ClinicalSidebar with navigation and search functionality
-- **Files created**:
-  - `src/components/ClinicalSidebar.tsx` - Sidebar navigation with 7 items
-  - `src/components/PMRInterface.tsx` - Main PMR layout container
-- **Files modified**:
-  - `src/App.tsx` - Changed from 'content' to 'pmr' phase, uses PMRInterface
-  - `src/types/index.ts` - Updated Phase type: 'content' → 'pmr'
-- **Design decisions**:
-  - 220px fixed width sidebar with dark blue-gray background (#1E293B)
-  - Header: "CareerRecord PMR v1.0.0" in 50% opacity white
-  - 7 navigation items with Lucide icons (ClipboardList, FileText, Pill, AlertTriangle, FlaskConical, FolderOpen, Send)
-  - Separator line between Summary and Consultations
-  - Active state: 3px NHS blue left border, white text, background rgba(255,255,255,0.12)
-  - Hover state: white text at 100%, background rgba(255,255,255,0.08)
-  - Search input in header with basic filtering (fuse.js not installed yet)
-  - Footer with "Session: A.CHARLWOOD" and current time (updates every minute)
-  - URL hash routing (#summary, #consultations, etc.)
-  - Keyboard shortcuts: Alt+1-7 for navigation, / to focus search, Escape to clear search
-- **Navigation behavior**:
-  - Instant view switching (no animation) — matches clinical system authenticity
-  - Click updates URL hash and activeView state simultaneously
-  - On page load, hash is read to set initial view
-- **Accessibility**:
-  - `role="navigation"` and `aria-label` on sidebar
-  - `aria-current="page"` on active nav item
-  - Keyboard navigation with Alt+1-7 shortcuts
-  - Search has escape key to clear and blur
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - Lucide React already installed, provides all required icons
-  - fuse.js not installed — basic search filtering implemented, can enhance later
-  - Sticky positioning with `h-screen sticky top-0` keeps sidebar fixed while content scrolls
-  - PMRInterface wraps PatientBanner + sidebar + main content layout
-
-### Iteration 6 — Task 6: Build SummaryView component with clinical alert
-- **Completed**: Task 6 - Created SummaryView with Clinical Alert and summary cards
-- **Files created**:
-  - `src/components/views/SummaryView.tsx` - Full Summary view with Clinical Alert and 4 cards
-- **Files modified**:
-  - `src/components/PMRInterface.tsx` - Updated to render SummaryView when activeView is 'summary'
-- **Design decisions**:
-  - Clinical Alert: amber background (#FEF3C7), 4px amber left border, AlertTriangle icon
-  - Alert animates in with max-height transition (300ms delay after view loads)
-  - Acknowledge button: on click, icon cross-fades to green Check (200ms), then alert collapses (200ms)
-  - Patient Demographics card: full width, two-column key-value layout with right-aligned labels
-  - Active Problems card: shows 3 active/in-progress problems with traffic light dots and dates
-  - Current Medications Quick View: 4-column table (Drug, Dose, Freq, Status), top 5 Active meds
-  - Last Consultation card: shows most recent role with truncated history text
-  - Traffic lights: 8px circles, green for Active/Resolved, amber for In Progress
-  - All tables use proper semantic `<table>` markup with `scope="col"`
-  - "View Full List" / "View Full Record" links navigate to corresponding views
-- **Accessibility**:
-  - `role="alert"` and `aria-live="assertive"` on Clinical Alert
-  - `aria-label` on main content area with current view name
-  - Proper table semantics for medications table
-  - Traffic lights always accompanied by text labels (never sole indicator)
-  - Respects `prefers-reduced-motion`: alert appears instantly, no animations
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - Alert animation uses max-height transition for smooth expand/collapse
-  - Clinical Alert text uses amber-800 (#92400E) for contrast against amber-100 background
-  - Grid layout: demographics full width, problems/medications side-by-side, last consultation full width
-  - `line-clamp-2` and `line-clamp-3` utilities work well for truncating text in cards
-
-### Iteration 7 — Task 7: Build ConsultationsView with History/Examination/Plan structure
-- **Completed**: Task 7 - Created ConsultationsView with expandable consultation entries
-- **Files created**:
-  - `src/components/views/ConsultationsView.tsx` - Full Consultations view with 5 expandable entries
-- **Files modified**:
-  - `src/components/PMRInterface.tsx` - Added ConsultationsView to renderView switch
-- **Design decisions**:
-  - Each entry has 3px left border color-coded by employer: NHS blue (#005EB8) for ICB, Teal (#00897B) for Tesco
-  - Collapsed state shows: status dot, date, organization (colored), role title, key coded entry summary
-  - Status dot: green for current roles, gray for historical
-  - Expanded state shows: Duration, HISTORY (paragraph), EXAMINATION (bullets), PLAN (bullets), CODED ENTRIES
-  - Section headers styled in Inter 600, 12px, uppercase, tracking-wider, gray-400
-  - Coded entries use [XXX000] format in Geist Mono, gray-400
-  - Only one entry expanded at a time (accordion behavior)
-  - Expand animation: height 0→auto (200ms, ease-out)
-  - Chevron icon rotates 180° when expanded
-- **Accessibility**:
-  - `aria-expanded` on toggle buttons
-  - Status dots have `aria-label` describing current vs historical
-  - Respects `prefers-reduced-motion`: expand is instant
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - Height animation uses `height: auto` which requires setting height to undefined after animation
-  - Content inside expanded area uses separate opacity transition for smooth appearance
-  - Border-left styling with explicit width/color in style prop for dynamic org colors
-
-### Iteration 8 — Task 8: Build MedicationsView with sortable table and prescribing history
-- **Completed**: Task 8 - Created MedicationsView with sortable table and category tabs
-- **Files created**:
-  - `src/components/views/MedicationsView.tsx` - Full Medications view with 3 category tabs
-- **Files modified**:
-  - `src/components/PMRInterface.tsx` - Added MedicationsView to renderView switch
-  - `src/index.css` - Added fadeIn animation for expanded content
-- **Design decisions**:
-  - Three category tabs: Active Medications (technical), Clinical Medications (healthcare), PRN (strategic)
-  - Tabs have descriptive subtitles to explain the mapping
-  - Sortable columns: clicking header toggles asc/desc/null with visual indicators
-  - Sort icons: ArrowUpDown (unsorted), ArrowUp (asc), ArrowDown (desc) in NHS blue
-  - Table columns: Drug Name, Dose (%), Frequency, Start (year), Status
-  - Row height: ~40px with 10px py padding
-  - Alternating row colors: white / gray-50
-  - Hover state: blue-50 (#EFF6FF) tint
-  - Traffic light status dots: 8px circles (green=Active, gray=Historical) with text labels
-  - Expandable rows: click to show "Prescribing History" mini-timeline
-  - Prescribing history: year + description, styled in Geist Mono
-  - fadeIn animation (200ms ease-out) for expanded content
-- **Accessibility**:
-  - Proper semantic `<table>` markup with `scope="col"` on headers
-  - `role="tablist"` and `aria-selected` on tab buttons
-  - `aria-expanded` on expandable rows
-  - Traffic lights always accompanied by text labels
-  - Respects `prefers-reduced-motion`: fadeIn disabled
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - Case block lexical declarations need curly braces wrapping to satisfy ESLint
-  - Sort state with three values (null/asc/desc) provides intuitive toggle behavior
-  - Frequency sort uses custom order object mapping
-
-### Iteration 9 — Task 9: Build ProblemsView with traffic light system
-- **Completed**: Task 9 - Created ProblemsView with two tables and expandable narrative
-- **Files created**:
-  - `src/components/views/ProblemsView.tsx` - Full Problems view with Active and Resolved sections
-- **Files modified**:
-  - `src/components/PMRInterface.tsx` - Added ProblemsView to renderView switch
-- **Design decisions**:
-  - Two sections: Active Problems (3 items) and Resolved Problems (8 items)
-  - Traffic light component: 8px circles with text labels (green=Active/Resolved, amber=In Progress)
-  - Active Problems table: Status, Code, Problem, Since columns
-  - Resolved Problems table: Status, Code, Problem, Resolved, Outcome columns
-  - Code column: [XXX000] format in Geist Mono, gray-500
-  - Expandable rows: click to show narrative and linked consultations
-  - Linked consultations: clickable buttons navigate to Consultations view with item ID
-  - Height animation: 200ms ease-out for expand/collapse
-  - Hover state: blue-50 (#EFF6FF) background tint
-  - Accordion behavior: only one row expanded at a time (per section? globally? went with global)
-- **Accessibility**:
-  - Proper semantic `<table>` markup with `scope="col"` on headers
-  - `aria-expanded` on clickable rows
-  - Traffic lights have `aria-label` with status text
-  - Expand button has `aria-label` for screen readers
-  - Screen reader-only column header for expand button
-  - Respects `prefers-reduced-motion`: height transition disabled
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - `problem.linkedConsultations` needed null coalescing since it's optional in the type
-  - Height animation uses refs to measure content height for smooth expansion
-  - Linked consultations use external link icon to indicate navigation
-
-### Iteration 10 — Task 10: Build InvestigationsView with results panel
-- **Completed**: Task 10 - Created InvestigationsView with expandable rows and results panel
-- **Files created**:
-  - `src/components/views/InvestigationsView.tsx` - Full Investigations view with 5 project entries
-- **Files modified**:
-  - `src/components/PMRInterface.tsx` - Added InvestigationsView to renderView switch
-- **Design decisions**:
-  - Status badges: Complete (green dot), Ongoing (amber dot), Live (pulsing green dot with ping animation)
-  - Table columns: Test Name, Requested, Status, Result
-  - Expandable rows: click to show tree-indented results panel
-  - Results panel uses key-value layout with fixed-width labels (w-40) for alignment
-  - Methodology and Results sections display multi-line content
-  - Tech Stack displayed as comma-separated list
-  - PharMetrics has "View Results" button linking to medicines.charlwood.xyz
-  - Height animation: 200ms ease-out for expand/collapse
-  - Accordion behavior: only one row expanded at a time (global)
-  - Hover state: blue-50 (#EFF6FF) background tint
-- **Accessibility**:
-  - Proper semantic `<table>` markup with `scope="col"` on headers
-  - `aria-expanded` on clickable rows
-  - Status badges have `aria-label` with status text
-  - Traffic lights always accompanied by text labels
-  - External link has proper target="_blank" rel="noopener noreferrer"
-  - Respects `prefers-reduced-motion`: height transition disabled
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - Live status uses Tailwind animate-ping for pulsing effect (requires relative container)
-  - Tree-indented structure uses flex with fixed-width labels for clean alignment
-  - Results as bullet list provides better readability than comma-separated text
-
-### Iteration 11 — Task 11: Build DocumentsView for education/certifications
-- **Completed**: Task 11 - Created DocumentsView with expandable rows and preview panel
-- **Files created**:
-  - `src/components/views/DocumentsView.tsx` - Full Documents view with 5 document entries
-- **Files modified**:
-  - `src/components/PMRInterface.tsx` - Added DocumentsView to renderView switch
-- **Design decisions**:
-  - Document type icons: FileText (Certificate), Award (Registration), GraduationCap (Results), FlaskConical (Research)
-  - Table columns: Type (icon), Document, Date, Source
-  - Expandable rows: click to show tree-indented preview panel
-  - Preview panel uses key-value layout with fixed-width labels (w-40) for alignment
-  - Shows: Type, Date Awarded, Institution, Classification, Duration, Research (with grade), Notes
-  - Height animation: 200ms ease-out for expand/collapse
-  - Accordion behavior: only one row expanded at a time (global)
-  - Hover state: blue-50 (#EFF6FF) background tint
-  - Consistent with InvestigationsView expanded view style
-- **Accessibility**:
-  - Proper semantic `<table>` markup with `scope="col"` on headers
-  - `aria-expanded` on clickable rows
-  - Screen reader-only column header for expand button
-  - Respects `prefers-reduced-motion`: height transition disabled
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - Document type icons from Lucide match design spec exactly
-  - Research documents show both detail and grade in same field with line break
-  - Tree-indented structure consistency across Investigations and Documents views
-
-### Iteration 12 — Task 12: Build ReferralsView with clinical referral form
-- **Completed**: Task 12 - Created ReferralsView with clinical referral form and direct contact section
-- **Files created**:
-  - `src/components/views/ReferralsView.tsx` - Full Referrals view with form and contact table
-- **Files modified**:
-  - `src/components/PMRInterface.tsx` - Added ReferralsView to renderView switch
-- **Design decisions**:
-  - Form layout: two-column grid for patient info and referrer fields
-  - Pre-filled patient info: CHARLWOOD, Andrew (Mr); NHS Number: 221 181 0
-  - Priority radio buttons: Urgent (red), Routine (NHS blue, default), Two-Week Wait (amber)
-  - Tongue-in-cheek tooltips on priority options
-  - Form fields: Referrer Name (required), Referrer Email (required, validated), Referrer Org (optional), Reason (textarea)
-  - Contact method radio: Email, Phone, LinkedIn
-  - Submit button: NHS blue (#005EB8), loading spinner on submit
-  - Success state: green checkmark, reference number (REF-YYYY-MMDD-NNN), 24-48hr response message
-  - Direct Contact table below form: Email (mailto), Phone (tel), LinkedIn (external link), Location
-  - Form validation with inline error messages
-  - Input styling: 1px border-gray-300, 4px radius, 8px 12px padding, NHS blue focus ring
-- **Accessibility**:
-  - Proper form labels with `htmlFor` associations
-  - Required field indicators (red asterisk)
-  - Error messages announced
-  - Radio buttons properly grouped with hidden inputs and visible styled indicators
-  - Respects `prefers-reduced-motion`: no animations
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Learnings**:
-  - Form validation uses simple state-based approach with error objects
-  - Radio buttons styled with hidden `<input>` and custom styled `<span>` for visual control
-  - Reference number uses current date plus random sequence for uniqueness
-  - Direct Contact table uses same key-value layout as Patient Demographics card
-
-### Iteration 13 — Task 13: Implement keyboard shortcuts and accessibility
-- **Completed**: Task 13 - Implemented keyboard shortcuts and accessibility features across the PMR interface
-- **Files created**:
-  - `src/contexts/AccessibilityContext.tsx` - Global context for focus management and expanded item state
-- **Files modified**:
-  - `src/components/ClinicalSidebar.tsx` - Added roving tabindex with Up/Down arrow navigation, Enter/Space activation, Home/End support
-  - `src/components/PMRInterface.tsx` - Added focus management after view change, integrated with AccessibilityContext
-  - `src/components/LoginScreen.tsx` - Triggers focus on first sidebar item after login completion
-  - `src/components/App.tsx` - Wrapped with AccessibilityProvider
-  - `src/components/views/ConsultationsView.tsx` - Added focus management when expanding consultation entries
-  - `src/components/views/SummaryView.tsx` - Added scope="col" to table headers
-- **Accessibility features implemented**:
-  - **Roving tabindex**: Sidebar navigation supports Up/Down arrows, Home/End, Enter/Space
-  - **Focus management**: Focus moves to sidebar after login, focus moves to view heading after view change, focus moves to expanded content
-  - **Global Escape**: Closes any expanded item across all views
-  - **ARIA attributes**: role="menu" on nav, role="menuitem" on nav items, aria-current="page" on active, tabIndex management
-  - **Table accessibility**: scope="col" on all table headers across all views
-- **Design decisions**:
-  - Created AccessibilityContext to manage global expanded state and focus targets
-  - Focus moves to expanded content immediately after expansion (not waiting for animation)
-  - Screen reader announces view changes via heading focus
-  - First nav button always receives tabindex=0 (roving tabindex pattern)
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓ (1 warning about fast refresh), `npm run build` ✓
-- **Learnings**:
-  - Roving tabindex requires explicit tabIndex management based on focus state
-  - useRef array for button refs enables dynamic nav item count
-  - Global Escape handler in context prevents need for per-view handlers
-  - Focus after login requires ref forwarding from sidebar to context
-
-### Iteration 14 — Task 14: Implement responsive design (tablet and mobile)
-- **Completed**: Task 14 - Implemented full responsive design for tablet and mobile breakpoints
-- **Files created**:
-  - `src/hooks/useBreakpoint.ts` - Custom hook for responsive breakpoint detection (mobile <768px, tablet 768-1024px, desktop >1024px)
-  - `src/components/MobileBottomNav.tsx` - Bottom navigation bar component for mobile with 7 icon buttons and safe area padding
-- **Files modified**:
-  - `src/components/ClinicalSidebar.tsx` - Added tablet mode (56px icon-only sidebar with tooltips) via isTablet prop
-  - `src/components/PatientBanner.tsx` - Added mobile minimal banner and tablet always-condensed mode via isMobile/isTablet props
-  - `src/components/PMRInterface.tsx` - Integrated responsive layout with mobile bottom nav, search bar, and back navigation
-  - `src/components/views/MedicationsView.tsx` - Added mobile card layout with stacked medication cards
-  - `src/components/views/ProblemsView.tsx` - Added mobile card layout for problem entries
-  - `src/components/views/InvestigationsView.tsx` - Added mobile card layout for investigation entries
-  - `src/components/views/DocumentsView.tsx` - Added mobile card layout for document entries
-- **Design decisions**:
-  - Desktop (>1024px): Full 220px sidebar with labels, full/condensed patient banner, standard tables
-  - Tablet (768-1024px): 56px icon-only sidebar with hover tooltips, always-condensed patient banner, tables with horizontal scroll
-  - Mobile (<768px): Bottom navigation bar (56px), minimal patient banner with overflow menu, card layouts instead of tables, search bar at top of each view, back navigation arrow
-  - Mobile card layouts: Each table row becomes a stacked card with expandable content
-  - Touch targets: Minimum 48px height for mobile buttons
-  - Safe area padding: `env(safe-area-inset-bottom)` for bottom nav on devices with home indicator
-- **Responsive patterns**:
-  - `useBreakpoint` hook returns `{ isMobile, isTablet, isDesktop, breakpoint }`
-  - Views conditionally render table or card layout based on `isMobile`
-  - Bottom nav uses fixed positioning with z-index 50
-  - Mobile search bar replaces sidebar search input
-  - Back navigation returns to Summary view from any other view
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓ (1 pre-existing warning), `npm run build` ✓
-- **Learnings**:
-  - Card layouts work better than horizontal-scrolling tables on mobile
-  - Bottom navigation provides familiar mobile app experience (matches NHS App pattern)
-  - isTablet/isMobile props passed from PMRInterface down to components
-  - useBreakpoint hook avoids resize event listener thrashing with proper cleanup
-  - Mobile overflow menu for banner actions reduces clutter on small screens
-
-### Iteration 15 — Task 15: Final integration, testing, and polish
-- **Completed**: Task 15 - Final integration with interface materialization animations
-- **Files modified**:
-  - `src/components/LoginScreen.tsx` - Added fade-out animation (scale 103%, fade 200ms) before transitioning to PMR
-  - `src/components/PMRInterface.tsx` - Added entrance animations for all UI elements with proper timing
-- **Changes made**:
-  - Login card now animates out with scale + fade before PMR interface appears
-  - Patient banner slides down from top (200ms, ease-out)
-  - Sidebar slides in from left (250ms, ease-out, 50ms delay)
-  - Main content fades in (300ms, 150ms delay)
-  - Mobile bottom nav slides up (200ms, ease-out)
-  - All animations respect `prefers-reduced-motion`: instant appearance with zero duration
-- **Design decisions**:
-  - Used framer motion for all entrance animations
-  - Animation timings match design spec exactly
-  - Reduced motion users see instant transitions (no animations)
-  - Variants defined with useMemo to prevent recreation on every render
-- **Known limitations**:
-  - Search only filters navigation items, not content across all sections (fuse.js not implemented)
-  - This was a deliberate scope decision from Iteration 5 - can enhance later
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓ (1 pre-existing warning), `npm run build` ✓
-- **Learnings**:
-  - framer motion Variants type works well with useMemo for conditional reduced motion support
-  - Empty object `{}` in hidden state for reduced motion prevents any animation
-  - Login animation timing: ~1.2s (username 350ms + password 160ms + pauses 300ms + exit 200ms)
-
-### Iteration 16 — Task 16: Review against original design plan
-- **Completed**: Task 16 - Reviewed build against goal.md design specification
-- **Review findings**:
-  - Core PMR system fully functional and matches design intent
-  - All 7 views implemented with proper clinical system aesthetic
-  - ECG → Login → PMR transitions match spec timing
-  - Responsive design works at all breakpoints
-  - Accessibility features implemented (keyboard nav, ARIA, reduced motion)
-- **Known gaps documented as scope decisions**:
-  - Breadcrumb navigation: Not implemented (sidebar navigation sufficient for CV use case)
-  - Context menus: Not implemented (not essential for CV presentation)
-  - Full search: Only filters nav items (fuse.js across all content deferred - can enhance later)
-  - Download CV: Placeholder button (PDF generation out of scope for this iteration)
-  - Second Consultations alert: Marked as optional in spec, not implemented
-- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
-- **Decision**: All essential features complete. Project status: COMPLETE
+**Design decisions:**
+- Kept legacy tokens in place to avoid breaking boot/ECG components
+- Used --pmr- namespace for all PMR tokens to distinguish from legacy design system
+- Extended Tailwind colors rather than replacing them — allows both themes to work simultaneously
