@@ -218,3 +218,29 @@ This is a complete redesign of the CV presentation, moving from the ECG animatio
   - Clinical Alert text uses amber-800 (#92400E) for contrast against amber-100 background
   - Grid layout: demographics full width, problems/medications side-by-side, last consultation full width
   - `line-clamp-2` and `line-clamp-3` utilities work well for truncating text in cards
+
+### Iteration 7 — Task 7: Build ConsultationsView with History/Examination/Plan structure
+- **Completed**: Task 7 - Created ConsultationsView with expandable consultation entries
+- **Files created**:
+  - `src/components/views/ConsultationsView.tsx` - Full Consultations view with 5 expandable entries
+- **Files modified**:
+  - `src/components/PMRInterface.tsx` - Added ConsultationsView to renderView switch
+- **Design decisions**:
+  - Each entry has 3px left border color-coded by employer: NHS blue (#005EB8) for ICB, Teal (#00897B) for Tesco
+  - Collapsed state shows: status dot, date, organization (colored), role title, key coded entry summary
+  - Status dot: green for current roles, gray for historical
+  - Expanded state shows: Duration, HISTORY (paragraph), EXAMINATION (bullets), PLAN (bullets), CODED ENTRIES
+  - Section headers styled in Inter 600, 12px, uppercase, tracking-wider, gray-400
+  - Coded entries use [XXX000] format in Geist Mono, gray-400
+  - Only one entry expanded at a time (accordion behavior)
+  - Expand animation: height 0→auto (200ms, ease-out)
+  - Chevron icon rotates 180° when expanded
+- **Accessibility**:
+  - `aria-expanded` on toggle buttons
+  - Status dots have `aria-label` describing current vs historical
+  - Respects `prefers-reduced-motion`: expand is instant
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - Height animation uses `height: auto` which requires setting height to undefined after animation
+  - Content inside expanded area uses separate opacity transition for smooth appearance
+  - Border-left styling with explicit width/color in style prop for dynamic org colors

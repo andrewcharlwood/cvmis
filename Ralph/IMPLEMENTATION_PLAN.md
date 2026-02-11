@@ -131,7 +131,7 @@ src/
 
   Create `src/components/views/SummaryView.tsx`. Grid layout with cards: Patient Demographics (full width, two-column key-value table), Active Problems (left column, green/amber dots with dates), Current Medications Quick View (right column, 4-column table showing top 5 skills), Last Consultation preview (full width, truncated to 2-3 lines with "View Full Record" link). Clinical Alert banner: amber background (#FEF3C7), amber left border, warning icon, text "ALERT: This patient has identified £14.6M in prescribing efficiency savings...", Acknowledge button. Alert slides down with spring animation (250ms) after view loads. Clicking Acknowledge: icon changes to green checkmark (200ms), then alert collapses upward (200ms).
 
-- [ ] **Task 7: Build ConsultationsView with History/Examination/Plan structure**
+- [x] **Task 7: Build ConsultationsView with History/Examination/Plan structure**
 
   Create `src/components/views/ConsultationsView.tsx`. Reverse-chronological journal of 5 roles. Each entry: collapsed state shows date, organization (NHS blue), role title, key coded entry, expand chevron. Click to expand: shows Duration, HISTORY section (context/background), EXAMINATION section (bullet list of analysis/findings), PLAN section (bullet list of outcomes), CODED ENTRIES (SNOMED-style codes like [EFF001], [ALG001]). Section headers styled as clinical consultation dividers (uppercase, letter-spacing). Only one entry expanded at a time. Color-coded left border: NHS blue for NHS N&W ICB, Teal (#00897B) for Tesco PLC. Expand animation: height 0→auto (200ms, ease-out).
 
