@@ -111,7 +111,7 @@ src/
 
   Create `src/types/pmr.ts` with interfaces for: `Patient`, `Consultation` (History/Examination/Plan/CodedEntries), `Medication` (with PrescribingHistory), `Problem` (status, code, outcome), `Investigation` (with results), `Document`, `ReferralForm`. Create `src/data/` directory with files: `consultations.ts` (5 roles from CV_v4.md mapped to consultation format), `medications.ts` (18 skills mapped to medication format with prescribing history), `problems.ts` (8-10 achievements with traffic light status), `investigations.ts` (4 projects with methodology/results), `documents.ts` (MPharm, Mary Seacole, A-Levels, Research). All data must match CV_v4.md exactly with specific numbers (£14.6M, 14,000 patients, etc.).
 
-- [ ] **Task 2: Modify ECGAnimation for PMR flatline transition**
+- [x] **Task 2: Modify ECGAnimation for PMR flatline transition**
 
   Modify `src/components/ECGAnimation.tsx` to change the exit phase. Instead of fading to white and revealing the CV, the animation should: 1) Complete the name tracing as normal, 2) Hold for 300ms, 3) Draw a flatline extending rightward from the name over 300ms (patient monitor flatline visual), 4) Fade entire canvas to black over 200ms, 5) Transition background to dark blue-gray (#1E293B) over 200ms. Emit `onComplete` callback to trigger LoginScreen. Total ECG phase: ~5-6 seconds. Preserve all existing animation timing for heartbeats and letter tracing.
 

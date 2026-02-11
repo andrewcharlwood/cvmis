@@ -83,3 +83,26 @@ This is a complete redesign of the CV presentation, moving from the ECG animatio
   - CV has 5 roles but only 4 explicitly listed dates - inferred Duty Pharmacy Manager from GPhC registration date (Aug 2016)
   - Key numbers verified: £14.6M efficiency, 14,000 patients, £2.6M savings, 70% reduction, 200 hours, £1M revenue, £220M budget
   - Skills categorized into Active (technical), Clinical (healthcare domain), PRN (strategic/leadership)
+
+### Iteration 2 — Task 2: Modify ECGAnimation for PMR flatline transition
+- **Completed**: Task 2 - Modified ECGAnimation exit phase for clinical flatline → login transition
+- **Files modified**:
+  - `src/components/ECGAnimation.tsx` - Changed exit from fade-to-white to flatline → black → login background
+- **Changes made**:
+  - Replaced HOLD_TIME (0.75s) and EXIT_TIME (0.8s) with precise phase timings:
+    - FLATLINE_HOLD: 300ms (hold after name trace)
+    - FLATLINE_DRAW: 300ms (horizontal line extending rightward)
+    - FADE_TO_BLACK: 200ms (canvas opacity fade)
+    - BG_TRANSITION: 200ms (background to #1E293B login color)
+  - New timing phases: isFlatlinePhase, isFadePhase, isBgTransitionPhase
+  - Background now transitions to login screen color (#1E293B) instead of white
+  - Flatline drawn from final name position to right edge of viewport
+  - Scanline head dot hidden during fade/bg phases
+- **Design decisions**:
+  - Flatline visually reads as patient monitor flatline (deliberate metaphor)
+  - Total ECG phase still ~5-6 seconds, exit adds ~1 second
+  - Background transition uses CSS transition for smooth handoff to LoginScreen
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - Canvas fade must complete before background transition for clean visual
+  - The flatline extension needs to go slightly past viewport edge (+50px) for smooth visual
