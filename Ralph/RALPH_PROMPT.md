@@ -2,19 +2,31 @@
 
 You are operating inside an automated loop. Each iteration you receive fresh context - you have NO memory of previous iterations. Your only persistence is the filesystem.
 
-You are converting the completed `concept.html` (ECG Heartbeat CV Website) into a modern React application with TypeScript, Vite, and Tailwind CSS. The goal is a portfolio-grade React implementation that preserves all animations, interactions, and design details from the HTML concept.
+You are implementing **Design 7: The Clinical Record** — a Patient Medical Record (PMR) system that presents Andy's CV as a clinician would view a patient record. This is a complete redesign from the previous ECG Heartbeat concept.
+
+**The Concept:**
+The "patient" is Andy's career. Users navigate a genuine NHS clinical software interface (similar to EMIS Web, SystmOne, Vision) with a patient banner, sidebar navigation, consultation journal, medications table, clinical alerts, and a login sequence. The design works on two levels: clinicians recognize the interface immediately; recruiters get a novel, information-dense presentation.
 
 ## Your Task This Iteration
 
-1. **Use the /frontend-design skill** (REQUIRED for visual components): Before writing ANY code for components that involve visual design, styling, animations, or UI elements, you MUST invoke the `/frontend-design` skill. This includes: BootSequence, ECGAnimation, FloatingNav, Hero, Skills, Experience, Education, Projects, Contact, Footer, and any component with CSS/styling. This skill gives you access to specialized frontend design capabilities for higher quality, polished output.
+1. **Use the /frontend-design skill** (REQUIRED for visual components): Before writing ANY code for components that involve visual design, styling, animations, or UI elements, you MUST invoke the `/frontend-design` skill. This includes: LoginScreen, PatientBanner, ClinicalSidebar, ClinicalAlert, all View components (Summary, Consultations, Medications, Problems, Investigations, Documents, Referrals), and any table, card, or form component.
 
 2. **Read the plan**: Open `IMPLEMENTATION_PLAN.md` and find the highest-priority unchecked item (`- [ ]`). Items are listed in priority order - pick the first unchecked one.
 
-3. **Read accumulated learnings**: Open `progress.txt` and read the "Codebase Patterns" section. This contains learnings from previous iterations.
+3. **Read accumulated learnings**: Open `progress.txt` and read the "Codebase Patterns" section. This contains learnings from previous iterations about PMR design system, data architecture, animation approach, and clinical system authenticity.
 
-4. **Read guardrails**: Open `guardrails.md` and read ALL guardrails. These are hard rules you MUST follow. Violating a guardrail is a quality check failure.
+4. **Read guardrails**: Open `guardrails.md` and read ALL guardrails. These are hard rules you MUST follow. Key guardrails include:
+   - Light-mode only (clinical systems don't have dark mode)
+   - Instant view switching (no animations between views)
+   - Proper semantic table markup for all data tables
+   - Traffic lights must always have text labels
+   - Exact NHS blue color (#005EB8)
+   - ECG must end with flatline (not fade to white)
+   - Login typing animation specifics
+   - Consultation History/Examination/Plan format
+   - Coded entries in [XXX000] format
 
-5. **Implement the item**: Complete the single task you selected. Keep changes focused - one task per iteration. Write production-quality React/TypeScript code that is artistic, creative, and visually polished. This is a design showcase - the output should make someone say "wow, that's slick."
+5. **Implement the item**: Complete the single task you selected. Keep changes focused - one task per iteration. Write production-quality React/TypeScript code that faithfully reproduces a clinical information system. This is a design showcase requiring absolute thematic fidelity.
 
 6. **Run quality checks**: Execute the quality check commands listed in `IMPLEMENTATION_PLAN.md` under "Quality Checks". Fix any issues before proceeding.
 
@@ -38,19 +50,46 @@ You are converting the completed `concept.html` (ECG Heartbeat CV Website) into 
 
 ## Critical Rules
 
-- **ALWAYS invoke /frontend-design skill before writing visual component code** — this is mandatory for BootSequence, ECGAnimation, FloatingNav, Hero, Skills, Experience, Education, Projects, Contact, Footer, and any styled component
+- **ALWAYS invoke /frontend-design skill before writing visual component code** — this is mandatory for all UI components
 - **Only work on ONE task per iteration**
 - **Always read progress.txt AND guardrails.md before starting** — previous iterations may have left important context
 - **If a task is blocked or unclear**, document why in progress.txt and move to the next unchecked item
 - **Keep commits atomic and well-described**
 - **If quality checks fail, fix the issues before committing**
-- **The visual quality bar is HIGH** — this is a design portfolio piece
-- **Preserve all animations exactly** — timing, easing, and visual effects must match concept.html
-- **Use TypeScript strictly** — no `any` types, proper interfaces for all data structures
-- **Follow the established project structure** — components in `src/components/`, hooks in `src/hooks/`, etc.
+- **The visual quality bar is HIGH** — this must look like real clinical software
+- **Preserve clinical system authenticity** — instant navigation, proper tables, NHS blue, coded entries, traffic lights
+- **Use TypeScript strictly** — no `any` types, proper interfaces for all PMR data structures
+- **Follow the established project structure** — components in `src/components/`, data in `src/data/`, types in `src/types/`
+- **Respect prefers-reduced-motion** — animations must have instant fallbacks
 
 ## Reference Files
 
-- `References/concept.html` — The complete working HTML implementation (your source of truth for animations, styling, timing)
-- `References/CV_v4.md` — CV content to populate sections
-- `References/ECGVideo/` — Remotion video project with ECG animation patterns
+- `designs/07-the-clinical-record.md` — Complete design specification with all visual details, animations, and interactions
+- `References/CV_v4.md` — Source CV content (roles, achievements, numbers, dates)
+- `References/concept.html` — Previous ECG implementation (timing reference only for boot sequence)
+
+## Design Document Highlights
+
+**Color Palette (Light-mode only):**
+- Main content: `#F5F7FA`
+- Cards: `#FFFFFF`
+- Sidebar: `#1E293B`
+- NHS blue: `#005EB8`
+- Green (active): `#22C55E`
+- Amber (alerts): `#F59E0B`
+
+**Typography:**
+- Inter for general text
+- Geist Mono for coded entries and data values
+
+**Key Interactions:**
+- Login sequence: typing username/password character-by-character
+- Clinical alert: slides down, acknowledges with checkmark → collapse
+- Consultation entries: expand/collapse with History/Examination/Plan
+- Medications table: sortable columns, expandable prescribing history
+- Sidebar: instant view switching, no animations
+
+**Responsive Strategy:**
+- Desktop (>1024px): 220px sidebar with labels
+- Tablet (768-1024px): 56px icon-only sidebar
+- Mobile (<768px): Bottom navigation bar

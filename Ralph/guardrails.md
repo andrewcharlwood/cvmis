@@ -1,90 +1,120 @@
-# Guardrails — React Conversion
+# Guardrails — Clinical Record PMR System
 
 ## Standard Guardrails
 
 ### Frontend-design skill requirement
 - **When**: Writing ANY component with visual styling, animations, or UI elements
-- **Rule**: You MUST invoke the `/frontend-design` skill before writing code. This applies to: BootSequence, ECGAnimation, FloatingNav, Hero, Skills, Experience, Education, Projects, Contact, Footer, and any styled component.
-- **Why**: The frontend-design skill provides specialized capabilities for creating polished, professional-grade visual output. Skipping it results in lower quality design.
+- **Rule**: You MUST invoke the `/frontend-design` skill before writing code. This applies to: LoginScreen, PatientBanner, ClinicalSidebar, ClinicalAlert, all View components (Summary, Consultations, Medications, Problems, Investigations, Documents, Referrals), and any table, card, or form component.
+- **Why**: The frontend-design skill provides specialized capabilities for creating polished, professional-grade visual output. This is a high-fidelity clinical interface requiring exact color matching and spacing.
 
-### Boot sequence consistency
-- **When**: Implementing BootSequence component
-- **Rule**: Boot text must match concept.html exactly: "CLINICAL TERMINAL v3.2.1", "Initialising pharmacist profile...", SYSTEM/USER/ROLE/LOCATION labels with values, loading modules line, three [OK] lines, "---", and final ready line. Use Fira Code font, green #00ff41 for [OK] and values, cyan #00e5ff for labels, dim green #3a6b45 for other text.
-- **Why**: Boot sequence is the shared identity across all concepts. Must be identical.
+### Light-mode only constraint
+- **When**: Implementing any styling for the PMR interface
+- **Rule**: This design is LIGHT-MODE ONLY. Never implement dark mode. Clinical systems operate in light mode due to high ambient lighting in consulting rooms. Use white backgrounds (`#FFFFFF`), cool light gray content areas (`#F5F7FA`), and dark text (`#111827`).
+- **Why**: Dark mode would break the clinical system metaphor entirely.
 
-### ECG animation fidelity
-- **When**: Implementing ECGAnimation component
-- **Rule**: Timing and visual effects must match concept.html exactly: flatline 1000ms, three heartbeats with amplitudes 40px→60px→100px, color shift #00ff41→#00C9A7→#00897B, branching lines from third R peak, background transition black→white.
-- **Why**: The ECG animation is the signature visual effect. Any deviation breaks the experience.
+### Clinical system navigation behavior
+- **When**: Implementing sidebar navigation and view switching
+- **Rule**: View switching must be INSTANT — no crossfade, no slide animation, no transition. When a sidebar item is clicked, the main content area replaces immediately. This matches EMIS Web, SystmOne, and other clinical systems exactly.
+- **Why**: Clinical systems prioritize speed and responsiveness over visual flair. Any animation here breaks the authenticity.
+
+### Table markup requirements
+- **When**: Building the Medications, Problems, Investigations, or Documents tables
+- **Rule**: Use proper semantic HTML `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>` elements. Headers must use `scope="col"`. Never use divs styled as tables. Tables must have `1px solid #E5E7EB` borders on all cells, 40px row height, and alternating row colors.
+- **Why**: Screen readers rely on proper table markup to navigate data tables. Clinical systems use real tables.
+
+### Traffic light accessibility
+- **When**: Using green/amber/red status indicators
+- **Rule**: Traffic light dots (8px circles) must ALWAYS accompany text labels ("Active", "Resolved", "In Progress"). Never use color alone to communicate status. This applies to Problems status, Medications status, and Investigations status.
+- **Why**: WCAG 2.1 AA requirement — color cannot be the sole means of conveying information.
 
 ### CV content accuracy
-- **When**: Adding CV content to components
-- **Rule**: Use the expanded CV_v4.md content. Key roles in order: Interim Head (May-Nov 2025), Deputy Head (Jul 2024-Present), High-Cost Drugs & Interface Pharmacist (May 2022-Jul 2024), Pharmacy Manager Tesco (Nov 2017-May 2022), Duty Pharmacy Manager Tesco (Aug 2016-Nov 2017). Include Mary Seacole Programme in education. Include key achievements with specific numbers (£14.6M, 14,000 patients, £2.6M, 70%, 200hrs, £1M).
-- **Why**: The CV data must be accurate and complete. Missing roles or wrong dates would be a critical error.
+- **When**: Adding CV content to data files
+- **Rule**: Use exact data from `References/CV_v4.md`. Key numbers must match: £14.6M efficiency programme, 14,000 patients, £2.6M savings, 70% reduction, 200 hours saved, £1M revenue, £220M budget. Dates must be accurate: Interim Head (May-Nov 2025), Deputy Head (Jul 2024-Present), etc.
+- **Why**: Inaccurate CV data is a critical error. The PMR system presents factual career information.
+
+### NHS blue brand color
+- **When**: Using the primary accent color
+- **Rule**: Use exact NHS blue `#005EB8` for: active sidebar border, buttons, links, column headers, organization names. This is the actual NHS brand blue. Never use a different shade.
+- **Why**: NHS blue is instantly recognizable to healthcare professionals. Wrong blue breaks the authenticity.
 
 ### TypeScript strictness
 - **When**: Writing any TypeScript code
-- **Rule**: No `any` types. Define interfaces for all data structures. Use proper React.FC types or function component signatures with typed props. Enable strict mode in tsconfig.json.
-- **Why**: Type safety is a core benefit of the React conversion. `any` defeats the purpose.
+- **Rule**: No `any` types. Define interfaces for all data structures in `src/types/pmr.ts`. Use proper React.FC types or function component signatures with typed props. Enable strict mode in tsconfig.json.
+- **Why**: Type safety is critical for maintainability. The data layer has complex types (Consultation, Medication with history, Problem with codes).
 
-### Google Fonts loading
-- **When**: Setting up index.html
-- **Rule**: Use preconnect links to fonts.googleapis.com AND fonts.gstatic.com (with crossorigin), then the font CSS link. Load ALL fonts: Fira Code, Plus Jakarta Sans, Inter Tight. Test that fonts actually render.
-- **Why**: Fonts are critical to the design identity. Missing fonts break the visual concept.
-
-### Transition timing
-- **When**: Building the boot-to-design transition
-- **Rule**: Boot phase should take ~4 seconds. ECG animation should take ~5-6 seconds. Total time from page load to fully revealed design: no more than 10 seconds.
-- **Why**: Too long and users will leave. Too short and the effect is lost.
+### Reduced motion support
+- **When**: Implementing animations (login typing, alert slide, consultation expand)
+- **Rule**: All animations must respect `prefers-reduced-motion: reduce`. With reduced motion: login typing completes instantly, alert appears without slide, consultation expand is instant, banner condensation is instant.
+- **Why**: Accessibility requirement for users with vestibular disorders.
 
 ### No console errors
 - **When**: Writing JavaScript/TypeScript
-- **Rule**: No errors in the browser console. Handle edge cases: elements that might not exist, animation cleanup on unmount, proper dependency arrays in hooks.
+- **Rule**: No errors in the browser console. Handle edge cases: fuse.js search with no results, table sorting with empty data, form validation, animation cleanup on unmount.
 - **Why**: Console errors suggest broken functionality and are a quality check failure.
 
 ### Responsive breakpoints
 - **When**: Adding responsive CSS/Tailwind classes
-- **Rule**: Must work at 3 breakpoints: desktop (>768px), tablet (<=768px), mobile (<=480px). Navigation must be usable at all sizes. Content must not overflow horizontally. Touch targets must be reasonable size.
-- **Why**: CVs are often viewed on mobile devices.
-
-### Scroll animation observer
-- **When**: Implementing scroll-triggered animations
-- **Rule**: Use IntersectionObserver via custom hook (useScrollReveal), NOT scroll event listeners. Set appropriate threshold (0.1-0.15). Animations should only play once (don't re-trigger on scroll up).
-- **Why**: IntersectionObserver is more performant and reliable than scroll listeners.
-
-### Tailwind CSS usage
-- **When**: Writing component styles
-- **Rule**: Use Tailwind utility classes for all styling. Only use inline styles or CSS modules for dynamic values that can't be expressed with Tailwind (e.g., stroke-dashoffset calculations). Extend Tailwind config for custom colors.
-- **Why**: Consistent styling approach, smaller bundle size, better maintainability.
+- **Rule**: Must work at 3 breakpoints: desktop (>1024px with full sidebar), tablet (768-1024px with icon-only sidebar), mobile (<768px with bottom nav). Tables must adapt: full columns on desktop, scrollable on tablet, card layout on mobile.
+- **Why**: Clinical records may be viewed on tablets in consulting rooms or mobile devices.
 
 ## Project-Specific Guardrails
 
-### Framer Motion for complex animations
-- **When**: Animating the boot sequence, ECG paths, branching lines
-- **Rule**: Use Framer Motion's `motion` components and props (initial, animate, transition). Use `pathLength` for SVG drawing animations. Use `AnimatePresence` for exit animations. Define transition objects with exact timing from concept.html.
-- **Why**: Framer Motion provides declarative, performant animations that are easier to maintain than imperative JS.
+### ECG flatline transition
+- **When**: Modifying ECGAnimation component
+- **Rule**: The ECG must end with a flatline (horizontal line extending rightward from the name) that visually reads as a patient monitor flatline. This transitions to the login screen background (#1E293B). Do NOT fade to white — the previous design did that, but this design requires the flatline → login sequence.
+- **Why**: The flatline signals "end of patient monitoring, opening clinical record." It's a narrative transition.
 
-### Skill circle calculation
-- **When**: Building SVG circular progress gauges in Skills component
-- **Rule**: The circumference formula is `2 * Math.PI * radius`. `strokeDasharray = circumference`. `strokeDashoffset = circumference * (1 - level / 100)`. The circle MUST have `transform: rotate(-90deg)` to start progress from 12 o'clock position.
-- **Why**: Wrong math or missing rotation produces circles that fill from the wrong position or have incorrect percentages.
+### Login typing animation
+- **When**: Implementing LoginScreen component
+- **Rule**: Username "A.CHARLWOOD" types character-by-character at 30ms per character. Password fills with 8 dots at 20ms per dot. Use Geist Mono font for the typing. Blinking cursor appears during typing.
+- **Why**: The login sequence is the most immersive transition. Every NHS worker recognizes typing credentials into a clinical system.
 
-### Component file structure
-- **When**: Creating new components
-- **Rule**: One component per file in `src/components/`. Named exports for components. Props interface defined at top of file. Follow naming: PascalCase for components (BootSequence.tsx), camelCase for hooks (useScrollReveal.ts).
-- **Why**: Consistent organization makes the codebase maintainable.
+### Consultation format fidelity
+- **When**: Building ConsultationsView
+- **Rule**: Each consultation MUST have History, Examination, and Plan sections. Use uppercase section headers with letter-spacing (Inter 600, 12px, gray-400). History = context/background, Examination = analysis/findings (bullet list), Plan = outcomes/delivery (bullet list). Include coded entries at bottom in [XXX000] format.
+- **Why**: This is the clinical SOAP note format. The mapping to career content is the core concept.
 
-### Lucide React icons
-- **When**: Adding icons to Contact or other sections
-- **Rule**: Use Lucide React icons instead of unicode symbols. Import specific icons: `import { Phone, Mail, Linkedin, MapPin } from 'lucide-react'`. Size icons consistently (default 24px or specified size prop).
-- **Why**: Lucide provides consistent, scalable SVG icons that match the design system.
+### Medication table columns
+- **When**: Building MedicationsView
+- **Rule**: Table must have exactly these columns: Drug Name, Dose (%), Frequency, Start (year), Status. All columns must be sortable. Default grouping: Active Medications (technical), Clinical Medications (healthcare), PRN (strategic).
+- **Why**: Medications tables in clinical systems have standard columns. This mapping provides more information than typical skills sections.
 
-### Custom hooks for reusable logic
-- **When**: Implementing scroll reveal, active section tracking
-- **Rule**: Extract reusable logic into custom hooks in `src/hooks/`. Hooks should be composable and return values/functions needed by components. Name with `use` prefix.
-- **Why**: Keeps components clean, enables reuse, follows React best practices.
+### Clinical alert behavior
+- **When**: Implementing ClinicalAlert component
+- **Rule**: Alert appears on Summary view load with spring animation (250ms). Must include warning icon, amber background (#FEF3C7), amber left border, and "Acknowledge" button. Clicking Acknowledge: icon → green checkmark (200ms) → alert collapses upward (200ms). Use `role="alert"` and `aria-live="assertive"`.
+- **Why**: The clinical alert is the signature interaction. It frames the £14.6M achievement with institutional weight.
 
-### Vite configuration
-- **When**: Setting up the project build
-- **Rule**: Use Vite's default React template. Configure path aliases in `vite.config.ts` for clean imports (e.g., `@/components/Hero`). Ensure `build.outDir` is set correctly.
-- **Why**: Vite provides fast dev server and optimized production builds.
+### Coded entries format
+- **When**: Adding coded entries to consultations or problems
+- **Rule**: Use fictional but consistent SNOMED-style codes: [EFF001] for efficiency, [ALG001] for algorithms, [AUT001] for automation, [SQL001] for data, [BUD001] for budget, [TRN001] for transformation, [LEA001] for leadership, etc. Codes in Geist Mono 12px, gray-500.
+- **Why**: Clinical systems use coded entries (SNOMED CT, Read codes). This maintains the metaphor.
+
+### Sidebar navigation structure
+- **When**: Building ClinicalSidebar
+- **Rule**: Exactly 7 items in this order: Summary, Consultations, Medications, Problems, Investigations, Documents, Referrals. Use Lucide icons: ClipboardList, FileText, Pill, AlertTriangle, FlaskConical, FolderOpen, Send. Separator line after Summary. Active state: 3px NHS blue left border.
+- **Why**: This matches clinical record navigation categories. Order matters for Alt+1-7 shortcuts.
+
+### Patient banner data
+- **When**: Building PatientBanner
+- **Rule**: Full name "CHARLWOOD, Andrew (Mr)" (surname first, comma-separated). DOB "14/02/1993" (DD/MM/YYYY). NHS No "221 181 0" (GPhC number formatted like NHS number with tooltip). Address "Norwich, NR1". Status "Active" with green dot. Badge "Open to opportunities".
+- **Why**: This is the most recognizable PMR element. Format must match clinical systems exactly.
+
+### Keyboard shortcuts
+- **When**: Implementing navigation
+- **Rule**: Alt+1 through Alt+7 must activate corresponding sidebar items. Escape closes expanded items and menus. / focuses search. Implement roving tabindex in sidebar (Up/Down arrows navigate, Enter activates).
+- **Why**: Clinical systems have keyboard shortcuts for rapid navigation. This is expected behavior.
+
+### Form validation
+- **When**: Building ReferralsView form
+- **Rule**: Referrer Name and Email are required. Show validation errors if empty on submit. Generate reference number in format REF-YYYY-MM-DD-NNN from current date. Success message shows reference and "Expected response time: 24-48 hours."
+- **Why**: Clinical referral forms have validation. The reference number mimics real NHS referral references.
+
+### Mobile bottom navigation
+- **When**: Implementing responsive mobile layout
+- **Rule**: On mobile (<768px), sidebar becomes bottom nav bar with 7 icon buttons (56px height, safe area padding). Patient banner becomes minimal. Tables switch to card layout. Add back arrow in each view returning to Summary.
+- **Why**: Mobile clinical apps use bottom tabs. This matches the NHS App and EMIS Mobile patterns.
+
+### Search implementation
+- **When**: Adding search functionality
+- **Rule**: Use fuse.js with threshold 0.3. Index all content: consultation titles/bullets, medication names, problem descriptions, investigation names, document titles. Group results by section. Clicking result navigates to view and expands matching item.
+- **Why**: Clinical systems have record search. Fuse.js provides fuzzy matching for medical record lookups.
