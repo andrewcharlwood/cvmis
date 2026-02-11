@@ -139,7 +139,7 @@ src/
 
   Create `src/components/views/MedicationsView.tsx`. Three category tabs: Active Medications (technical skills), Clinical Medications (healthcare domain skills), PRN (strategic skills). Each tab shows a table: Drug Name | Dose (%) | Frequency | Start | Status. Sortable columns: clicking header sorts (asc/desc toggle). Default sort: by category grouping. Table styling: gray-200 borders, alternating row colors, 40px row height. Hover: subtle blue tint (#EFF6FF). Click row to expand "Prescribing History" — mini-timeline showing skill progression (year + description). History styled in Geist Mono. 18 total medications mapped from CV skills with accurate proficiency percentages and usage frequencies.
 
-- [ ] **Task 9: Build ProblemsView with traffic light system**
+- [x] **Task 9: Build ProblemsView with traffic light system**
 
   Create `src/components/views/ProblemsView.tsx`. Two sections: Active Problems and Resolved Problems. Table columns: Status (traffic light dot), Code (SNOMED-style in Geist Mono), Problem description, Since/Resolved date, Outcome (for resolved). Traffic lights: 8px circles — green (resolved/current), amber (in progress), gray (inactive/historical). Active problems: £220M budget oversight, SQL transformation, data literacy programme. Resolved problems: 8 achievements with specific outcomes ("Python algorithm: 14,000 pts, £2.6M/yr", "70% reduction, 200hrs saved", etc.). Click row to expand full narrative with "linked consultations" navigation.
 

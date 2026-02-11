@@ -276,3 +276,33 @@ This is a complete redesign of the CV presentation, moving from the ECG animatio
   - Case block lexical declarations need curly braces wrapping to satisfy ESLint
   - Sort state with three values (null/asc/desc) provides intuitive toggle behavior
   - Frequency sort uses custom order object mapping
+
+### Iteration 9 — Task 9: Build ProblemsView with traffic light system
+- **Completed**: Task 9 - Created ProblemsView with two tables and expandable narrative
+- **Files created**:
+  - `src/components/views/ProblemsView.tsx` - Full Problems view with Active and Resolved sections
+- **Files modified**:
+  - `src/components/PMRInterface.tsx` - Added ProblemsView to renderView switch
+- **Design decisions**:
+  - Two sections: Active Problems (3 items) and Resolved Problems (8 items)
+  - Traffic light component: 8px circles with text labels (green=Active/Resolved, amber=In Progress)
+  - Active Problems table: Status, Code, Problem, Since columns
+  - Resolved Problems table: Status, Code, Problem, Resolved, Outcome columns
+  - Code column: [XXX000] format in Geist Mono, gray-500
+  - Expandable rows: click to show narrative and linked consultations
+  - Linked consultations: clickable buttons navigate to Consultations view with item ID
+  - Height animation: 200ms ease-out for expand/collapse
+  - Hover state: blue-50 (#EFF6FF) background tint
+  - Accordion behavior: only one row expanded at a time (per section? globally? went with global)
+- **Accessibility**:
+  - Proper semantic `<table>` markup with `scope="col"` on headers
+  - `aria-expanded` on clickable rows
+  - Traffic lights have `aria-label` with status text
+  - Expand button has `aria-label` for screen readers
+  - Screen reader-only column header for expand button
+  - Respects `prefers-reduced-motion`: height transition disabled
+- **Quality checks**: `npm run typecheck` ✓, `npm run lint` ✓, `npm run build` ✓
+- **Learnings**:
+  - `problem.linkedConsultations` needed null coalescing since it's optional in the type
+  - Height animation uses refs to measure content height for smooth expansion
+  - Linked consultations use external link icon to indicate navigation
