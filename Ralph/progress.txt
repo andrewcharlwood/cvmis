@@ -220,3 +220,43 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 
 **Next task:** Task 3 — Rebuild LoginScreen with new typing speed, user-interactive button, and premium font
 
+### Iteration 4 — Task 3: Rebuild LoginScreen
+**Completed:** Task 3
+**Changes made:**
+- Rebuilt LoginScreen.tsx with all spec requirements:
+  - Typing speed changed from 30ms/char → 80ms/char for username, 20ms/dot → 60ms/dot for password
+  - Pause between username and password changed from 150ms → 300ms
+  - Start delay changed from 200ms → 400ms (more breathing room for card entrance)
+  - Login button is now user-interactive — disabled/dimmed (opacity 0.6) while typing, fully interactive after typing completes
+  - Added `typingComplete` state to track when typing is done
+  - Added `buttonHovered` state for hover visual feedback (#004D9F on hover)
+  - Button `onClick` handler only fires when `typingComplete` is true
+  - Reduced motion: typing completes instantly, button immediately available for user click (NOT auto-triggered)
+  - `activeField` state expanded to include `'done'` value for post-typing state
+- Font references updated from `'Inter'` → `var(--font-ui)` (Elvaro Grotesque) throughout
+- Card shadow upgraded from single-layer `0 1px 2px rgba(0,0,0,0.03)` → multi-layered `0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)` per design system
+- Timer cleanup improved: all `setTimeout` calls tracked via `timeoutRefs` ref array and cleared on unmount
+- Fixed ESLint warning about `timeoutRefs.current` in cleanup by capturing to local variable
+
+**Codebase patterns discovered:**
+- `addTimeout` helper pattern: wraps `setTimeout` and tracks IDs in a ref array for cleanup — useful for components with multiple sequential timeouts
+- Button hover state should use a slightly darker shade than the base (#004D9F between #005EB8 and #004494 pressed)
+- `var(--font-ui)` is the correct way to reference the premium font in inline styles (not the font name directly)
+
+**Quality checks:** All passed
+- TypeScript: No errors
+- ESLint: 1 pre-existing warning in AccessibilityContext.tsx (not our changes)
+- Build: Successful, 392KB bundle
+
+**Visual review:** Skipped — browser tools (Claude in Chrome) not available in this environment
+
+**Issues encountered:** None
+
+**Design decisions:**
+- Kept the Geist Mono + Fira Code monospace fallback chain for input fields (authentic clinical terminal feel)
+- Button hover color (#004D9F) is a midpoint between NHS blue (#005EB8) and pressed (#004494) — subtle but noticeable
+- 400ms start delay gives the card entrance animation time to complete before typing begins
+- Button uses `disabled` attribute plus visual opacity change for clear affordance
+
+**Next task:** Task 4 — Rebuild PatientBanner
+
