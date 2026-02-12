@@ -172,3 +172,51 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 - Font guardrail added: use [UI font] from Fonts/, not Inter/Roboto
 - Login guardrail added: 80ms/char typing, user-interactive button
 
+### Iteration 3 — Task 2: Set up premium font and update Tailwind config
+**Completed:** Task 2
+**Changes made:**
+- Added @font-face declarations in src/index.css for both premium font candidates:
+  - Elvaro Grotesque: 7 weights (Light 300 → Black 900) loaded from WOFF2/WOFF files in Fonts/ directory
+  - Blumir: Variable font (100-700 weight range) loaded from WOFF2/WOFF files
+- Updated CSS variables: --font-ui (Elvaro Grotesque), --font-ui-alt (Blumir)
+- Removed --font-inter, replaced with --font-ui in CSS variables
+- Updated Tailwind config fontFamily:
+  - Added font-ui: ['Elvaro Grotesque', 'system-ui', 'sans-serif']
+  - Added font-ui-alt: ['Blumir', 'system-ui', 'sans-serif']
+  - Removed font-inter references
+  - Kept font-geist for monospace data (Geist Mono)
+  - Kept font-mono for boot/ECG phases (Fira Code)
+- Enhanced Tailwind boxShadow tokens for Clinical Luxury:
+  - pmr: '0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)' (multi-layered card shadow)
+  - pmr-hover: '0 2px 4px rgba(0,0,0,0.06), 0 8px 16px rgba(0,0,0,0.04)' (hover lift)
+  - pmr-banner: '0 2px 8px rgba(0,0,0,0.12)' (patient banner drop shadow)
+- Updated utility class .pmr-theme to use var(--font-ui) instead of var(--font-inter)
+- Added .font-ui and .font-ui-alt utility classes
+- Fixed ESLint errors in ECGAnimation.tsx (viewOff and headSX should be const, not let)
+
+**Codebase patterns discovered:**
+- Font loading strategy: Load both candidate fonts now, switch between them by changing CSS variable only
+- Elvaro Grotesque chosen as primary (institutional credibility, slightly condensed, data-dense UI)
+- Blumir available as alternative (more refined/luxurious) via font-ui-alt
+- Font files are correctly bundled by Vite (visible in build output: 14 Elvaro files + 2 Blumir files)
+- Shadow system: pmr (default card), pmr-hover (interactive lift), pmr-banner (separation) — layered depth
+- font-display: swap ensures text remains visible during font load
+
+**Quality checks:** All passed
+- TypeScript: No errors
+- ESLint: 1 pre-existing warning in AccessibilityContext.tsx (not our changes)
+- Build: Successful, 391KB bundle (includes all font files)
+
+**Visual review:** N/A (configuration task, no visual component — fonts will be visible in Task 3 LoginScreen onwards)
+
+**Issues encountered:** None
+
+**Design decisions:**
+- Started with Elvaro Grotesque as primary (per task instructions: "start with Elvaro, can be swapped later")
+- Loaded all 7 weights for Elvaro (300/400/500/600/700/800/900) for full weight hierarchy control
+- Loaded Blumir as variable font (single file supports 100-700 range) for efficiency
+- Used font-display: swap for optimal loading behavior (text visible immediately, swaps to custom font when loaded)
+- Enhanced shadow tokens in Tailwind config (was only single pmr shadow, now includes hover and banner variants)
+
+**Next task:** Task 3 — Rebuild LoginScreen with new typing speed, user-interactive button, and premium font
+
