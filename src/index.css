@@ -2,6 +2,80 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Premium UI fonts — Elvaro Grotesque (primary) */
+@font-face {
+  font-family: 'Elvaro Grotesque';
+  src: url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Light.woff2') format('woff2'),
+       url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Elvaro Grotesque';
+  src: url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Regular.woff2') format('woff2'),
+       url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Elvaro Grotesque';
+  src: url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Medium.woff2') format('woff2'),
+       url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Elvaro Grotesque';
+  src: url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-SemiBold.woff2') format('woff2'),
+       url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Elvaro Grotesque';
+  src: url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Bold.woff2') format('woff2'),
+       url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Elvaro Grotesque';
+  src: url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-ExtraBold.woff2') format('woff2'),
+       url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-ExtraBold.woff') format('woff');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Elvaro Grotesque';
+  src: url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Black.woff2') format('woff2'),
+       url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Black.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Premium UI fonts — Blumir (alternative) */
+@font-face {
+  font-family: 'Blumir';
+  src: url('/Fonts/blumir-font-family/WOFF/Blumir-VF.woff2') format('woff2-variations'),
+       url('/Fonts/blumir-font-family/WOFF/Blumir-VF.woff') format('woff-variations');
+  font-weight: 100 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Original design system tokens (for boot/ECG phases) */
   --bg: #FFFFFF;
@@ -41,7 +115,8 @@
   --pmr-alert-text: #92400E;
   --pmr-radius: 4px;
   --pmr-radius-login: 12px;
-  --font-inter: 'Inter', system-ui, sans-serif;
+  --font-ui: 'Elvaro Grotesque', system-ui, sans-serif;
+  --font-ui-alt: 'Blumir', system-ui, sans-serif;
   --font-geist-mono: 'Geist Mono', 'Fira Code', monospace;
 }
 
@@ -69,8 +144,11 @@ body {
   .font-mono {
     font-family: 'Fira Code', monospace;
   }
-  .font-inter {
-    font-family: var(--font-inter);
+  .font-ui {
+    font-family: var(--font-ui);
+  }
+  .font-ui-alt {
+    font-family: var(--font-ui-alt);
   }
   .font-geist-mono {
     font-family: var(--font-geist-mono);
@@ -78,7 +156,7 @@ body {
   .pmr-theme {
     background-color: var(--pmr-content);
     color: var(--pmr-text-primary);
-    font-family: var(--font-inter);
+    font-family: var(--font-ui);
   }
 }
 

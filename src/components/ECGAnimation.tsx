@@ -414,13 +414,11 @@ export function ECGAnimation({ onComplete, startPosition }: ECGAnimationProps) {
       }
 
       // Calculate viewport and head screen position
-      let headSX: number
-      let viewOff: number
       const headSXEcg = HEAD_SCREEN_RATIO * vw
-      
+
       // Simple continuous scrolling - viewport follows head when it exceeds 75% of screen
-      viewOff = Math.max(0, headWX - headSXEcg)
-      headSX = headWX - viewOff
+      const viewOff = Math.max(0, headWX - headSXEcg)
+      const headSX = headWX - viewOff
 
       // Calculate fade alpha
       let fadeAlpha = 1
