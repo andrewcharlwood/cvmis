@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useLayoutEffect, useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // =============================================================================
@@ -25,6 +25,8 @@ interface BootConfig {
     cursorBlinkInterval: number
     holdAfterComplete: number
     fadeOutDuration: number
+    cursorShrinkDuration: number
+    ecgStartDelay: number
   }
   colors: {
     bright: string
@@ -38,9 +40,33 @@ interface BootSequenceProps {
   onCursorPositionReady?: (position: { x: number; y: number }) => void
 }
 
+interface TypedSegment {
+  text: string
+  color: string
+  bold?: boolean
+  isSeedDot?: boolean
+}
+
+interface TypedLine {
+  segments: TypedSegment[]
+  totalChars: number
+  pauseAfter: number  // ms to pause after this line completes
+  speed: number       // ms per character (0 = instant)
+}
+
 // =============================================================================
 // Configuration
 // =============================================================================
+
+// Global speed multiplier for typing animation.
+// 1.0 = default (~3.3s typing). Lower = faster, higher = slower.
+const TYPING_SPEED = 2
+
+const COLORS = {
+  bright: '#00ff41',
+  dim: '#3a6b45',
+  cyan: '#00e5ff',
+}
 
 const BOOT_CONFIG: BootConfig = {
   header: 'CLINICAL TERMINAL v3.2.1',
@@ -57,195 +83,349 @@ const BOOT_CONFIG: BootConfig = {
     { type: 'module', text: 'population_health.mod', style: 'dim' },
     { type: 'module', text: 'data_analytics.eng', style: 'dim' },
     { type: 'separator', text: '---', style: 'dim' },
-    { type: 'ready', text: 'READY — Rendering CV..', style: 'bright' },
+    { type: 'ready', text: 'READY \u2014 Rendering CV..', style: 'bright' },
   ],
   timing: {
     lineDelay: 220,
-    cursorBlinkInterval: 530,
-    holdAfterComplete: 400,
-    fadeOutDuration: 800,
+    cursorBlinkInterval: 300,
+    holdAfterComplete: 900,
+    fadeOutDuration: 600,
+    cursorShrinkDuration: 600,
+    ecgStartDelay: 0,
   },
-  colors: {
-    bright: '#00ff41',
-    dim: '#3a6b45',
-    cyan: '#00e5ff',
-  },
+  colors: COLORS,
 }
 
-// =============================================================================
-// Helper Functions
-// =============================================================================
-
-function getCumulativeDelay(lineIndex: number): number {
-  return lineIndex * BOOT_CONFIG.timing.lineDelay
+// Apply speed multiplier — instant lines (speed=0) stay instant
+function s(ms: number): number {
+  return Math.round(ms * TYPING_SPEED)
 }
 
-// =============================================================================
-// Line Components
-// =============================================================================
+// Build typed lines from BOOT_CONFIG
+function buildTypedLines(): TypedLine[] {
+  const lines: TypedLine[] = []
 
-function BootLineHeader({ text }: { text: string }) {
-  return (
-    <div className="font-mono text-sm leading-relaxed">
-      <span
-        className="font-bold"
-        style={{ color: BOOT_CONFIG.colors.bright }}
-      >
-        {text}
-      </span>
-    </div>
-  )
-}
+  // Header
+  const headerText = BOOT_CONFIG.header
+  lines.push({
+    segments: [{ text: headerText, color: COLORS.bright, bold: true }],
+    totalChars: headerText.length,
+    pauseAfter: s(40),
+    speed: s(18),
+  })
 
-function BootLineStatus({ line }: { line: BootLine }) {
-  const color = line.style ? BOOT_CONFIG.colors[line.style] : BOOT_CONFIG.colors.dim
-  return (
-    <div className="font-mono text-sm leading-relaxed" style={{ color }}>
-      {line.text}
-    </div>
-  )
-}
-
-function BootLineSeparator({ line }: { line: BootLine }) {
-  const color = line.style ? BOOT_CONFIG.colors[line.style] : BOOT_CONFIG.colors.dim
-  return (
-    <div className="font-mono text-sm leading-relaxed" style={{ color }}>
-      {line.text || '---'}
-    </div>
-  )
-}
-
-function BootLineField({ line }: { line: BootLine }) {
-  const valueColor = line.style ? BOOT_CONFIG.colors[line.style] : BOOT_CONFIG.colors.bright
-  return (
-    <div className="font-mono text-sm leading-relaxed">
-      <span style={{ color: BOOT_CONFIG.colors.cyan }}>
-        {(line.label || '').padEnd(9)}
-      </span>
-      <span style={{ color: valueColor }}>{line.value}</span>
-    </div>
-  )
-}
-
-function BootLineModule({ line }: { line: BootLine }) {
-  const textColor = line.style ? BOOT_CONFIG.colors[line.style] : BOOT_CONFIG.colors.dim
-  return (
-    <div className="font-mono text-sm leading-relaxed">
-      <span className="font-bold" style={{ color: BOOT_CONFIG.colors.bright }}>
-        [OK]
-      </span>{' '}
-      <span style={{ color: textColor }}>{line.text}</span>
-    </div>
-  )
-}
-
-function BootLineReady({ line }: { line: BootLine }) {
-  const color = line.style ? BOOT_CONFIG.colors[line.style] : BOOT_CONFIG.colors.bright
-  return (
-    <div className="font-mono text-sm leading-relaxed">
-      <span className="font-bold" style={{ color }}>
-        &gt; {line.text}
-        <span className="ecg-seed-dot">.</span>
-      </span>
-    </div>
-  )
-}
-
-function BootLineRenderer({ line }: { line: BootLine }) {
-  switch (line.type) {
-    case 'header':
-      return <BootLineHeader text={line.text || ''} />
-    case 'status':
-      return <BootLineStatus line={line} />
-    case 'separator':
-      return <BootLineSeparator line={line} />
-    case 'field':
-      return <BootLineField line={line} />
-    case 'module':
-      return <BootLineModule line={line} />
-    case 'ready':
-      return <BootLineReady line={line} />
-    default:
-      return null
+  for (const line of BOOT_CONFIG.lines) {
+    switch (line.type) {
+      case 'status': {
+        const text = line.text || ''
+        lines.push({
+          segments: [{ text, color: COLORS.dim }],
+          totalChars: text.length,
+          pauseAfter: s(40),
+          speed: s(14),
+        })
+        break
+      }
+      case 'separator': {
+        const text = line.text || '---'
+        lines.push({
+          segments: [{ text, color: COLORS.dim }],
+          totalChars: text.length,
+          pauseAfter: s(50),
+          speed: 0, // instant
+        })
+        break
+      }
+      case 'field': {
+        const label = (line.label || '').padEnd(9)
+        const value = line.value || ''
+        const valueColor = line.style === 'cyan' ? COLORS.cyan : COLORS.bright
+        lines.push({
+          segments: [
+            { text: label, color: COLORS.cyan },
+            { text: value, color: valueColor },
+          ],
+          totalChars: label.length + value.length,
+          pauseAfter: s(30),
+          speed: s(10),
+        })
+        break
+      }
+      case 'module': {
+        const prefix = '[OK] '
+        const name = line.text || ''
+        lines.push({
+          segments: [
+            { text: '[OK]', color: COLORS.bright, bold: true },
+            { text: ' ', color: COLORS.dim },
+            { text: name, color: COLORS.dim },
+          ],
+          totalChars: prefix.length + name.length,
+          pauseAfter: s(50),
+          speed: 0, // instant — stdout output
+        })
+        break
+      }
+      case 'ready': {
+        const prefix = '> '
+        const body = line.text || ''
+        const seedDot = '.'
+        lines.push({
+          segments: [
+            { text: prefix + body, color: COLORS.bright, bold: true },
+            { text: seedDot, color: COLORS.bright, bold: true, isSeedDot: true },
+          ],
+          totalChars: prefix.length + body.length + seedDot.length,
+          pauseAfter: 0,
+          speed: s(16),
+        })
+        break
+      }
+    }
   }
+
+  return lines
 }
+
+const TYPED_LINES = buildTypedLines()
+const TOTAL_CHARS = TYPED_LINES.reduce((sum, l) => sum + l.totalChars, 0)
 
 // =============================================================================
 // Main Component
 // =============================================================================
 
 export function BootSequence({ onComplete, onCursorPositionReady }: BootSequenceProps) {
+  const [typedCount, setTypedCount] = useState(0)
+  const [phase, setPhase] = useState<'typing' | 'holding' | 'fading' | 'done'>('typing')
   const [isVisible, setIsVisible] = useState(true)
-  const [showCursor, setShowCursor] = useState(false)
-  const [cursorCaptured, setCursorCaptured] = useState(false)
-  const [isMorphing, setIsMorphing] = useState(false)
-  const cursorRef = useRef<HTMLDivElement>(null)
-  const reducedMotion = typeof window !== 'undefined' 
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+  const cursorRef = useRef<HTMLSpanElement>(null)
+  const cursorAnchorRef = useRef<HTMLSpanElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const cursorCapturedRef = useRef(false)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [cursorPos, setCursorPos] = useState<{ left: number; top: number } | null>(null)
+
+  const reducedMotion = typeof window !== 'undefined'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
     : false
 
-  // Calculate total boot time
-  const totalBootTime = BOOT_CONFIG.lines.length * BOOT_CONFIG.timing.lineDelay
-  const fadeStartTime = totalBootTime + BOOT_CONFIG.timing.holdAfterComplete
-
-  // Capture cursor position when boot completes
+  // Capture cursor position for ECG handoff
   const captureCursorPosition = useCallback(() => {
-    if (cursorRef.current && onCursorPositionReady && !cursorCaptured) {
+    if (cursorRef.current && onCursorPositionReady && !cursorCapturedRef.current) {
       const rect = cursorRef.current.getBoundingClientRect()
-      const position = {
+      onCursorPositionReady({
         x: rect.left + rect.width / 2,
         y: rect.top + rect.height / 2,
-      }
-      onCursorPositionReady(position)
-      setCursorCaptured(true)
+      })
+      cursorCapturedRef.current = true
     }
-  }, [onCursorPositionReady, cursorCaptured])
+  }, [onCursorPositionReady])
 
-  // Handle completion sequence
+  // Typing engine — runs as a self-scheduling setTimeout chain
   useEffect(() => {
-    if (reducedMotion) {
-      // Reduced motion: show everything instantly, then complete
-      const timer = setTimeout(onComplete, 500)
-      return () => clearTimeout(timer)
+    if (reducedMotion || phase !== 'typing') return
+
+    // All characters typed
+    if (typedCount >= TOTAL_CHARS) {
+      setPhase('holding')
+      return
     }
 
-    // Show cursor after all lines are rendered
-    const cursorTimer = setTimeout(() => {
-      setShowCursor(true)
-    }, totalBootTime)
+    // Find which line the cursor is on and position within it
+    let lineStart = 0
+    let lineIdx = 0
+    for (let i = 0; i < TYPED_LINES.length; i++) {
+      if (lineStart + TYPED_LINES[i].totalChars > typedCount) {
+        lineIdx = i
+        break
+      }
+      lineStart += TYPED_LINES[i].totalChars
+    }
 
-    // Capture cursor position and start morph
-    const morphTimer = setTimeout(() => {
-      captureCursorPosition()
-      setIsMorphing(true)
-    }, fadeStartTime - 100)
+    const line = TYPED_LINES[lineIdx]
+    const posInLine = typedCount - lineStart
 
-    // Fade out and complete
-    const fadeTimer = setTimeout(() => {
-      setIsVisible(false)
-    }, fadeStartTime)
-
-    const completeTimer = setTimeout(() => {
-      onComplete()
-    }, fadeStartTime + BOOT_CONFIG.timing.fadeOutDuration)
+    if (posInLine === 0 && line.speed === 0) {
+      // Instant line: show all chars at once after a brief pause
+      timeoutRef.current = setTimeout(() => {
+        setTypedCount(lineStart + line.totalChars)
+      }, line.pauseAfter || 10)
+    } else if (posInLine === 0 && lineIdx > 0) {
+      // Start of a new typed line — apply previous line's pauseAfter
+      timeoutRef.current = setTimeout(() => {
+        setTypedCount(prev => prev + 1)
+      }, TYPED_LINES[lineIdx - 1].pauseAfter)
+    } else {
+      // Type one character at the line's speed
+      timeoutRef.current = setTimeout(() => {
+        setTypedCount(prev => prev + 1)
+      }, line.speed)
+    }
 
     return () => {
-      clearTimeout(cursorTimer)
-      clearTimeout(morphTimer)
-      clearTimeout(fadeTimer)
-      clearTimeout(completeTimer)
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
-  }, [onComplete, totalBootTime, fadeStartTime, captureCursorPosition, reducedMotion])
+  }, [typedCount, phase, reducedMotion])
+
+  // Hold phase: capture cursor, then start fading
+  useEffect(() => {
+    if (phase !== 'holding') return
+
+    captureCursorPosition()
+
+    const fadeTimer = setTimeout(() => {
+      setPhase('fading')
+    }, BOOT_CONFIG.timing.holdAfterComplete)
+
+    return () => clearTimeout(fadeTimer)
+  }, [phase, captureCursorPosition])
+
+  // Fade phase: wait for animations to finish, then complete
+  useEffect(() => {
+    if (phase !== 'fading') return
+
+    const longestFade = Math.max(
+      BOOT_CONFIG.timing.fadeOutDuration,
+      BOOT_CONFIG.timing.cursorShrinkDuration
+    )
+
+    const completeTimer = setTimeout(() => {
+      setIsVisible(false)
+      setPhase('done')
+      onComplete()
+    }, longestFade + BOOT_CONFIG.timing.ecgStartDelay)
+
+    return () => clearTimeout(completeTimer)
+  }, [phase, onComplete])
+
+  // Reduced motion: skip animation
+  useEffect(() => {
+    if (!reducedMotion) return
+    const timer = setTimeout(onComplete, 500)
+    return () => clearTimeout(timer)
+  }, [reducedMotion, onComplete])
+
+  // Track cursor anchor position relative to the content container
+  useLayoutEffect(() => {
+    if (!cursorAnchorRef.current || !containerRef.current || phase === 'done') return
+    const anchor = cursorAnchorRef.current.getBoundingClientRect()
+    const container = containerRef.current.getBoundingClientRect()
+    setCursorPos({
+      left: anchor.left - container.left,
+      top: anchor.top - container.top,
+    })
+  }, [typedCount, phase])
+
+  // Render the typed lines up to typedCount
+  const renderLines = () => {
+    let remaining = typedCount
+    const renderedLines: React.ReactNode[] = []
+    let cursorPlaced = false
+
+    for (let lineIdx = 0; lineIdx < TYPED_LINES.length; lineIdx++) {
+      const line = TYPED_LINES[lineIdx]
+
+      // During typing, render this line if we've started typing into it (or it's the first line with cursor)
+      if (phase === 'typing' && remaining <= 0 && lineIdx > 0) break
+
+      const charsForLine = Math.min(Math.max(0, remaining), line.totalChars)
+      remaining -= charsForLine
+
+      // Cursor goes on the line currently being typed, or the last line in non-typing phases
+      const isCursorLine = phase === 'typing'
+        ? !cursorPlaced && (charsForLine < line.totalChars || remaining <= 0)
+        : lineIdx === TYPED_LINES.length - 1
+
+      // Render segments
+      let charBudget = phase === 'typing' ? charsForLine : line.totalChars
+      const spans: React.ReactNode[] = []
+
+      for (let segIdx = 0; segIdx < line.segments.length; segIdx++) {
+        const seg = line.segments[segIdx]
+        if (charBudget <= 0 && phase === 'typing') break
+
+        const visibleChars = phase === 'typing'
+          ? Math.min(charBudget, seg.text.length)
+          : seg.text.length
+        const visibleText = seg.text.slice(0, visibleChars)
+        charBudget -= visibleChars
+
+        if (seg.isSeedDot && visibleChars > 0) {
+          spans.push(
+            <span
+              key={segIdx}
+              className={phase === 'holding' ? 'ecg-seed-dot animate-seed-pulse' : 'ecg-seed-dot'}
+              style={{ color: seg.color, fontWeight: seg.bold ? 700 : 400 }}
+            >
+              {visibleText}
+            </span>
+          )
+        } else if (visibleChars > 0) {
+          spans.push(
+            <span
+              key={segIdx}
+              style={{ color: seg.color, fontWeight: seg.bold ? 700 : 400 }}
+            >
+              {visibleText}
+            </span>
+          )
+        }
+      }
+
+      // Invisible placeholder to mark cursor position (actual cursor rendered outside fading wrapper)
+      if (isCursorLine && phase !== 'done') {
+        cursorPlaced = true
+        spans.push(
+          <span
+            key="cursor-anchor"
+            ref={cursorAnchorRef}
+            className="inline-block align-middle"
+            style={{ width: 8, height: 16, marginLeft: 1 }}
+          />
+        )
+      }
+
+      renderedLines.push(
+        <div key={lineIdx} className="font-mono text-sm leading-relaxed whitespace-nowrap">
+          {spans}
+        </div>
+      )
+    }
+
+    return renderedLines
+  }
 
   // Reduced motion: instant render
   if (reducedMotion) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col justify-center bg-black p-10 font-mono text-sm overflow-hidden">
+      <div className="fixed inset-0 z-50 flex flex-col justify-center bg-black px-5 py-8 sm:p-10 font-mono text-sm overflow-hidden">
         <div className="flex flex-col gap-1 max-w-[640px] transform -translate-y-1/2">
-          <BootLineHeader text={BOOT_CONFIG.header} />
-          {BOOT_CONFIG.lines.map((line, index) => (
-            <BootLineRenderer key={index} line={line} />
-          ))}
+          {(() => {
+            // Render all lines fully
+            const lines: React.ReactNode[] = []
+            for (let lineIdx = 0; lineIdx < TYPED_LINES.length; lineIdx++) {
+              const line = TYPED_LINES[lineIdx]
+              const spans: React.ReactNode[] = []
+              for (let segIdx = 0; segIdx < line.segments.length; segIdx++) {
+                const seg = line.segments[segIdx]
+                spans.push(
+                  <span
+                    key={segIdx}
+                    className={seg.isSeedDot ? 'ecg-seed-dot' : undefined}
+                    style={{ color: seg.color, fontWeight: seg.bold ? 700 : 400 }}
+                  >
+                    {seg.text}
+                  </span>
+                )
+              }
+              lines.push(
+                <div key={lineIdx} className="font-mono text-sm leading-relaxed whitespace-nowrap">
+                  {spans}
+                </div>
+              )
+            }
+            return lines
+          })()}
         </div>
       </div>
     )
@@ -255,14 +435,16 @@ export function BootSequence({ onComplete, onCursorPositionReady }: BootSequence
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className="fixed inset-0 z-50 flex flex-col justify-center bg-black p-10 font-mono text-sm overflow-hidden"
+          className="fixed inset-0 z-50 flex flex-col justify-center bg-black px-5 py-8 sm:p-10 font-mono text-sm overflow-hidden"
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: BOOT_CONFIG.timing.fadeOutDuration / 1000, ease: 'easeOut' }}
+          exit={{ opacity: 1 }}
+          transition={{ duration: 0 }}
         >
           {/* CRT Scanlines */}
-          <div
+          <motion.div
             className="absolute inset-0 pointer-events-none"
+            animate={{ opacity: phase === 'fading' || phase === 'done' ? 0 : 1 }}
+            transition={{ duration: BOOT_CONFIG.timing.fadeOutDuration / 1000, ease: 'easeOut' }}
             style={{
               background: `repeating-linear-gradient(
                 0deg,
@@ -274,62 +456,37 @@ export function BootSequence({ onComplete, onCursorPositionReady }: BootSequence
             }}
           />
 
-          {/* Content */}
-          <div className="flex flex-col gap-1 max-w-[640px] transform -translate-y-1/2 relative z-10">
-            {/* Header */}
+          {/* Content container */}
+          <div ref={containerRef} className="flex flex-col gap-1 max-w-[640px] transform -translate-y-1/2 relative z-10">
+            {/* Text fades out independently */}
             <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: 'easeOut' }}
+              animate={{ opacity: phase === 'fading' || phase === 'done' ? 0 : 1 }}
+              transition={{ duration: BOOT_CONFIG.timing.fadeOutDuration / 1000, ease: 'easeOut' }}
             >
-              <BootLineHeader text={BOOT_CONFIG.header} />
+              {renderLines()}
             </motion.div>
 
-            {/* Lines */}
-            {BOOT_CONFIG.lines.map((line, index) => (
-              <motion.div
-                key={index}
-                className="whitespace-nowrap leading-relaxed"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: getCumulativeDelay(index) / 1000,
-                  duration: 0.4,
-                  ease: 'easeOut',
-                }}
-              >
-                <BootLineRenderer line={line} />
-              </motion.div>
-            ))}
-
-            {/* Blinking Cursor */}
-            {showCursor && (
-              <motion.div
+            {/* Cursor rendered outside fading wrapper — shrinks independently */}
+            {cursorPos && phase !== 'done' && (
+              <span
                 ref={cursorRef}
-                className="inline-block ml-1"
-                initial={{ opacity: 0 }}
-                animate={{ 
-                  opacity: isMorphing ? 0 : 1,
-                  scaleX: isMorphing ? 0 : 1,
-                  width: isMorphing ? 0 : 8,
-                }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="absolute animate-blink"
                 style={{
-                  height: 16,
-                  backgroundColor: BOOT_CONFIG.colors.bright,
-                  animation: isMorphing ? undefined : 'blink 530ms infinite',
+                  left: cursorPos.left,
+                  top: cursorPos.top + (phase === 'fading' ? 12 : 0),
+                  width: 8,
+                  height: phase === 'fading' ? 4 : 16,
+                  backgroundColor: COLORS.bright,
+                  filter: phase === 'fading' ? 'blur(1px)' : 'none',
+                  boxShadow: phase === 'fading' ? '0 0 12px rgba(0,255,65,0.9)' : 'none',
+                  transition: phase === 'fading'
+                    ? `top ${BOOT_CONFIG.timing.cursorShrinkDuration}ms ease-out, height ${BOOT_CONFIG.timing.cursorShrinkDuration}ms ease-out, filter ${BOOT_CONFIG.timing.cursorShrinkDuration}ms ease-out, box-shadow ${BOOT_CONFIG.timing.cursorShrinkDuration}ms ease-out`
+                    : 'none',
+                  animationDuration: `${BOOT_CONFIG.timing.cursorBlinkInterval}ms`,
                 }}
               />
             )}
           </div>
-
-          {/* CSS for blink animation */}
-          <style>{`
-            @keyframes blink {
-              0%, 50% { opacity: 1; }
-              51%, 100% { opacity: 0; }
-            }
-          `}</style>
         </motion.div>
       )}
     </AnimatePresence>

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useRef } from 'react'
 import type { Phase } from './types'
 import { BootSequence } from './components/BootSequence'
 import { ECGAnimation } from './components/ECGAnimation'
@@ -8,43 +8,27 @@ import { AccessibilityProvider } from './contexts/AccessibilityContext'
 
 function App() {
   const [phase, setPhase] = useState<Phase>('boot')
-  const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null)
-
-  const handleBootComplete = useCallback(() => {
-    setPhase('ecg')
-  }, [])
-
-  const handleCursorPositionReady = useCallback((position: { x: number; y: number }) => {
-    setCursorPosition(position)
-  }, [])
-
-  const handleECGComplete = useCallback(() => {
-    setPhase('login')
-  }, [])
-
-  const handleLoginComplete = useCallback(() => {
-    setPhase('pmr')
-  }, [])
+  const cursorPositionRef = useRef<{ x: number; y: number } | null>(null)
 
   return (
     <AccessibilityProvider>
       <div className="min-h-screen bg-black">
         {phase === 'boot' && (
-          <BootSequence 
-            onComplete={handleBootComplete} 
-            onCursorPositionReady={handleCursorPositionReady}
+          <BootSequence
+            onComplete={() => setPhase('ecg')}
+            onCursorPositionReady={(pos) => { cursorPositionRef.current = pos }}
           />
         )}
-        
+
         {phase === 'ecg' && (
-          <ECGAnimation 
-            onComplete={handleECGComplete} 
-            startPosition={cursorPosition}
+          <ECGAnimation
+            onComplete={() => setPhase('login')}
+            startPosition={cursorPositionRef.current}
           />
-        )}
+       )}
         
         {phase === 'login' && (
-          <LoginScreen onComplete={handleLoginComplete} />
+          <LoginScreen onComplete={() => setPhase('pmr')} />
         )}
         
         {phase === 'pmr' && <PMRInterface />}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Shield } from 'lucide-react'
 import { useAccessibility } from '../contexts/AccessibilityContext'
@@ -11,18 +11,22 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   const [username, setUsername] = useState('')
   const [passwordDots, setPasswordDots] = useState(0)
   const [showCursor, setShowCursor] = useState(true)
-  const [isTypingUsername, setIsTypingUsername] = useState(true)
-  const [isTypingPassword, setIsTypingPassword] = useState(false)
+  const [activeField, setActiveField] = useState<'username' | 'password' | null>('username')
   const [buttonPressed, setButtonPressed] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
   const { requestFocusAfterLogin } = useAccessibility()
-  
+
   const fullUsername = 'A.CHARLWOOD'
   const passwordLength = 8
-  
-  const prefersReducedMotion = typeof window !== 'undefined' 
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+
+  const prefersReducedMotion = typeof window !== 'undefined'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
     : false
+
+  // Refs for interval cleanup
+  const usernameIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const passwordIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const cursorIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const triggerComplete = useCallback(() => {
     setIsExiting(true)
@@ -36,6 +40,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
     if (prefersReducedMotion) {
       setUsername(fullUsername)
       setPasswordDots(passwordLength)
+      setActiveField(null)
       setTimeout(() => {
         setButtonPressed(true)
         setTimeout(() => {
@@ -45,33 +50,37 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       return
     }
 
-    setIsTypingUsername(true)
+    // Username typing: 30ms per character
     let usernameIndex = 0
-    
-    const usernameInterval = setInterval(() => {
+    usernameIntervalRef.current = setInterval(() => {
       if (usernameIndex <= fullUsername.length) {
         setUsername(fullUsername.slice(0, usernameIndex))
         usernameIndex++
       } else {
-        clearInterval(usernameInterval)
-        setIsTypingUsername(false)
-        setIsTypingPassword(true)
-        
+        if (usernameIntervalRef.current) {
+          clearInterval(usernameIntervalRef.current)
+        }
+        setActiveField('password')
+
+        // Password dots: 20ms per dot, after 150ms pause
         setTimeout(() => {
           let dotCount = 0
-          const passwordInterval = setInterval(() => {
+          passwordIntervalRef.current = setInterval(() => {
             if (dotCount <= passwordLength) {
               setPasswordDots(dotCount)
               dotCount++
             } else {
-              clearInterval(passwordInterval)
-              setIsTypingPassword(false)
-              
+              if (passwordIntervalRef.current) {
+                clearInterval(passwordIntervalRef.current)
+              }
+              setActiveField(null)
+
+              // Button press: after 150ms pause
               setTimeout(() => {
                 setButtonPressed(true)
                 setTimeout(() => {
                   triggerComplete()
-                }, 100)
+                }, 200)
               }, 150)
             }
           }, 20)
@@ -81,47 +90,66 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   }, [triggerComplete, prefersReducedMotion])
 
   useEffect(() => {
-    const cursorInterval = setInterval(() => {
+    // Cursor blink: 530ms interval
+    cursorIntervalRef.current = setInterval(() => {
       setShowCursor(prev => !prev)
     }, 530)
-    
-    startLoginSequence()
-    
-    return () => clearInterval(cursorInterval)
+
+    // Delay start slightly for card entrance
+    const startTimeout = setTimeout(() => {
+      startLoginSequence()
+    }, 200)
+
+    return () => {
+      if (cursorIntervalRef.current) clearInterval(cursorIntervalRef.current)
+      if (usernameIntervalRef.current) clearInterval(usernameIntervalRef.current)
+      if (passwordIntervalRef.current) clearInterval(passwordIntervalRef.current)
+      clearTimeout(startTimeout)
+    }
   }, [startLoginSequence])
 
   return (
     <div
       className="fixed inset-0 flex items-center justify-center z-50"
       style={{ backgroundColor: '#1E293B' }}
+      role="status"
+      aria-label="Clinical system login"
     >
       <motion.div
-        className="bg-white p-8"
+        className="bg-white"
         style={{
           width: '320px',
+          padding: '32px',
           borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1)',
+          border: '1px solid #E5E7EB',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
         }}
-        initial={{ opacity: 0 }}
+        initial={{ opacity: 0, scale: 0.98 }}
         animate={isExiting ? { scale: 1.03, opacity: 0 } : { scale: 1, opacity: 1 }}
         transition={{ duration: 0.2, ease: 'easeOut' }}
       >
-        {/* Branding */}
-        <div className="flex flex-col items-center mb-8">
+        {/* Branding Header */}
+        <div
+          className="flex flex-col items-center"
+          style={{ marginBottom: '28px' }}
+        >
           <div
-            className="p-3 rounded-lg mb-3"
-            style={{ backgroundColor: 'rgba(0, 94, 184, 0.08)' }}
+            style={{
+              padding: '10px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(0, 94, 184, 0.07)',
+              marginBottom: '10px',
+            }}
           >
             <Shield
-              size={28}
+              size={26}
               style={{ color: '#005EB8' }}
               strokeWidth={2.5}
             />
           </div>
           <span
             style={{
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: '13px',
               fontWeight: 600,
               color: '#64748B',
@@ -132,7 +160,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
           </span>
           <span
             style={{
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: '11px',
               fontWeight: 400,
               color: '#94A3B8',
@@ -144,13 +172,13 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
         </div>
 
         {/* Login Form */}
-        <div className="space-y-5">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Username Field */}
           <div>
             <label
               style={{
                 display: 'block',
-                fontFamily: 'Inter, sans-serif',
+                fontFamily: "'Inter', system-ui, sans-serif",
                 fontSize: '12px',
                 fontWeight: 500,
                 color: '#64748B',
@@ -162,26 +190,24 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
             <div
               style={{
                 width: '100%',
-                padding: '10px 12px',
-                fontFamily: "'Geist Mono', 'Courier New', monospace",
+                padding: '9px 11px',
+                fontFamily: "'Geist Mono', 'Fira Code', monospace",
                 fontSize: '13px',
-                backgroundColor: '#FFFFFF',
-                border: '1px solid #D1D5DB',
+                backgroundColor: activeField === 'username' ? '#FFFFFF' : '#FAFAFA',
+                border: activeField === 'username' ? '1px solid #005EB8' : '1px solid #E5E7EB',
                 borderRadius: '4px',
                 color: '#111827',
                 minHeight: '38px',
                 display: 'flex',
                 alignItems: 'center',
+                transition: 'background-color 150ms ease-out, border-color 150ms ease-out',
               }}
             >
               <span>{username}</span>
-              {isTypingUsername && (
+              {activeField === 'username' && (
                 <span
-                  style={{
-                    opacity: showCursor ? 1 : 0,
-                    color: '#005EB8',
-                    marginLeft: '1px',
-                  }}
+                  style={{ opacity: showCursor ? 1 : 0, color: '#005EB8' }}
+                  aria-hidden="true"
                 >
                   |
                 </span>
@@ -194,7 +220,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
             <label
               style={{
                 display: 'block',
-                fontFamily: 'Inter, sans-serif',
+                fontFamily: "'Inter', system-ui, sans-serif",
                 fontSize: '12px',
                 fontWeight: 500,
                 color: '#64748B',
@@ -206,27 +232,25 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
             <div
               style={{
                 width: '100%',
-                padding: '10px 12px',
-                fontFamily: "'Geist Mono', 'Courier New', monospace",
+                padding: '9px 11px',
+                fontFamily: "'Geist Mono', 'Fira Code', monospace",
                 fontSize: '13px',
-                backgroundColor: '#FFFFFF',
-                border: '1px solid #D1D5DB',
+                backgroundColor: activeField === 'password' ? '#FFFFFF' : '#FAFAFA',
+                border: activeField === 'password' ? '1px solid #005EB8' : '1px solid #E5E7EB',
                 borderRadius: '4px',
                 color: '#111827',
                 letterSpacing: '0.15em',
                 minHeight: '38px',
                 display: 'flex',
                 alignItems: 'center',
+                transition: 'background-color 150ms ease-out, border-color 150ms ease-out',
               }}
             >
               <span>{'\u2022'.repeat(passwordDots)}</span>
-              {isTypingPassword && (
+              {activeField === 'password' && (
                 <span
-                  style={{
-                    opacity: showCursor ? 1 : 0,
-                    color: '#005EB8',
-                    marginLeft: '2px',
-                  }}
+                  style={{ opacity: showCursor ? 1 : 0, color: '#005EB8' }}
+                  aria-hidden="true"
                 >
                   |
                 </span>
@@ -238,8 +262,8 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
           <button
             style={{
               width: '100%',
-              padding: '11px 16px',
-              fontFamily: 'Inter, sans-serif',
+              padding: '10px 16px',
+              fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: '14px',
               fontWeight: 600,
               color: '#FFFFFF',
@@ -248,7 +272,6 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               borderRadius: '4px',
               cursor: 'pointer',
               transition: 'background-color 100ms ease-out',
-              marginTop: '8px',
             }}
           >
             Log In
@@ -258,18 +281,17 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
         {/* Footer */}
         <div
           style={{
-            marginTop: '24px',
-            paddingTop: '20px',
+            marginTop: '22px',
+            paddingTop: '18px',
             borderTop: '1px solid #E5E7EB',
           }}
         >
           <p
             style={{
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: '11px',
               color: '#94A3B8',
               textAlign: 'center',
-              lineHeight: '1.4',
             }}
           >
             Secure clinical system login

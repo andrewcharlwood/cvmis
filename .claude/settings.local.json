@@ -8,7 +8,10 @@
       "Bash(start \"\" \"C:\\\\Users\\\\Andy\\\\Ralph Local\\\\Tasks\\\\cv-4-vitals-monitor\\\\4-vitals-monitor.html\")",
       "Bash(npx skills find:*)",
       "WebSearch",
-      "Bash(ls \"C:\\\\Users\\\\Andy\\\\Ralph Local\\\\Tasks\\\\New CV website\\\\designs\"\" 2>nul || echo \"Directory does not exist \")"
+      "Bash(ls \"C:\\\\Users\\\\Andy\\\\Ralph Local\\\\Tasks\\\\New CV website\\\\designs\"\" 2>nul || echo \"Directory does not exist \")",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }
