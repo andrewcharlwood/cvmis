@@ -76,15 +76,15 @@ The sidebar replicates the dark navigation panel found in EMIS Web and similar c
 
 ### Styling
 
-- Each item: 44px height, 16px left padding, icon (18px, `lucide-react`) + label in Inter 500, 14px
+- Each item: 44px height, 16px left padding, icon (18px, `lucide-react`) + label in [UI font] 500, 14px
 - Default state: white text at 70% opacity, transparent background
 - Hover state: white text at 100% opacity, background `rgba(255,255,255,0.08)`
-- Active state: white text at 100%, NHS blue left border (3px), background `rgba(255,255,255,0.12)`, label in Inter 600
+- Active state: white text at 100%, NHS blue left border (3px), background `rgba(255,255,255,0.12)`, label in [UI font] 600
 - A thin horizontal separator line (`1px solid rgba(255,255,255,0.1)`) appears between "Summary" and "Consultations" (separating the overview from the detail views)
 
 ### Sidebar Footer
 
-At the bottom of the sidebar, in small text (Inter 400, 11px, `#64748B`):
+At the bottom of the sidebar, in small text ([UI font] 400, 11px, `#64748B`):
 ```
 Session: A.CHARLWOOD
 Logged in: [current time]
@@ -98,7 +98,7 @@ At the top, above the navigation items, a small logo or system name:
 CareerRecord PMR
 v1.0.0
 ```
-In Inter 500, 13px, white at 50% opacity. Styled like the "EMIS Web" branding that appears in the top-left of the real system.
+In [UI font] 500, 13px, white at 50% opacity. Styled like clinical system branding that appears in the top-left of the navigation.
 
 ---
 
@@ -132,7 +132,7 @@ A breadcrumb appears at the top of the main content area:
 Patient Record > Consultations > Interim Head, Population Health
 ```
 
-The breadcrumb updates as the user navigates deeper (e.g., expanding a consultation). Clicking "Patient Record" returns to Summary. Clicking "Consultations" collapses any expanded entries and shows the full journal list. The breadcrumb is styled in Inter 400, 13px, gray-400, with chevron separators.
+The breadcrumb updates as the user navigates deeper (e.g., expanding a consultation). Clicking "Patient Record" returns to Summary. Clicking "Consultations" collapses any expanded entries and shows the full journal list. The breadcrumb is styled in [UI font] 400, 13px, gray-400, with chevron separators.
 
 ### Secondary Navigation: Within-View Interactions
 
@@ -146,18 +146,18 @@ The breadcrumb updates as the user navigates deeper (e.g., expanding a consultat
 
 ---
 
-## Design Guidance (from /frontend-design)
+## Design Guidance
 
 ### Aesthetic Direction
 
-**Clinical Institutional Precision** — The NHS Patient Administration System (PAS) header bar, faithfully reproduced as personal branding. This is not a "medical theme" website. It is a clinical system UI that happens to contain career data instead of patient data. The fidelity to real NHS IT systems (EMIS Web, SystmOne, Lorenzo) is the entire point.
+**Clinical Luxury** — The patient banner and sidebar draw their *structure* from NHS clinical systems (PAS headers, EMIS Web navigation), but the *execution* is premium — refined typography, layered shadows, considered spacing. The clinical metaphor lives in the layout and conventions (surname-first, pipe separators, status dots); the luxury lives in the finish.
 
-- **Tone**: Utilitarian, institutional, information-dense. No decoration. No gradients. No shadows. The beauty is in the data density, the pipe separators, the monospaced identifiers, the surname-first convention, the green status dot.
+- **Tone**: Precise, information-dense, and refined. Generous whitespace, layered shadows, and premium typography elevate what would otherwise be institutional UI. The clinical conventions (data density, pipe separators, monospaced identifiers, surname-first, green status dot) provide authentic texture.
 - **Typography Discipline**:
-  - Inter at 600 weight for the patient name — the anchor element
+  - [UI font] at 600 weight for the patient name — the anchor element
   - Geist Mono for structured identifiers (NHS Number, DOB) — monospaced data feels like it came from a database
-  - Inter at normal weight for demographic text
-  - The pipe character `|` as a data separator is a deliberate NHS PAS convention
+  - [UI font] at normal weight for demographic text
+  - The pipe character `|` as a data separator is a deliberate clinical convention
 
 ### Design System Tokens
 
@@ -170,7 +170,7 @@ The breadcrumb updates as the user navigates deeper (e.g., expanding a consultat
 | Border | `#E5E7EB` | 1px solid borders |
 | Border Radius | `4px` | All UI elements |
 | Green Status | `#22C55E` | Active status dot |
-| Font Text | `Inter` | All text content |
+| Font Text | [UI font] | All text content (Elvaro or Blumir — see CLAUDE.md) |
 | Font Data | `Geist Mono` | Monospaced identifiers |
 
 ### Key Design Decisions
@@ -197,7 +197,7 @@ The breadcrumb updates as the user navigates deeper (e.g., expanding a consultat
 5. **Navigation Item States**:
    - Default: white text at 70% opacity, transparent background
    - Hover: white text at 100%, background `rgba(255,255,255,0.08)`
-   - Active: white text at 100%, 3px NHS blue left border, background `rgba(255,255,255,0.12)`, Inter 600 weight
+   - Active: white text at 100%, 3px NHS blue left border, background `rgba(255,255,255,0.12)`, [UI font] 600 weight
 
 6. **Interface Materialization Animations** (PMRInterface):
    - Patient banner slides down (200ms ease-out)
@@ -281,7 +281,7 @@ const navItems: NavItem[] = [
 <button
   className={`
     w-full h-[44px] px-4 flex items-center gap-3
-    font-inter text-[14px] font-medium
+    font-ui text-[14px] font-medium
     transition-all duration-150
     ${isActive 
       ? 'text-white bg-white/[0.12] border-l-[3px] border-pmr-nhsblue font-semibold' 
@@ -485,7 +485,7 @@ const viewLabels: Record<ViewId, string> = {
   referrals: 'Contact'
 }
 
-// Styling: Inter 400, 13px, gray-400
+// Styling: [UI font] 400, 13px, gray-400
 // Chevron separators using Lucide ChevronRight
 // Clickable links navigate back
 ```

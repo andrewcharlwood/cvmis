@@ -61,13 +61,13 @@ Traffic lights are 8px circles with the status colors (green, amber, red, gray).
 
 ---
 
-## Design Guidance (from /frontend-design)
+## Design Guidance
 
 ### Aesthetic Direction
 
-**Clinical Utilitarian** — This is not a place for flashy gradients or playful animation. The metaphor demands the disciplined, functional aesthetic of an actual NHS clinical system. Think EMIS/SystmOne: white backgrounds, precise table layouts, 1px borders, quiet colour discipline. The visual power comes from the *content structure*, not decoration. The traffic light dots and expandable narratives do all the heavy lifting. Every pixel serves a clinical purpose.
+**Clinical Luxury** — The Problems view uses the clinical structure of a problem list (traffic lights, coded entries, expandable narratives) but executes with premium refinement. White card surfaces with layered shadows, generous padding, refined typography. The visual power comes from the *content structure* — traffic light dots and expandable narratives do the heavy lifting — while the luxury finish makes it feel polished and intentional.
 
-The distinctiveness comes from the *concept itself* — framing career achievements as a Problem List is the creative act. The execution must be restrained to sell the metaphor.
+The distinctiveness comes from the *concept itself* — framing career achievements as a Problem List is the creative act. The premium execution makes it memorable.
 
 ### Key Design Decisions
 
@@ -78,18 +78,18 @@ The distinctiveness comes from the *concept itself* — framing career achieveme
    - Implementation uses flexbox with gap-2 for dot-label pairing
 
 2. **Typography System**
-   - **Inter** for all body text, headers, and UI labels — clean, clinical, readable
+   - **[UI font]** for all body text, headers, and UI labels (Elvaro or Blumir — see CLAUDE.md)
    - **Geist Mono** for codes and dates — SNOMED-style codes like `[EFF001]`, `[MGT001]` must be monospace
    - Font sizes: 13px for table headers (uppercase, tracking-wider), 14px for body text
-   - Header styling: `font-inter font-semibold text-xs uppercase tracking-wider text-gray-400`
+   - Header styling: `font-ui font-semibold text-xs uppercase tracking-wider text-gray-400`
 
 3. **Color Palette (Locked)**
-   - Light-mode ONLY (clinical systems are light-mode by design)
+   - Light-mode ONLY
    - NHS Blue: `#005EB8` (Tailwind `text-pmr-nhsblue`) — used for links and accents
    - Borders: `1px solid #E5E7EB` (gray-200) — consistent table borders
-   - Row hover: `#EFF6FF` (blue-50) — subtle clinical highlight
-   - Background: White cards on `#F5F7FA` (pmr-content) background
-   - Border radius: 4px max — clinical systems use sharp corners
+   - Row hover: `#EFF6FF` (blue-50) — subtle highlight
+   - Background: White cards on `#F5F7FA` (pmr-content) background with layered shadows per design system
+   - Border radius: 4px for clinical elements
 
 4. **Table Structure**
    - Semantic HTML: `<table>`, `<thead>`, `<th scope="col">`, `<tbody>`, `<tr>`, `<td>`

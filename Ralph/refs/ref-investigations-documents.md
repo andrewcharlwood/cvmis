@@ -109,13 +109,13 @@ The preview panel uses the same tree-indented structure as the Investigations ex
 
 ---
 
-## Design Guidance (from /frontend-design)
+## Design Guidance
 
 ### Aesthetic Direction
 
-**Tone:** Clinical utilitarian — faithful reproduction of NHS clinical software (EMIS Web / SystmOne). Zero decorative flourish. Borders as the dominant structuring element. Dense, scannable, table-first. Light-mode only. The visual language is institutional and familiar to any NHS clinician.
+**Tone:** Clinical Luxury — the *structure* of clinical investigation results and attached documents (tables, status badges, expandable rows) executed with premium refinement. Borders provide authentic clinical structuring; layered shadows, generous spacing, and refined typography provide the luxury finish. Light-mode only.
 
-**Differentiation:** The expanded-row tree-indented monospace structure using box-drawing characters is the signature element. It transforms a flat data table into something that reads like a lab report or radiology result — structured, indented, with labelled fields in `Geist Mono`. The pipe-and-branch characters (`├─`, `│`, `└─`) create a distinctly clinical-system aesthetic that no standard portfolio site would ever use.
+**Differentiation:** The expanded-row tree-indented monospace structure using box-drawing characters is the signature element. It transforms a flat data table into something that reads like a lab report or radiology result — structured, indented, with labelled fields in `Geist Mono`. The pipe-and-branch characters (`├─`, `│`, `└─`) create a distinctly clinical aesthetic that no standard portfolio site would ever use.
 
 ### Key Design Decisions
 
@@ -136,11 +136,12 @@ Both views share an identical expand/collapse mechanic:
 
 #### Typography & Spacing
 
-- **Primary font:** Inter (text, labels, table headers)
+- **Primary font:** [UI font] (text, labels, table headers — Elvaro or Blumir, see CLAUDE.md)
 - **Monospace font:** Geist Mono (tree-indented expanded content)
 - **Border radius:** 4px throughout
 - **Border color:** `#E5E7EB` (Tailwind gray-200)
 - **NHS Blue:** `#005EB8` (action buttons, links)
+- **Card shadow:** Multi-layered per design system
 
 ### Implementation Patterns
 

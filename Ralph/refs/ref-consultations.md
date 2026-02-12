@@ -24,9 +24,9 @@ Entries are stacked vertically, most recent at top. Each entry has a collapsed s
 ```
 
 - Date in Geist Mono, 13px, gray-500 (left-aligned)
-- Organization in Inter 400, 13px, NHS blue
-- Role title in Inter 600, 15px, gray-900
-- Key coded entry: a single-line summary of the most notable achievement, prefixed with "Key:" in Inter 500, gray-500
+- Organization in [UI font] 400, 13px, NHS blue
+- Role title in [UI font] 600, 15px, gray-900
+- Key coded entry: a single-line summary of the most notable achievement, prefixed with "Key:" in [UI font] 500, gray-500
 - Expand chevron button (right-aligned)
 - Status dot: green for current roles, gray for historical
 
@@ -78,7 +78,7 @@ This is a direct mapping from the clinical consultation format (SOAP notes) to c
 | **Examination** | Analysis / Findings | What Andy discovered, built, or analyzed — the technical and analytical work |
 | **Plan** | Outcomes / Delivery | What was achieved, what impact was measured, what's ongoing |
 
-Section headers ("HISTORY", "EXAMINATION", "PLAN") are styled in Inter 600, 12px, uppercase, letter-spacing 0.05em, gray-400 — exactly like the section dividers in a clinical consultation record.
+Section headers ("HISTORY", "EXAMINATION", "PLAN") are styled in [UI font] 600, 12px, uppercase, letter-spacing 0.05em, gray-400 — styled like clinical consultation record section dividers.
 
 ## Coded Entries
 
@@ -110,15 +110,13 @@ This visual grouping helps the user quickly scan which organization each entry b
 
 ---
 
-## Design Guidance (from /frontend-design)
+## Design Guidance
 
 ### Aesthetic Direction
 
-**Utilitarian clinical information system.** Zero decorative flourish. Border-heavy, table-heavy, functional. Light-mode only. The design language of EMIS Web and SystmOne—systems that every NHS pharmacist interacts with daily.
+**Clinical Luxury.** The structure and conventions of a clinical consultation journal — reverse-chronological entries, H/E/P format, coded entries, traffic-light status indicators — executed with premium refinement. Refined shadows, generous spacing, considered typography. Light-mode only.
 
-This is a **faithful digital clinical information system**—structured, database-driven, tabular, with the distinctive UI patterns of actual NHS clinical software: patient banner, tabbed clinical views, consultation history as a reverse-chronological journal, coded entries with SNOMED-style references, traffic-light status indicators, and action buttons styled as clinical system controls.
-
-**What makes this unforgettable:** The History / Examination / Plan structure maps perfectly to Context / Analysis / Outcome. A clinician seeing this will immediately recognize the consultation journal format. A recruiter gets highly structured, scannable career data. The accordion behavior, coded entries, and status indicators all draw from real clinical software patterns.
+**What makes this unforgettable:** The History / Examination / Plan structure maps perfectly to Context / Analysis / Outcome. A clinician seeing this will immediately recognize the consultation journal format. A recruiter gets highly structured, scannable career data. The accordion behavior, coded entries, and status indicators draw from clinical software patterns — but the execution feels polished and premium, not institutional.
 
 ### Key Design Decisions
 
@@ -127,7 +125,7 @@ This is a **faithful digital clinical information system**—structured, databas
      - **History** → Context / Background (why the role existed, reporting lines)
      - **Examination** → Analysis / Findings (what was discovered, built, analyzed)
      - **Plan** → Outcomes / Delivery (what was achieved, impact measured)
-   - Section headers styled as clinical system dividers: Inter 600, 12px, uppercase, letter-spacing 0.05em, gray-400
+   - Section headers styled as clinical system dividers: [UI font] 600, 12px, uppercase, letter-spacing 0.05em, gray-400
 
 2. **Height-Only Expand Animation (200ms)**
    - No opacity fade on content—content simply grows/shrinks
@@ -140,7 +138,7 @@ This is a **faithful digital clinical information system**—structured, databas
    - Tesco PLC: Teal (`#00897B`)
 
 4. **Typography System**
-   - Inter for text content
+   - [UI font] for text content (Elvaro or Blumir — see CLAUDE.md)
    - Geist Mono for dates, codes, timestamps
    - Border radius: 4px throughout
    - Borders: 1px solid #E5E7EB

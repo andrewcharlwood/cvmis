@@ -65,7 +65,7 @@ Skills are grouped into three "medication types," mimicking how clinical systems
 
 ## Table Styling
 
-- Table headers: Inter 600, 13px, uppercase, gray-400, `#F9FAFB` background
+- Table headers: [UI font] 600, 13px, uppercase, gray-400, `#F9FAFB` background
 - Table rows: alternating `#FFFFFF` / `#F9FAFB` backgrounds
 - Row height: 40px
 - All borders: `1px solid #E5E7EB`
@@ -94,44 +94,44 @@ Table columns are sortable by clicking the header. Clicking "Dose" sorts by prof
 
 ---
 
-## Design Guidance (from /frontend-design)
+## Design Guidance
 
 ### Aesthetic Direction
 
-**Clinical-Utilitarian / NHS PMR Fidelity**
+**Clinical Luxury**
 
-This implementation follows the Clinical Record (Design 7) medications-as-skills metaphor with absolute fidelity to the specification. The aesthetic is clinical-utilitarian: light-mode only, border-heavy, table-driven, zero decorative flourish. Every design decision mirrors real NHS PMR systems (EMIS Web, SystmOne). The component is not themed loosely -- it is a faithful reproduction of how medications lists appear in actual GP clinical software, repurposed to present skills as active prescriptions.
+The medications-as-skills metaphor uses the *structure* of an active medications list — tabs, table layout, status indicators, prescribing history — but executed with premium refinement. Layered shadows on cards, generous spacing, refined typography. Light-mode only.
 
-**Purpose:** Present 18 professional skills as an active medications list that clinicians will instantly recognize and recruiters will find navigable and information-dense.
+**Purpose:** Present 18 professional skills as an active medications list. Clinicians recognize the format; recruiters get navigable, information-dense content.
 
-**Tone:** Institutional, functional, border-heavy. No shadows, no rounded corners beyond 4px, no gradients. Clinical systems are designed for rapid information retrieval under time pressure -- that same quality makes this an efficient skills display.
+**Tone:** Precise, structured, refined. Tables and borders provide clinical authenticity; shadows, typography, and spacing provide the luxury finish. Clinical systems are designed for rapid information retrieval under time pressure — that same quality makes this an efficient skills display.
 
-**Constraints followed:**
-- Light-mode ONLY (clinical systems are light-mode by design)
+**Constraints:**
+- Light-mode ONLY
 - NHS blue `#005EB8` as the sole accent color
-- Border radius capped at 4px
-- Inter for all text, Geist Mono for prescribing history data
-- All borders `1px solid #E5E7EB`
-- No decorative elements whatsoever
+- Border radius 4px for clinical elements
+- [UI font] for all text (Elvaro or Blumir — see CLAUDE.md), Geist Mono for prescribing history data
+- Borders `1px solid #E5E7EB` on tables
+- Card surfaces with multi-layered shadows per design system
 
-**Differentiation:** The medications-as-skills mapping provides richer data than any traditional "skills list." Dose maps to proficiency, Frequency maps to usage patterns, Start maps to when the skill was acquired, and prescribing history shows the skill's evolution over time. This is not decoration -- it is genuinely useful information architecture.
+**Differentiation:** The medications-as-skills mapping provides richer data than any traditional "skills list." Dose maps to proficiency, Frequency maps to usage patterns, Start maps to when the skill was acquired, and prescribing history shows the skill's evolution over time. Genuinely useful information architecture.
 
 ### Key Design Decisions
 
 #### 1. Three Category Tabs
 - **"Active Medications"** (8 technical skills), **"Clinical Medications"** (6 healthcare domain skills), **"PRN (As Required)"** (4 strategic/leadership skills)
 - Active tab: white background + NHS blue (`#005EB8`) 2px bottom border
-- Inactive tabs: `#F9FAFB` background, gray text, hover brightens
+- Inactive tabs: `#F9FAFB` background, gray text, hover brightens to white
 - Count badges show the number of items per category
 - Full ARIA `role="tablist"`, `role="tab"`, `aria-selected`, `aria-controls` semantics
 
 #### 2. Semantic HTML Table
 - Proper `<table>`, `<thead>`, `<th scope="col">`, `<tbody>`, `<tr>`, `<td>` markup
 - Five columns: Drug Name, Dose, Frequency, Start, Status
-- Headers: Inter 600, 13px, uppercase, 0.03em tracking, `#F9FAFB` background
+- Headers: [UI font] 600, 13px, uppercase, 0.03em tracking, `#F9FAFB` background
 - Row height: 40px
 - Alternating `#FFFFFF` / `#F9FAFB` row backgrounds via CSS `:nth-child(even)`
-- Hover state: `#EFF6FF` (subtle blue tint) -- **no transform, no lift, no shadow**
+- Hover state: `#EFF6FF` (subtle blue tint)
 - Status dots: 6px green circles inline with "Active" text
 - All borders: `1px solid #E5E7EB`
 

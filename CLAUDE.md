@@ -28,7 +28,7 @@ No test framework is configured.
 
 1. **BootSequence** — Terminal typing animation (~4s), green-on-black aesthetic. Fira Code font, matrix-green palette. **Locked — do not change.**
 2. **ECGAnimation** — Canvas-based heartbeat animation with mask-based letter tracing. Background transitions from black to `#1E293B`. **Locked — do not change.**
-3. **LoginScreen** — Animated login card on dark background. Auto-types credentials, transitions to PMR. This phase onward is open to design evolution.
+3. **LoginScreen** — Animated login card on dark background. Types credentials at a natural pace, then presents an interactive "Log In" button for the user to click. This phase onward is open to design evolution.
 4. **PMRInterface** — The main portfolio experience: patient banner + clinical sidebar + scrollable content views.
 
 ### Key Patterns
@@ -64,7 +64,13 @@ The aesthetic direction is **"Clinical Luxury"** — the precision and informati
 
 Typography is the primary vehicle for premium feel. Avoid generic system fonts.
 
-- **UI / Body**: Use a distinctive geometric or humanist sans-serif with character — **not** Inter, Roboto, or system defaults. Choose something with personality that still reads cleanly at small sizes (11-14px range). Candidates: Satoshi, General Sans, Outfit, DM Sans, or similar. The chosen font should feel "designed" rather than "default."
+- **UI / Body — two candidates to evaluate (build with both, then choose):**
+  - **Elvaro Grotesque** (by TabojaStudio) — Modern grotesque sans-serif. 7 weights: Light (300), Regular (400), Medium (500), SemiBold (600), Bold (700), ExtraBold (800), Black (900). Also available as variable font. The "grotesque" classification carries institutional credibility (Helvetica/Akzidenz-Grotesk lineage) while feeling distinctly premium. Slightly condensed proportions suit data-dense UI.
+  - **Blumir** (by VisualCreativeStd) — Geometric-humanist hybrid, "blends geometric precision." 7 weights: Thin (100), ExtraLight (200), Light (300), Regular (400), Medium (500), SemiBold (600), Bold (700) — plus oblique variants for each. Also available as variable font. More refined/luxurious feel than Elvaro.
+  - Both fonts are sourced from Envato (licensed), stored locally in `Fonts/`. Web font files (WOFF/WOFF2) are available for both. **Do not use Inter, Roboto, or system defaults** — these read as generic.
+  - Font files for web:
+    - Elvaro: `Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-*.woff2`
+    - Blumir: `Fonts/blumir-font-family/WOFF/Blumir-VF.woff2` (variable font)
 - **Monospace / Data**: Geist Mono for timestamps, coded entries, registration numbers, and tabular data. This creates the "technical texture" that sells the clinical metaphor.
 - **Terminal phase**: Fira Code — locked, do not change.
 - **Type scale**: Keep it tight. Clinical systems use small text. Headings 15-18px, body 13-14px, labels 11-12px. Precision over drama.
@@ -96,7 +102,8 @@ Real clinical software is flat and border-heavy. This project should use shadows
 Motion should feel considered and premium, never flashy:
 
 - **Entrance animations**: The PMR interface materializes in sequence — banner slides down → sidebar slides from left → content fades in. Quick (200-300ms) with easing.
-- **Login transition**: Card scales slightly and fades. Background carries over to PMR (both are `#1E293B`-derived).
+- **Login typing**: 80ms/char for username, 60ms/dot for password. Natural, readable pace. After typing completes, "Log In" button becomes interactive — user clicks to proceed.
+- **Login transition**: On button click, card scales slightly and fades. Background carries over to PMR (both are `#1E293B`-derived).
 - **View switching**: Instant, no transition between views. This preserves the "software application" feel.
 - **Expandable content**: Height-only animation, 200ms ease-out. Content grows/shrinks — no opacity fade.
 - **Hover states**: Subtle, immediate. Background color shifts, not transforms. Think: OS-level responsiveness.

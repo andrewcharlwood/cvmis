@@ -49,13 +49,14 @@
   - On a consultation entry: "Expand", "Copy to clipboard", "View coded entries"
   - On a medication row: "View prescribing history", "Copy to clipboard"
   - On a problem entry: "View linked consultations", "Copy to clipboard"
-- Context menus styled: white background, `1px solid #E5E7EB` border, 4px radius, `box-shadow: 0 4px 12px rgba(0,0,0,0.1)`. Items in Inter 400, 14px, 36px row height.
+- Context menus styled: white background, `1px solid #E5E7EB` border, 4px radius, `box-shadow: 0 4px 12px rgba(0,0,0,0.1)`. Items in [UI font] 400, 14px, 36px row height.
 
 ### Login Screen Typing
-- The username types character-by-character (30ms per character).
-- The password dots appear faster (20ms per dot).
+- The username types character-by-character at a natural reading pace (80ms per character).
+- The password dots appear at a deliberate pace (60ms per dot).
 - A blinking cursor appears in the active field (530ms blink interval).
-- The "Log In" button shows a brief active/pressed state before the interface materializes.
+- After typing completes, the "Log In" button becomes clearly interactive (full opacity, hover state). The user clicks it to proceed — this is NOT auto-triggered.
+- On click, the button shows a brief pressed state before the interface materializes.
 
 ---
 

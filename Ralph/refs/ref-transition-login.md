@@ -18,16 +18,16 @@ The flatline has a subtle audio-visual implication without actual sound — the 
 
 The entire canvas fades to black over 200ms (the name and flatline dissolve into darkness). Then, from black, the background transitions to a dark blue-gray (`#1E293B`) over 200ms. This is the color of a clinical system login screen — the dark institutional background that every NHS worker recognizes from their Monday morning.
 
-## Phase 3: Login Sequence (1200ms)
+## Phase 3: Login Sequence (user-paced)
 
-A login panel materializes center-screen: a white card (320px wide, 12px border-radius, subtle shadow) on the dark blue-gray background. The card contains:
+A login panel materializes center-screen: a white card (320px wide, 12px border-radius, refined shadow) on the dark blue-gray background. The card contains:
 
 - A small NHS-blue shield icon or generic clinical system logo at the top
-- **Username field**: Empty text input with label "Username". After 200ms, a cursor appears and types `A.CHARLWOOD` character by character (30ms per character, ~350ms total). The typing uses Geist Mono / monospace font.
-- **Password field**: After a 150ms pause, dots fill the password field in rapid succession (8 dots, 20ms each, ~160ms total).
-- **"Log In" button**: NHS blue (`#005EB8`), full width. After another 150ms pause, the button receives a subtle pressed state (darkens slightly, 100ms) as if clicked.
+- **Username field**: Empty text input with label "Username". After 400ms, a cursor appears and types `A.CHARLWOOD` character by character at a natural reading pace (80ms per character, ~880ms total). The typing uses Geist Mono / monospace font.
+- **Password field**: After a 300ms pause, dots fill the password field at a deliberate pace (8 dots, 60ms each, ~480ms total).
+- **"Log In" button**: NHS blue (`#005EB8`), full width. After typing completes, the button becomes clearly available as a **user-interactive element**. The user clicks it to proceed. The button should have a visible hover state and feel like a natural call-to-action — this is the moment where the user "logs in" to the record.
 
-The login card holds for 200ms in its "submitted" state, then...
+**Important**: The login button is NOT auto-clicked. The user must click it. This creates a deliberate, satisfying interaction — the user is choosing to enter the record. On click, the button shows a brief pressed state (darkens slightly, 100ms), then...
 
 ## Phase 4: Interface Materialization (500ms)
 
@@ -42,42 +42,41 @@ The login card scales up slightly (103%) and fades out (200ms). As it fades, the
 
 The full PMR interface is visible: patient banner at top, dark sidebar on left, Summary view in the main content area, and the clinical alert banner demanding attention. The user is now "logged in" to Andy's career record.
 
-**Total transition duration:** ~2.7 seconds
+**Total transition duration:** ~2s for typing to complete, then user-paced (waits for button click), then ~500ms for interface materialization.
 
 ## Why This Works
 
-The login sequence is the most immersive transition of all designs. Every NHS worker, every pharmacist, every GP has typed their credentials into a clinical system at 8am on a Monday. This transition puts them right there. It's specific, it's authentic, and it immediately establishes the metaphor: you are opening a patient record. The "patient" happens to be a career.
+The login sequence is the most immersive transition. Every NHS worker, every pharmacist, every GP recognizes the shape of a clinical login screen. This transition evokes that recognition — but executed with premium refinement rather than institutional austerity. The natural typing pace lets the user absorb what's happening. And the interactive login button is the pivotal moment: the user *chooses* to enter the record. That moment of agency makes the experience feel personal, not passive.
 
 ## Login Animation Implementation Notes
 
 - Component mounts with dark blue-gray background
 - Login card fades in (Framer Motion, 200ms)
-- Username typing: `setInterval` adds one character per 30ms to a state string
-- Password dots: `setInterval` adds one dot per 20ms
-- Button press: state change triggers visual pressed state, then 200ms delay
-- `onComplete` callback fires, parent component swaps to PMRInterface
-- Typing respects `prefers-reduced-motion` — with reduced motion, full username appears instantly and login completes in ~500ms total
+- Username typing: `setInterval` adds one character per 80ms to a state string (~880ms total)
+- Password dots: `setInterval` adds one dot per 60ms (~480ms total)
+- After typing completes: button becomes interactive (opacity goes to 1, cursor: pointer)
+- **User clicks the "Log In" button** — this is NOT auto-triggered
+- On click: button shows pressed state (100ms), then `onComplete` callback fires
+- Typing respects `prefers-reduced-motion` — with reduced motion, full username and password appear instantly, button is immediately interactive
 - **Font: Geist Mono** for username/password fields (NOT Fira Code)
 
 ---
 
-## Design Guidance (from /frontend-design)
+## Design Guidance
 
-> Pre-baked design direction. Do NOT invoke `/frontend-design` at runtime — this section contains the output.
+### Aesthetic Direction: Clinical Luxury
 
-### Aesthetic Direction: Institutional Utilitarian
-
-This is not "exciting" design — it is the visual equivalent of fluorescent lights, laminate desks, and the smell of hand sanitiser at 07:58 on a Monday morning. The card must look like every single hospital login prompt a doctor has ever seen: clean white, unadorned, functional. No personality. The branding is the only concession to identity. The magic is not visual flair — it is the uncanny recognition of "oh, this is exactly what that looks like" combined with the satisfying typewriter rhythm of credentials appearing.
+The login card evokes the structure of a clinical system login — shield icon, two fields, a button — but executed with premium refinement. Clean white card with refined shadow, considered spacing, and the satisfying rhythm of credentials appearing at a natural pace. The recognition factor ("oh, this looks like a clinical login") is the creative hook; the premium finish is what makes it memorable.
 
 ### Key Design Decisions
 
-1. **Active field focus ring**: NHS-blue border (`1px solid #005EB8`) on the currently active field, inactive fields shift to `#FAFAFA` background. Mirrors real NHS login forms (Lorenzo, SystmOne, EMIS Web). Transition 150ms.
-2. **Reduced shadow to spec**: Use exactly `0 1px 2px rgba(0,0,0,0.03)`. Card sits on dark background through border definition, not shadow depth — more faithful to real NHS software.
-3. **Border**: Use `1px solid #E5E7EB` per design system (not `rgba(255,255,255,0.1)`).
-4. **Timer cleanup**: Track every `setInterval` and `setTimeout` via refs, clear all on unmount.
-5. **Consolidated active field state**: Single `activeField` state (`'username' | 'password' | null`) instead of separate booleans.
-6. **Accessibility**: `role="status"` + `aria-label` on outer container. Cursor pipes `aria-hidden="true"`. Card entrance `scale: 0.98` (not 0).
-7. **The Monday-morning feeling**: No gradients, no decorative elements, no loading spinners, no "Welcome back!" messaging. Just white rectangle on gray, shield icon, two fields, button. Typing speed deliberately mechanical.
+1. **Active field focus ring**: NHS-blue border (`1px solid #005EB8`) on the currently active field, inactive fields shift to `#FAFAFA` background. Clinical login convention. Transition 150ms.
+2. **Refined card shadow**: Multi-layered shadow `0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)` — the card should feel like it floats above the dark background. Combined with `1px solid #E5E7EB` border.
+3. **Timer cleanup**: Track every `setInterval` and `setTimeout` via refs, clear all on unmount.
+4. **Consolidated active field state**: Single `activeField` state (`'username' | 'password' | 'done' | null`) instead of separate booleans. `'done'` state indicates typing is complete and button is ready.
+5. **Accessibility**: `role="status"` + `aria-label` on outer container. Cursor pipes `aria-hidden="true"`. Card entrance `scale: 0.98` (not 0).
+6. **User-initiated login**: After typing completes, the "Log In" button is clearly interactive. Hover state (slight darken), cursor: pointer, and the button should feel like an invitation to click. This is the one moment of user agency in the boot sequence — make it satisfying.
+7. **Natural typing pace**: 80ms/char for username, 60ms/dot for password. Deliberate and readable, not frantically fast.
 
 ### Implementation Pattern
 
@@ -94,9 +93,10 @@ interface LoginScreenProps {
 const [username, setUsername] = useState('')
 const [passwordDots, setPasswordDots] = useState(0)
 const [showCursor, setShowCursor] = useState(true)
-const [activeField, setActiveField] = useState<'username' | 'password' | null>('username')
+const [activeField, setActiveField] = useState<'username' | 'password' | 'done' | null>('username')
 const [buttonPressed, setButtonPressed] = useState(false)
 const [isExiting, setIsExiting] = useState(false)
+const [typingComplete, setTypingComplete] = useState(false)
 
 const fullUsername = 'A.CHARLWOOD'
 const passwordLength = 8
@@ -111,7 +111,7 @@ Card structure:
     padding: '32px',
     borderRadius: '12px',
     border: '1px solid #E5E7EB',
-    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)',
   }}
   initial={{ opacity: 0, scale: 0.98 }}
   animate={isExiting ? { scale: 1.03, opacity: 0 } : { scale: 1, opacity: 1 }}
@@ -131,12 +131,12 @@ Branding header:
     <Shield size={26} style={{ color: '#005EB8' }} strokeWidth={2.5} />
   </div>
   <span style={{
-    fontFamily: "'Inter', system-ui, sans-serif",
+    fontFamily: "'[UI font]', system-ui, sans-serif",
     fontSize: '13px', fontWeight: 600,
     color: '#64748B', letterSpacing: '0.01em',
   }}>CareerRecord PMR</span>
   <span style={{
-    fontFamily: "'Inter', system-ui, sans-serif",
+    fontFamily: "'[UI font]', system-ui, sans-serif",
     fontSize: '11px', fontWeight: 400,
     color: '#94A3B8', marginTop: '2px',
   }}>Clinical Information System</span>
@@ -165,18 +165,25 @@ Input field pattern (username example):
 </div>
 ```
 
-Login button:
+Login button (interactive — user clicks to proceed):
 ```tsx
-<button style={{
-  width: '100%',
-  padding: '10px 16px',
-  fontFamily: "'Inter', system-ui, sans-serif",
-  fontSize: '14px', fontWeight: 600,
-  color: '#FFFFFF',
-  backgroundColor: buttonPressed ? '#004494' : '#005EB8',
-  border: 'none',
-  borderRadius: '4px',
-}}>Log In</button>
+<button
+  onClick={typingComplete ? handleLogin : undefined}
+  disabled={!typingComplete}
+  style={{
+    width: '100%',
+    padding: '10px 16px',
+    fontFamily: "'[UI font]', system-ui, sans-serif",
+    fontSize: '14px', fontWeight: 600,
+    color: '#FFFFFF',
+    backgroundColor: buttonPressed ? '#004494' : '#005EB8',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: typingComplete ? 'pointer' : 'default',
+    opacity: typingComplete ? 1 : 0.6,
+    transition: 'background-color 150ms, opacity 300ms',
+  }}
+>Log In</button>
 ```
 
 Typing sequence (reduced motion branch):
@@ -184,18 +191,21 @@ Typing sequence (reduced motion branch):
 if (prefersReducedMotion) {
   setUsername(fullUsername)
   setPasswordDots(passwordLength)
-  setActiveField(null)
-  setTimeout(() => { setButtonPressed(true); setTimeout(triggerComplete, 100) }, 300)
+  setActiveField('done')
+  setTypingComplete(true)
+  // Button is immediately available for user to click
   return
 }
-// Normal: username at 30ms/char, 150ms pause, password at 20ms/dot, 150ms pause, button press
+// Normal: username at 80ms/char, 300ms pause, password at 60ms/dot
+// After typing completes: setTypingComplete(true), button becomes interactive
+// User clicks "Log In" to proceed — no auto-click
 ```
 
 Footer:
 ```tsx
 <div style={{ marginTop: '22px', paddingTop: '18px', borderTop: '1px solid #E5E7EB' }}>
   <p style={{
-    fontFamily: "'Inter', system-ui, sans-serif",
+    fontFamily: "'[UI font]', system-ui, sans-serif",
     fontSize: '11px', color: '#94A3B8', textAlign: 'center',
   }}>Secure clinical system login</p>
 </div>

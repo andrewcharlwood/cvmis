@@ -1,12 +1,12 @@
 ---
 
-## Design Guidance (from /frontend-design)
+## Design Guidance
 
 ### Aesthetic Direction
 
-**Tone: Clinical Utilitarian** — This is an NHS-styled patient medical record system. The aesthetic is intentionally institutional: clean, functional, bureaucratic-in-a-charming-way. The humor comes from the deadpan application of clinical form conventions to a personal contact form. No flourishes, no gradients, no decorative frills. The beauty is in the precision of the grid, the crispness of the type hierarchy, and the tongue-in-cheek seriousness of it all.
+**Tone: Clinical Luxury** — A contact form styled as a clinical referral, with the *structure* of an NHS referral form (priority levels, reference numbers, clinical fields) but executed with premium refinement. The humor comes from the deadpan application of clinical form conventions to a personal contact form. The beauty is in the precision of the grid, the crispness of the type hierarchy, refined inputs, and the tongue-in-cheek seriousness of it all.
 
-**What makes it memorable**: The collision between NHS clinical form seriousness and the fact that you are "referring" to a person's contact page. The pre-filled "patient" header, the priority radio buttons with their wry tooltips, the reference number generation — all of this is a joke delivered with a completely straight face.
+**What makes it memorable**: The collision between clinical form structure and the fact that you are "referring" to a person's contact page. The pre-filled "patient" header, the priority radio buttons with their wry tooltips, the reference number generation — all of this is a joke delivered with a completely straight face, in a beautifully finished package.
 
 ### Key Design Decisions
 
@@ -37,7 +37,7 @@ Each priority option features a colored dot indicator and supports hover tooltip
 | Card border | `1px solid #E5E7EB` | `border-pmr-border` |
 | Input border | `1px solid #D1D5DB` | `border-pmr-border-dark` |
 | Border radius | `4px` | `rounded` |
-| Label font | Inter 500, 13px, gray-600 | `font-inter font-medium text-sm text-gray-600` |
+| Label font | [UI font] 500, 13px, gray-600 | `font-ui font-medium text-sm text-gray-600` |
 | Mono font | Geist Mono | `font-mono` (reference numbers) |
 | Input padding | `8px 12px` | `py-2 px-3` |
 | Focus state | NHS blue border + glow | `focus:border-pmr-nhsblue focus:ring-2 focus:ring-pmr-nhsblue/15` |

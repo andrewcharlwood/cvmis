@@ -24,11 +24,12 @@
 ### Design System Requirements (from ref-design-system.md)
 - Light-mode ONLY — no dark mode
 - NHS blue: #005EB8 (primary interactive)
-- Border radius: 4px for cards/inputs (clinical systems use minimal rounding)
-- Borders dominate — 1px solid #E5E7EB everywhere
-- Table row height: 40px, card padding: 16px, main content padding: 24px
-- Fonts: Inter (general text), Geist Mono (coded entries, timestamps, data values)
-- Base spacing unit: 4px — clinical density, not marketing site spacing
+- Border radius: 4px for cards/inputs
+- Borders: 1px solid #E5E7EB on tables and cards, combined with multi-layered shadows for depth
+- Card shadows: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)
+- Table row height: 40px, card padding: 16-24px, main content padding: 24px
+- Fonts: [UI font] (Elvaro Grotesque or Blumir from Fonts/ dir), Geist Mono (coded entries, timestamps, data values)
+- Base spacing unit: 4px — generous but structured, more whitespace than real clinical systems
 
 ### Known Dependencies
 - React 18.3.1, TypeScript, Vite
@@ -51,10 +52,13 @@
 - If browser tools fail, skip visual review and note in iteration log — don't block progress
 
 ### Critical Styling Notes
-- Geist Mono font must be loaded (NOT Fira Code) for coded entries and timestamps
-- Patient banner name must be 20px Inter 600 (not 18px)
-- Clinical alert must use spring animation (Framer Motion type: "spring"), not ease-out
-- View switching must be INSTANT — no crossfade, no slide between views
+- Design direction is **Clinical Luxury** — clinical structure, premium execution
+- Premium UI font loaded from Fonts/ directory (Elvaro Grotesque or Blumir, NOT Inter/Roboto)
+- Geist Mono for coded entries and timestamps (NOT Fira Code)
+- Multi-layered shadows on cards — NOT flat/borderless
+- Clinical alert uses spring animation (Framer Motion type: "spring"), not ease-out
+- View switching INSTANT — no crossfade, no slide between views
+- Login typing: 80ms/char username, 60ms/dot password. Button is USER-INTERACTIVE (not auto-triggered)
 - Consultation expand/collapse: height animation ONLY, no opacity fade on content
 
 ## Iteration Log
@@ -144,5 +148,27 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 - Letter spacing: LETTER_W 72px, LETTER_G 10px, SPACE_W 30px (matches original, tighter than ECGCombined)
 - Morph animation uses Framer Motion scaleX/width/opacity for smooth cursor-to-dot transition
 
-**Next task:** Task 2 — Rebuild LoginScreen component
+**Next task:** Task 2 — Set up premium font
+
+## Manual Intervention — 2026-02-12
+### Reason: Design direction changed from "Clinical Utilitarian" to "Clinical Luxury"
+### Changes made:
+- Rewrote IMPLEMENTATION_PLAN.md — leaner format, tasks point to ref files for detail
+- Rewrote guardrails.md — updated shadow rules, font rules, login pacing, luxury direction
+- Updated all Ralph/refs/*.md files to align with Clinical Luxury direction
+- Updated CLAUDE.md with new login typing spec (80ms/char, user-interactive button)
+- Updated ref-design-system.md login typing speed
+### Tasks reset: Task 2 (LoginScreen — needs new typing speed + interactive button + premium font)
+### Tasks added: New Task 2 (font setup) inserted before LoginScreen rebuild (now Task 3)
+### Context for next iteration:
+- The design direction is "Clinical Luxury" — clinical STRUCTURE, premium EXECUTION
+- All ref files now say "Clinical Luxury" not "Clinical Utilitarian" or "faithful reproduction"
+- Cards get multi-layered shadows (not flat/borderless)
+- Premium font from Fonts/ directory replaces Inter (see CLAUDE.md Typography section)
+- Login screen typing is slower (80ms/char, 60ms/dot) and the button is USER-CLICKED
+- Sidebar labels are CV-friendly (Experience, Skills, etc.) — clinical metaphor is in the LAYOUT
+### New guardrails added:
+- Shadow guardrail updated: multi-layered shadows required (was: "no shadows")
+- Font guardrail added: use [UI font] from Fonts/, not Inter/Roboto
+- Login guardrail added: 80ms/char typing, user-interactive button
 

@@ -8,7 +8,7 @@
 
 The landing view after login. This mimics the "Patient Summary" screen — the first screen a clinician sees when opening a patient record, showing the most important information at a glance.
 
-**Layout:** A grid of summary cards arranged in a 2-column layout on desktop, single column on mobile. Each card has a header bar with the card title in Inter 600, 14px, uppercase, on a `#F9FAFB` background with `1px solid #E5E7EB` bottom border.
+**Layout:** A grid of summary cards arranged in a 2-column layout on desktop, single column on mobile. Each card has a header bar with the card title in [UI font] 600, 14px, uppercase, on a `#F9FAFB` background with `1px solid #E5E7EB` bottom border.
 
 ### Card 1: Patient Demographics (spans full width)
 
@@ -21,7 +21,7 @@ The landing view after login. This mimics the "Patient Summary" screen — the f
 +---------------------------------------------------------------------+
 ```
 
-A two-column key-value table. Labels in Inter 500, 13px, gray-500. Values in Inter 400, 14px, gray-900. Labels right-aligned, values left-aligned — mimicking clinical system demographics layout.
+A two-column key-value table. Labels in [UI font] 500, 13px, gray-500. Values in [UI font] 400, 14px, gray-900. Labels right-aligned, values left-aligned — clinical form layout.
 
 ### Card 2: Active Problems (left column)
 
@@ -34,7 +34,7 @@ A two-column key-value table. Labels in Inter 500, 13px, gray-500. Values in Int
 +---------------------------------------------------------------------+
 ```
 
-A list with green dots for active/current items, amber dots for in-progress items. Each entry has a title in Inter 500, 14px, and a date range or status in Geist Mono, 12px, right-aligned. Click an entry to navigate to the corresponding Consultation.
+A list with green dots for active/current items, amber dots for in-progress items. Each entry has a title in [UI font] 500, 14px, and a date range or status in Geist Mono, 12px, right-aligned. Click an entry to navigate to the corresponding Consultation.
 
 ### Card 3: Current Medications — Quick View (right column)
 
@@ -89,7 +89,7 @@ When the user first loads the Summary view (immediately after the login transiti
 - Background: amber (`#FEF3C7` — amber-100, light amber)
 - Left border: 4px solid `#F59E0B` (amber-500)
 - Warning icon: `AlertTriangle` from Lucide, amber-600
-- Text: Inter 500, 14px, `#92400E` (amber-800)
+- Text: [UI font] 500, 14px, `#92400E` (amber-800)
 - "Acknowledge" button: small outlined button, amber border and text
 
 ### Behavior
@@ -117,19 +117,19 @@ This second alert reinforces the key technical achievement in clinical language.
 
 ---
 
-## Design Guidance (from /frontend-design)
+## Design Guidance
 
 ### Aesthetic Direction
 
-**Clinical Precision Meets Professional Polish**
+**Clinical Luxury**
 
-The NHS clinical record aesthetic draws from real-world electronic patient record systems (EPR), balancing institutional gravitas with polished execution. Key visual principles:
+The Summary view and Clinical Alert use clinical structure (card-based summary, status dots, coded entries, alert banners) with premium execution. Key visual principles:
 
-- **Light-mode ONLY** — Consistent with clinical systems that prioritize readability over dark aesthetics
-- **NHS blue (#005EB8)** — Institutional anchor color for headers and accents
-- **Card-based architecture** — All information lives in contained, bordered cards (1px solid #E5E7EB, 4px border-radius)
-- **Monospace for data** — Geist Mono for all coded entries, dates, and numerical values (creates clinical system authenticity)
-- **High information density** — Compact layouts that maximize data visibility (16px card padding, tight line-heights)
+- **Light-mode ONLY**
+- **NHS blue (#005EB8)** — The accent color for headers and accents
+- **Card-based architecture** — All information lives in contained, bordered cards with layered shadows (per design system)
+- **Monospace for data** — Geist Mono for all coded entries, dates, and numerical values (clinical texture)
+- **Generous but structured** — More whitespace than a real clinical system. Cards have 16-24px padding. Content breathes.
 - **Status dots** — Green/amber/red traffic light indicators for at-a-glance status assessment
 
 ### Key Design Decisions
@@ -157,9 +157,9 @@ This sequence transforms dismissal from a jarring disappearance into a satisfyin
 
 **3. Typography Hierarchy**
 
-- **Card headers**: Inter 600, 14px, uppercase, letter-spacing-wide — creates clear section delineation
-- **Labels**: Inter 500, 13px, gray-500, right-aligned — mimics clinical form layout
-- **Values**: Inter 400, 14px, gray-900, left-aligned — primary data focus
+- **Card headers**: [UI font] 600, 14px, uppercase, letter-spacing-wide — creates clear section delineation
+- **Labels**: [UI font] 500, 13px, gray-500, right-aligned — clinical form layout
+- **Values**: [UI font] 400, 14px, gray-900, left-aligned — primary data focus
 - **Coded values**: Geist Mono, 12px — all dates, IDs, percentages, status codes
 
 ### Implementation Patterns
