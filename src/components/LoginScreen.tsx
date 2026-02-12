@@ -11,9 +11,11 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   const [username, setUsername] = useState('')
   const [passwordDots, setPasswordDots] = useState(0)
   const [showCursor, setShowCursor] = useState(true)
-  const [activeField, setActiveField] = useState<'username' | 'password' | null>('username')
+  const [activeField, setActiveField] = useState<'username' | 'password' | 'done' | null>('username')
   const [buttonPressed, setButtonPressed] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
+  const [typingComplete, setTypingComplete] = useState(false)
+  const [buttonHovered, setButtonHovered] = useState(false)
   const { requestFocusAfterLogin } = useAccessibility()
 
   const fullUsername = 'A.CHARLWOOD'
@@ -23,34 +25,41 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
     : false
 
-  // Refs for interval cleanup
+  // Refs for interval/timeout cleanup
   const usernameIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const passwordIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const cursorIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const timeoutRefs = useRef<ReturnType<typeof setTimeout>[]>([])
 
-  const triggerComplete = useCallback(() => {
-    setIsExiting(true)
-    setTimeout(() => {
-      requestFocusAfterLogin()
-      onComplete()
-    }, prefersReducedMotion ? 0 : 200)
-  }, [onComplete, requestFocusAfterLogin, prefersReducedMotion])
+  const addTimeout = useCallback((fn: () => void, delay: number) => {
+    const id = setTimeout(fn, delay)
+    timeoutRefs.current.push(id)
+    return id
+  }, [])
+
+  const handleLogin = useCallback(() => {
+    if (!typingComplete || isExiting) return
+    setButtonPressed(true)
+    addTimeout(() => {
+      setIsExiting(true)
+      addTimeout(() => {
+        requestFocusAfterLogin()
+        onComplete()
+      }, prefersReducedMotion ? 0 : 200)
+    }, 100)
+  }, [typingComplete, isExiting, onComplete, requestFocusAfterLogin, prefersReducedMotion, addTimeout])
 
   const startLoginSequence = useCallback(() => {
     if (prefersReducedMotion) {
       setUsername(fullUsername)
       setPasswordDots(passwordLength)
-      setActiveField(null)
-      setTimeout(() => {
-        setButtonPressed(true)
-        setTimeout(() => {
-          triggerComplete()
-        }, 100)
-      }, 300)
+      setActiveField('done')
+      setTypingComplete(true)
+      // Button is immediately available for user to click
       return
     }
 
-    // Username typing: 30ms per character
+    // Username typing: 80ms per character
     let usernameIndex = 0
     usernameIntervalRef.current = setInterval(() => {
       if (usernameIndex <= fullUsername.length) {
@@ -62,8 +71,8 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
         }
         setActiveField('password')
 
-        // Password dots: 20ms per dot, after 150ms pause
-        setTimeout(() => {
+        // Password dots: 60ms per dot, after 300ms pause
+        addTimeout(() => {
           let dotCount = 0
           passwordIntervalRef.current = setInterval(() => {
             if (dotCount <= passwordLength) {
@@ -73,21 +82,15 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               if (passwordIntervalRef.current) {
                 clearInterval(passwordIntervalRef.current)
               }
-              setActiveField(null)
-
-              // Button press: after 150ms pause
-              setTimeout(() => {
-                setButtonPressed(true)
-                setTimeout(() => {
-                  triggerComplete()
-                }, 200)
-              }, 150)
+              setActiveField('done')
+              setTypingComplete(true)
+              // Button becomes interactive — user clicks to proceed
             }
-          }, 20)
-        }, 150)
+          }, 60)
+        }, 300)
       }
-    }, 30)
-  }, [triggerComplete, prefersReducedMotion])
+    }, 80)
+  }, [prefersReducedMotion, addTimeout])
 
   useEffect(() => {
     // Cursor blink: 530ms interval
@@ -95,18 +98,28 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       setShowCursor(prev => !prev)
     }, 530)
 
-    // Delay start slightly for card entrance
-    const startTimeout = setTimeout(() => {
+    // Delay start slightly for card entrance animation
+    const startTimeout = addTimeout(() => {
       startLoginSequence()
-    }, 200)
+    }, 400)
+
+    // Capture ref value for cleanup
+    const pendingTimeouts = timeoutRefs.current
 
     return () => {
       if (cursorIntervalRef.current) clearInterval(cursorIntervalRef.current)
       if (usernameIntervalRef.current) clearInterval(usernameIntervalRef.current)
       if (passwordIntervalRef.current) clearInterval(passwordIntervalRef.current)
       clearTimeout(startTimeout)
+      pendingTimeouts.forEach(id => clearTimeout(id))
     }
-  }, [startLoginSequence])
+  }, [startLoginSequence, addTimeout])
+
+  const buttonBg = buttonPressed
+    ? '#004494'
+    : buttonHovered && typingComplete
+      ? '#004D9F'
+      : '#005EB8'
 
   return (
     <div
@@ -122,7 +135,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
           padding: '32px',
           borderRadius: '12px',
           border: '1px solid #E5E7EB',
-          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)',
         }}
         initial={{ opacity: 0, scale: 0.98 }}
         animate={isExiting ? { scale: 1.03, opacity: 0 } : { scale: 1, opacity: 1 }}
@@ -149,7 +162,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
           </div>
           <span
             style={{
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "var(--font-ui)",
               fontSize: '13px',
               fontWeight: 600,
               color: '#64748B',
@@ -160,7 +173,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
           </span>
           <span
             style={{
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "var(--font-ui)",
               fontSize: '11px',
               fontWeight: 400,
               color: '#94A3B8',
@@ -178,7 +191,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
             <label
               style={{
                 display: 'block',
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: '12px',
                 fontWeight: 500,
                 color: '#64748B',
@@ -220,7 +233,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
             <label
               style={{
                 display: 'block',
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: '12px',
                 fontWeight: 500,
                 color: '#64748B',
@@ -258,20 +271,25 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
             </div>
           </div>
 
-          {/* Log In Button */}
+          {/* Log In Button — user clicks to proceed */}
           <button
+            onClick={handleLogin}
+            disabled={!typingComplete}
+            onMouseEnter={() => setButtonHovered(true)}
+            onMouseLeave={() => setButtonHovered(false)}
             style={{
               width: '100%',
               padding: '10px 16px',
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "var(--font-ui)",
               fontSize: '14px',
               fontWeight: 600,
               color: '#FFFFFF',
-              backgroundColor: buttonPressed ? '#004494' : '#005EB8',
+              backgroundColor: buttonBg,
               border: 'none',
               borderRadius: '4px',
-              cursor: 'pointer',
-              transition: 'background-color 100ms ease-out',
+              cursor: typingComplete ? 'pointer' : 'default',
+              opacity: typingComplete ? 1 : 0.6,
+              transition: 'background-color 150ms, opacity 300ms',
             }}
           >
             Log In
@@ -288,7 +306,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
         >
           <p
             style={{
-              fontFamily: "'Inter', system-ui, sans-serif",
+              fontFamily: "var(--font-ui)",
               fontSize: '11px',
               color: '#94A3B8',
               textAlign: 'center',
