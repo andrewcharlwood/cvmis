@@ -44,12 +44,12 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 4: Build TopBar component
 > Detail: `Ralph/refs/ref-03-topbar-sidebar.md` (TopBar section)
-- [ ] Create `src/components/TopBar.tsx`
-- [ ] Brand section (icon + name + version tag)
-- [ ] Search bar (triggers command palette, not inline search)
-- [ ] Session info (mono font, pill badge)
-- [ ] Fixed position, 48px height, white bg, bottom border
-- [ ] Run quality checks
+- [x] Create `src/components/TopBar.tsx`
+- [x] Brand section (icon + name + version tag)
+- [x] Search bar (triggers command palette, not inline search)
+- [x] Session info (mono font, pill badge)
+- [x] Fixed position, 48px height, white bg, bottom border
+- [x] Run quality checks
 
 #### Task 5: Build new Sidebar — PersonHeader
 > Detail: `Ralph/refs/ref-03-topbar-sidebar.md` (Sidebar PersonHeader section)

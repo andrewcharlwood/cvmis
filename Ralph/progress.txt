@@ -136,3 +136,22 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Not applicable (data-only changes, no visual components yet)
 
+### Iteration 3 — Task 4: Build TopBar component
+**Status:** Complete
+**Changes:**
+- Created `src/components/TopBar.tsx` — fixed 48px header with three zones:
+  - Left: Home icon (lucide-react, 18px, accent) + "Headhunt Medical Center" (13px, 600 weight) + "Remote" version badge (11px, tertiary)
+  - Center: Search bar button (max-width 560px, min-width 400px, 42px height) with Search icon, placeholder text, Ctrl+K kbd badge. On click triggers `onSearchClick` prop (for command palette in Task 18). Hidden on mobile (<768px). Hover/focus border transitions to accent color with focus ring.
+  - Right: "Dr. A.CHARLWOOD" text (hidden on <640px) + "Active Session · [time]" pill badge (Geist Mono, accent-light bg, accent-border)
+- Component uses CSS custom properties from Task 1 tokens (--surface, --border, --accent, --text-primary, --text-secondary, --text-tertiary, --bg-dashboard, --accent-light, --accent-border)
+- Live time updates every 60 seconds using setInterval
+- Search bar is a `<button>` element (not input) — it doesn't do inline search, only triggers the command palette
+- Responsive: search bar hidden on <768px (md breakpoint), user name hidden on <640px (sm breakpoint)
+**Learnings:**
+- Search bar should be a button, not an input — it triggers the command palette overlay (Task 18). No inline filtering.
+- Using `var(--radius-card)` for 8px border radius on the search bar container
+- Time format: 24-hour (en-GB locale), no seconds — matches clinical system convention
+- TopBar is not yet wired into DashboardLayout (that's Task 7) — component is created and ready
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Not applicable (component not yet wired into App — will be visible after Task 7)
+
