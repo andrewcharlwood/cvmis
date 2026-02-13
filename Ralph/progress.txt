@@ -787,3 +787,64 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 
 **Next task:** Task 13 — Fuzzy search with fuse.js
 
+
+
+### Iteration 14 — Task 13: Fuzzy search with fuse.js
+**Completed:** Task 13
+**Changes made:**
+- **Installed fuse.js** (npm install fuse.js) — version 7.0.0
+- **Created src/lib/search.ts**:
+  - `buildSearchIndex()` function — builds unified Fuse search index from all PMR data
+  - Search index includes: consultations (5), medications (18), problems (11), investigations (6), documents (5) — total 45 searchable items
+  - Each item has: id, title, section (ViewId), sectionLabel (CV-friendly), highlight (full text preview)
+  - Fuse.js config: threshold 0.3, weighted keys (title: 2, highlight: 1), minMatchCharLength: 2
+  - `groupResultsBySection()` — groups search results by sectionLabel for organized dropdown
+  - Export types: `SearchResult`, `FuseResult` from fuse.js
+- **Updated ClinicalSidebar.tsx**:
+  - Replaced simple `filter` search with `searchIndex.search()` (fuzzy matching)
+  - Added `useMemo(() => buildSearchIndex(), [])` — index built once on mount
+  - Search requires minimum 2 characters, returns top 10 results
+  - Results grouped by section using `groupResultsBySection()`
+  - Dropdown UI: section headers with icon + label + count, result rows with title + highlight (line-clamp-1)
+  - `handleSearchResultClick()` — navigates to section, calls `setExpandedItem(result.item.id)`, clears search
+  - Integrated with AccessibilityContext for breadcrumb updates
+  - Section headers show section icon from navItems
+  - Dropdown styling: `max-h-[400px] overflow-y-auto`, `bg-pmr-sidebar`, `border border-white/10`, `shadow-lg`
+  - Result hover: `hover:bg-white/[0.10]`
+  - TypeScript: imported `FuseResult` type, typed map callback parameter
+
+**Codebase patterns discovered:**
+- Fuse.js search index pattern: build once in `useMemo`, search on every query change in separate `useMemo`
+- Grouped results display: `Map<string, FuseResult[]>` from grouping function, iterate with `Array.from(grouped.entries())`
+- Search result navigation: change view + hash + call `setExpandedItem()` to auto-expand matching item
+- Minimum query length (2 chars) prevents noise from single-character searches
+- Top 10 result limit keeps dropdown manageable
+- Section icon lookup: `navItems.find(item => item.label === sectionLabel)?.icon`
+
+**Quality checks:** All passed
+- TypeScript: No errors
+- ESLint: 1 pre-existing warning in AccessibilityContext.tsx (not our changes)
+- Build: Successful, 416.25 KB bundle (fuse.js adds ~21 KB)
+
+**Visual review:** Completed via Playwright MCP at http://localhost:5173
+- Searched "python": dropdown shows "Skills (1)" with Python medication, "Projects (3)" with 3 Python-related projects
+- Section headers render with correct icons (Pill for Skills, Flask for Projects) and item counts
+- Clicked Python result: navigated to Skills view (#medications hash), Python row expanded with prescribing history visible
+- Searched "budget": dropdown shows "Skills (1)" with Budget Management, "Achievements (1)" with £220M budget problem
+- Fuzzy matching works: partial matches, case-insensitive
+- Clear search button (X icon) visible when query present
+- Dropdown styling: dark sidebar background, white text, section headers at 50% opacity, result highlights at 50% opacity
+- Line-clamp-1 on highlight text truncates long descriptions cleanly
+
+**Issues encountered:** None
+
+**Design decisions:**
+- Used `useMemo` for search index (built once) and search results (recomputed on query change) — performance optimization
+- Minimum 2 characters required — prevents overly broad results from single letters
+- Top 10 results limit — prevents overwhelming dropdown, encourages more specific queries
+- Section grouping preserves the clinical navigation structure — users see results organized by PMR section
+- Highlight text uses `line-clamp-1` for clean truncation — full text visible on hover isn't needed (title is enough to identify)
+- Search index includes both title (weight: 2) and full text (weight: 1) — prioritizes title matches but allows content searches
+
+**Next task:** Task 14 — Responsive design audit
+

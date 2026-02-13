@@ -58,7 +58,7 @@ Also read `CLAUDE.md` for font setup instructions (Elvaro Grotesque and Blumir c
 
 - [x] **Task 12: Rebuild ReferralsView (Contact).** Read `Ralph/refs/ref-referrals.md`. Clinical referral form with priority radio buttons (Urgent/Routine/Two-Week Wait with tongue-in-cheek tooltips). Form validation, reference number generation, success state. Direct contact table below form.
 
-- [ ] **Task 13: Fuzzy search with fuse.js.** Read `Ralph/refs/ref-interactions.md` (Search section). Install fuse.js. Build search index from all content. Results dropdown grouped by section. Clicking a result navigates to section + expands matching item. Mobile: search at top of each view.
+- [x] **Task 13: Fuzzy search with fuse.js.** Read `Ralph/refs/ref-interactions.md` (Search section). Install fuse.js. Build search index from all content. Results dropdown grouped by section. Clicking a result navigates to section + expands matching item. Mobile: search at top of each view.
 
 - [ ] **Task 14: Responsive design audit.** Read `Ralph/refs/ref-interactions.md` (Responsive Strategy section). Test all three breakpoints: Desktop (>1024px), Tablet (768-1024px), Mobile (<768px). Tables → card layouts on mobile. Bottom nav bar. Touch targets ≥48px.
 
