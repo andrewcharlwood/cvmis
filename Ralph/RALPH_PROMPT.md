@@ -41,11 +41,10 @@ The sidebar uses CV-intuitive labels, NOT clinical jargon. But each view's conte
 
 6. **Run quality checks**: Execute the quality check commands listed in `IMPLEMENTATION_PLAN.md` under "Quality Checks". Fix any issues before proceeding.
 
-7. **Visual Review** (Tasks 1b-11 only — skip for non-visual tasks like Task 1, 12-15): After quality checks pass, verify your work visually in the browser using the Claude in Chrome browser tools:
-   a. Call `tabs_context_mcp` to get available tabs (create if empty).
-   b. Navigate to `http://localhost:5173` (dev server runs throughout the loop).
-   c. **First load only**: The app plays a boot→ECG→login→PMR sequence (~15s). Use `computer` with `action: "wait", duration: 15` then take a screenshot. On subsequent navigations in the same tab, the app stays in PMR phase — no waiting needed.
-   d. Navigate to the hash route for your task's view:
+7. **Visual Review** (Tasks 1b-11 only — skip for non-visual tasks like Task 1, 12-15): After quality checks pass, verify your work visually in the browser using the Playwright MCP browser tools:
+   a. Navigate to `http://localhost:5173` using `mcp__playwright__browser_navigate`.
+   b. **First load only**: The app plays a boot→ECG→login→PMR sequence (~15s). Use `mcp__playwright__browser_wait_for` with `time: 15` then take a snapshot. On subsequent navigations, the app stays in PMR phase — no waiting needed.
+   c. Navigate to the hash route for your task's view:
       - Task 1b (Boot/ECG): Refresh page, screenshot during boot sequence, then again during ECG animation
       - Task 2 (Login): Refresh page, wait ~8s (after boot+ECG), screenshot the login screen
       - Task 3 (Banner): Any PMR view — review the patient banner at top
@@ -53,10 +52,10 @@ The sidebar uses CV-intuitive labels, NOT clinical jargon. But each view's conte
       - Task 5 (Layout/Breadcrumb): Any PMR view — review overall composition
       - Task 6: `#summary` | Task 7: `#experience` | Task 8: `#skills`
       - Task 9: `#achievements` | Task 10: `#projects` then `#education` | Task 11: `#contact`
-   e. Take a screenshot (`computer` with `action: "screenshot"`) and compare against your reference file.
-   f. Check specifically: colors match spec, correct font (Inter vs Geist Mono), proper spacing, `1px solid #E5E7EB` borders, 4px border-radius, layout alignment, NHS blue `#005EB8`.
-   g. If discrepancies are found: fix them, re-run quality checks, take another screenshot to confirm.
-   h. Note the visual review outcome in your progress.txt entry (step 10).
+   d. Use `mcp__playwright__browser_snapshot` (accessibility tree) or `mcp__playwright__browser_take_screenshot` (visual) to capture the page, and compare against your reference file.
+   e. Check specifically: colors match spec, correct font (Inter vs Geist Mono), proper spacing, `1px solid #E5E7EB` borders, 4px border-radius, layout alignment, NHS blue `#005EB8`.
+   f. If discrepancies are found: fix them, re-run quality checks, take another screenshot to confirm.
+   g. Note the visual review outcome in your progress.txt entry (step 10).
 
 8. **Commit your changes**: Stage and commit all changes with a descriptive message referencing the task you completed.
 
@@ -109,7 +108,7 @@ The sidebar uses CV-intuitive labels, NOT clinical jargon. But each view's conte
 
 - **ALWAYS read the "Design Guidance" section in the ref file before writing visual component code** — do NOT invoke /frontend-design at runtime (it's pre-baked into the ref files)
 - **Do NOT invoke the /frontend-design skill** — the design guidance is already embedded in each ref file. Invoking it at runtime will consume your context and stall the iteration.
-- **ALWAYS visually review visual components (Tasks 1b-11) in the browser** — use Claude in Chrome tools to screenshot and verify against the spec before committing
+- **ALWAYS visually review visual components (Tasks 1b-11) in the browser** — use Playwright MCP tools to screenshot and verify against the spec before committing
 - **Only work on ONE task per iteration**
 - **Always read progress.txt AND guardrails.md before starting** — previous iterations may have left important context
 - **If a task is blocked or unclear**, document why in progress.txt and move to the next unchecked item

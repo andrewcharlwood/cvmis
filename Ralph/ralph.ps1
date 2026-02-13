@@ -35,7 +35,7 @@
 #>
 
 param(
-    [string]$Model = "sonnet",
+    [string]$Model = "opus",
     [string]$BranchName,
     [int]$MaxNoProgress = 3,
     [int]$MaxSameError = 3
@@ -143,14 +143,14 @@ if (Test-Path $progressFile) {
 
 Write-Host ""
 Write-Host "===== Ralph Wiggum Loop (Visualization Improvements) =====" -ForegroundColor Cyan
-Write-Host "Model: $Model (dynamic switching enabled) | Visual review: ON | Runs until COMPLETE" -ForegroundColor Cyan
+Write-Host "Model: $Model (dynamic switching enabled) | Visual review: Playwright MCP | Runs until COMPLETE" -ForegroundColor Cyan
 Write-Host "Circuit breakers: no-progress=$MaxNoProgress, same-error=$MaxSameError" -ForegroundColor Cyan
 if ($BranchName) { Write-Host "Branch: $BranchName" -ForegroundColor Cyan }
 if ($existingIterations -gt 0) { Write-Host "Previous iterations: $existingIterations" -ForegroundColor Cyan }
 Write-Host "===========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# --- Dev Server (for visual review via Claude in Chrome) ---
+# --- Dev Server (for visual review via Playwright MCP) ---
 $devServerPort = 5173
 $devServerPid = $null
 

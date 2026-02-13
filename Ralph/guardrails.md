@@ -83,7 +83,7 @@ Hard rules that MUST be followed in every iteration. Violating these will produc
 ## Visual Review Guardrails
 
 ### When: Completing any visual task
-**Rule:** After quality checks, open `http://localhost:5173` via Claude in Chrome tools, take a screenshot, and compare against the ref file spec. Fix visual discrepancies. If browser tools are unavailable, note in progress.txt and proceed.
+**Rule:** After quality checks, open `http://localhost:5173` via Playwright MCP tools (`mcp__playwright__browser_navigate`, `mcp__playwright__browser_take_screenshot`, `mcp__playwright__browser_snapshot`), take a screenshot, and compare against the ref file spec. Fix visual discrepancies. If browser tools are unavailable, note in progress.txt and proceed.
 **Why:** Code review alone cannot catch visual issues.
 
 ### When: Browser tools fail
