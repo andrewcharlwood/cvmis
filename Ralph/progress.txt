@@ -553,3 +553,62 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 
 **Next task:** Task 9 — Rebuild MedicationsView (Skills view)
 
+### Iteration 10 — Task 9: Rebuild MedicationsView (Skills view)
+**Completed:** Task 9
+**Changes made:**
+- **MedicationsView.tsx**: Complete rebuild from ref-medications.md spec:
+  - **Font updates**: All `font-inter` references replaced with `font-ui` (Elvaro Grotesque)
+  - **Card styling**: Added `shadow-pmr` (multi-layered shadow), `border border-[#E5E7EB]`, `overflow-hidden`
+  - **Category tabs**: Three tabs (Active Medications, Clinical Medications, PRN) with count badges showing item count per category. Active tab: white bg, NHS blue bottom border, blue text. Inactive: `#F9FAFB` bg, gray text, hover to white.
+  - **Semantic table**: Proper `<table>`, `<thead>`, `<th scope="col">`, `<tbody>` markup per guardrails
+  - **Sortable columns**: ChevronsUpDown (neutral), ChevronUp/ChevronDown (active, NHS blue) sort indicators. Three-state cycle: asc → desc → none.
+  - **Column borders**: `border-r border-[#E5E7EB]` between columns for clinical authenticity
+  - **Row height**: `h-[40px]` per design system spec
+  - **Alternating rows**: `bg-white` / `bg-[#F9FAFB]` via index-based alternation
+  - **Hover state**: `hover:bg-[#EFF6FF]` (subtle blue tint) on rows and sort buttons
+  - **Status dots**: 6px green circles with "Active" text label (guardrail: dots must always have text)
+  - **Framer Motion expand/collapse**: `AnimatePresence initial={false}` + `motion.tr`/`motion.div` for height-only animation (no opacity fade per guardrail). 200ms ease-out.
+  - **Chevron rotation**: `motion.div` with `animate={{ rotate: isExpanded ? 180 : 0 }}` — consistent with ConsultationsView pattern
+  - **Prescribing history**: Vertical timeline with NHS blue dots (`bg-[#005EB8]` with white ring), connecting line (`bg-[#E5E7EB]`). Year markers in `font-geist font-semibold text-[12px]`, descriptions in `font-geist text-[12px]`.
+  - **Mobile card layout**: Stacked key-value pairs with expand/collapse, same Framer Motion animation
+  - **Accessibility**: `role="tablist"`, `role="tab"`, `aria-selected`, `aria-controls` on tabs. `aria-expanded` on rows. `tabIndex={0}` + keyboard handler on table rows. `focus-visible:ring-2` on mobile buttons.
+  - **AccessibilityContext integration**: `setExpandedItem` called on expand/collapse to update breadcrumb
+  - **prefers-reduced-motion**: All Framer Motion animations use `duration: 0` when reduced motion preferred
+  - **Tab panel**: Proper `id` and `role="tabpanel"` with `aria-labelledby`
+  - **Font sizes per spec**: Headers `text-[13px]`, data cells `text-[13px]`, drug names `text-[14px]`, prescribing history `text-[12px]`
+
+**Codebase patterns discovered:**
+- `AnimatePresence initial={false}` on table rows prevents animation when switching tabs (content should appear instantly)
+- Count badges on tabs provide scannable category sizes — computed once outside component via `categoryCounts` record
+- Column borders between `<th>`/`<td>` cells (via `border-r border-[#E5E7EB] last:border-r-0`) add clinical authenticity
+- Framer Motion `motion.tr` works for table row expand but needs a nested `motion.div` for reliable height animation (table row height can't animate directly)
+- The `SortIndicator` component pattern (ChevronsUpDown → ChevronUp/ChevronDown) is reusable for any sortable table
+
+**Quality checks:** All passed
+- TypeScript: No errors
+- ESLint: 1 pre-existing warning in AccessibilityContext.tsx (not our changes)
+- Build: Successful, 395.01 KB bundle
+
+**Visual review:** Completed via Playwright MCP at default viewport
+- Collapsed state: All 8 Active Medications visible with correct data in all 5 columns
+- Tab switching: Active → Clinical (6 items) → PRN (4 items), all instant with correct count badges
+- Expanded Python row: Prescribing history with vertical timeline, NHS blue dots, Geist Mono year markers, descriptions
+- Accordion behavior: Expanding SQL collapsed Python (single-expand)
+- Sort indicators: ChevronsUpDown visible in all column headers
+- Alternating rows: White/gray-50 alternation visible
+- Column borders: Vertical separators between all columns
+- Status dots: Green dots with "Active" text label in every row
+- Card shadow: Multi-layered shadow visible around container
+- Footer: "8 medications in this category. Click a row to view prescribing history."
+
+**Issues encountered:** None
+
+**Design decisions:**
+- Moved `prefersReducedMotion` check to module scope (computed once, not per render)
+- Used `ChevronsUpDown` from lucide-react for neutral sort state per ref spec (was using `ArrowUpDown`)
+- Drug Name column includes the expand chevron inline (saves a dedicated column, cleaner layout)
+- Timeline dots use `ring-2 ring-white` to create white gap between dot and timeline line
+- Tab count badges use `bg-[#005EB8]/10 text-[#005EB8]` for active tab, `bg-gray-200 text-gray-500` for inactive
+
+**Next task:** Task 10 — Rebuild ProblemsView (Achievements view)
+

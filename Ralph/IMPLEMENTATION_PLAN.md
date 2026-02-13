@@ -50,7 +50,7 @@ Also read `CLAUDE.md` for font setup instructions (Elvaro Grotesque and Blumir c
 
 - [x] **Task 8: Rebuild ConsultationsView.** Read `Ralph/refs/ref-consultations.md`. Reverse-chronological journal. Collapsed entries with date, org, role, key achievement. Expanded: H/E/P structure with coded entries. Height-only expand animation (no opacity fade). One expanded at a time. 3px left border color-coded by employer. Second clinical alert on first visit.
 
-- [ ] **Task 9: Rebuild MedicationsView.** Read `Ralph/refs/ref-medications.md`. Three category tabs (Active/Clinical/PRN). Semantic `<table>` with sortable columns. Expandable prescribing history in Geist Mono. Status dots with text labels. Mobile: card layout.
+- [x] **Task 9: Rebuild MedicationsView.** Read `Ralph/refs/ref-medications.md`. Three category tabs (Active/Clinical/PRN). Semantic `<table>` with sortable columns. Expandable prescribing history in Geist Mono. Status dots with text labels. Mobile: card layout.
 
 - [ ] **Task 10: Rebuild ProblemsView.** Read `Ralph/refs/ref-problems.md`. Two sections: Active Problems and Resolved Problems. Traffic light dots (8px, always with text labels). Code column in Geist Mono. Expandable rows with narrative + linked consultation navigation. Mobile: card layout.
 
