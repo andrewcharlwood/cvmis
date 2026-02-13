@@ -232,3 +232,36 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* Pulse animation for status badge dot */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Custom scrollbar for sidebar */
+.pmr-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.pmr-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.pmr-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pmr-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.pmr-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
