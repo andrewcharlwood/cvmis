@@ -374,7 +374,7 @@ export const CareerActivityTile: React.FC = () => {
   )
 
   return (
-    <Card full>
+    <Card full tileId="career-activity">
       <CardHeader dotColor="teal" title="CAREER ACTIVITY" rightText="Full timeline" />
 
       <div className="activity-grid">

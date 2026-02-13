@@ -30,7 +30,7 @@ export const LastConsultationTile: React.FC = () => {
   }
 
   return (
-    <Card full>
+    <Card full tileId="last-consultation">
       <CardHeader dotColor="green" title="LAST CONSULTATION" rightText="Most recent role" />
 
       {/* Header info row */}

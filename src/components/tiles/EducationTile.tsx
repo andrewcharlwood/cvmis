@@ -22,7 +22,7 @@ export function EducationTile() {
   ]
 
   return (
-    <Card full>
+    <Card full tileId="education">
       <CardHeader dotColor="purple" title="EDUCATION" />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

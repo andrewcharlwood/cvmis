@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { TopBar } from './TopBar'
 import Sidebar from './Sidebar'
+import { CommandPalette } from './CommandPalette'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
 import { LatestResultsTile } from './tiles/LatestResultsTile'
 import { CoreSkillsTile } from './tiles/CoreSkillsTile'
@@ -9,6 +10,7 @@ import { LastConsultationTile } from './tiles/LastConsultationTile'
 import { CareerActivityTile } from './tiles/CareerActivityTile'
 import { EducationTile } from './tiles/EducationTile'
 import { ProjectsTile } from './tiles/ProjectsTile'
+import type { PaletteAction } from '@/lib/search'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -45,11 +47,62 @@ const contentVariants = {
 }
 
 export function DashboardLayout() {
-  const [, setCommandPaletteOpen] = useState(false)
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
 
   const handleSearchClick = () => {
     setCommandPaletteOpen(true)
   }
+
+  const handlePaletteClose = useCallback(() => {
+    setCommandPaletteOpen(false)
+  }, [])
+
+  // Global Ctrl+K listener to open command palette
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        setCommandPaletteOpen(prev => !prev)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  // Handle palette actions (scroll to tile, expand item, open link, download)
+  const handlePaletteAction = useCallback((action: PaletteAction) => {
+    switch (action.type) {
+      case 'scroll': {
+        const tileEl = document.querySelector(`[data-tile-id="${action.tileId}"]`)
+        if (tileEl) {
+          tileEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+        break
+      }
+      case 'expand': {
+        const tileEl = document.querySelector(`[data-tile-id="${action.tileId}"]`)
+        if (tileEl) {
+          tileEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          // Dispatch a custom event that the tile can listen for to expand the item
+          const expandEvent = new CustomEvent('palette-expand', {
+            detail: { tileId: action.tileId, itemId: action.itemId },
+          })
+          document.dispatchEvent(expandEvent)
+        }
+        break
+      }
+      case 'link': {
+        window.open(action.url, '_blank', 'noopener,noreferrer')
+        break
+      }
+      case 'download': {
+        // For now, open the CV file or trigger a download
+        // This can be wired to an actual PDF when available
+        window.open('/References/CV_v4.md', '_blank')
+        break
+      }
+    }
+  }, [])
 
   return (
     <div
@@ -123,7 +176,12 @@ export function DashboardLayout() {
         </motion.main>
       </div>
 
-      {/* Command palette will be rendered here (Task 18) */}
+      {/* Command palette overlay */}
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={handlePaletteClose}
+        onAction={handlePaletteAction}
+      />
     </div>
   )
 }

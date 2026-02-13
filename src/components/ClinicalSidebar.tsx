@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import type { ViewId } from '../types/pmr'
 import { useAccessibility } from '../contexts/AccessibilityContext'
-import { buildSearchIndex, groupResultsBySection, type SearchResult } from '../lib/search'
+import { buildLegacySearchIndex, groupResultsBySection, type SearchResult } from '../lib/search'
 import type { FuseResult } from 'fuse.js'
 
 interface NavItem {
@@ -55,7 +55,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
   const { focusAfterLoginRef, setExpandedItem } = useAccessibility()
 
   // Build search index once on mount
-  const searchIndex = useMemo(() => buildSearchIndex(), [])
+  const searchIndex = useMemo(() => buildLegacySearchIndex(), [])
 
   const handleNavClick = useCallback(
     (view: ViewId) => {

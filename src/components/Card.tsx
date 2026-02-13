@@ -4,9 +4,10 @@ interface CardProps {
   children: React.ReactNode
   full?: boolean // spans both grid columns
   className?: string
+  tileId?: string // data-tile-id for command palette scroll targeting
 }
 
-export function Card({ children, full, className }: CardProps) {
+export function Card({ children, full, className, tileId }: CardProps) {
   const [isHovered, setIsHovered] = React.useState(false)
 
   const baseStyles: React.CSSProperties = {
@@ -25,6 +26,7 @@ export function Card({ children, full, className }: CardProps) {
     <div
       style={baseStyles}
       className={className}
+      data-tile-id={tileId}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

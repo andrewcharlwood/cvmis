@@ -337,3 +337,25 @@ html {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== COMMAND PALETTE ANIMATIONS ===== */
+@keyframes palette-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes palette-modal-in {
+  from { transform: scale(0.97) translateY(-8px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes palette-overlay-in {
+    from { opacity: 1; }
+    to { opacity: 1; }
+  }
+  @keyframes palette-modal-in {
+    from { transform: none; opacity: 1; }
+    to { transform: none; opacity: 1; }
+  }
+}

@@ -10,7 +10,7 @@ export function PatientSummaryTile() {
   }
 
   return (
-    <Card full>
+    <Card full tileId="patient-summary">
       <CardHeader dotColor="teal" title="PATIENT SUMMARY" />
       <div style={bodyStyles}>{personalStatement}</div>
     </Card>

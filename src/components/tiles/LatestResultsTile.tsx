@@ -109,7 +109,7 @@ export function LatestResultsTile() {
   }
 
   return (
-    <Card>
+    <Card tileId="latest-results">
       <CardHeader dotColor="teal" title="LATEST RESULTS" rightText="Updated May 2025" />
       <div style={gridStyles}>
         {kpis.map((kpi) => (
