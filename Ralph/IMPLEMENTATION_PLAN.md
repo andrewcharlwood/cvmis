@@ -53,19 +53,19 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 5: Build new Sidebar — PersonHeader
 > Detail: `Ralph/refs/ref-03-topbar-sidebar.md` (Sidebar PersonHeader section)
-- [ ] Create `src/components/Sidebar.tsx`
-- [ ] Avatar circle (52px, teal gradient, initials)
-- [ ] Name, title, status badge with pulse dot
-- [ ] Details grid (GPhC, Education, Location, Phone, Email, Registered)
-- [ ] 272px width, light background, right border
-- [ ] Run quality checks
+- [x] Create `src/components/Sidebar.tsx`
+- [x] Avatar circle (52px, teal gradient, initials)
+- [x] Name, title, status badge with pulse dot
+- [x] Details grid (GPhC, Education, Location, Phone, Email, Registered)
+- [x] 272px width, light background, right border
+- [x] Run quality checks
 
 #### Task 6: Build new Sidebar — Tags + Alerts
 > Detail: `Ralph/refs/ref-03-topbar-sidebar.md` (Tags and Alerts section)
-- [ ] Section title component (uppercase, divider line)
-- [ ] Tags section (flex wrap pills, color variants)
-- [ ] Alerts section (colored flag items with icons)
-- [ ] Run quality checks
+- [x] Section title component (uppercase, divider line)
+- [x] Tags section (flex wrap pills, color variants)
+- [x] Alerts section (colored flag items with icons)
+- [x] Run quality checks
 
 #### Task 7: Build DashboardLayout and wire up App.tsx
 > Detail: `Ralph/refs/ref-04-dashboard-layout.md`

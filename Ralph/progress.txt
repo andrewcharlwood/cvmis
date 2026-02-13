@@ -155,3 +155,25 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Not applicable (component not yet wired into App — will be visible after Task 7)
 
+### Iteration 4 — Tasks 5-6: Build Sidebar with PersonHeader, Tags, and Alerts
+**Status:** Complete
+**Changes:**
+- Created `src/components/Sidebar.tsx` — complete sidebar component with three main sections:
+  - **PersonHeader**: 52px teal gradient avatar with "AC" initials, name "CHARLWOOD, Andrew" (15px, 700 weight), title "Pharmacy Data Technologist" (11.5px, Geist Mono), status badge "Open to Opportunities" with animated pulse dot (6px, success color, 2s pulse animation). Details grid with 6 rows: GPhC No. (monospace, letter-spaced), Education, Location, Phone (accent link), Email (accent link), Registered. 2px teal border-bottom separator.
+  - **Tags**: Section title with divider line. 5 colored pill badges (10.5px, 3px/8px padding, 4px radius) in three color variants (teal/amber/green). Data from tags.ts.
+  - **Alerts/Highlights**: 2 flag items with lucide-react icons (AlertTriangle for alert, AlertCircle for amber). 11px, 700 weight, 7px/10px padding, 6px radius. Severity-based colors.
+- Added animations to `src/index.css`:
+  - `@keyframes pulse` for status badge dot (opacity 1→0.4→1, 2s infinite)
+  - `.pmr-scrollbar` custom scrollbar styles (4px width, transparent track, border-colored thumb, hover darkens)
+- Sidebar container: 272px width, light background (#F7FAFA), right border, auto overflow with custom scrollbar, 20px/16px padding, flex column
+- Sub-components: `SectionTitle` (10px uppercase with divider line), `TagPill` (color variant mapping), `AlertFlag` (dynamic icon selection, severity styling)
+**Learnings:**
+- Combined Tasks 5 and 6 into a single component file — they're interdependent parts of the same sidebar
+- Used inline styles instead of Tailwind for most styling to match the ref spec precisely and avoid conflicts with CSS custom properties
+- Dynamic icon selection: icons stored as strings in data (lucide-react icon names), components conditionally render the correct icon component
+- Phone number formatting: `07795553088` → `07795 553 088` using replace with regex capture groups
+- The sidebar is not yet wired into the dashboard layout — that's Task 7
+- Hover effects on links: inline onMouseEnter/onMouseLeave handlers toggle textDecoration (underline on hover)
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Not applicable (component not yet wired into App — will be visible after Task 7)
+
