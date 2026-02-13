@@ -4,6 +4,7 @@ import { TopBar } from './TopBar'
 import { SubNav } from './SubNav'
 import Sidebar from './Sidebar'
 import { CommandPalette } from './CommandPalette'
+import { DetailPanel } from './DetailPanel'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
 import { LatestResultsTile } from './tiles/LatestResultsTile'
 import { CoreSkillsTile } from './tiles/CoreSkillsTile'
@@ -163,7 +164,10 @@ export function DashboardLayout() {
 
             {/* LatestResultsTile — half width (left) */}
             <LatestResultsTile />
-            {/* CoreSkillsTile — half width (right) */}
+            {/* ProjectsTile — half width (right) */}
+            <ProjectsTile />
+
+            {/* CoreSkillsTile — full width */}
             <CoreSkillsTile />
 
             {/* LastConsultationTile — full width */}
@@ -174,9 +178,6 @@ export function DashboardLayout() {
 
             {/* EducationTile — full width */}
             <EducationTile />
-
-            {/* ProjectsTile — full width */}
-            <ProjectsTile />
           </div>
         </motion.main>
       </div>
@@ -187,6 +188,9 @@ export function DashboardLayout() {
         onClose={handlePaletteClose}
         onAction={handlePaletteAction}
       />
+
+      {/* Detail panel */}
+      <DetailPanel />
     </div>
   )
 }

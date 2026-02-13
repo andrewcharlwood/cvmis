@@ -233,7 +233,7 @@ export function CoreSkillsTile() {
   )
 
   return (
-    <Card tileId="core-skills">
+    <Card full tileId="core-skills">
       <CardHeader dotColor="amber" title="REPEAT MEDICATIONS" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {skills.map((skill) => (

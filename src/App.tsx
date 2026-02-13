@@ -5,6 +5,7 @@ import { ECGAnimation } from './components/ECGAnimation'
 import { LoginScreen } from './components/LoginScreen'
 import { DashboardLayout } from './components/DashboardLayout'
 import { AccessibilityProvider } from './contexts/AccessibilityContext'
+import { DetailPanelProvider } from './contexts/DetailPanelContext'
 
 function SkipButton({ onSkip }: { onSkip: () => void }) {
   const [visible, setVisible] = useState(false)
@@ -76,7 +77,11 @@ function App() {
           <LoginScreen onComplete={() => setPhase('pmr')} />
         )}
 
-        {phase === 'pmr' && <DashboardLayout />}
+        {phase === 'pmr' && (
+          <DetailPanelProvider>
+            <DashboardLayout />
+          </DetailPanelProvider>
+        )}
 
         {(phase === 'boot' || phase === 'ecg') && (
           <SkipButton onSkip={skipToLogin} />

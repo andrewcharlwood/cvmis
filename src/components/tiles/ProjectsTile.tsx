@@ -258,7 +258,7 @@ export function ProjectsTile() {
   )
 
   return (
-    <Card full tileId="projects">
+    <Card tileId="projects">
       <CardHeader dotColor="amber" title="ACTIVE PROJECTS" />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
