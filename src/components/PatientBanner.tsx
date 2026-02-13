@@ -2,79 +2,61 @@ import { Download, Mail, Linkedin, MoreHorizontal } from 'lucide-react'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { patient } from '@/data/patient'
-import { useScrollCondensation } from '@/hooks/useScrollCondensation'
 
 interface PatientBannerProps {
   isMobile?: boolean
   isTablet?: boolean
+  isCondensed?: boolean
 }
 
-export function PatientBanner({ isMobile = false, isTablet = false }: PatientBannerProps) {
-  const { isCondensed, sentinelRef } = useScrollCondensation({ threshold: 100 })
-
+export function PatientBanner({ isMobile = false, isTablet = false, isCondensed = false }: PatientBannerProps) {
   const prefersReducedMotion = typeof window !== 'undefined'
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
     : false
 
   if (isMobile) {
-    return (
-      <>
-        <div
-          ref={sentinelRef}
-          className="h-0 w-full absolute top-0"
-          aria-hidden="true"
-        />
-        <MobileBanner />
-      </>
-    )
+    return <MobileBanner />
   }
 
   const shouldCondense = isTablet || isCondensed
 
   return (
-    <>
-      <div
-        ref={sentinelRef}
-        className="h-0 w-full absolute top-0"
-        aria-hidden="true"
-      />
-      <header
-        className={`
-          sticky top-0 z-40 w-full
-          bg-pmr-banner border-b border-slate-600
-          shadow-pmr-banner
-          transition-all duration-200 ease-out
-          ${shouldCondense ? 'h-12' : 'h-20'}
-        `}
-        role="banner"
-      >
-        <AnimatePresence mode="wait" initial={false}>
-          {shouldCondense ? (
-            <motion.div
-              key="condensed"
-              initial={prefersReducedMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="h-full"
-            >
-              <CondensedBanner />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="full"
-              initial={prefersReducedMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="h-full"
-            >
-              <FullBanner />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
-    </>
+    <header
+      className={`
+        w-full z-40
+        bg-pmr-banner border-b border-slate-600
+        shadow-pmr-banner
+        transition-all duration-200 ease-out
+        ${shouldCondense ? 'h-12' : 'h-20'}
+      `}
+      role="banner"
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        {shouldCondense ? (
+          <motion.div
+            key="condensed"
+            initial={prefersReducedMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="h-full"
+          >
+            <CondensedBanner />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="full"
+            initial={prefersReducedMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="h-full"
+          >
+            <FullBanner />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
   )
 }
 
@@ -97,7 +79,7 @@ function MobileBanner() {
 
   return (
     <header
-      className="sticky top-0 z-40 w-full h-12 bg-pmr-banner border-b border-slate-600 shadow-pmr-banner"
+      className="w-full z-40 h-12 bg-pmr-banner border-b border-slate-600 shadow-pmr-banner"
       role="banner"
     >
       <div className="h-full px-3 flex items-center justify-between gap-2">

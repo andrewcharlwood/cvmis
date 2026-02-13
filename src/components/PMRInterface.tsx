@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { motion, Variants } from 'framer-motion'
 import { Search, X, ArrowLeft } from 'lucide-react'
 import type { ViewId } from '../types/pmr'
@@ -14,6 +14,7 @@ import { DocumentsView } from './views/DocumentsView'
 import { ReferralsView } from './views/ReferralsView'
 import { useAccessibility } from '../contexts/AccessibilityContext'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { useScrollCondensation } from '../hooks/useScrollCondensation'
 
 interface PMRInterfaceProps {
   children?: React.ReactNode
@@ -37,8 +38,13 @@ function PMRContent({ children }: PMRInterfaceProps) {
   const [mobileSearchQuery, setMobileSearchQuery] = useState('')
   
   const viewHeadingRef = useRef<HTMLDivElement>(null)
+  const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null)
+  const scrollContainerCallbackRef = useCallback((node: HTMLElement | null) => {
+    setScrollContainer(node)
+  }, [])
   const { requestFocusAfterViewChange, expandedItemId, setExpandedItem } = useAccessibility()
   const { isMobile, isTablet } = useBreakpoint()
+  const { isCondensed } = useScrollCondensation({ threshold: 100, scrollContainer })
 
   const prefersReducedMotion = typeof window !== 'undefined' 
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
@@ -147,32 +153,36 @@ function PMRContent({ children }: PMRInterfaceProps) {
   }
 
   return (
-    <motion.div 
-      className="min-h-screen bg-pmr-content"
+    <motion.div
+      className="flex h-screen overflow-hidden bg-pmr-content"
       initial="hidden"
       animate="visible"
     >
-      <motion.div variants={bannerVariants}>
-        <PatientBanner isMobile={isMobile} isTablet={isTablet} />
-      </motion.div>
-      <div className="flex">
-        {!isMobile && (
-          <motion.div variants={sidebarVariants}>
-            <ClinicalSidebar 
-              activeView={activeView} 
-              onViewChange={handleViewChange}
-              isTablet={isTablet}
-            />
-          </motion.div>
-        )}
+      {/* Fixed sidebar */}
+      {!isMobile && (
+        <motion.div variants={sidebarVariants} className="flex-shrink-0">
+          <ClinicalSidebar
+            activeView={activeView}
+            onViewChange={handleViewChange}
+            isTablet={isTablet}
+          />
+        </motion.div>
+      )}
+
+      {/* Main content column: banner (fixed) + scrollable content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <motion.div variants={bannerVariants} className="flex-shrink-0">
+          <PatientBanner isMobile={isMobile} isTablet={isTablet} isCondensed={isCondensed} />
+        </motion.div>
+
         <motion.main
+          ref={scrollContainerCallbackRef}
           variants={contentVariants}
           role="main"
           aria-label={`${activeView} view`}
           className={`
-            flex-1 p-4 md:p-6
+            flex-1 overflow-y-auto p-4 md:p-6
             ${isMobile ? 'pb-20' : ''}
-            ${isTablet ? 'min-h-[calc(100vh-48px)]' : 'min-h-[calc(100vh-80px)]'}
           `}
         >
           {isMobile && (
@@ -181,7 +191,7 @@ function PMRContent({ children }: PMRInterfaceProps) {
               onChange={setMobileSearchQuery}
             />
           )}
-          
+
           <div
             ref={viewHeadingRef}
             tabIndex={-1}
@@ -190,7 +200,7 @@ function PMRContent({ children }: PMRInterfaceProps) {
           >
             <h1 className="sr-only">{viewLabels[activeView]}</h1>
           </div>
-          
+
           {isMobile && activeView !== 'summary' && (
             <button
               type="button"
@@ -201,15 +211,15 @@ function PMRContent({ children }: PMRInterfaceProps) {
               Back to Summary
             </button>
           )}
-          
+
           {children || renderView()}
         </motion.main>
       </div>
-      
+
       {isMobile && (
         <motion.div variants={mobileNavVariants}>
-          <MobileBottomNav 
-            activeView={activeView} 
+          <MobileBottomNav
+            activeView={activeView}
             onViewChange={handleViewChange}
           />
         </motion.div>

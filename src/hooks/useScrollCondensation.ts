@@ -1,35 +1,30 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface UseScrollCondensationOptions {
   threshold?: number
+  scrollContainer?: HTMLElement | null
 }
 
 export function useScrollCondensation(options: UseScrollCondensationOptions = {}) {
-  const { threshold = 100 } = options
+  const { threshold = 100, scrollContainer } = options
   const [isCondensed, setIsCondensed] = useState(false)
-  const sentinelRef = useRef<HTMLDivElement>(null)
+
+  const handleScroll = useCallback(() => {
+    if (!scrollContainer) return
+    setIsCondensed(scrollContainer.scrollTop >= threshold)
+  }, [scrollContainer, threshold])
 
   useEffect(() => {
-    const sentinel = sentinelRef.current
-    if (!sentinel) return
+    if (!scrollContainer) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries
-        setIsCondensed(!entry.isIntersecting)
-      },
-      {
-        rootMargin: `-${threshold}px 0px 0px 0px`,
-        threshold: 0,
-      }
-    )
-
-    observer.observe(sentinel)
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true })
+    // Check initial state
+    handleScroll()
 
     return () => {
-      observer.disconnect()
+      scrollContainer.removeEventListener('scroll', handleScroll)
     }
-  }, [threshold])
+  }, [scrollContainer, handleScroll])
 
-  return { isCondensed, sentinelRef }
+  return { isCondensed }
 }

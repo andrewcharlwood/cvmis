@@ -168,7 +168,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
       <aside
         role="navigation"
         aria-label="Clinical record navigation"
-        className="hidden md:flex lg:hidden flex-col w-14 h-screen sticky top-0 bg-pmr-sidebar text-white"
+        className="hidden md:flex lg:hidden flex-col w-14 h-full bg-pmr-sidebar text-white"
       >
         <div className="p-2 border-b border-white/10">
           <div className="font-inter font-medium text-[10px] text-white/50 text-center leading-tight">
@@ -230,7 +230,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
     <aside
       role="navigation"
       aria-label="Clinical record navigation"
-      className="hidden lg:flex flex-col w-[220px] h-screen sticky top-0 bg-pmr-sidebar text-white"
+      className="hidden lg:flex flex-col w-[220px] h-full bg-pmr-sidebar text-white"
     >
       <div className="p-4 border-b border-white/10">
         <div className="font-inter font-medium text-[13px] text-white/50 leading-tight">
