@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { TopBar } from './TopBar'
 import Sidebar from './Sidebar'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
+import { LatestResultsTile } from './tiles/LatestResultsTile'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -98,6 +99,7 @@ export function DashboardLayout() {
             <PatientSummaryTile />
 
             {/* LatestResultsTile — half width (left) */}
+            <LatestResultsTile />
             {/* CoreSkillsTile — half width (right) */}
             {/* LastConsultationTile — full width */}
             {/* CareerActivityTile — full width */}
