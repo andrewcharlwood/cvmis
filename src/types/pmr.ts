@@ -132,6 +132,7 @@ export interface KPI {
   sub: string
   colorVariant: 'green' | 'amber' | 'teal'
   explanation: string
+  story?: KPIStory      // NEW: rich detail for panel
 }
 
 export interface SkillMedication {
@@ -144,4 +145,52 @@ export interface SkillMedication {
   category: 'Technical' | 'Domain' | 'Leadership'
   status: 'Active' | 'Historical'
   icon: string
+}
+
+// Skill categories for grouped display
+export type SkillCategory = 'Technical' | 'Domain' | 'Leadership'
+
+// Extended KPI with story content for detail panel
+export interface KPIStory {
+  context: string       // What this number covers
+  role: string          // Your role / what you did
+  outcomes: string[]    // Key decisions or results
+  period?: string       // Time period
+}
+
+// Constellation-specific types
+export interface ConstellationNode {
+  id: string
+  type: 'role' | 'skill'
+  label: string
+  shortLabel?: string    // abbreviated for small nodes
+  organization?: string
+  startYear?: number
+  endYear?: number | null
+  orgColor?: string
+  domain?: 'clinical' | 'technical' | 'leadership'
+}
+
+export interface ConstellationLink {
+  source: string
+  target: string
+  strength: number
+}
+
+// Detail panel content union
+export type DetailPanelContent =
+  | { type: 'kpi'; kpi: KPI }
+  | { type: 'skill'; skill: SkillMedication }
+  | { type: 'skills-all'; category?: SkillCategory }
+  | { type: 'consultation'; consultation: Consultation }
+  | { type: 'project'; investigation: Investigation }
+  | { type: 'education'; document: Document }
+  | { type: 'career-role'; consultation: Consultation }
+
+// Education extras (for detail panel)
+export interface EducationExtra {
+  documentId: string
+  extracurriculars?: string[]
+  researchDescription?: string
+  programmeDetail?: string
 }

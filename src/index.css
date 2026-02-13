@@ -124,6 +124,7 @@
   --border-light: #E4EDEB;
   --sidebar-width: 272px;
   --topbar-height: 48px;
+  --subnav-height: 36px;
   --radius-card: 8px;
   --radius-sm: 6px;
   --shadow-sm: 0 1px 2px rgba(26,43,42,0.05);
@@ -131,6 +132,12 @@
   --shadow-lg: 0 8px 32px rgba(26,43,42,0.12);
   --font-body: var(--font-ui);
   --font-mono-dashboard: 'Geist Mono', 'Fira Code', monospace;
+
+  /* Detail panel */
+  --panel-narrow: 400px;
+  --panel-wide: 60vw;
+  --backdrop-blur: 4px;
+  --backdrop-bg: rgba(26,43,42,0.15);
 
   /* Legacy PMR tokens — kept for backward compat during transition (cleaned up in Task 21) */
   --pmr-content: #F0F5F4;
@@ -400,10 +407,42 @@ textarea:focus-visible {
   outline-offset: 0px;
 }
 
+/* ===== DETAIL PANEL ANIMATIONS ===== */
+@keyframes panel-slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes panel-slide-out {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
+@keyframes backdrop-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* Disable pulse animation on status badge dot */
   @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 1; }
+  }
+
+  /* Instant panel animations */
+  @keyframes panel-slide-in {
+    from { transform: none; }
+    to { transform: none; }
+  }
+
+  @keyframes panel-slide-out {
+    from { transform: none; }
+    to { transform: none; }
+  }
+
+  @keyframes backdrop-fade-in {
+    from { opacity: 1; }
+    to { opacity: 1; }
   }
 }
