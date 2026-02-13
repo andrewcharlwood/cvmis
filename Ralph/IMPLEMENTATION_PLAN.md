@@ -69,13 +69,13 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 7: Build DashboardLayout and wire up App.tsx
 > Detail: `Ralph/refs/ref-04-dashboard-layout.md`
-- [ ] Create `src/components/DashboardLayout.tsx`
-- [ ] Three-zone layout: TopBar (fixed) + Sidebar (fixed) + Main (scrollable card grid)
-- [ ] Card grid: 2 columns desktop, 1 column <900px
-- [ ] Framer Motion entrance animations (topbar → sidebar → content)
-- [ ] Update App.tsx: replace PMRInterface with DashboardLayout in PMR phase
-- [ ] Verify boot → ECG → login → dashboard transition works
-- [ ] Run quality checks
+- [x] Create `src/components/DashboardLayout.tsx`
+- [x] Three-zone layout: TopBar (fixed) + Sidebar (fixed) + Main (scrollable card grid)
+- [x] Card grid: 2 columns desktop, 1 column <900px
+- [x] Framer Motion entrance animations (topbar → sidebar → content)
+- [x] Update App.tsx: replace PMRInterface with DashboardLayout in PMR phase
+- [x] Verify boot → ECG → login → dashboard transition works
+- [x] Run quality checks
 
 ### Phase 2: Dashboard Tiles
 

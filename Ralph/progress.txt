@@ -51,6 +51,14 @@
 - Tailwind shadows: `shadow-pmr-sm`, `shadow-pmr-md`, `shadow-pmr-lg`
 - Tailwind radius: `rounded-card` (8px), `rounded-card-sm` (6px), `rounded-login` (12px)
 
+### Dashboard Layout
+- DashboardLayout.tsx is the main container for the pmr phase — replaces PMRInterface
+- Three-zone: TopBar (fixed, z-100, 48px) + Sidebar (fixed left, 272px) + Main (scrollable card grid)
+- Card grid: CSS Grid `repeat(2, 1fr)` gap 16px, responsive 1fr at ≤900px via `.dashboard-grid` class
+- Entrance: three separate Framer Motion variants (topbar → sidebar → content), staggered with delays
+- Sidebar: default export (`import Sidebar from './Sidebar'`), TopBar: named export (`import { TopBar } from './TopBar'`)
+- Background color transition: DashboardLayout covers App.tsx's `bg-black` with `var(--bg-dashboard)` + `minHeight: 100vh`
+
 ### Visual Review
 - Dev server runs on `http://localhost:5173` throughout the loop
 - App has boot→ECG→login→dashboard sequence (~15s on first load)
@@ -176,4 +184,29 @@
 - Hover effects on links: inline onMouseEnter/onMouseLeave handlers toggle textDecoration (underline on hover)
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Not applicable (component not yet wired into App — will be visible after Task 7)
+
+### Iteration 5 — Task 7: Build DashboardLayout and wire up App.tsx
+**Status:** Complete
+**Changes:**
+- Created `src/components/DashboardLayout.tsx` — main layout container with three-zone structure:
+  - TopBar (fixed via TopBar component, animated slide-down from -48px)
+  - Sidebar (fixed left via Sidebar component, animated slide from -272px)
+  - Main content area (flex: 1, scrollable, 24px 28px 40px padding) with card grid placeholder
+- Card grid uses CSS Grid: `repeat(2, 1fr)` with 16px gap, responsive to 1 column at ≤900px
+- Three Framer Motion entrance variants: topbar (200ms), sidebar (250ms, 50ms delay), content (300ms, 150ms delay)
+- All animations respect `prefers-reduced-motion` via module-scope matchMedia check (established pattern)
+- Added `dashboard-grid` responsive CSS class in `src/index.css` for the 900px breakpoint
+- Updated `src/App.tsx`: replaced `PMRInterface` import/render with `DashboardLayout` in 'pmr' phase
+- Background transition handled by option 1 from ref: DashboardLayout sets `background: var(--bg-dashboard)` with `minHeight: 100vh`, covering the dark login background as the entrance animation plays
+- Command palette state placeholder added (useState for open/close) — will be wired in Task 18
+- TopBar `onSearchClick` prop connected to command palette open handler
+- Main content area uses `pmr-scrollbar` class for styled scrollbar (thin, border-colored thumb)
+**Learnings:**
+- DashboardLayout uses separate `initial`/`animate` on each motion.div rather than a parent orchestrator — cleaner for three independently animated zones
+- The `bg-black` on App.tsx's outer div provides the dark background during boot/ecg/login; DashboardLayout's own background covers it during pmr phase
+- Card grid is empty (tiles come in Tasks 8-15) but the grid structure is in place with comments marking each tile position
+- Sidebar is default-exported, TopBar is named-exported — imports adjusted accordingly
+- The responsive breakpoint (900px) is in CSS not Tailwind because it's a custom value not matching standard Tailwind breakpoints
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Skipped — browser tools unavailable. Dashboard layout structure verified via quality checks. Visual review will happen when tiles are added.
 
