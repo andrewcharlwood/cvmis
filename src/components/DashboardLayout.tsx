@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { TopBar } from './TopBar'
+import { SubNav } from './SubNav'
 import Sidebar from './Sidebar'
 import { CommandPalette } from './CommandPalette'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
@@ -10,6 +11,7 @@ import { LastConsultationTile } from './tiles/LastConsultationTile'
 import { CareerActivityTile } from './tiles/CareerActivityTile'
 import { EducationTile } from './tiles/EducationTile'
 import { ProjectsTile } from './tiles/ProjectsTile'
+import { useActiveSection } from '@/hooks/useActiveSection'
 import type { PaletteAction } from '@/lib/search'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -48,6 +50,7 @@ const contentVariants = {
 
 export function DashboardLayout() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+  const activeSection = useActiveSection()
 
   const handleSearchClick = () => {
     setCommandPaletteOpen(true)
@@ -55,6 +58,11 @@ export function DashboardLayout() {
 
   const handlePaletteClose = useCallback(() => {
     setCommandPaletteOpen(false)
+  }, [])
+
+  const handleSectionClick = useCallback((_sectionId: string) => {
+    // Section click is already handled in SubNav component
+    // This is just a placeholder for any additional logic needed
   }, [])
 
   // Global Ctrl+K listener to open command palette
@@ -114,12 +122,15 @@ export function DashboardLayout() {
         <TopBar onSearchClick={handleSearchClick} />
       </motion.div>
 
-      {/* Layout below TopBar: Sidebar + Main */}
+      {/* SubNav — sticky below TopBar */}
+      <SubNav activeSection={activeSection} onSectionClick={handleSectionClick} />
+
+      {/* Layout below TopBar + SubNav: Sidebar + Main */}
       <div
         style={{
           display: 'flex',
-          marginTop: 'var(--topbar-height)',
-          height: 'calc(100vh - var(--topbar-height))',
+          marginTop: 'calc(var(--topbar-height) + var(--subnav-height))',
+          height: 'calc(100vh - var(--topbar-height) - var(--subnav-height))',
         }}
       >
         {/* Sidebar — hidden on mobile/tablet, visible on desktop */}
