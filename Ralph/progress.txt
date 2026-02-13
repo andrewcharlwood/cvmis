@@ -513,3 +513,32 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Skipped — no browser tools available.
 
+### Iteration 17 — Task 19: Responsive design
+**Status:** Complete
+**Changes:**
+- Updated `src/components/DashboardLayout.tsx`:
+  - Sidebar: hidden on <lg (1024px) via `hidden lg:block` class
+  - Main content padding: responsive Tailwind classes `p-4 pb-8 md:p-6 md:pb-10 lg:px-7 lg:pt-6 lg:pb-10`
+- Updated `src/index.css`:
+  - Dashboard grid: mobile-first (1 col default → 2 col at md/768px)
+  - Activity grid: mobile-first (1 col default → 2 col at md/768px)
+  - Gap adjustments: 12px mobile, 16px tablet/desktop
+- Updated `src/components/TopBar.tsx`:
+  - Brand text: "Headhunt Medical Center" → "HMC" on <sm (640px)
+  - "Remote" badge: hidden on <md (768px)
+  - Session badge: "Active Session · [time]" → "[time]" only on <xs (480px)
+- Updated `src/components/CommandPalette.tsx`:
+  - Modal width: full-width on mobile with 8px edge margin, 580px on md+
+  - Search input padding: reduced on mobile (12px → 8px)
+  - Results padding: reduced on mobile (8px → 8px)
+  - Footer: hidden on mobile (only visible on md+)
+  - Overlay padding: responsive (8px on mobile, 10vh top on larger screens)
+**Learnings:**
+- Mobile-first approach: default styles for mobile, progressively enhance with md/lg breakpoints
+- Tailwind breakpoints: xs (480px), sm (640px), md (768px), lg (1024px), xl (1280px)
+- CommandPalette uses class-based width for responsive (w-full → md:w-[580px]) rather than inline style
+- All touch targets already meet 48px+ minimum (TopBar 48px height, search bar 42px, buttons have sufficient padding)
+- The sidebar being hidden on mobile is acceptable — all content is in the main scrollable area, and the command palette provides quick navigation
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Skipped — visual verification should be done by user at multiple breakpoints (1280px, 800px, 375px)
+

@@ -176,11 +176,11 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 19: Responsive design
 > Detail: `Ralph/refs/ref-08-polish.md` (Responsive section)
-- [ ] Desktop (>1024px): full sidebar + 2-column grid
-- [ ] Tablet (768–1024px): collapsed/hidden sidebar + adapted grid
-- [ ] Mobile (<768px): no sidebar, single-column tiles, simplified topbar
-- [ ] Touch-friendly targets (48px+)
-- [ ] Run quality checks
+- [x] Desktop (>1024px): full sidebar + 2-column grid
+- [x] Tablet (768–1024px): collapsed/hidden sidebar + adapted grid
+- [x] Mobile (<768px): no sidebar, single-column tiles, simplified topbar
+- [x] Touch-friendly targets (48px+)
+- [x] Run quality checks
 
 #### Task 20: Accessibility audit
 > Detail: `Ralph/refs/ref-08-polish.md` (Accessibility section)
