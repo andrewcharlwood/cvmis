@@ -118,3 +118,21 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Not applicable (token-only changes, no visual components yet)
 
+### Iteration 2 — Task 2: Create new data files and update types
+**Status:** Complete
+**Changes:**
+- Created `src/data/profile.ts` — personal statement extracted from CV_v4.md (exact match)
+- Created `src/data/tags.ts` — 5 sidebar tags with color variants (teal, amber, green)
+- Created `src/data/alerts.ts` — 2 sidebar alert flags (£14.6M savings, £220M budget) with severity and lucide-react icon names
+- Created `src/data/kpis.ts` — 4 KPI metrics (Budget, Savings, Years, Team Size) with values, labels, subs, color variants, and explanation text for flip cards
+- Created `src/data/skills.ts` — 5 technical skills as "SkillMedication" entries with user-specified frequencies (Data Analysis="Twice daily", Python="Daily", SQL="Daily", Power BI="Once weekly", JS/TS="When required"), plus years, proficiency, category, status, and lucide-react icon names
+- Updated `src/types/pmr.ts` — added 4 new interfaces: Tag, Alert, KPI, SkillMedication
+**Learnings:**
+- All new data files follow the established pattern: import types, export const array
+- Icon names are stored as strings (lucide-react icon names) — components will dynamically import them
+- Skills frequency strings are user-specified values (not standardized enum like old Medication type)
+- KPI explanations are substantial text blocks for flip card backs — these will be displayed in full when users flip the cards
+- All CV numbers/dates verified against CV_v4.md — £220M, £14.6M, 9+ years, team of 12, start years for skills
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Not applicable (data-only changes, no visual components yet)
+

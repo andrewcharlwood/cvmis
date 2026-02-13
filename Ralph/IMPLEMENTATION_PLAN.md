@@ -29,13 +29,13 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 2: Create new data files and update types
 > Detail: `Ralph/refs/ref-02-data-types.md`
-- [ ] Create `src/data/profile.ts` (personal statement)
-- [ ] Create `src/data/tags.ts` (sidebar tags)
-- [ ] Create `src/data/alerts.ts` (sidebar alert flags)
-- [ ] Create `src/data/kpis.ts` (Latest Results metrics)
-- [ ] Create `src/data/skills.ts` (skills with medication frequency + years)
-- [ ] Update `src/types/pmr.ts` (new interfaces)
-- [ ] Run quality checks
+- [x] Create `src/data/profile.ts` (personal statement)
+- [x] Create `src/data/tags.ts` (sidebar tags)
+- [x] Create `src/data/alerts.ts` (sidebar alert flags)
+- [x] Create `src/data/kpis.ts` (Latest Results metrics)
+- [x] Create `src/data/skills.ts` (skills with medication frequency + years)
+- [x] Update `src/types/pmr.ts` (new interfaces)
+- [x] Run quality checks
 
 #### Task 3: Update CLAUDE.md for new architecture
 - [x] Already completed during project setup (manual intervention 2026-02-13)
