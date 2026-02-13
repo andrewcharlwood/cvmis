@@ -276,3 +276,16 @@ html {
     grid-template-columns: 1fr;
   }
 }
+
+/* Activity grid responsive */
+.activity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .activity-grid {
+    grid-template-columns: 1fr;
+  }
+}
