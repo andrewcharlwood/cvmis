@@ -62,4 +62,4 @@ Also read `CLAUDE.md` for font setup instructions (Elvaro Grotesque and Blumir c
 
 - [x] **Task 14: Responsive design audit.** Read `Ralph/refs/ref-interactions.md` (Responsive Strategy section). Test all three breakpoints: Desktop (>1024px), Tablet (768-1024px), Mobile (<768px). Tables → card layouts on mobile. Bottom nav bar. Touch targets ≥48px.
 
-- [ ] **Task 15: Accessibility audit + final polish.** Read `Ralph/refs/ref-interactions.md` (Accessibility section). Semantic HTML, ARIA attributes, focus management, keyboard navigation, screen reader announcements, `prefers-reduced-motion` support, WCAG 2.1 AA contrast. Final visual consistency pass.
+- [x] **Task 15: Accessibility audit + final polish.** Read `Ralph/refs/ref-interactions.md` (Accessibility section). Semantic HTML, ARIA attributes, focus management, keyboard navigation, screen reader announcements, `prefers-reduced-motion` support, WCAG 2.1 AA contrast. Final visual consistency pass.

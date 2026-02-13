@@ -895,3 +895,49 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 
 **Next task:** Task 15 — Accessibility audit + final polish
 
+### Iteration 16 — Task 15: Accessibility audit + final polish
+**Completed:** Task 15
+**Changes made:**
+- **ClinicalSidebar.tsx**: Replaced `<aside role="navigation">` with `<nav>` (removes conflicting roles — `<aside>` has implicit `complementary`, overridden by `role="navigation"`). Removed redundant nested `<nav>` elements, replaced with `<div>`. Added `role="listbox"`, `role="group"`, and `role="option"` to search results dropdown. Added `id="search-results-listbox"` for `aria-controls` connection. Changed search input to `type="search"` with `role="combobox"`, `aria-label="Search record"`, `aria-expanded`, `aria-controls`, `aria-autocomplete="list"`.
+- **PMRInterface.tsx**: Removed redundant `role="main"` from `<main>` element. Fixed `aria-label` to use CV-friendly label (`viewLabels[activeView]` → "Summary view", "Experience view", etc.) instead of raw ViewId ("consultations view"). Added `type="search"` and `aria-label` to mobile search input.
+- **Breadcrumb.tsx**: Added `aria-current="page"` to the current (last) breadcrumb item. Added `aria-hidden="true"` to chevron separator `<li>` elements so screen readers skip decorative icons.
+- **SummaryView.tsx**: Added `aria-label="Acknowledge clinical alert"` on the alert acknowledge button per accessibility spec.
+- **PatientBanner.tsx**: Changed `focus:ring-2` to `focus-visible:ring-2` on ActionButton links (focus ring only shows on keyboard navigation, not mouse clicks). Added `role="img"` to StatusDot so screen readers announce the `aria-label`.
+- **LoginScreen.tsx**: Changed container from `role="status"` to `role="dialog" aria-modal="true"` (login card is a modal dialog, not a status message). Added `loginButtonRef` with auto-focus when typing completes (keyboard users can immediately press Enter to log in). Added `focus-visible:ring-2` to the Log In button.
+- **MedicationsView.tsx**: Added `id="tab-{id}"` to tab buttons for proper `aria-labelledby` connection. Fixed `aria-labelledby` on tab panels to reference `"tab-${activeTab}"` instead of raw `activeTab`.
+- **ConsultationsView.tsx**: Changed consultation entry wrapper from `<div>` to `<article>` per accessibility spec (each entry is a self-contained piece of content).
+- **ProblemsView.tsx**: Changed TrafficLight dot from `role="img" aria-label="Status: ..."` to `aria-hidden="true"` (the adjacent text label already handles the semantic — having both `aria-label` on the dot AND visible text is redundant).
+- **App.tsx**: Added `sr-only` live region with `role="status" aria-live="polite"` that announces "Patient Record for Charlwood, Andrew. Summary view." when PMR phase activates. Added `focus-visible:ring-2` to Skip button.
+
+**Accessibility audit summary:**
+- ✅ Semantic HTML: `<nav>` for navigation (sidebar, breadcrumb, mobile nav), `<header>` for banner, `<main>` for content, `<article>` for consultation entries, semantic `<table>` for all data tables
+- ✅ Keyboard navigation: Arrow keys in sidebar (roving tabindex), Alt+1-7 shortcuts, "/" for search, Enter/Space on expandable items, Escape to close expanded items, Home/End in sidebar menu
+- ✅ Screen reader: `role="alert" aria-live="assertive"` on clinical alert, `aria-expanded` on all expandable items, `aria-current="page"` on active nav and breadcrumb, `aria-label` on all icon-only buttons, live region announcement on PMR entry
+- ✅ Focus management: Auto-focus to first sidebar item after login, focus to view heading after navigation, auto-focus to login button when typing completes
+- ✅ `prefers-reduced-motion`: All Framer Motion animations use `duration: 0`, login typing completes instantly, banner crossfade skips
+- ✅ WCAG contrast: NHS blue on white (~7.3:1), all text on backgrounds meets AA requirements, traffic lights always paired with text labels
+
+**Quality checks:** All passed
+- TypeScript: No errors
+- ESLint: 1 pre-existing warning in AccessibilityContext.tsx (not our changes)
+- Build: Successful, 417.18 KB bundle
+
+**Visual review:** Completed via Playwright MCP at default viewport
+- Verified accessibility tree snapshot shows correct roles, labels, and structure
+- Login screen renders as `dialog` with `aria-modal`
+- Sidebar renders as `navigation` (not `aside`)
+- Search input has `combobox` role
+- Clinical alert has `alert` role with acknowledge button labelled
+- Breadcrumb has `aria-current="page"` on current item
+- PMR entry live region announcement present
+
+**Issues encountered:** None
+
+**Design decisions:**
+- Used `role="dialog"` for login (modal pattern) rather than `role="status"` (live region pattern)
+- Used `aria-hidden="true"` on TrafficLight dots in ProblemsView (text label is the accessible alternative) rather than `role="img"` (which would create duplicate announcements)
+- Used `role="combobox"` on search input with `aria-expanded`/`aria-controls` for standard combobox pattern
+- Breadcrumb chevron separators marked `aria-hidden` to avoid "image" announcements in screen readers
+
+**ALL TASKS COMPLETE** — Implementation plan fully checked off (Tasks 1-15)
+
