@@ -54,7 +54,7 @@ Also read `CLAUDE.md` for font setup instructions (Elvaro Grotesque and Blumir c
 
 - [x] **Task 10: Rebuild ProblemsView.** Read `Ralph/refs/ref-problems.md`. Two sections: Active Problems and Resolved Problems. Traffic light dots (8px, always with text labels). Code column in Geist Mono. Expandable rows with narrative + linked consultation navigation. Mobile: card layout.
 
-- [ ] **Task 11: Rebuild InvestigationsView + DocumentsView.** Read `Ralph/refs/ref-investigations-documents.md`. Both views share the expandable-row pattern with tree-indented monospace content (box-drawing characters). Investigations: status badges (Complete/Ongoing/Live). Documents: type icons per document category. "View Results" button for PharMetrics only. Mobile: card layouts.
+- [x] **Task 11: Rebuild InvestigationsView + DocumentsView.** Read `Ralph/refs/ref-investigations-documents.md`. Both views share the expandable-row pattern with tree-indented monospace content (box-drawing characters). Investigations: status badges (Complete/Ongoing/Live). Documents: type icons per document category. "View Results" button for PharMetrics only. Mobile: card layouts.
 
 - [ ] **Task 12: Rebuild ReferralsView (Contact).** Read `Ralph/refs/ref-referrals.md`. Clinical referral form with priority radio buttons (Urgent/Routine/Two-Week Wait with tongue-in-cheek tooltips). Form validation, reference number generation, success state. Direct contact table below form.
 

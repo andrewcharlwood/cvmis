@@ -665,3 +665,72 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 
 **Next task:** Task 11 — Rebuild InvestigationsView + DocumentsView (Projects + Education views)
 
+### Iteration 12 — Task 11: Rebuild InvestigationsView + DocumentsView (Projects + Education)
+**Completed:** Task 11
+**Changes made:**
+- **InvestigationsView.tsx**: Complete rebuild from ref-investigations-documents.md spec:
+  - **Framer Motion expand/collapse**: Replaced CSS height transition with `AnimatePresence initial={false}` + `motion.tr`/`motion.div` for height-only animation (200ms ease-out, no opacity fade per guardrail)
+  - **Chevron rotation**: `motion.div` with `animate={{ rotate: isExpanded ? 180 : 0 }}` — consistent with all other expandable views
+  - **Font updates**: All `font-inter` → `font-ui` (Elvaro Grotesque), `font-mono` → `font-geist` for dates, tree content
+  - **StatusBadge component**: Pill-styled badges with colored dots and text labels. Three statuses: Complete (emerald), Ongoing (amber), Live (emerald with `animate-ping` pulse)
+  - **Tree-indented expanded content**: Box-drawing characters (`├─`, `└─`) in Geist Mono 12px. `TreeLine` and `TreeBranch` helper components for consistent rendering. Results field uses nested sub-tree structure
+  - **Color-coded left borders**: Expanded panels have `border-l-4` colored by status (#10B981 for Complete/Live, #F59E0B for Ongoing)
+  - **View Results button**: NHS blue (#005EB8) button with ExternalLink icon, only appears for PharMetrics (the only project with `externalUrl`)
+  - **Card styling**: `shadow-pmr` multi-layered shadow, `border border-[#E5E7EB]`, `overflow-hidden`
+  - **Table improvements**: Column borders (`border-r border-[#E5E7EB]`), alternating rows (`bg-white`/`bg-[#F9FAFB]`), `hover:bg-[#EFF6FF]`, row height `h-[40px]`
+  - **Removed separate expand column**: Chevron integrated into Test Name column (saves a column, cleaner layout)
+  - **Accessibility**: `tabIndex={0}`, keyboard handler (Enter/Space), `aria-expanded`, descriptive `aria-label`
+  - **AccessibilityContext**: `setExpandedItem` updates breadcrumb with investigation name
+  - **Mobile cards**: Framer Motion animation, StatusBadge, focus-visible rings, tree-indented expanded content
+  - **Reduced motion**: All Framer Motion animations use `duration: 0` when `prefersReducedMotion` is true
+
+- **DocumentsView.tsx**: Complete rebuild from ref-investigations-documents.md spec:
+  - Same Framer Motion expand/collapse pattern as InvestigationsView
+  - **Document type icons**: `FileText` (Certificate), `Award` (Registration), `GraduationCap` (Results), `FlaskConical` (Research)
+  - **Color-coded left borders by document type**: NHS blue (#005EB8) for Certificate, emerald (#10B981) for Registration, indigo (#6366F1) for Results, violet (#8B5CF6) for Research
+  - **Tree-indented expanded content**: Dynamic field rendering — only shows fields that exist in the data (institution, classification, duration, research, notes)
+  - **Font updates**: All `font-inter` → `font-ui`, `font-mono` → `font-geist`
+  - **Card styling**: `shadow-pmr`, `border border-[#E5E7EB]`, alternating rows, hover states
+  - **Accessibility**: Same pattern as InvestigationsView — tabIndex, keyboard, aria-expanded, AccessibilityContext
+
+**Codebase patterns discovered:**
+- `TreeLine` and `TreeBranch` helper components create a reusable tree-indented display pattern — could be extracted to a shared component for use in other views
+- StatusBadge with pill styling (bg + border + dot + text) is more visually refined than the simple dot+text TrafficLight pattern used in ProblemsView
+- Dynamic field list pattern (build an array of `{ label, value }` objects from optional props, then iterate with `TreeLine`) is cleaner than a chain of conditional JSX for optional fields
+- Removing the dedicated expand column (integrating chevron into the first data column) saves horizontal space — applicable to any expandable table
+- Color-coded left borders on expanded panels provide visual connection between the row and its detail panel
+
+**Quality checks:** All passed
+- TypeScript: No errors
+- ESLint: 1 pre-existing warning in AccessibilityContext.tsx (not our changes)
+- Build: Successful, 395.31 KB bundle
+
+**Visual review:** Completed via Playwright MCP at default viewport
+- **InvestigationsView (Projects):**
+  - 5 rows visible with correct data in all 4 columns
+  - StatusBadge pills: "Live" with pulsing dot (PharMetrics), "Complete" in emerald (all others)
+  - Expanded PharMetrics: tree-indented Geist Mono content with `├─`/`└─` characters
+  - Green left border on expanded panel
+  - "View Results" button in NHS blue with ExternalLink icon
+  - Results sub-tree with nested `├─`/`└─`
+  - Column borders between all columns
+  - Alternating row backgrounds visible
+- **DocumentsView (Education):**
+  - 5 rows with document type icons (FileText, Award, GraduationCap, FlaskConical)
+  - Expanded MPharm: all 7 fields rendered with tree indentation
+  - Blue left border (Certificate type)
+  - Research field shows detail + grade on second line
+  - Notes field uses `└─` (last item indicator)
+  - Dates in Geist Mono, titles in Elvaro Grotesque
+
+**Issues encountered:** None
+
+**Design decisions:**
+- Integrated chevron into first data column (Test Name / Document) rather than separate expand column — saves space, cleaner
+- Used `TreeLine` / `TreeBranch` helper components for consistent tree structure rather than inline JSX
+- Document type colors chosen for visual distinction: blue (Certificate), green (Registration), indigo (Results), violet (Research)
+- Status border colors match the badge colors for visual consistency
+- Module-scope `prefersReducedMotion` (computed once) for performance — established pattern
+
+**Next task:** Task 12 — Rebuild ReferralsView (Contact)
+
