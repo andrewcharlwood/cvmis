@@ -27,12 +27,12 @@ interface ClinicalSidebarProps {
 
 const navItems: NavItem[] = [
   { id: 'summary', label: 'Summary', icon: <ClipboardList size={18} /> },
-  { id: 'consultations', label: 'Consultations', icon: <FileText size={18} /> },
-  { id: 'medications', label: 'Medications', icon: <Pill size={18} /> },
-  { id: 'problems', label: 'Problems', icon: <AlertTriangle size={18} /> },
-  { id: 'investigations', label: 'Investigations', icon: <FlaskConical size={18} /> },
-  { id: 'documents', label: 'Documents', icon: <FolderOpen size={18} /> },
-  { id: 'referrals', label: 'Referrals', icon: <Send size={18} /> },
+  { id: 'consultations', label: 'Experience', icon: <FileText size={18} /> },
+  { id: 'medications', label: 'Skills', icon: <Pill size={18} /> },
+  { id: 'problems', label: 'Achievements', icon: <AlertTriangle size={18} /> },
+  { id: 'investigations', label: 'Projects', icon: <FlaskConical size={18} /> },
+  { id: 'documents', label: 'Education', icon: <FolderOpen size={18} /> },
+  { id: 'referrals', label: 'Contact', icon: <Send size={18} /> },
 ]
 
 function getCurrentTime(): string {
@@ -94,6 +94,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
     }
   }, [handleNavClick])
 
+  // Update clock every minute
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(getCurrentTime())
@@ -101,6 +102,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
     return () => clearInterval(interval)
   }, [])
 
+  // Hash routing
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1) as ViewId
@@ -114,6 +116,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
     return () => window.removeEventListener('hashchange', handleHashChange)
   }, [onViewChange])
 
+  // Alt+1-7 keyboard shortcuts and "/" for search
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.altKey && e.key >= '1' && e.key <= '7') {
@@ -136,6 +139,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onViewChange, isSearchFocused])
 
+  // Set focus-after-login ref to first nav button
   useEffect(() => {
     if (navButtonRefs.current[0]) {
       ;(focusAfterLoginRef as React.MutableRefObject<HTMLButtonElement | null>).current = navButtonRefs.current[0]
@@ -163,19 +167,22 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
     )
   }, [searchQuery])
 
+  // ── Tablet: 56px icon-only sidebar ──
   if (isTablet) {
     return (
       <aside
         role="navigation"
         aria-label="Clinical record navigation"
-        className="hidden md:flex lg:hidden flex-col w-14 h-full bg-pmr-sidebar text-white"
+        className="hidden md:flex lg:hidden flex-col w-14 h-full bg-pmr-sidebar border-r border-[#334155] text-white"
       >
+        {/* Header */}
         <div className="p-2 border-b border-white/10">
-          <div className="font-inter font-medium text-[10px] text-white/50 text-center leading-tight">
+          <div className="font-ui font-medium text-[10px] text-white/50 text-center leading-tight">
             PMR
           </div>
         </div>
 
+        {/* Navigation */}
         <nav className="flex-1 py-2 overflow-y-auto">
           <ul role="menu" aria-label="Record sections">
             {navItems.map((item, index) => (
@@ -196,17 +203,19 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
                   onMouseLeave={() => setHoveredItem(null)}
                   className={`
                     w-full flex items-center justify-center h-11
-                    transition-colors relative
+                    transition-colors duration-150 relative
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-pmr-nhsblue/40 focus-visible:ring-inset
                     ${activeView === item.id
-                      ? 'text-white bg-white/12 border-l-[3px] border-pmr-nhsblue'
-                      : 'text-white/70 hover:text-white hover:bg-white/8'}
+                      ? 'text-white bg-white/[0.12] border-l-[3px] border-pmr-nhsblue'
+                      : 'text-white/70 hover:text-white hover:bg-white/[0.08] border-l-[3px] border-transparent'}
                   `}
                 >
-                  <span className={activeView === item.id ? 'text-white' : 'text-white/60'}>
+                  <span className={activeView === item.id ? 'text-white' : ''}>
                     {item.icon}
                   </span>
+                  {/* Tooltip on hover */}
                   {hoveredItem === item.id && (
-                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50 font-inter">
+                    <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50 font-ui shadow-lg pointer-events-none">
                       {item.label}
                     </div>
                   )}
@@ -216,8 +225,9 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
           </ul>
         </nav>
 
+        {/* Footer */}
         <div className="p-2 border-t border-white/10">
-          <div className="font-inter text-[9px] text-slate-400 text-center leading-relaxed">
+          <div className="font-ui text-[9px] text-[#64748B] text-center leading-relaxed">
             <div>A.C</div>
             <div>{currentTime}</div>
           </div>
@@ -226,19 +236,22 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
     )
   }
 
+  // ── Desktop: 220px full sidebar ──
   return (
     <aside
       role="navigation"
       aria-label="Clinical record navigation"
-      className="hidden lg:flex flex-col w-[220px] h-full bg-pmr-sidebar text-white"
+      className="hidden lg:flex flex-col w-[220px] h-full bg-pmr-sidebar border-r border-[#334155] text-white"
     >
+      {/* Header branding */}
       <div className="p-4 border-b border-white/10">
-        <div className="font-inter font-medium text-[13px] text-white/50 leading-tight">
+        <div className="font-ui font-medium text-[13px] text-white/50 leading-tight">
           CareerRecord PMR
         </div>
-        <div className="font-inter text-[11px] text-white/40 mt-0.5">v1.0.0</div>
+        <div className="font-ui text-[11px] text-white/40 mt-0.5">v1.0.0</div>
       </div>
 
+      {/* Search input */}
       <div className="p-3 border-b border-white/10">
         <div className="relative">
           <Search
@@ -254,7 +267,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setIsSearchFocused(false)}
             onKeyDown={handleSearchKeyDown}
-            className="w-full h-9 pl-8 pr-7 bg-white/5 border border-white/10 rounded text-sm font-inter text-white placeholder-white/40 focus:outline-none focus:border-pmr-nhsblue focus:bg-white/10 transition-colors"
+            className="w-full h-9 pl-8 pr-7 bg-white/[0.05] border border-white/10 rounded text-sm font-ui text-white placeholder-white/40 focus:outline-none focus:border-pmr-nhsblue focus:bg-white/[0.10] transition-colors"
           />
           {searchQuery && (
             <button
@@ -266,6 +279,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
               <X size={14} />
             </button>
           )}
+          {/* Search results dropdown */}
           {searchQuery && filteredItems.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-pmr-sidebar border border-white/10 rounded overflow-hidden z-50">
               {filteredItems.map(item => (
@@ -276,10 +290,10 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
                     handleNavClick(item.id)
                     setSearchQuery('')
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/10 transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.10] transition-colors"
                 >
                   <span className="text-white/60">{item.icon}</span>
-                  <span className="font-inter text-sm">{item.label}</span>
+                  <span className="font-ui text-sm">{item.label}</span>
                 </button>
               ))}
             </div>
@@ -287,6 +301,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
         </div>
       </div>
 
+      {/* Navigation items */}
       <nav className="flex-1 py-2 overflow-y-auto">
         <ul role="menu" aria-label="Record sections">
           {navItems.map((item, index) => (
@@ -302,24 +317,29 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
                 aria-current={activeView === item.id ? 'page' : undefined}
                 onClick={() => handleNavClick(item.id)}
                 onKeyDown={e => handleNavKeyDown(e, index)}
-                className={`w-full flex items-center gap-3 h-11 px-4 text-left transition-colors ${
-                  activeView === item.id
-                    ? 'text-white bg-white/12 border-l-[3px] border-pmr-nhsblue font-semibold'
-                    : 'text-white/70 hover:text-white hover:bg-white/8'
-                }`}
+                className={`
+                  w-full flex items-center gap-3 h-[44px] px-4
+                  font-ui text-[14px]
+                  transition-colors duration-150
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-pmr-nhsblue/40 focus-visible:ring-inset
+                  ${activeView === item.id
+                    ? 'text-white bg-white/[0.12] border-l-[3px] border-pmr-nhsblue font-semibold'
+                    : 'text-white/70 hover:text-white hover:bg-white/[0.08] border-l-[3px] border-transparent font-medium'}
+                `}
               >
-                <span className={activeView === item.id ? 'text-white' : 'text-white/60'}>
+                <span className={`w-[18px] h-[18px] flex items-center justify-center ${activeView === item.id ? 'text-white' : 'text-white/60'}`}>
                   {item.icon}
                 </span>
-                <span className="font-inter text-sm">{item.label}</span>
+                <span>{item.label}</span>
               </button>
             </li>
           ))}
         </ul>
       </nav>
 
+      {/* Footer: session info */}
       <div className="p-4 border-t border-white/10">
-        <div className="font-inter text-[11px] text-slate-400 leading-relaxed">
+        <div className="font-ui text-[11px] text-[#64748B] leading-relaxed">
           <div>Session: A.CHARLWOOD</div>
           <div>Logged in: {currentTime}</div>
         </div>

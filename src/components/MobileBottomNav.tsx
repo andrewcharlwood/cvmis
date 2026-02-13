@@ -10,12 +10,12 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { id: 'summary', label: 'Summary', shortLabel: 'Summary', icon: <ClipboardList size={20} /> },
-  { id: 'consultations', label: 'Consultations', shortLabel: 'Consult', icon: <FileText size={20} /> },
-  { id: 'medications', label: 'Medications', shortLabel: 'Meds', icon: <Pill size={20} /> },
-  { id: 'problems', label: 'Problems', shortLabel: 'Issues', icon: <AlertTriangle size={20} /> },
-  { id: 'investigations', label: 'Investigations', shortLabel: 'Tests', icon: <FlaskConical size={20} /> },
-  { id: 'documents', label: 'Documents', shortLabel: 'Docs', icon: <FolderOpen size={20} /> },
-  { id: 'referrals', label: 'Referrals', shortLabel: 'Refer', icon: <Send size={20} /> },
+  { id: 'consultations', label: 'Experience', shortLabel: 'Exp', icon: <FileText size={20} /> },
+  { id: 'medications', label: 'Skills', shortLabel: 'Skills', icon: <Pill size={20} /> },
+  { id: 'problems', label: 'Achievements', shortLabel: 'Achieve', icon: <AlertTriangle size={20} /> },
+  { id: 'investigations', label: 'Projects', shortLabel: 'Projects', icon: <FlaskConical size={20} /> },
+  { id: 'documents', label: 'Education', shortLabel: 'Edu', icon: <FolderOpen size={20} /> },
+  { id: 'referrals', label: 'Contact', shortLabel: 'Contact', icon: <Send size={20} /> },
 ]
 
 interface MobileBottomNavProps {
@@ -56,7 +56,7 @@ export function MobileBottomNav({ activeView, onViewChange }: MobileBottomNavPro
                 aria-label={item.label}
               >
                 {item.icon}
-                <span className="text-[10px] mt-0.5 font-inter font-medium">
+                <span className="text-[10px] mt-0.5 font-ui font-medium">
                   {item.shortLabel}
                 </span>
               </button>

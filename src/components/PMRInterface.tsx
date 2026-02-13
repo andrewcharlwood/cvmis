@@ -143,13 +143,13 @@ function PMRContent({ children }: PMRInterfaceProps) {
   }
 
   const viewLabels: Record<ViewId, string> = {
-    summary: 'Patient Summary',
-    consultations: 'Consultation History',
-    medications: 'Current Medications',
-    problems: 'Problem List',
-    investigations: 'Investigation Results',
-    documents: 'Attached Documents',
-    referrals: 'Referral Form',
+    summary: 'Summary',
+    consultations: 'Experience',
+    medications: 'Skills',
+    problems: 'Achievements',
+    investigations: 'Projects',
+    documents: 'Education',
+    referrals: 'Contact',
   }
 
   return (
