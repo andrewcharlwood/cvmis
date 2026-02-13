@@ -81,11 +81,11 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 8: Build reusable Card component
 > Detail: `Ralph/refs/ref-05-card-and-top-tiles.md` (Card section)
-- [ ] Create `src/components/Card.tsx`
-- [ ] Base card styling (white, border, radius 8px, shadow-sm, hover shadow-md)
-- [ ] `full` variant (spans both grid columns)
-- [ ] CardHeader sub-component (dot + title + optional right text)
-- [ ] Run quality checks
+- [x] Create `src/components/Card.tsx`
+- [x] Base card styling (white, border, radius 8px, shadow-sm, hover shadow-md)
+- [x] `full` variant (spans both grid columns)
+- [x] CardHeader sub-component (dot + title + optional right text)
+- [x] Run quality checks
 
 #### Task 9: Build PatientSummary tile
 > Detail: `Ralph/refs/ref-05-card-and-top-tiles.md` (PatientSummary section)

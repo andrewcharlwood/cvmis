@@ -210,3 +210,24 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Skipped — browser tools unavailable. Dashboard layout structure verified via quality checks. Visual review will happen when tiles are added.
 
+### Iteration 6 — Task 8: Build reusable Card component
+**Status:** Complete
+**Changes:**
+- Created `src/components/Card.tsx` with two exports:
+  - `Card` component: Reusable base card with white background, 8px border-radius, shadow-sm
+  - `CardHeader` component: Colored dot (8px circle) + uppercase title + optional mono right text
+- Card styling: Uses CSS custom properties (--surface, --border-light, --border, --radius, --shadow-sm/md)
+- Hover interaction: Shadow deepens to shadow-md, border strengthens to --border (via useState + onMouseEnter/onMouseLeave)
+- Full-width variant: `full` prop sets `gridColumn: '1 / -1'` to span both grid columns
+- CardHeader dot colors: teal (#0D6E6E), amber (#D97706), green (#059669), alert (#DC2626), purple (#7C3AED)
+- Header typography: title is 12px, 600 weight, uppercase, 0.06em letter-spacing, text-secondary
+- Right text: 10px, 400 weight, text-tertiary, Geist Mono font, margin-left auto
+- All styles use inline React.CSSProperties to precisely match the ref spec
+**Learnings:**
+- Card uses inline styles rather than Tailwind classes — ensures precise CSS custom property mapping
+- Hover state managed with React state (not CSS :hover) to coordinate shadow + border color transitions
+- CardHeader accepts dotColor as string literal union type ('teal' | 'amber' | etc.) — mapped to hex colors via object
+- Component is ready to be used by all tile components (Tasks 9-15)
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Not applicable — base component, will be visible once integrated into tiles
+
