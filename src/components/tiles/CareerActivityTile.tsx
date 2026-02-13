@@ -1,6 +1,10 @@
-import React from 'react'
+import React, { useState, useCallback } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Card, CardHeader } from '../Card'
 import { documents } from '@/data/documents'
+import { consultations } from '@/data/consultations'
+
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 type ActivityType = 'role' | 'project' | 'cert' | 'edu'
 
@@ -11,6 +15,8 @@ interface ActivityEntry {
   meta: string
   date: string
   sortYear: number
+  /** ID of the corresponding consultation in consultations.ts (role entries only) */
+  consultationId?: string
 }
 
 /**
@@ -21,7 +27,6 @@ function buildTimeline(): ActivityEntry[] {
   const entries: ActivityEntry[] = []
 
   // Roles from consultations
-  // Entry 1: Interim Head (2024-2025)
   entries.push({
     id: 'interim-head-2025',
     type: 'role',
@@ -29,9 +34,9 @@ function buildTimeline(): ActivityEntry[] {
     meta: 'NHS Norfolk & Waveney ICB',
     date: '2024 – 2025',
     sortYear: 2024,
+    consultationId: 'interim-head-2025',
   })
 
-  // Entry 3: Senior Data Analyst (2021-2024) - concept calls this "Senior Data Analyst — Medicines Optimisation"
   entries.push({
     id: 'deputy-head-2024',
     type: 'role',
@@ -39,9 +44,9 @@ function buildTimeline(): ActivityEntry[] {
     meta: 'NHS Norfolk & Waveney ICB',
     date: '2021 – 2024',
     sortYear: 2021,
+    consultationId: 'deputy-head-2024',
   })
 
-  // Entry 6: Prescribing Data Pharmacist (2018-2021)
   entries.push({
     id: 'high-cost-drugs-2022',
     type: 'role',
@@ -49,20 +54,20 @@ function buildTimeline(): ActivityEntry[] {
     meta: 'NHS Norwich CCG',
     date: '2018 – 2021',
     sortYear: 2018,
+    consultationId: 'pharmacy-manager-2017',
   })
 
-  // Entry 8: Community Pharmacist (2016-2018) - from Tesco roles
   entries.push({
-    id: 'pharmacy-manager-2017',
+    id: 'community-pharmacist-2016',
     type: 'role',
     title: 'Community Pharmacist',
     meta: 'Boots UK',
     date: '2016 – 2018',
     sortYear: 2016,
+    consultationId: 'duty-pharmacist-2016',
   })
 
-  // Projects from investigations
-  // Entry 2: £220M Prescribing Budget Oversight (2024)
+  // Projects
   entries.push({
     id: 'inv-budget',
     type: 'project',
@@ -72,7 +77,6 @@ function buildTimeline(): ActivityEntry[] {
     sortYear: 2024,
   })
 
-  // Entry 4: SQL Analytics Transformation (2025)
   entries.push({
     id: 'inv-sql-transform',
     type: 'project',
@@ -82,8 +86,7 @@ function buildTimeline(): ActivityEntry[] {
     sortYear: 2025,
   })
 
-  // Certifications from documents
-  // Entry 5: Power BI Data Analyst Associate (2023)
+  // Certifications
   entries.push({
     id: 'cert-powerbi',
     type: 'cert',
@@ -93,7 +96,6 @@ function buildTimeline(): ActivityEntry[] {
     sortYear: 2023,
   })
 
-  // Entry 7: Clinical Pharmacy Diploma (2019)
   entries.push({
     id: 'cert-diploma',
     type: 'cert',
@@ -103,7 +105,6 @@ function buildTimeline(): ActivityEntry[] {
     sortYear: 2019,
   })
 
-  // Entry 10: GPhC Registration (2016)
   entries.push({
     id: 'doc-gphc',
     type: 'cert',
@@ -113,8 +114,7 @@ function buildTimeline(): ActivityEntry[] {
     sortYear: 2016,
   })
 
-  // Education from documents
-  // Entry 9: MPharm (2011-2015)
+  // Education
   const mpharm = documents.find((d) => d.id === 'doc-mpharm')
   if (mpharm) {
     entries.push({
@@ -127,100 +127,264 @@ function buildTimeline(): ActivityEntry[] {
     })
   }
 
-  // Sort newest-first by sortYear (descending), then by entry order for same year
   return entries.sort((a, b) => {
     if (b.sortYear !== a.sortYear) return b.sortYear - a.sortYear
-    // For same year, preserve insertion order (stable sort)
     return 0
   })
 }
 
 const dotColorMap: Record<ActivityType, string> = {
-  role: '#0D6E6E', // teal (--accent)
-  project: '#D97706', // amber
-  cert: '#059669', // green (--success)
-  edu: '#7C3AED', // purple
+  role: '#0D6E6E',
+  project: '#D97706',
+  cert: '#059669',
+  edu: '#7C3AED',
+}
+
+const borderColorMap: Record<ActivityType, string> = {
+  role: '#0D6E6E',
+  project: '#D97706',
+  cert: '#059669',
+  edu: '#7C3AED',
 }
 
 interface ActivityItemProps {
   entry: ActivityEntry
+  isExpanded: boolean
+  onToggle: () => void
 }
 
-const ActivityItem: React.FC<ActivityItemProps> = ({ entry }) => {
+const ActivityItem: React.FC<ActivityItemProps> = ({ entry, isExpanded, onToggle }) => {
   const dotColor = dotColorMap[entry.type]
+  const isExpandable = entry.type === 'role' && entry.consultationId
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!isExpandable) return
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        onToggle()
+      } else if (e.key === 'Escape' && isExpanded) {
+        e.preventDefault()
+        onToggle()
+      }
+    },
+    [isExpandable, isExpanded, onToggle],
+  )
+
+  // Get consultation data for expanded content
+  const consultation = isExpandable
+    ? consultations.find((c) => c.id === entry.consultationId)
+    : null
 
   return (
     <div
+      role={isExpandable ? 'button' : undefined}
+      tabIndex={isExpandable ? 0 : undefined}
+      aria-expanded={isExpandable ? isExpanded : undefined}
+      onClick={isExpandable ? onToggle : undefined}
+      onKeyDown={isExpandable ? handleKeyDown : undefined}
       style={{
         display: 'flex',
-        gap: '10px',
-        padding: '10px 12px',
+        flexDirection: 'column',
         background: 'var(--bg-dashboard)',
         borderRadius: 'var(--radius-sm)',
         border: '1px solid var(--border-light)',
         fontSize: '12px',
         transition: 'border-color 0.15s',
-        cursor: 'default',
+        cursor: isExpandable ? 'pointer' : 'default',
+        ...(isExpanded && {
+          borderColor: 'var(--accent-border)',
+        }),
+      }}
+      onMouseEnter={(e) => {
+        if (isExpandable) {
+          e.currentTarget.style.borderColor = 'var(--accent-border)'
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (isExpandable && !isExpanded) {
+          e.currentTarget.style.borderColor = 'var(--border-light)'
+        }
       }}
     >
-      {/* Dot */}
-      <div
-        style={{
-          width: '8px',
-          height: '8px',
-          borderRadius: '50%',
-          background: dotColor,
-          flexShrink: 0,
-          marginTop: '2px', // align with text baseline
-        }}
-      />
-
-      {/* Content */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      {/* Item header row */}
+      <div style={{ display: 'flex', gap: '10px', padding: '10px 12px' }}>
         <div
           style={{
-            fontWeight: 600,
-            color: 'var(--text-primary)',
-            lineHeight: 1.3,
-          }}
-        >
-          {entry.title}
-        </div>
-        <div
-          style={{
-            fontSize: '11px',
-            color: 'var(--text-secondary)',
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: dotColor,
+            flexShrink: 0,
             marginTop: '2px',
           }}
-        >
-          {entry.meta}
-        </div>
-        <div
-          style={{
-            fontSize: '10px',
-            fontFamily: 'var(--font-mono)',
-            color: 'var(--text-tertiary)',
-            marginTop: '3px',
-          }}
-        >
-          {entry.date}
+        />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              lineHeight: 1.3,
+            }}
+          >
+            {entry.title}
+          </div>
+          <div
+            style={{
+              fontSize: '11px',
+              color: 'var(--text-secondary)',
+              marginTop: '2px',
+            }}
+          >
+            {entry.meta}
+          </div>
+          <div
+            style={{
+              fontSize: '10px',
+              fontFamily: 'var(--font-mono)',
+              color: 'var(--text-tertiary)',
+              marginTop: '3px',
+            }}
+          >
+            {entry.date}
+          </div>
         </div>
       </div>
+
+      {/* Expanded content */}
+      <AnimatePresence initial={false}>
+        {isExpanded && consultation && (
+          <motion.div
+            initial={{ height: 0 }}
+            animate={{ height: 'auto' }}
+            exit={{ height: 0 }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : { duration: 0.2, ease: 'easeOut' }
+            }
+            style={{ overflow: 'hidden' }}
+          >
+            <div
+              style={{
+                borderLeft: `2px solid ${borderColorMap[entry.type]}`,
+                marginLeft: '16px',
+                marginRight: '12px',
+                marginBottom: '12px',
+                paddingLeft: '14px',
+                paddingTop: '4px',
+              }}
+            >
+              {/* Role title */}
+              <div
+                style={{
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                  color: 'var(--accent)',
+                  marginBottom: '8px',
+                }}
+              >
+                {consultation.role}
+              </div>
+
+              {/* Achievement bullets */}
+              {consultation.examination.length > 0 && (
+                <ul
+                  style={{
+                    listStyle: 'none',
+                    padding: 0,
+                    margin: '0 0 10px 0',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '5px',
+                  }}
+                >
+                  {consultation.examination.map((item, i) => (
+                    <li
+                      key={i}
+                      style={{
+                        display: 'flex',
+                        gap: '8px',
+                        fontSize: '11.5px',
+                        color: 'var(--text-primary)',
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: 'var(--accent)',
+                          opacity: 0.5,
+                          flexShrink: 0,
+                          marginTop: '1px',
+                        }}
+                      >
+                        •
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {/* Coded entries */}
+              {consultation.codedEntries && consultation.codedEntries.length > 0 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '6px',
+                    marginTop: '4px',
+                  }}
+                >
+                  {consultation.codedEntries.map((entry) => (
+                    <span
+                      key={entry.code}
+                      style={{
+                        fontSize: '10px',
+                        fontFamily: 'var(--font-mono)',
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        background: 'var(--accent-light)',
+                        color: 'var(--accent)',
+                        border: '1px solid var(--accent-border)',
+                      }}
+                    >
+                      {entry.code}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
 
 export const CareerActivityTile: React.FC = () => {
   const timeline = buildTimeline()
+  const [expandedItemId, setExpandedItemId] = useState<string | null>(null)
+
+  const handleToggle = useCallback(
+    (id: string) => {
+      setExpandedItemId((prev) => (prev === id ? null : id))
+    },
+    [],
+  )
 
   return (
     <Card full>
       <CardHeader dotColor="teal" title="CAREER ACTIVITY" rightText="Full timeline" />
 
-      {/* Activity grid - 2 columns on desktop, 1 on mobile */}
       <div className="activity-grid">
         {timeline.map((entry) => (
-          <ActivityItem key={entry.id} entry={entry} />
+          <ActivityItem
+            key={entry.id}
+            entry={entry}
+            isExpanded={expandedItemId === entry.id}
+            onToggle={() => handleToggle(entry.id)}
+          />
         ))}
       </div>
     </Card>
