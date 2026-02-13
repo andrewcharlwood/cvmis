@@ -504,3 +504,52 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 
 **Next task:** Task 8 — Rebuild ConsultationsView (Experience view)
 
+### Iteration 9 — Task 8: Rebuild ConsultationsView (Experience view)
+**Completed:** Task 8
+**Changes made:**
+- **ConsultationsView.tsx**: Complete rebuild from ref-consultations.md spec:
+  - **Framer Motion expand/collapse**: Replaced custom CSS height transition with `AnimatePresence` + `motion.div` for proper height-only animation (200ms ease-out). No opacity fade on content (guardrail compliance).
+  - **Chevron rotation**: Now uses `motion.div` with `animate={{ rotate: isExpanded ? 180 : 0 }}` instead of CSS class toggle.
+  - **Font updates**: All `font-inter` references replaced with `font-ui` (Elvaro Grotesque). Section headers, body text, labels all use `font-ui`.
+  - **Font sizes per spec**: Dates `text-[13px]`, organization `text-[13px]`, role title `text-[15px]`, body/bullets `text-[13px]`, section headers `text-[12px]`, coded entries `text-[12px]`.
+  - **Coded entries**: Full line in `font-geist` (Geist Mono) — `[CODE] Description` on a single div, not split into separate spans.
+  - **Section headers**: `font-ui font-semibold text-[12px] uppercase tracking-[0.05em] text-gray-400` — matches clinical system divider style.
+  - **Hover state**: Changed from `bg-gray-50` to `bg-[#EFF6FF]` (blue tint) for interactive rows.
+  - **Card styling**: Added `shadow-pmr` (multi-layered shadow), `border border-[#E5E7EB]`, with `overflow-hidden`.
+  - **3px left border**: Color-coded by employer via inline style (NHS blue `#005EB8` or Tesco teal `#00897B`).
+  - **Accessibility**: Added `focus-visible:ring-2 focus-visible:ring-pmr-nhsblue/40 focus-visible:ring-inset` on entry buttons, `aria-expanded` attribute, descriptive `aria-label` with role + org + date.
+  - **Status dot**: Green for current, gray for historical, with `aria-label`.
+  - **Single-expand accordion**: Only one entry expanded at a time.
+  - **Reduced motion**: All animations skip to final state (Framer Motion `duration: 0`).
+  - **Removed unused imports**: Cleaned up `useEffect`, `useRef` — no longer needed with Framer Motion approach.
+
+**Codebase patterns discovered:**
+- `AnimatePresence initial={false}` + `motion.div` with `initial/animate/exit` on `height` is the cleanest pattern for height-only expand/collapse — cleaner than the previous custom CSS transition approach with `useRef` + `useEffect` + `setTimeout`.
+- Coded entries render cleaner as a single `font-geist` div with the full `[CODE] Description` text, rather than splitting code and description into separate styled spans.
+- Framer Motion chevron rotation via `motion.div` is simpler and more consistent than CSS class toggle with `transition-transform`.
+
+**Quality checks:** All passed
+- TypeScript: No errors
+- ESLint: 1 pre-existing warning in AccessibilityContext.tsx (not our changes)
+- Build: Successful, 395.72 KB bundle
+
+**Visual review:** Completed via Playwright MCP at default viewport
+- Collapsed state: All 5 entries visible with date (Geist Mono), organization (employer color), role title (semibold), key coded entry
+- 3px left border visible: NHS blue for first 3 entries, teal for Tesco entries
+- Green status dot on Deputy Head (current role), gray on all others
+- Expanded first entry: H/E/P sections with proper section header styling, bulleted lists, coded entries in Geist Mono
+- Accordion behavior: Expanding second entry collapsed first (re-shows Key coded entry)
+- Chevron rotated 180° when expanded
+- Multi-layered shadows visible on cards
+- No opacity fade during expand/collapse — height-only animation confirmed
+
+**Issues encountered:** None
+
+**Design decisions:**
+- Used `AnimatePresence initial={false}` to prevent animation on first render (entries should appear without animation)
+- Kept coded entries as simple single-line divs in Geist Mono for clean, scannable output
+- Status dots use `aria-label` for screen readers but no visible text label — the ref spec specifies dots only for consultations (text labels required for traffic lights in problems/medications views)
+- View heading says "Consultation Journal" (clinical metaphor in content) while sidebar says "Experience" (CV-friendly nav)
+
+**Next task:** Task 9 — Rebuild MedicationsView (Skills view)
+

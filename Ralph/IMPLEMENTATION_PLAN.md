@@ -48,7 +48,7 @@ Also read `CLAUDE.md` for font setup instructions (Elvaro Grotesque and Blumir c
 
 - [x] **Task 7: Rebuild SummaryView + Clinical Alert.** Read `Ralph/refs/ref-summary-alert.md`. Clinical Alert with spring animation entrance, acknowledge → checkmark → collapse sequence. Summary cards: Demographics (full-width key-value), Active Problems (traffic lights), Current Skills quick table, Last Consultation preview. 2-column grid desktop, single column mobile. Navigation links to other views.
 
-- [ ] **Task 8: Rebuild ConsultationsView.** Read `Ralph/refs/ref-consultations.md`. Reverse-chronological journal. Collapsed entries with date, org, role, key achievement. Expanded: H/E/P structure with coded entries. Height-only expand animation (no opacity fade). One expanded at a time. 3px left border color-coded by employer. Second clinical alert on first visit.
+- [x] **Task 8: Rebuild ConsultationsView.** Read `Ralph/refs/ref-consultations.md`. Reverse-chronological journal. Collapsed entries with date, org, role, key achievement. Expanded: H/E/P structure with coded entries. Height-only expand animation (no opacity fade). One expanded at a time. 3px left border color-coded by employer. Second clinical alert on first visit.
 
 - [ ] **Task 9: Rebuild MedicationsView.** Read `Ralph/refs/ref-medications.md`. Three category tabs (Active/Clinical/PRN). Semantic `<table>` with sortable columns. Expandable prescribing history in Geist Mono. Status dots with text labels. Mobile: card layout.
 
