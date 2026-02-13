@@ -39,6 +39,8 @@ The sidebar uses CV-intuitive labels, NOT clinical jargon. But each view's conte
 
 5. **Implement the item**: Complete the single task you selected. Keep changes focused - one task per iteration. Write production-quality React/TypeScript code that faithfully reproduces a clinical information system. This is a design showcase requiring absolute thematic fidelity.
 
+   **IMPORTANT — Ref files are the source of truth, not existing code.** The current codebase contains errors and legacy patterns from earlier iterations. Do NOT treat the existing component structure, layout, or behaviour as authoritative. If the existing code does not match what the ref file specifies, **rebuild the component from the ref spec** rather than patching around the existing implementation. The ref files define the target; the existing code is just a starting point that may need to be replaced entirely.
+
 6. **Run quality checks**: Execute the quality check commands listed in `IMPLEMENTATION_PLAN.md` under "Quality Checks". Fix any issues before proceeding.
 
 7. **Visual Review** (Tasks 1b-11 only — skip for non-visual tasks like Task 1, 12-15): After quality checks pass, verify your work visually in the browser using the Playwright MCP browser tools:
@@ -114,6 +116,7 @@ The sidebar uses CV-intuitive labels, NOT clinical jargon. But each view's conte
 - **If a task is blocked or unclear**, document why in progress.txt and move to the next unchecked item
 - **Keep commits atomic and well-described**
 - **If quality checks fail, fix the issues before committing**
+- **Ref files are the spec — existing code is not.** If the current implementation contradicts the ref file, rebuild from the ref spec. Do not preserve broken patterns just because they exist in the codebase.
 - **The visual quality bar is HIGH** — this must look like real clinical software
 - **Preserve clinical system authenticity** — instant navigation, proper tables, NHS blue, coded entries, traffic lights
 - **Sidebar labels are CV-friendly** — Experience (not Consultations), Skills (not Medications), etc.

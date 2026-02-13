@@ -25,3 +25,8 @@ dist-ssr
 
 # TypeScript
 *.tsbuildinfo
+
+#Playwrite Screenshots
+*.png
+
+nul
