@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinical Record — The Foyer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  /* ========================================
+     THE FOYER — Cinematic split-screen
+     A luxury hospitality approach to
+     clinical identity presentation
+     ======================================== */
+
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    /* Left panel — dark identity wall */
+    --panel-dark: #1E293B;
+    --panel-dark-deeper: #172032;
+    --panel-dark-lighter: #263349;
+
+    /* Right panel — warm content surface */
+    --panel-light: #FAFBFC;
+    --panel-light-warm: #F8F9FB;
+
+    /* Accent */
+    --nhs-blue: #005EB8;
+    --nhs-blue-hover: #004C93;
+    --nhs-blue-glow: rgba(0, 94, 184, 0.15);
+
+    /* Left panel text */
+    --dark-text-primary: #F1F5F9;
+    --dark-text-secondary: #94A3B8;
+    --dark-text-muted: #64748B;
+    --dark-text-faint: #475569;
+    --dark-border: rgba(148, 163, 184, 0.12);
+
+    /* Right panel text */
+    --light-text-primary: #111827;
+    --light-text-secondary: #6B7280;
+    --light-text-muted: #9CA3AF;
+    --light-text-faint: #D1D5DB;
+    --light-border: #E5E7EB;
+    --light-border-subtle: #F0F1F3;
+
+    /* Status */
+    --green: #22C55E;
+    --green-text: #16A34A;
+    --green-dark: #4ADE80;
+    --amber: #F59E0B;
+    --amber-text: #D97706;
+
+    /* Layout */
+    --left-width: 40%;
+    --right-width: 60%;
+
+    /* Fonts */
+    --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  html {
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--light-text-primary);
+    background: var(--panel-dark);
+    line-height: 1.5;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ----------------------------------------
+     Layout — The Split
+     ---------------------------------------- */
+
+  .foyer {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ========================================
+     LEFT PANEL — The Identity Wall
+     ======================================== */
+
+  .identity-panel {
+    width: var(--left-width);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: var(--panel-dark);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 10;
+  }
+
+  /* Subtle vertical gradient for depth */
+  .identity-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(30, 41, 59, 0) 0%,
+      rgba(15, 23, 42, 0.3) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Very subtle right edge glow where panels meet */
+  .identity-panel::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--dark-border);
+  }
+
+  /* --- Patient Identity Block --- */
+
+  .identity-block {
+    position: relative;
+    padding: 48px 44px 40px;
+    flex-shrink: 0;
+  }
+
+  .identity-name {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--dark-text-primary);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 4px;
+  }
+
+  .identity-title {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--dark-text-secondary);
+    letter-spacing: 0.01em;
+    margin-bottom: 28px;
+  }
+
+  /* Status badges */
+  .identity-status-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  .status-badge.active {
+    color: var(--green-dark);
+  }
+
+  .status-badge.active .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+    animation: pulse-dot 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
+    50% { box-shadow: 0 0 14px rgba(34, 197, 94, 0.6); }
+  }
+
+  .status-badge.opportunity {
+    color: var(--nhs-blue);
+    background: var(--nhs-blue-glow);
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid rgba(0, 94, 184, 0.25);
+  }
+
+  /* Demographic fields */
+  .identity-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .identity-field {
+    display: flex;
+    align-items: baseline;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--dark-border);
+  }
+
+  .identity-field:last-child {
+    border-bottom: none;
+  }
+
+  .field-label {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--dark-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    width: 120px;
+    flex-shrink: 0;
+  }
+
+  .field-value {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--dark-text-primary);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
+  }
+
+  .field-value.text {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  /* --- Action Buttons --- */
+
+  .identity-actions {
+    padding: 0 44px;
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+    margin-top: 8px;
+  }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    border: none;
+  }
+
+  .action-btn svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 1.5;
+  }
+
+  .action-btn.primary {
+    background: var(--nhs-blue);
+    color: #fff;
+    border: 1px solid var(--nhs-blue);
+  }
+
+  .action-btn.primary:hover {
+    background: var(--nhs-blue-hover);
+    border-color: var(--nhs-blue-hover);
+    box-shadow: 0 2px 12px rgba(0, 94, 184, 0.3);
+  }
+
+  .action-btn.ghost {
+    background: transparent;
+    color: var(--dark-text-secondary);
+    border: 1px solid var(--dark-border);
+  }
+
+  .action-btn.ghost:hover {
+    color: var(--dark-text-primary);
+    border-color: var(--dark-text-muted);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  /* --- Navigation --- */
+
+  .identity-nav-section {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 0 0 0;
+    min-height: 0;
+  }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--dark-text-faint);
+    padding: 0 44px 14px;
+  }
+
+  .nav-list {
+    list-style: none;
+    padding: 0 0 8px 0;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 44px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--dark-text-secondary);
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease;
+    position: relative;
+    text-decoration: none;
+    letter-spacing: 0.005em;
+  }
+
+  .nav-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: transparent;
+    transition: background 0.2s ease;
+  }
+
+  .nav-item:hover {
+    color: var(--dark-text-primary);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .nav-item.active {
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .nav-item.active::before {
+    background: var(--nhs-blue);
+  }
+
+  .nav-item .nav-number {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--dark-text-faint);
+    width: 24px;
+    flex-shrink: 0;
+    font-weight: 400;
+  }
+
+  .nav-item.active .nav-number {
+    color: var(--nhs-blue);
+  }
+
+  /* --- Session Footer --- */
+
+  .identity-footer {
+    position: relative;
+    padding: 16px 44px;
+    border-top: 1px solid var(--dark-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .session-user {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--dark-text-muted);
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .session-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+
+  .session-time {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--dark-text-faint);
+    letter-spacing: 0.05em;
+  }
+
+
+  /* ========================================
+     RIGHT PANEL — The Content Surface
+     ======================================== */
+
+  .content-panel {
+    width: var(--right-width);
+    margin-left: var(--left-width);
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--panel-light);
+    position: relative;
+  }
+
+  /* Subtle inner shadow at left edge where panels meet */
+  .content-panel::before {
+    content: '';
+    position: fixed;
+    left: var(--left-width);
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.04) 0%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Scrollbar */
+  .content-panel::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .content-panel::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .content-panel::-webkit-scrollbar-thumb {
+    background: var(--light-border);
+    border-radius: 3px;
+  }
+
+  .content-panel::-webkit-scrollbar-thumb:hover {
+    background: var(--light-text-muted);
+  }
+
+  /* --- Breadcrumb / Section indicator --- */
+
+  .content-breadcrumb {
+    position: sticky;
+    top: 0;
+    background: var(--panel-light);
+    padding: 16px 52px;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--light-text-muted);
+    letter-spacing: 0.02em;
+    z-index: 5;
+    border-bottom: 1px solid var(--light-border-subtle);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(8px);
+    background: rgba(250, 251, 252, 0.92);
+  }
+
+  .breadcrumb-separator {
+    color: var(--light-text-faint);
+    font-size: 10px;
+  }
+
+  .breadcrumb-current {
+    color: var(--light-text-secondary);
+    font-weight: 500;
+  }
+
+  /* --- Content Body --- */
+
+  .content-body {
+    padding: 44px 52px 80px;
+    max-width: 780px;
+  }
+
+  /* --- Section blocks --- */
+
+  .section {
+    margin-bottom: 0;
+    padding-bottom: 48px;
+  }
+
+  .section + .section {
+    padding-top: 0;
+    border-top: 1px solid var(--light-border-subtle);
+    padding-top: 48px;
+  }
+
+  .section-header {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--light-text-muted);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-header svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 1.5;
+    color: var(--light-text-faint);
+  }
+
+  /* --- Clinical Alert --- */
+
+  .clinical-alert {
+    background: #FFFBEB;
+    border-left: 3px solid var(--amber);
+    padding: 16px 22px;
+    margin-bottom: 48px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .alert-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .alert-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--amber-text);
+  }
+
+  .alert-icon svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+  }
+
+  .alert-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--amber-text);
+    margin-bottom: 3px;
+  }
+
+  .alert-text {
+    font-size: 13px;
+    color: #92400E;
+    line-height: 1.55;
+    font-weight: 400;
+  }
+
+  .alert-text strong {
+    font-weight: 600;
+    color: #78350F;
+  }
+
+  .alert-dismiss {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #D4A574;
+    padding: 2px;
+    flex-shrink: 0;
+    transition: color 0.15s ease;
+  }
+
+  .alert-dismiss:hover {
+    color: #92400E;
+  }
+
+  .alert-dismiss svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 1.5;
+  }
+
+  /* --- Active Problems --- */
+
+  .problem-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--light-border-subtle);
+  }
+
+  .problem-row:last-child {
+    border-bottom: none;
+  }
+
+  .problem-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  .problem-dot.active { background: var(--green); }
+  .problem-dot.in-progress { background: var(--amber); }
+  .problem-dot.resolved { background: var(--light-text-faint); }
+
+  .problem-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .problem-desc {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--light-text-primary);
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+
+  .problem-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .problem-status-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .problem-status-label.active { color: var(--green-text); }
+  .problem-status-label.in-progress { color: var(--amber-text); }
+
+  .problem-since {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--light-text-muted);
+    font-weight: 400;
+  }
+
+  .problem-code {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--light-text-faint);
+    font-weight: 400;
+    margin-left: auto;
+  }
+
+  /* --- Medications / Skills --- */
+
+  .med-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .med-table thead th {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--light-text-muted);
+    text-align: left;
+    padding: 0 0 12px;
+    border-bottom: 1px solid var(--light-border);
+  }
+
+  .med-table thead th:last-child {
+    text-align: right;
+  }
+
+  .med-table tbody td {
+    font-size: 13px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--light-border-subtle);
+    vertical-align: middle;
+  }
+
+  .med-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .med-table tbody tr {
+    transition: background 0.1s ease;
+  }
+
+  .med-table tbody tr:hover {
+    background: rgba(0, 0, 0, 0.01);
+  }
+
+  .med-name {
+    font-weight: 500;
+    color: var(--light-text-primary);
+  }
+
+  .med-dose {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--light-text-secondary);
+    font-weight: 400;
+  }
+
+  .med-freq {
+    font-size: 12px;
+    color: var(--light-text-muted);
+    font-weight: 400;
+  }
+
+  .med-year {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--light-text-muted);
+    text-align: right;
+    font-weight: 400;
+  }
+
+  .med-category {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--light-text-muted);
+    padding: 2px 8px;
+    background: var(--panel-light-warm);
+    border-radius: 3px;
+    display: inline-block;
+  }
+
+  /* Proficiency bar */
+  .proficiency-bar {
+    width: 60px;
+    height: 3px;
+    background: var(--light-border);
+    border-radius: 2px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  .proficiency-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--nhs-blue);
+    transition: width 0.6s ease;
+  }
+
+  /* --- Last Consultation --- */
+
+  .consult-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 6px;
+  }
+
+  .consult-role {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--light-text-primary);
+    line-height: 1.3;
+  }
+
+  .consult-org {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--nhs-blue);
+  }
+
+  .consult-meta {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--light-border-subtle);
+  }
+
+  .consult-meta-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .consult-meta-label {
+    font-size: 9.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--light-text-muted);
+  }
+
+  .consult-meta-value {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--light-text-primary);
+  }
+
+  .consult-meta-value.mono {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--light-text-secondary);
+  }
+
+  .consult-meta-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--light-border);
+  }
+
+  .consult-summary {
+    font-size: 13.5px;
+    color: var(--light-text-secondary);
+    line-height: 1.7;
+    max-width: 640px;
+  }
+
+  .consult-achievements {
+    margin-top: 16px;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .consult-achievements li {
+    font-size: 12.5px;
+    color: var(--light-text-secondary);
+    line-height: 1.6;
+    padding: 4px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .consult-achievements li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 11px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--light-text-faint);
+  }
+
+  /* --- Resolved Problems (Achievements) --- */
+
+  .resolved-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--light-border-subtle);
+  }
+
+  .resolved-row:last-child {
+    border-bottom: none;
+  }
+
+  .resolved-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .resolved-desc {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--light-text-primary);
+    margin-bottom: 3px;
+  }
+
+  .resolved-outcome {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--nhs-blue);
+    margin-bottom: 2px;
+  }
+
+  .resolved-meta {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--light-text-muted);
+    font-weight: 400;
+  }
+
+  .check-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--green-text);
+  }
+
+  .check-icon svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+  }
+
+  /* --- Utility --- */
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .divider-hairline {
+    height: 1px;
+    background: var(--light-border-subtle);
+    margin: 0;
+  }
+
+  /* --- Entrance animations --- */
+
+  @keyframes fadeInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .identity-block {
+    animation: fadeInLeft 0.5s ease both;
+    animation-delay: 0.1s;
+  }
+
+  .identity-actions {
+    animation: fadeInLeft 0.5s ease both;
+    animation-delay: 0.25s;
+  }
+
+  .identity-nav-section {
+    animation: fadeIn 0.4s ease both;
+    animation-delay: 0.4s;
+  }
+
+  .clinical-alert {
+    animation: fadeInUp 0.4s ease both;
+    animation-delay: 0.3s;
+  }
+
+  .section:nth-child(1) { animation: fadeInUp 0.4s ease both; animation-delay: 0.35s; }
+  .section:nth-child(2) { animation: fadeInUp 0.4s ease both; animation-delay: 0.4s; }
+  .section:nth-child(3) { animation: fadeInUp 0.4s ease both; animation-delay: 0.45s; }
+  .section:nth-child(4) { animation: fadeInUp 0.4s ease both; animation-delay: 0.5s; }
+  .section:nth-child(5) { animation: fadeInUp 0.4s ease both; animation-delay: 0.55s; }
+
+  /* --- Reduced motion --- */
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0s !important;
+      animation-delay: 0s !important;
+      transition-duration: 0s !important;
+    }
+
+    .status-badge.active .status-dot {
+      animation: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="foyer">
+
+  <!-- ========================================
+       LEFT PANEL — Identity Wall
+       ======================================== -->
+  <aside class="identity-panel" role="complementary" aria-label="Patient identity">
+
+    <!-- Patient Identity -->
+    <div class="identity-block">
+      <h1 class="identity-name">CHARLWOOD, Andrew</h1>
+      <p class="identity-title">Deputy Head, Population Health & Data Analysis</p>
+
+      <div class="identity-status-row">
+        <span class="status-badge active">
+          <span class="status-dot"></span>
+          Active
+        </span>
+        <span class="status-badge opportunity">Open to opportunities</span>
+      </div>
+
+      <!-- Demographic fields -->
+      <div class="identity-fields">
+        <div class="identity-field">
+          <span class="field-label">DOB</span>
+          <span class="field-value">14/02/1993</span>
+        </div>
+        <div class="identity-field">
+          <span class="field-label">NHS No</span>
+          <span class="field-value">221 181 0</span>
+        </div>
+        <div class="identity-field">
+          <span class="field-label">Registration</span>
+          <span class="field-value">GPhC 2211810</span>
+        </div>
+        <div class="identity-field">
+          <span class="field-label">Location</span>
+          <span class="field-value text">Norwich, NR1</span>
+        </div>
+        <div class="identity-field">
+          <span class="field-label">Since</span>
+          <span class="field-value">August 2016</span>
+        </div>
+        <div class="identity-field">
+          <span class="field-label">Qualification</span>
+          <span class="field-value text">MPharm (Hons) 2:1</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="identity-actions">
+      <button class="action-btn primary">
+        <i data-lucide="download"></i>
+        Download CV
+      </button>
+      <button class="action-btn ghost">
+        <i data-lucide="mail"></i>
+        Email
+      </button>
+      <button class="action-btn ghost">
+        <i data-lucide="linkedin"></i>
+        LinkedIn
+      </button>
+    </div>
+
+    <!-- Navigation -->
+    <div class="identity-nav-section">
+      <div class="nav-label">Record</div>
+      <nav aria-label="Clinical record navigation">
+        <ul class="nav-list">
+          <li>
+            <a class="nav-item active" href="#summary" data-view="summary">
+              <span class="nav-number">01</span>
+              Summary
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="#experience" data-view="experience">
+              <span class="nav-number">02</span>
+              Experience
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="#skills" data-view="skills">
+              <span class="nav-number">03</span>
+              Skills
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="#achievements" data-view="achievements">
+              <span class="nav-number">04</span>
+              Achievements
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="#projects" data-view="projects">
+              <span class="nav-number">05</span>
+              Projects
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="#education" data-view="education">
+              <span class="nav-number">06</span>
+              Education
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="#contact" data-view="contact">
+              <span class="nav-number">07</span>
+              Contact
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Session Footer -->
+    <div class="identity-footer">
+      <span class="session-user">
+        <span class="session-dot"></span>
+        A.CHARLWOOD
+      </span>
+      <span class="session-time" id="session-time">14:32</span>
+    </div>
+
+  </aside>
+
+  <!-- ========================================
+       RIGHT PANEL — Content Surface
+       ======================================== -->
+  <main class="content-panel" role="main">
+
+    <!-- Breadcrumb -->
+    <div class="content-breadcrumb">
+      <span>Clinical Record</span>
+      <span class="breadcrumb-separator">/</span>
+      <span>CHARLWOOD, Andrew</span>
+      <span class="breadcrumb-separator">/</span>
+      <span class="breadcrumb-current">Summary</span>
+    </div>
+
+    <div class="content-body">
+
+      <!-- Clinical Alert -->
+      <div class="clinical-alert" role="alert" id="clinical-alert">
+        <div class="alert-body">
+          <span class="alert-icon"><i data-lucide="alert-triangle"></i></span>
+          <div>
+            <div class="alert-label">Clinical Alert</div>
+            <div class="alert-text">This patient has identified <strong>&pound;14.6M in prescribing efficiency savings</strong> across Norfolk &amp; Waveney ICS, with &pound;2M on target for delivery this financial year.</div>
+          </div>
+        </div>
+        <button class="alert-dismiss" aria-label="Dismiss alert" onclick="document.getElementById('clinical-alert').style.display='none'">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <!-- ---- SECTION: Active Problems ---- -->
+      <div class="section">
+        <div class="section-header">
+          <i data-lucide="alert-circle"></i>
+          Active Problems
+        </div>
+
+        <div class="problem-row">
+          <div class="problem-dot active"></div>
+          <div class="problem-content">
+            <div class="problem-desc">&pound;220M prescribing budget oversight and management</div>
+            <div class="problem-meta-row">
+              <span class="problem-status-label active">Active</span>
+              <span class="problem-since">Jul 2024</span>
+              <span class="problem-code">MGT001</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="problem-row">
+          <div class="problem-dot in-progress"></div>
+          <div class="problem-content">
+            <div class="problem-desc">Patient-level SQL analytics transformation</div>
+            <div class="problem-meta-row">
+              <span class="problem-status-label in-progress">In Progress</span>
+              <span class="problem-since">2025</span>
+              <span class="problem-code">TRN001</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="problem-row">
+          <div class="problem-dot in-progress"></div>
+          <div class="problem-content">
+            <div class="problem-desc">Team data literacy programme</div>
+            <div class="problem-meta-row">
+              <span class="problem-status-label in-progress">In Progress</span>
+              <span class="problem-since">Jul 2024</span>
+              <span class="problem-code">LEA001</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---- SECTION: Current Medications / Skills ---- -->
+      <div class="section">
+        <div class="section-header">
+          <i data-lucide="pill"></i>
+          Current Medications
+        </div>
+
+        <table class="med-table">
+          <thead>
+            <tr>
+              <th>Drug</th>
+              <th>Proficiency</th>
+              <th>Frequency</th>
+              <th>Since</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="med-name">Data Analysis</td>
+              <td class="med-dose">
+                <span class="proficiency-bar"><span class="proficiency-fill" style="width: 95%"></span></span>95%
+              </td>
+              <td class="med-freq">Daily</td>
+              <td class="med-year">2016</td>
+            </tr>
+            <tr>
+              <td class="med-name">Medicines Optimisation</td>
+              <td class="med-dose">
+                <span class="proficiency-bar"><span class="proficiency-fill" style="width: 95%"></span></span>95%
+              </td>
+              <td class="med-freq">Daily</td>
+              <td class="med-year">2016</td>
+            </tr>
+            <tr>
+              <td class="med-name">Power BI</td>
+              <td class="med-dose">
+                <span class="proficiency-bar"><span class="proficiency-fill" style="width: 92%"></span></span>92%
+              </td>
+              <td class="med-freq">Daily</td>
+              <td class="med-year">2019</td>
+            </tr>
+            <tr>
+              <td class="med-name">Python</td>
+              <td class="med-dose">
+                <span class="proficiency-bar"><span class="proficiency-fill" style="width: 90%"></span></span>90%
+              </td>
+              <td class="med-freq">Daily</td>
+              <td class="med-year">2017</td>
+            </tr>
+            <tr>
+              <td class="med-name">Population Health Analytics</td>
+              <td class="med-dose">
+                <span class="proficiency-bar"><span class="proficiency-fill" style="width: 90%"></span></span>90%
+              </td>
+              <td class="med-freq">Daily</td>
+              <td class="med-year">2022</td>
+            </tr>
+            <tr>
+              <td class="med-name">SQL</td>
+              <td class="med-dose">
+                <span class="proficiency-bar"><span class="proficiency-fill" style="width: 88%"></span></span>88%
+              </td>
+              <td class="med-freq">Daily</td>
+              <td class="med-year">2017</td>
+            </tr>
+            <tr>
+              <td class="med-name">Dashboard Development</td>
+              <td class="med-dose">
+                <span class="proficiency-bar"><span class="proficiency-fill" style="width: 88%"></span></span>88%
+              </td>
+              <td class="med-freq">Weekly</td>
+              <td class="med-year">2019</td>
+            </tr>
+            <tr>
+              <td class="med-name">NICE TA Implementation</td>
+              <td class="med-dose">
+                <span class="proficiency-bar"><span class="proficiency-fill" style="width: 85%"></span></span>85%
+              </td>
+              <td class="med-freq">Weekly</td>
+              <td class="med-year">2022</td>
+            </tr>
+            <tr>
+              <td class="med-name">Algorithm Design</td>
+              <td class="med-dose">
+                <span class="proficiency-bar"><span class="proficiency-fill" style="width: 82%"></span></span>82%
+              </td>
+              <td class="med-freq">Weekly</td>
+              <td class="med-year">2022</td>
+            </tr>
+            <tr>
+              <td class="med-name">JavaScript / TypeScript</td>
+              <td class="med-dose">
+                <span class="proficiency-bar"><span class="proficiency-fill" style="width: 70%"></span></span>70%
+              </td>
+              <td class="med-freq">Weekly</td>
+              <td class="med-year">2020</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ---- SECTION: Last Consultation ---- -->
+      <div class="section">
+        <div class="section-header">
+          <i data-lucide="stethoscope"></i>
+          Last Consultation
+        </div>
+
+        <div class="consult-meta">
+          <div class="consult-meta-pair">
+            <span class="consult-meta-label">Date</span>
+            <span class="consult-meta-value mono">14 May 2025</span>
+          </div>
+          <div class="consult-meta-divider"></div>
+          <div class="consult-meta-pair">
+            <span class="consult-meta-label">Organisation</span>
+            <span class="consult-meta-value">NHS Norfolk &amp; Waveney ICB</span>
+          </div>
+          <div class="consult-meta-divider"></div>
+          <div class="consult-meta-pair">
+            <span class="consult-meta-label">Duration</span>
+            <span class="consult-meta-value mono">May 2025 — Nov 2025</span>
+          </div>
+        </div>
+
+        <div class="consult-header">
+          <span class="consult-role">Interim Head, Population Health &amp; Data Analysis</span>
+        </div>
+        <p class="consult-summary">Led strategic delivery of population health initiatives and data-driven medicines optimisation across Norfolk &amp; Waveney ICS, reporting to Associate Director of Pharmacy with presentation accountability to Chief Medical Officer and system-level programme boards.</p>
+
+        <ul class="consult-achievements">
+          <li>Identified &pound;14.6M efficiency programme through comprehensive data analysis</li>
+          <li>Built Python-based switching algorithm: 14,000 patients identified, &pound;2.6M annual savings</li>
+          <li>Automated incentive scheme analysis: 50% reduction in targeted prescribing within 2 months</li>
+        </ul>
+      </div>
+
+      <!-- ---- SECTION: Recent Experience ---- -->
+      <div class="section">
+        <div class="section-header">
+          <i data-lucide="briefcase"></i>
+          Current Appointment
+        </div>
+
+        <div class="consult-meta">
+          <div class="consult-meta-pair">
+            <span class="consult-meta-label">Date</span>
+            <span class="consult-meta-value mono">01 Jul 2024</span>
+          </div>
+          <div class="consult-meta-divider"></div>
+          <div class="consult-meta-pair">
+            <span class="consult-meta-label">Organisation</span>
+            <span class="consult-meta-value">NHS Norfolk &amp; Waveney ICB</span>
+          </div>
+          <div class="consult-meta-divider"></div>
+          <div class="consult-meta-pair">
+            <span class="consult-meta-label">Duration</span>
+            <span class="consult-meta-value mono">Jul 2024 — Present</span>
+          </div>
+        </div>
+
+        <div class="consult-header">
+          <span class="consult-role">Deputy Head, Population Health &amp; Data Analysis</span>
+          <span class="consult-org" style="font-size: 11px; background: var(--nhs-blue-glow); padding: 2px 10px; border-radius: 100px;">Current</span>
+        </div>
+        <p class="consult-summary">Driving data analytics strategy for medicines optimisation, developing bespoke datasets and analytical frameworks from messy, real-world GP prescribing data to identify efficiency opportunities and address health inequalities across the integrated care system.</p>
+
+        <ul class="consult-achievements">
+          <li>Managed &pound;220M prescribing budget with sophisticated forecasting models</li>
+          <li>Created comprehensive medicines data table with dm+d integration, morphine equivalents, Anticholinergic Burden scoring</li>
+          <li>Led financial scenario modelling for DOAC switching programme</li>
+          <li>Developed Python-based controlled drug monitoring system for population-scale OME tracking</li>
+        </ul>
+      </div>
+
+      <!-- ---- SECTION: Resolved Problems (Key Achievements) ---- -->
+      <div class="section">
+        <div class="section-header">
+          <i data-lucide="check-circle-2"></i>
+          Resolved Problems
+        </div>
+
+        <div class="resolved-row">
+          <span class="check-icon"><i data-lucide="check-circle-2"></i></span>
+          <div class="resolved-content">
+            <div class="resolved-desc">&pound;14.6M efficiency target identification and delivery</div>
+            <div class="resolved-outcome">Over-target performance achieved</div>
+            <div class="resolved-meta">EFF002 &middot; Resolved Oct 2025</div>
+          </div>
+        </div>
+
+        <div class="resolved-row">
+          <span class="check-icon"><i data-lucide="check-circle-2"></i></span>
+          <div class="resolved-content">
+            <div class="resolved-desc">Manual prescribing analysis inefficiency</div>
+            <div class="resolved-outcome">Python algorithm: 14,000 pts, &pound;2.6M/yr</div>
+            <div class="resolved-meta">EFF001 &middot; Resolved Oct 2025</div>
+          </div>
+        </div>
+
+        <div class="resolved-row">
+          <span class="check-icon"><i data-lucide="check-circle-2"></i></span>
+          <div class="resolved-content">
+            <div class="resolved-desc">Incentive scheme manual calculation</div>
+            <div class="resolved-outcome">Automated: 50% Rx reduction in 2 months</div>
+            <div class="resolved-meta">AUT002 &middot; Resolved 2025</div>
+          </div>
+        </div>
+
+        <div class="resolved-row">
+          <span class="check-icon"><i data-lucide="check-circle-2"></i></span>
+          <div class="resolved-content">
+            <div class="resolved-desc">Population opioid exposure monitoring</div>
+            <div class="resolved-outcome">CD monitoring system: OME tracking</div>
+            <div class="resolved-meta">MON001 &middot; Resolved 2024</div>
+          </div>
+        </div>
+
+        <div class="resolved-row">
+          <span class="check-icon"><i data-lucide="check-circle-2"></i></span>
+          <div class="resolved-content">
+            <div class="resolved-desc">Blueteq form creation backlog</div>
+            <div class="resolved-outcome">70% reduction, 200hrs saved</div>
+            <div class="resolved-meta">AUT001 &middot; Resolved 2023</div>
+          </div>
+        </div>
+
+        <div class="resolved-row">
+          <span class="check-icon"><i data-lucide="check-circle-2"></i></span>
+          <div class="resolved-content">
+            <div class="resolved-desc">Asthma screening scalability</div>
+            <div class="resolved-outcome">National rollout: ~300 branches, ~&pound;1M</div>
+            <div class="resolved-meta">INN001 &middot; Resolved 2019</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- /content-body -->
+
+  </main>
+
+</div><!-- /foyer -->
+
+<script>
+  // Initialize Lucide icons
+  lucide.createIcons();
+
+  // Session time — live clock
+  function updateTime() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('session-time').textContent = h + ':' + m;
+  }
+  updateTime();
+  setInterval(updateTime, 10000);
+
+  // Navigation — active state switching
+  document.querySelectorAll('.nav-item').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.nav-item').forEach(function(n) {
+        n.classList.remove('active');
+      });
+      this.classList.add('active');
+
+      // Update breadcrumb
+      var viewName = this.textContent.trim();
+      document.querySelector('.breadcrumb-current').textContent = viewName;
+    });
+  });
+
+  // Keyboard navigation (Alt+1 through Alt+7)
+  document.addEventListener('keydown', function(e) {
+    if (e.altKey && e.key >= '1' && e.key <= '7') {
+      e.preventDefault();
+      var idx = parseInt(e.key) - 1;
+      var items = document.querySelectorAll('.nav-item');
+      if (items[idx]) {
+        items[idx].click();
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

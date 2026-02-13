@@ -1,0 +1,1711 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practitioner Record System — CHARLWOOD, Andrew</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&amp;family=Fira+Code:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F0F5F4;
+  --surface: #FFFFFF;
+  --sidebar-bg: #F7FAFA;
+  --text-primary: #1A2B2A;
+  --text-secondary: #5B7A78;
+  --text-tertiary: #8DA8A5;
+  --accent: #0D6E6E;
+  --accent-hover: #0A8080;
+  --accent-light: rgba(10,128,128,0.08);
+  --accent-border: rgba(10,128,128,0.18);
+  --amber: #D97706;
+  --amber-light: rgba(217,119,6,0.08);
+  --amber-border: rgba(217,119,6,0.18);
+  --success: #059669;
+  --success-light: rgba(5,150,105,0.08);
+  --success-border: rgba(5,150,105,0.18);
+  --alert: #DC2626;
+  --alert-light: rgba(220,38,38,0.08);
+  --alert-border: rgba(220,38,38,0.18);
+  --border: #D4E0DE;
+  --border-light: #E4EDEB;
+  --sidebar-width: 272px;
+  --topbar-height: 48px;
+  --radius: 8px;
+  --radius-sm: 6px;
+  --shadow-sm: 0 1px 2px rgba(26,43,42,0.05);
+  --shadow-md: 0 2px 8px rgba(26,43,42,0.08);
+  --shadow-lg: 0 8px 32px rgba(26,43,42,0.12);
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Fira Code', monospace;
+}
+
+html { font-size: 14px; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ===== TOP BAR ===== */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--topbar-height);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 100;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.topbar-brand svg { color: var(--accent); }
+
+.topbar-brand span.version {
+  font-weight: 400;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  margin-left: 2px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.topbar-session {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  background: var(--accent-light);
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--accent-border);
+}
+
+.topbar-kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ===== LAYOUT ===== */
+.layout {
+  display: flex;
+  margin-top: var(--topbar-height);
+  height: calc(100vh - var(--topbar-height));
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Person Header — with clinical-style accent border */
+.person-header {
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: 6px;
+}
+
+.person-avatar {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, var(--accent), #0A8080);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(13,110,110,0.25);
+}
+
+.person-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.person-title {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+.person-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--success);
+  background: var(--success-light);
+  border: 1px solid var(--success-border);
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+
+.person-status .dot {
+  width: 6px; height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Person Details Grid */
+.person-details {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  padding: 2px 0;
+}
+
+.detail-label { color: var(--text-tertiary); font-weight: 400; }
+.detail-value { color: var(--text-primary); font-weight: 500; text-align: right; }
+.detail-value a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+.detail-value a:hover { text-decoration: underline; }
+
+/* Sidebar Sections */
+.sidebar-section {
+  padding: 14px 0 6px;
+}
+
+.sidebar-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sidebar-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-light);
+}
+
+/* Tags */
+.tag-group { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.tag {
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.3;
+}
+
+.tag-teal { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent-border); }
+.tag-amber { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-border); }
+.tag-green { background: var(--success-light); color: var(--success); border: 1px solid var(--success-border); }
+
+/* Clinical Alert Flags */
+.flag-list { display: flex; flex-direction: column; gap: 6px; }
+
+.flag-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.02em;
+}
+
+.flag-alert {
+  background: var(--alert-light);
+  color: var(--alert);
+  border: 1px solid var(--alert-border);
+}
+
+.flag-amber {
+  background: var(--amber-light);
+  color: var(--amber);
+  border: 1px solid var(--amber-border);
+}
+
+.flag-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Active Projects */
+.project-list { display: flex; flex-direction: column; gap: 6px; }
+
+.project-item {
+  font-size: 11.5px;
+  color: var(--text-primary);
+  padding: 7px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.4;
+  transition: border-color 0.15s;
+}
+
+.project-item:hover { border-color: var(--accent-border); }
+
+.project-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.project-year {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Skills */
+.skill-list { display: flex; flex-direction: column; gap: 8px; }
+
+.skill-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.skill-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+}
+
+.skill-name { color: var(--text-primary); font-weight: 500; }
+.skill-pct { color: var(--text-tertiary); font-family: var(--font-mono); font-size: 10.5px; }
+
+.skill-bar {
+  height: 5px;
+  background: var(--border-light);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.skill-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), #0A8080);
+  transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Education */
+.edu-item {
+  font-size: 11.5px;
+  color: var(--text-primary);
+  padding: 7px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+}
+
+.edu-item .edu-degree {
+  font-weight: 600;
+  display: block;
+}
+
+.edu-item .edu-detail {
+  color: var(--text-secondary);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+/* ===== MAIN ===== */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 28px 40px;
+}
+
+.main::-webkit-scrollbar { width: 6px; }
+.main::-webkit-scrollbar-track { background: transparent; }
+.main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Command Bar */
+.command-bar-wrapper {
+  max-width: 560px;
+  min-width: 400px;
+}
+
+.command-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0 14px;
+  height: 42px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: text;
+}
+
+.command-bar:hover { border-color: var(--accent-border); }
+
+.command-bar:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(13,110,110,0.12);
+}
+
+.command-bar svg {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.command-bar:focus-within svg { color: var(--accent); }
+
+.command-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-primary);
+  margin-left: 10px;
+  height: 100%;
+}
+
+.command-bar input::placeholder { color: var(--text-tertiary); }
+
+.command-bar-kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* ===== CARD GRID ===== */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border);
+}
+
+.card-full { grid-column: 1 / -1; }
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.card-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.card-dot-teal { background: var(--accent); }
+.card-dot-amber { background: var(--amber); }
+.card-dot-green { background: var(--success); }
+.card-dot-alert { background: var(--alert); }
+
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+.card-title-right {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+}
+
+/* Metric Grid */
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.metric-card {
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  background: var(--bg);
+}
+
+.metric-value {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.metric-value-green { color: var(--success); }
+.metric-value-amber { color: var(--amber); }
+.metric-value-teal { color: var(--accent); }
+
+.metric-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+.metric-sub {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  margin-top: 4px;
+}
+
+/* Development Due */
+.dev-list { display: flex; flex-direction: column; gap: 10px; }
+
+.dev-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+}
+
+.dev-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dev-icon-teal { background: var(--accent-light); color: var(--accent); }
+.dev-icon-amber { background: var(--amber-light); color: var(--amber); }
+
+.dev-text { flex: 1; }
+.dev-title { font-weight: 600; color: var(--text-primary); }
+.dev-due { font-size: 11px; color: var(--text-tertiary); font-family: var(--font-mono); margin-top: 1px; }
+.dev-status {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+.dev-status-pending { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-border); }
+.dev-status-scheduled { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent-border); }
+
+/* Last Consultation */
+.consult-header-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.consult-field {
+  font-size: 11.5px;
+}
+
+.consult-field-label {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+
+.consult-field-value {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.consult-role {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.consult-bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.consult-bullets li {
+  font-size: 12.5px;
+  color: var(--text-primary);
+  padding-left: 16px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.consult-bullets li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.5;
+}
+
+/* Career Activity Feed */
+.activity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.activity-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  font-size: 12px;
+  transition: border-color 0.15s;
+}
+
+.activity-item:hover { border-color: var(--accent-border); }
+
+.activity-dot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 2px;
+}
+
+.activity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.activity-dot-role { background: var(--accent); }
+.activity-dot-project { background: var(--amber); }
+.activity-dot-cert { background: var(--success); }
+.activity-dot-edu { background: #7C3AED; }
+
+.activity-content { flex: 1; min-width: 0; }
+
+.activity-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.activity-meta {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.activity-date {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  margin-top: 3px;
+}
+
+/* ===== COMMAND PALETTE OVERLAY ===== */
+.palette-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,43,42,0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.palette-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.palette {
+  width: 580px;
+  max-height: 520px;
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(26,43,42,0.2), 0 0 0 1px rgba(26,43,42,0.08);
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.97) translateY(-8px);
+  transition: transform 0.2s cubic-bezier(0.4,0,0.2,1);
+  overflow: hidden;
+}
+
+.palette-overlay.active .palette {
+  transform: scale(1) translateY(0);
+}
+
+.palette-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.palette-search svg { color: var(--accent); flex-shrink: 0; }
+
+.palette-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.palette-search input::placeholder { color: var(--text-tertiary); }
+
+.palette-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.palette-results {
+  overflow-y: auto;
+  padding: 8px;
+  flex: 1;
+}
+
+.palette-results::-webkit-scrollbar { width: 4px; }
+.palette-results::-webkit-scrollbar-track { background: transparent; }
+.palette-results::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.palette-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  padding: 8px 10px 5px;
+}
+
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.1s;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.palette-item:hover,
+.palette-item.selected {
+  background: var(--accent-light);
+}
+
+.palette-item.selected {
+  outline: 1.5px solid var(--accent-border);
+}
+
+.palette-item-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 13px;
+}
+
+.palette-item-icon-teal { background: var(--accent-light); color: var(--accent); }
+.palette-item-icon-amber { background: var(--amber-light); color: var(--amber); }
+.palette-item-icon-green { background: var(--success-light); color: var(--success); }
+.palette-item-icon-purple { background: rgba(124,58,237,0.08); color: #7C3AED; }
+.palette-item-icon-alert { background: var(--alert-light); color: var(--alert); }
+
+.palette-item-text { flex: 1; min-width: 0; }
+
+.palette-item-title { font-weight: 500; }
+.palette-item-sub {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.palette-item-badge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.palette-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.palette-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  border-top: 1px solid var(--border-light);
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.palette-footer kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--text-secondary);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .card-grid { grid-template-columns: 1fr; }
+  .activity-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+    </svg>
+    Headhunt Medical Center <span class="version">Remote</span>
+  </div>
+  
+<div class="command-bar-wrapper">
+      <div class="command-bar" id="commandBarTrigger">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="commandBarInput" placeholder="Search records, experience, skills... (Ctrl+K)" autocomplete="off">
+        <span class="command-bar-kbd">Ctrl+K</span>
+      </div>
+    </div><div class="topbar-right">
+    <span class="topbar-session">Dr. A.CHARLWOOD · Active Session · 12:23</span>
+    <span class="topbar-kbd">Ctrl+K</span>
+  </div></header>
+
+<!-- LAYOUT -->
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <!-- Person Header -->
+    <div class="person-header">
+      <div class="person-avatar">AC</div>
+      <div class="person-name">CHARLWOOD, Andrew</div>
+      <div class="person-title">Pharmacy Data Technologist</div>
+      
+      <div class="person-details">
+        <div class="detail-row">
+          <span class="detail-label">GPhC No.</span>
+          <span class="detail-value" style="font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;">2211810</span>
+        </div><div class="detail-row">
+          <span class="detail-label">Education</span>
+          
+        <span class="detail-value">MPharm 2.1 (Hons)</span></div>
+        
+        <div class="detail-row">
+          <span class="detail-label">Location</span>
+          <span class="detail-value">Norwich, Norfolk</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Phone</span>
+          <span class="detail-value"><a href="tel:07795553088">07795 553 088</a></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Email</span>
+          <span class="detail-value"><a href="mailto:andy@charlwood.xyz">andy@charlwood.xyz</a></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Registered</span>
+          <span class="detail-value">August 2016</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tags -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Tags</div>
+      <div class="tag-group">
+        <span class="tag tag-teal">Pharmacist</span>
+        <span class="tag tag-teal">Data Lead</span>
+        <span class="tag tag-teal">NHS</span>
+        <span class="tag tag-amber">Population Health</span>
+        <span class="tag tag-green">BI &amp; Analytics</span>
+      </div>
+    </div>
+
+    <!-- Clinical Alerts / Highlights -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Alerts / Highlights</div>
+      <div class="flag-list">
+        <div class="flag-item flag-alert">
+          <span class="flag-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </span>
+          £14.6M SAVINGS IDENTIFIED
+        </div>
+        <div class="flag-item flag-amber">
+          <span class="flag-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          </span>
+          £220M BUDGET OVERSIGHT
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Projects -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Active Projects</div>
+      <div class="project-list">
+        <div class="project-item">
+          <span class="project-dot" style="background:var(--success)"></span>
+          <span>£220M prescribing budget</span>
+          <span class="project-year">2024</span>
+        </div>
+        <div class="project-item">
+          <span class="project-dot" style="background:var(--accent)"></span>
+          <span>SQL analytics transformation</span>
+          <span class="project-year">2025</span>
+        </div>
+        <div class="project-item">
+          <span class="project-dot" style="background:var(--amber)"></span>
+          <span>Team data literacy programme</span>
+          <span class="project-year">2024</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Core Skills -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Core Skills</div>
+      <div class="skill-list">
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Data Analysis</span><span class="skill-pct">95%</span></div>
+          <div class="skill-bar"><div class="skill-bar-fill" style="width: 95%;"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Power BI</span><span class="skill-pct">92%</span></div>
+          <div class="skill-bar"><div class="skill-bar-fill" style="width: 92%;"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Python</span><span class="skill-pct">90%</span></div>
+          <div class="skill-bar"><div class="skill-bar-fill" style="width: 90%;"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">SQL</span><span class="skill-pct">88%</span></div>
+          <div class="skill-bar"><div class="skill-bar-fill" style="width: 88%;"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">JS / TypeScript</span><span class="skill-pct">70%</span></div>
+          <div class="skill-bar"><div class="skill-bar-fill" style="width: 70%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Education -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Education</div>
+      <div class="edu-item">
+        <span class="edu-degree">MPharm (Hons) — 2:1</span>
+        <span class="edu-detail">University of East Anglia · 2015</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <!-- Command Bar -->
+    
+
+    <!-- Card Grid -->
+    <div class="card-grid">
+      <!-- Key Metrics -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-dot card-dot-teal"></span>
+          <span class="card-title">Latest results
+          </span>
+          <span class="card-title-right">Updated May 2025</span>
+        </div>
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-value metric-value-green">£220M</div>
+            <div class="metric-label">Budget Oversight</div>
+            <div class="metric-sub">NHS prescribing</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value metric-value-amber">£14.6M</div>
+            <div class="metric-label">Efficiency Savings</div>
+            <div class="metric-sub">Identified &amp; tracked</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value metric-value-teal">9+</div>
+            <div class="metric-label">Years in NHS</div>
+            <div class="metric-sub">Since 2016</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value metric-value-green">12</div>
+            <div class="metric-label">Team Size Led</div>
+            <div class="metric-sub">Cross-functional</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Development Due -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-dot card-dot-amber"></span>
+          <span class="card-title">Repeat Medications</span>
+        </div>
+        <div class="dev-list">
+          <div class="dev-item">
+            <div class="dev-icon dev-icon-teal">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            </div>
+            <div class="dev-text">
+              <div class="dev-title">Advanced SQL Certification</div>
+              <div class="dev-due">Q2 2026</div>
+            </div>
+            <span class="dev-status dev-status-pending">Pending</span>
+          </div>
+          <div class="dev-item">
+            <div class="dev-icon dev-icon-teal">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+            </div>
+            <div class="dev-text">
+              <div class="dev-title">Cloud Architecture Training</div>
+              <div class="dev-due">Q3 2026</div>
+            </div>
+            <span class="dev-status dev-status-scheduled">Scheduled</span>
+          </div>
+          <div class="dev-item">
+            <div class="dev-icon dev-icon-amber">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <div class="dev-text">
+              <div class="dev-title">Leadership Programme</div>
+              <div class="dev-due">2027</div>
+            </div>
+            <span class="dev-status dev-status-scheduled">Planned</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Last Consultation (Full width) -->
+      <div class="card card-full">
+        <div class="card-header">
+          <span class="card-dot card-dot-green"></span>
+          <span class="card-title">Last Consultation</span>
+          <span class="card-title-right">Most recent role</span>
+        </div>
+        <div class="consult-header-info">
+          <div class="consult-field">
+            <div class="consult-field-label">Date</div>
+            <div class="consult-field-value">May 2025</div>
+          </div>
+          <div class="consult-field">
+            <div class="consult-field-label">Organisation</div>
+            <div class="consult-field-value">NHS Norfolk &amp; Waveney ICB</div>
+          </div>
+          <div class="consult-field">
+            <div class="consult-field-label">Type</div>
+            <div class="consult-field-value">Permanent · Full-time</div>
+          </div>
+          <div class="consult-field">
+            <div class="consult-field-label">Band</div>
+            <div class="consult-field-value">8a</div>
+          </div>
+        </div>
+        <div class="consult-role">Interim Head, Population Health &amp; Data Analysis</div>
+        <ul class="consult-bullets">
+          <li>Led a cross-functional team of 12 across data, analytics, and population health workstreams</li>
+          <li>Oversaw £220M prescribing budget with full analytical accountability and reporting to ICB board</li>
+          <li>Identified £14.6M in efficiency savings through data-driven prescribing interventions</li>
+          <li>Designed and deployed Power BI dashboards used by 200+ clinicians and commissioners</li>
+          <li>Spearheaded SQL analytics transformation, migrating legacy Access databases to modern data stack</li>
+          <li>Established team data literacy programme, upskilling 30+ non-technical staff in data interpretation</li>
+        </ul>
+      </div>
+
+      <!-- Career Activity Feed (Full width) -->
+      <div class="card card-full">
+        <div class="card-header">
+          <span class="card-dot card-dot-teal"></span>
+          <span class="card-title">Career Activity</span>
+          <span class="card-title-right">Full timeline</span>
+        </div>
+        <div class="activity-grid">
+          <div class="activity-item">
+            <div class="activity-dot-wrap"><span class="activity-dot activity-dot-role"></span></div>
+            <div class="activity-content">
+              <div class="activity-title">Interim Head, Population Health &amp; Data Analysis</div>
+              <div class="activity-meta">NHS Norfolk &amp; Waveney ICB</div>
+              <div class="activity-date">2024 – 2025</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot-wrap"><span class="activity-dot activity-dot-project"></span></div>
+            <div class="activity-content">
+              <div class="activity-title">£220M Prescribing Budget Oversight</div>
+              <div class="activity-meta">Lead analyst &amp; budget owner</div>
+              <div class="activity-date">2024</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot-wrap"><span class="activity-dot activity-dot-role"></span></div>
+            <div class="activity-content">
+              <div class="activity-title">Senior Data Analyst — Medicines Optimisation</div>
+              <div class="activity-meta">NHS Norfolk &amp; Waveney ICB</div>
+              <div class="activity-date">2021 – 2024</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot-wrap"><span class="activity-dot activity-dot-project"></span></div>
+            <div class="activity-content">
+              <div class="activity-title">SQL Analytics Transformation</div>
+              <div class="activity-meta">Legacy migration project lead</div>
+              <div class="activity-date">2025</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot-wrap"><span class="activity-dot activity-dot-cert"></span></div>
+            <div class="activity-content">
+              <div class="activity-title">Power BI Data Analyst Associate</div>
+              <div class="activity-meta">Microsoft Certified</div>
+              <div class="activity-date">2023</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot-wrap"><span class="activity-dot activity-dot-role"></span></div>
+            <div class="activity-content">
+              <div class="activity-title">Prescribing Data Pharmacist</div>
+              <div class="activity-meta">NHS Norwich CCG</div>
+              <div class="activity-date">2018 – 2021</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot-wrap"><span class="activity-dot activity-dot-cert"></span></div>
+            <div class="activity-content">
+              <div class="activity-title">Clinical Pharmacy Diploma</div>
+              <div class="activity-meta">Professional development</div>
+              <div class="activity-date">2019</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot-wrap"><span class="activity-dot activity-dot-role"></span></div>
+            <div class="activity-content">
+              <div class="activity-title">Community Pharmacist</div>
+              <div class="activity-meta">Boots UK</div>
+              <div class="activity-date">2016 – 2018</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot-wrap"><span class="activity-dot activity-dot-edu"></span></div>
+            <div class="activity-content">
+              <div class="activity-title">MPharm (Hons) — 2:1</div>
+              <div class="activity-meta">University of East Anglia</div>
+              <div class="activity-date">2011 – 2015</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot-wrap"><span class="activity-dot activity-dot-cert"></span></div>
+            <div class="activity-content">
+              <div class="activity-title">GPhC Registration</div>
+              <div class="activity-meta">General Pharmaceutical Council</div>
+              <div class="activity-date">August 2016</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- COMMAND PALETTE OVERLAY -->
+<div class="palette-overlay" id="paletteOverlay">
+  <div class="palette" id="paletteModal">
+    <div class="palette-search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="paletteInput" placeholder="Search records, experience, skills..." autocomplete="off">
+      <span class="palette-hint">ESC</span>
+    </div>
+    <div class="palette-results" id="paletteResults"><div class="palette-section-label">Experience</div>
+          <div class="palette-item" data-index="0">
+            <div class="palette-item-icon palette-item-icon-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">Interim Head, Population Health &amp; Data Analysis</div>
+              <div class="palette-item-sub">NHS Norfolk &amp; Waveney ICB · 2024–2025</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="1">
+            <div class="palette-item-icon palette-item-icon-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">Senior Data Analyst — Medicines Optimisation</div>
+              <div class="palette-item-sub">NHS Norfolk &amp; Waveney ICB · 2021–2024</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="2">
+            <div class="palette-item-icon palette-item-icon-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">Prescribing Data Pharmacist</div>
+              <div class="palette-item-sub">NHS Norwich CCG · 2018–2021</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="3">
+            <div class="palette-item-icon palette-item-icon-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">Community Pharmacist</div>
+              <div class="palette-item-sub">Boots UK · 2016–2018</div>
+            </div>
+          </div><div class="palette-section-label">Core Skills</div>
+          <div class="palette-item" data-index="4">
+            <div class="palette-item-icon palette-item-icon-green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">Data Analysis — 95%</div>
+              <div class="palette-item-sub">Primary expertise · NHS population data</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="5">
+            <div class="palette-item-icon palette-item-icon-green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">Power BI — 92%</div>
+              <div class="palette-item-sub">Dashboard design &amp; deployment</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="6">
+            <div class="palette-item-icon palette-item-icon-green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">Python — 90%</div>
+              <div class="palette-item-sub">Data pipelines, automation, analytics</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="7">
+            <div class="palette-item-icon palette-item-icon-green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">SQL — 88%</div>
+              <div class="palette-item-sub">Advanced queries, database migration</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="8">
+            <div class="palette-item-icon palette-item-icon-green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">JavaScript / TypeScript — 70%</div>
+              <div class="palette-item-sub">Web development &amp; tooling</div>
+            </div>
+          </div><div class="palette-section-label">Active Projects</div>
+          <div class="palette-item" data-index="9">
+            <div class="palette-item-icon palette-item-icon-amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">£220M Prescribing Budget</div>
+              <div class="palette-item-sub">Budget oversight &amp; analytical accountability · 2024</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="10">
+            <div class="palette-item-icon palette-item-icon-amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">SQL Analytics Transformation</div>
+              <div class="palette-item-sub">Legacy migration to modern data stack · 2025</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="11">
+            <div class="palette-item-icon palette-item-icon-amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">Team Data Literacy Programme</div>
+              <div class="palette-item-sub">Upskilling 30+ non-technical staff · 2024</div>
+            </div>
+          </div><div class="palette-section-label">Achievements</div>
+          <div class="palette-item" data-index="12">
+            <div class="palette-item-icon palette-item-icon-amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">£14.6M Efficiency Savings Identified</div>
+              <div class="palette-item-sub">Data-driven prescribing interventions</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="13">
+            <div class="palette-item-icon palette-item-icon-amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">£220M Budget Oversight</div>
+              <div class="palette-item-sub">Full analytical accountability to ICB board</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="14">
+            <div class="palette-item-icon palette-item-icon-amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">Power BI Dashboards for 200+ Users</div>
+              <div class="palette-item-sub">Clinicians &amp; commissioners across ICB</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="15">
+            <div class="palette-item-icon palette-item-icon-amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">Team of 12 Led</div>
+              <div class="palette-item-sub">Cross-functional data &amp; population health</div>
+            </div>
+          </div><div class="palette-section-label">Education</div>
+          <div class="palette-item" data-index="16">
+            <div class="palette-item-icon palette-item-icon-purple"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"></path></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">MPharm (Hons) — 2:1</div>
+              <div class="palette-item-sub">University of East Anglia · 2011–2015</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="17">
+            <div class="palette-item-icon palette-item-icon-purple"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"></path></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">GPhC Registration</div>
+              <div class="palette-item-sub">General Pharmaceutical Council · August 2016</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="18">
+            <div class="palette-item-icon palette-item-icon-purple"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"></path></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">Power BI Data Analyst Associate</div>
+              <div class="palette-item-sub">Microsoft Certified · 2023</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="19">
+            <div class="palette-item-icon palette-item-icon-purple"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"></path></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">Clinical Pharmacy Diploma</div>
+              <div class="palette-item-sub">Professional development · 2019</div>
+            </div>
+          </div><div class="palette-section-label">Quick Actions</div>
+          <div class="palette-item" data-index="20">
+            <div class="palette-item-icon palette-item-icon-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">Download CV</div>
+              <div class="palette-item-sub">Export as PDF</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="21">
+            <div class="palette-item-icon palette-item-icon-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">Send Email</div>
+              <div class="palette-item-sub">andy@charlwood.xyz</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="22">
+            <div class="palette-item-icon palette-item-icon-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">View LinkedIn</div>
+              <div class="palette-item-sub">Professional profile</div>
+            </div>
+          </div>
+          <div class="palette-item" data-index="23">
+            <div class="palette-item-icon palette-item-icon-teal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">View Projects</div>
+              <div class="palette-item-sub">GitHub &amp; portfolio</div>
+            </div>
+          </div></div>
+    <div class="palette-footer">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> Navigate</span>
+      <span><kbd>Enter</kbd> Select</span>
+      <span><kbd>Esc</kbd> Close</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ===== COMMAND PALETTE DATA =====
+  const paletteData = [
+    // Experience
+    { section: 'Experience', icon: 'role', title: 'Interim Head, Population Health & Data Analysis', sub: 'NHS Norfolk & Waveney ICB \u00b7 2024\u20132025', keywords: 'head interim population health data analysis nhs norfolk waveney icb 2024 2025 latest current' },
+    { section: 'Experience', icon: 'role', title: 'Senior Data Analyst \u2014 Medicines Optimisation', sub: 'NHS Norfolk & Waveney ICB \u00b7 2021\u20132024', keywords: 'senior data analyst medicines optimisation nhs norfolk waveney icb 2021 2024' },
+    { section: 'Experience', icon: 'role', title: 'Prescribing Data Pharmacist', sub: 'NHS Norwich CCG \u00b7 2018\u20132021', keywords: 'prescribing data pharmacist nhs norwich ccg 2018 2021' },
+    { section: 'Experience', icon: 'role', title: 'Community Pharmacist', sub: 'Boots UK \u00b7 2016\u20132018', keywords: 'community pharmacist boots uk 2016 2018' },
+    // Core Skills
+    { section: 'Core Skills', icon: 'skill', title: 'Data Analysis \u2014 95%', sub: 'Primary expertise \u00b7 NHS population data', keywords: 'data analysis primary expertise 95' },
+    { section: 'Core Skills', icon: 'skill', title: 'Power BI \u2014 92%', sub: 'Dashboard design & deployment', keywords: 'power bi dashboard design deployment 92 visualisation' },
+    { section: 'Core Skills', icon: 'skill', title: 'Python \u2014 90%', sub: 'Data pipelines, automation, analytics', keywords: 'python data pipelines automation analytics 90 programming' },
+    { section: 'Core Skills', icon: 'skill', title: 'SQL \u2014 88%', sub: 'Advanced queries, database migration', keywords: 'sql advanced queries database migration 88' },
+    { section: 'Core Skills', icon: 'skill', title: 'JavaScript / TypeScript \u2014 70%', sub: 'Web development & tooling', keywords: 'javascript typescript web development tooling 70 js ts' },
+    // Active Projects
+    { section: 'Active Projects', icon: 'project', title: '\u00a3220M Prescribing Budget', sub: 'Budget oversight & analytical accountability \u00b7 2024', keywords: '220m prescribing budget oversight analytical accountability 2024' },
+    { section: 'Active Projects', icon: 'project', title: 'SQL Analytics Transformation', sub: 'Legacy migration to modern data stack \u00b7 2025', keywords: 'sql analytics transformation legacy migration modern data stack 2025' },
+    { section: 'Active Projects', icon: 'project', title: 'Team Data Literacy Programme', sub: 'Upskilling 30+ non-technical staff \u00b7 2024', keywords: 'team data literacy programme upskilling non-technical staff 2024 training' },
+    // Achievements
+    { section: 'Achievements', icon: 'achievement', title: '\u00a314.6M Efficiency Savings Identified', sub: 'Data-driven prescribing interventions', keywords: '14.6m efficiency savings identified data-driven prescribing interventions money cost' },
+    { section: 'Achievements', icon: 'achievement', title: '\u00a3220M Budget Oversight', sub: 'Full analytical accountability to ICB board', keywords: '220m budget oversight analytical accountability icb board' },
+    { section: 'Achievements', icon: 'achievement', title: 'Power BI Dashboards for 200+ Users', sub: 'Clinicians & commissioners across ICB', keywords: 'power bi dashboards 200 users clinicians commissioners' },
+    { section: 'Achievements', icon: 'achievement', title: 'Team of 12 Led', sub: 'Cross-functional data & population health', keywords: 'team 12 led cross-functional data population health leadership management' },
+    // Education
+    { section: 'Education', icon: 'edu', title: 'MPharm (Hons) \u2014 2:1', sub: 'University of East Anglia \u00b7 2011\u20132015', keywords: 'mpharm hons 2:1 university east anglia uea 2011 2015 pharmacy degree' },
+    { section: 'Education', icon: 'edu', title: 'GPhC Registration', sub: 'General Pharmaceutical Council \u00b7 August 2016', keywords: 'gphc registration general pharmaceutical council 2016 registered' },
+    { section: 'Education', icon: 'edu', title: 'Power BI Data Analyst Associate', sub: 'Microsoft Certified \u00b7 2023', keywords: 'power bi data analyst associate microsoft certified 2023 certification' },
+    { section: 'Education', icon: 'edu', title: 'Clinical Pharmacy Diploma', sub: 'Professional development \u00b7 2019', keywords: 'clinical pharmacy diploma professional development 2019' },
+    // Quick Actions
+    { section: 'Quick Actions', icon: 'action', title: 'Download CV', sub: 'Export as PDF', keywords: 'download cv export pdf resume', action: 'cv' },
+    { section: 'Quick Actions', icon: 'action', title: 'Send Email', sub: 'andy@charlwood.xyz', keywords: 'send email contact andy charlwood', action: 'email' },
+    { section: 'Quick Actions', icon: 'action', title: 'View LinkedIn', sub: 'Professional profile', keywords: 'view linkedin professional profile social', action: 'linkedin' },
+    { section: 'Quick Actions', icon: 'action', title: 'View Projects', sub: 'GitHub & portfolio', keywords: 'view projects github portfolio code repositories', action: 'projects' },
+  ];
+
+  const iconColorMap = {
+    role: 'teal',
+    skill: 'green',
+    project: 'amber',
+    achievement: 'amber',
+    edu: 'purple',
+    action: 'teal',
+  };
+
+  const iconSVGs = {
+    role: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    skill: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    project: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    achievement: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>',
+    edu: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"/></svg>',
+    action: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+  };
+
+  // ===== DOM ELEMENTS =====
+  const overlay = document.getElementById('paletteOverlay');
+  const modal = document.getElementById('paletteModal');
+  const paletteInput = document.getElementById('paletteInput');
+  const paletteResults = document.getElementById('paletteResults');
+  const commandBarInput = document.getElementById('commandBarInput');
+  const commandBarTrigger = document.getElementById('commandBarTrigger');
+
+  let selectedIndex = -1;
+  let visibleItems = [];
+
+  // ===== OPEN / CLOSE =====
+  function openPalette(initialQuery) {
+    overlay.classList.add('active');
+    paletteInput.value = initialQuery || '';
+    paletteInput.focus();
+    renderResults(paletteInput.value);
+    selectedIndex = -1;
+  }
+
+  function closePalette() {
+    overlay.classList.remove('active');
+    paletteInput.value = '';
+    commandBarInput.value = '';
+    selectedIndex = -1;
+  }
+
+  // ===== RENDER =====
+  function renderResults(query) {
+    const q = query.toLowerCase().trim();
+    let filtered = paletteData;
+
+    if (q) {
+      filtered = paletteData.filter(item => {
+        const haystack = (item.title + ' ' + item.sub + ' ' + item.keywords + ' ' + item.section).toLowerCase();
+        return q.split(/\s+/).every(word => haystack.includes(word));
+      });
+    }
+
+    visibleItems = filtered;
+
+    if (filtered.length === 0) {
+      paletteResults.innerHTML = '<div class="palette-empty">No results found</div>';
+      return;
+    }
+
+    // Group by section
+    const groups = {};
+    filtered.forEach(item => {
+      if (!groups[item.section]) groups[item.section] = [];
+      groups[item.section].push(item);
+    });
+
+    let html = '';
+    let globalIdx = 0;
+
+    for (const [section, items] of Object.entries(groups)) {
+      html += `<div class="palette-section-label">${section}</div>`;
+      items.forEach(item => {
+        const colorClass = iconColorMap[item.icon] || 'teal';
+        const svg = iconSVGs[item.icon] || iconSVGs.role;
+        const isSelected = globalIdx === selectedIndex;
+        html += `
+          <div class="palette-item${isSelected ? ' selected' : ''}" data-index="${globalIdx}">
+            <div class="palette-item-icon palette-item-icon-${colorClass}">${svg}</div>
+            <div class="palette-item-text">
+              <div class="palette-item-title">${highlight(item.title, q)}</div>
+              <div class="palette-item-sub">${item.sub}</div>
+            </div>
+          </div>`;
+        globalIdx++;
+      });
+    }
+
+    paletteResults.innerHTML = html;
+
+    // Attach click handlers
+    paletteResults.querySelectorAll('.palette-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const idx = parseInt(el.dataset.index, 10);
+        selectItem(idx);
+      });
+    });
+  }
+
+  function highlight(text, query) {
+    if (!query) return text;
+    const words = query.split(/\s+/).filter(Boolean);
+    let result = text;
+    words.forEach(word => {
+      const regex = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      result = result.replace(regex, '<mark style="background:rgba(10,128,128,0.15);color:inherit;border-radius:2px;padding:0 1px;">$1</mark>');
+    });
+    return result;
+  }
+
+  function updateSelection() {
+    const items = paletteResults.querySelectorAll('.palette-item');
+    items.forEach((el, i) => {
+      el.classList.toggle('selected', i === selectedIndex);
+    });
+    // Scroll into view
+    if (selectedIndex >= 0 && items[selectedIndex]) {
+      items[selectedIndex].scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function selectItem(index) {
+    const item = visibleItems[index];
+    if (!item) return;
+
+    if (item.action === 'email') {
+      window.location.href = 'mailto:andy@charlwood.xyz';
+    } else if (item.action === 'linkedin') {
+      window.open('https://linkedin.com', '_blank');
+    } else if (item.action === 'cv') {
+      alert('CV download would be triggered here.');
+    } else if (item.action === 'projects') {
+      window.open('https://github.com', '_blank');
+    }
+
+    closePalette();
+  }
+
+  // ===== EVENT HANDLERS =====
+
+  // Ctrl+K global shortcut
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      if (overlay.classList.contains('active')) {
+        closePalette();
+      } else {
+        openPalette();
+      }
+    }
+    if (e.key === 'Escape' && overlay.classList.contains('active')) {
+      e.preventDefault();
+      closePalette();
+    }
+  });
+
+  // Click overlay to close
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closePalette();
+  });
+
+  // Prevent clicks inside modal from closing
+  modal.addEventListener('click', (e) => e.stopPropagation());
+
+  // Palette input
+  paletteInput.addEventListener('input', () => {
+    selectedIndex = -1;
+    renderResults(paletteInput.value);
+  });
+
+  paletteInput.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (selectedIndex < visibleItems.length - 1) {
+        selectedIndex++;
+        updateSelection();
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (selectedIndex > 0) {
+        selectedIndex--;
+        updateSelection();
+      }
+    } else if (e.key === 'Enter' && selectedIndex >= 0) {
+      e.preventDefault();
+      selectItem(selectedIndex);
+    }
+  });
+
+  // Command bar input opens palette
+  commandBarInput.addEventListener('focus', () => {
+    openPalette();
+    commandBarInput.blur();
+  });
+
+  commandBarInput.addEventListener('input', () => {
+    const val = commandBarInput.value;
+    openPalette(val);
+    commandBarInput.value = '';
+  });
+
+  // Animate skill bars on load
+  window.addEventListener('load', () => {
+    document.querySelectorAll('.skill-bar-fill').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0%';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          bar.style.width = w;
+        });
+      });
+    });
+  });
+})();
+</script>
+
+</body></html>

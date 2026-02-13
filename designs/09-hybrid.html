@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinical Record — Hybrid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  /* ========================================
+     HYBRID — Three-column clinical luxury
+     Foyer drama + contextual workspace
+     ======================================== */
+
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    /* Core palette */
+    --sidebar-bg: #0F172A;
+    --sidebar-hover: #1A2540;
+    --identity-bg: #1E293B;
+    --identity-border: #2A3A52;
+    --content-bg: #F8FAFB;
+    --card-bg: #FFFFFF;
+
+    /* NHS Blue accent */
+    --accent: #005EB8;
+    --accent-hover: #004C93;
+    --accent-light: #EBF3FC;
+    --accent-subtle: rgba(0, 94, 184, 0.08);
+
+    /* Text on dark */
+    --text-white: #FFFFFF;
+    --text-light: #E2E8F0;
+    --text-light-secondary: #94A3B8;
+    --text-light-muted: #64748B;
+
+    /* Text on light */
+    --text-primary: #111827;
+    --text-secondary: #4B5563;
+    --text-muted: #6B7280;
+    --text-faint: #9CA3AF;
+    --text-ghost: #D1D5DB;
+
+    /* Status */
+    --green: #22C55E;
+    --green-text: #16A34A;
+    --amber: #F59E0B;
+    --amber-text: #D97706;
+
+    /* Borders */
+    --border-light: #E5E7EB;
+    --border-subtle: #F3F4F6;
+
+    /* Layout */
+    --sidebar-width: 56px;
+    --identity-width: 320px;
+
+    /* Fonts */
+    --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+  }
+
+  html {
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    background: var(--content-bg);
+    line-height: 1.5;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ----------------------------------------
+     Layout Shell — Three fixed columns
+     ---------------------------------------- */
+
+  .layout {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ----------------------------------------
+     Column 1: Slim Icon Sidebar
+     ---------------------------------------- */
+
+  .sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0 16px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 20;
+  }
+
+  .sidebar-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo svg {
+    width: 18px;
+    height: 18px;
+    color: var(--text-white);
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    padding: 0 8px;
+  }
+
+  .sidebar-item {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    color: var(--text-light-muted);
+    position: relative;
+    border: none;
+    background: transparent;
+  }
+
+  .sidebar-item:hover {
+    background: var(--sidebar-hover);
+    color: var(--text-light-secondary);
+  }
+
+  .sidebar-item.active {
+    background: var(--accent);
+    color: var(--text-white);
+  }
+
+  .sidebar-item.active::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .sidebar-item svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.75;
+  }
+
+  /* Tooltip on hover */
+  .sidebar-item[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--sidebar-bg);
+    color: var(--text-light);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+  }
+
+  .sidebar-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--identity-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-light-secondary);
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+    margin-top: auto;
+    cursor: default;
+  }
+
+  /* ----------------------------------------
+     Column 2: Identity Panel (The Foyer)
+     ---------------------------------------- */
+
+  .identity {
+    width: var(--identity-width);
+    min-width: var(--identity-width);
+    background: var(--identity-bg);
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width);
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* Subtle scrollbar for identity panel */
+  .identity::-webkit-scrollbar {
+    width: 4px;
+  }
+  .identity::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .identity::-webkit-scrollbar-thumb {
+    background: var(--identity-border);
+    border-radius: 2px;
+  }
+
+  .identity-header {
+    padding: 36px 32px 0;
+  }
+
+  .identity-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-white);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .identity-surname {
+    font-weight: 300;
+    opacity: 0.7;
+  }
+
+  .identity-role {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-light-secondary);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  .identity-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--identity-border);
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+
+  .status-badge.active {
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ADE80;
+  }
+
+  .status-badge.active::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  .status-badge.opportunity {
+    background: rgba(0, 94, 184, 0.15);
+    color: #60A5FA;
+    border: 1px solid rgba(96, 165, 250, 0.2);
+  }
+
+  /* Identity Demographics */
+  .identity-fields {
+    padding: 24px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .identity-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .identity-field-label {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-light-muted);
+  }
+
+  .identity-field-value {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-light);
+    line-height: 1.3;
+  }
+
+  .identity-field-value.mono {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  /* Identity Actions */
+  .identity-actions {
+    padding: 20px 32px;
+    margin-top: auto;
+    border-top: 1px solid var(--identity-border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .identity-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 12.5px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: var(--font-sans);
+    text-decoration: none;
+    border: none;
+  }
+
+  .identity-action svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 1.75;
+  }
+
+  .identity-action.primary {
+    background: var(--accent);
+    color: var(--text-white);
+    border: 1px solid var(--accent);
+  }
+
+  .identity-action.primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
+
+  .identity-action.secondary {
+    background: transparent;
+    color: var(--text-light-secondary);
+    border: 1px solid var(--identity-border);
+  }
+
+  .identity-action.secondary:hover {
+    border-color: var(--text-light-muted);
+    color: var(--text-light);
+  }
+
+  .identity-action-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .identity-action-row .identity-action {
+    flex: 1;
+  }
+
+  /* Session footer */
+  .identity-session {
+    padding: 12px 32px;
+    border-top: 1px solid var(--identity-border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .identity-session-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+
+  .identity-session-text {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-light-muted);
+    letter-spacing: 0.01em;
+  }
+
+  /* ----------------------------------------
+     Column 3: Content Area
+     ---------------------------------------- */
+
+  .content {
+    margin-left: calc(var(--sidebar-width) + var(--identity-width));
+    flex: 1;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--content-bg);
+    padding: 40px 48px 80px;
+  }
+
+  .content::-webkit-scrollbar {
+    width: 6px;
+  }
+  .content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .content::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 3px;
+  }
+  .content::-webkit-scrollbar-thumb:hover {
+    background: var(--text-ghost);
+  }
+
+  /* ----------------------------------------
+     Content: Breadcrumb
+     ---------------------------------------- */
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    color: var(--text-faint);
+    margin-bottom: 32px;
+  }
+
+  .breadcrumb svg {
+    width: 12px;
+    height: 12px;
+    stroke-width: 1.5;
+  }
+
+  .breadcrumb-current {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* ----------------------------------------
+     Content: Headline Block
+     ---------------------------------------- */
+
+  .headline {
+    margin-bottom: 48px;
+  }
+
+  .headline-text {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--text-primary);
+    line-height: 1.65;
+    max-width: 640px;
+    letter-spacing: -0.01em;
+  }
+
+  .headline-text strong {
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  /* ----------------------------------------
+     Content: KPI Metrics Strip
+     ---------------------------------------- */
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 56px;
+  }
+
+  .metric-tile {
+    padding: 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    position: relative;
+    transition: border-color 0.15s ease;
+  }
+
+  .metric-tile:hover {
+    border-color: var(--text-ghost);
+  }
+
+  .metric-tile::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 6px 6px 0 0;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .metric-tile:hover::before {
+    opacity: 1;
+  }
+
+  .metric-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .metric-value .metric-unit {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0;
+  }
+
+  .metric-label {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+    line-height: 1.3;
+  }
+
+  /* ----------------------------------------
+     Content: Section Headers
+     ---------------------------------------- */
+
+  .section-header {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--text-faint);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-light);
+  }
+
+  .section-header svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 1.5;
+  }
+
+  /* ----------------------------------------
+     Content: Career Timeline
+     ---------------------------------------- */
+
+  .timeline {
+    margin-bottom: 56px;
+    position: relative;
+    padding-left: 0;
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 16px 0;
+    position: relative;
+  }
+
+  .timeline-item + .timeline-item {
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .timeline-date {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-faint);
+    width: 48px;
+    flex-shrink: 0;
+    padding-top: 2px;
+    letter-spacing: 0.01em;
+  }
+
+  .timeline-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    padding-top: 4px;
+    position: relative;
+  }
+
+  .timeline-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: var(--card-bg);
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+  }
+
+  .timeline-dot.current {
+    background: var(--accent);
+  }
+
+  .timeline-dot.current::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 94, 184, 0.25);
+  }
+
+  .timeline-line {
+    width: 1px;
+    flex: 1;
+    background: var(--border-light);
+    min-height: 0;
+  }
+
+  .timeline-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .timeline-role {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.35;
+    margin-bottom: 3px;
+  }
+
+  .timeline-org {
+    font-size: 12.5px;
+    font-weight: 400;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .timeline-org-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .timeline-current-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--green-text);
+    background: rgba(34, 197, 94, 0.08);
+    padding: 2px 8px;
+    border-radius: 100px;
+    margin-left: 8px;
+  }
+
+  .timeline-current-badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  /* ----------------------------------------
+     Content: Active Problems
+     ---------------------------------------- */
+
+  .problems {
+    margin-bottom: 56px;
+  }
+
+  .problem-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .problem-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    transition: border-color 0.15s ease;
+  }
+
+  .problem-row + .problem-row {
+    margin-top: 6px;
+  }
+
+  .problem-row:hover {
+    border-color: var(--text-ghost);
+  }
+
+  .problem-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .problem-dot.active { background: var(--green); }
+  .problem-dot.in-progress { background: var(--amber); }
+
+  .problem-desc {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    flex: 1;
+    min-width: 0;
+  }
+
+  .problem-status-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    flex-shrink: 0;
+  }
+
+  .problem-status-label.active { color: var(--green-text); }
+  .problem-status-label.in-progress { color: var(--amber-text); }
+
+  .problem-since {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    flex-shrink: 0;
+    min-width: 64px;
+    text-align: right;
+  }
+
+  /* ----------------------------------------
+     Content: Skills Progress Bars
+     ---------------------------------------- */
+
+  .skills {
+    margin-bottom: 48px;
+  }
+
+  .skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .skill-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .skill-name {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    width: 120px;
+    flex-shrink: 0;
+  }
+
+  .skill-bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--border-light);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .skill-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent);
+    position: relative;
+    transition: width 0.6s ease;
+  }
+
+  .skill-bar-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 12px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+    border-radius: 0 3px 3px 0;
+  }
+
+  .skill-pct {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ----------------------------------------
+     Utility
+     ---------------------------------------- */
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Subtle entry animation */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-in {
+    animation: fadeInUp 0.4s ease both;
+  }
+
+  .animate-delay-1 { animation-delay: 0.05s; }
+  .animate-delay-2 { animation-delay: 0.1s; }
+  .animate-delay-3 { animation-delay: 0.15s; }
+  .animate-delay-4 { animation-delay: 0.2s; }
+  .animate-delay-5 { animation-delay: 0.25s; }
+  .animate-delay-6 { animation-delay: 0.3s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-in {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ====================================
+       COLUMN 1: Slim Icon Sidebar
+       ==================================== -->
+  <aside class="sidebar" role="navigation" aria-label="Main navigation">
+
+    <div class="sidebar-logo" aria-hidden="true">
+      <i data-lucide="heart-pulse"></i>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="sidebar-item active" data-tooltip="Summary" aria-label="Summary" aria-current="page">
+        <i data-lucide="layout-dashboard"></i>
+      </button>
+      <button class="sidebar-item" data-tooltip="Experience" aria-label="Experience">
+        <i data-lucide="briefcase"></i>
+      </button>
+      <button class="sidebar-item" data-tooltip="Skills" aria-label="Skills">
+        <i data-lucide="code-2"></i>
+      </button>
+      <button class="sidebar-item" data-tooltip="Achievements" aria-label="Achievements">
+        <i data-lucide="trophy"></i>
+      </button>
+      <button class="sidebar-item" data-tooltip="Projects" aria-label="Projects">
+        <i data-lucide="folder-open"></i>
+      </button>
+      <button class="sidebar-item" data-tooltip="Education" aria-label="Education">
+        <i data-lucide="graduation-cap"></i>
+      </button>
+      <button class="sidebar-item" data-tooltip="Contact" aria-label="Contact">
+        <i data-lucide="mail"></i>
+      </button>
+    </nav>
+
+    <div class="sidebar-avatar" title="Andrew Charlwood">AC</div>
+
+  </aside>
+
+  <!-- ====================================
+       COLUMN 2: Identity Panel (The Foyer)
+       ==================================== -->
+  <aside class="identity" role="complementary" aria-label="Patient identity">
+
+    <div class="identity-header">
+      <h1 class="identity-name">
+        Andrew <span class="identity-surname">Charlwood</span>
+      </h1>
+      <p class="identity-role">Pharmacist &amp; Data Analyst</p>
+
+      <div class="identity-status">
+        <span class="status-badge active">Active</span>
+        <span class="status-badge opportunity">Open to opportunities</span>
+      </div>
+    </div>
+
+    <div class="identity-fields">
+
+      <div class="identity-field">
+        <span class="identity-field-label">Date of Birth</span>
+        <span class="identity-field-value mono">14 / 02 / 1993</span>
+      </div>
+
+      <div class="identity-field">
+        <span class="identity-field-label">GPhC Number</span>
+        <span class="identity-field-value mono">221 181 0</span>
+      </div>
+
+      <div class="identity-field">
+        <span class="identity-field-label">Registered Since</span>
+        <span class="identity-field-value mono">August 2016</span>
+      </div>
+
+      <div class="identity-field">
+        <span class="identity-field-label">Location</span>
+        <span class="identity-field-value">Norwich, NR1</span>
+      </div>
+
+      <div class="identity-field">
+        <span class="identity-field-label">Qualification</span>
+        <span class="identity-field-value">MPharm (Hons) 2:1</span>
+      </div>
+
+      <div class="identity-field">
+        <span class="identity-field-label">University</span>
+        <span class="identity-field-value">UEA, 2015</span>
+      </div>
+
+    </div>
+
+    <div class="identity-actions">
+      <button class="identity-action primary">
+        <i data-lucide="download"></i>
+        Download CV
+      </button>
+      <div class="identity-action-row">
+        <button class="identity-action secondary">
+          <i data-lucide="mail"></i>
+          Email
+        </button>
+        <button class="identity-action secondary">
+          <i data-lucide="linkedin"></i>
+          LinkedIn
+        </button>
+      </div>
+    </div>
+
+    <div class="identity-session">
+      <span class="identity-session-dot"></span>
+      <span class="identity-session-text">
+        <span id="session-user">A.CHARLWOOD</span>
+        <span style="margin: 0 4px; opacity: 0.4;">&middot;</span>
+        <span id="session-time"></span>
+      </span>
+    </div>
+
+  </aside>
+
+  <!-- ====================================
+       COLUMN 3: Content Area
+       ==================================== -->
+  <main class="content" role="main">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb animate-in animate-delay-1">
+      <i data-lucide="heart-pulse"></i>
+      <span>Clinical Record</span>
+      <i data-lucide="chevron-right"></i>
+      <span class="breadcrumb-current">Summary</span>
+    </div>
+
+    <!-- Headline Block -->
+    <div class="headline animate-in animate-delay-2">
+      <p class="headline-text">
+        NHS pharmacist turned data leader. <strong>8 years</strong> transforming healthcare through analytics and prescribing optimisation &mdash; from building patient-level switching algorithms to managing a <strong>&pound;220M</strong> prescribing budget across Norfolk &amp; Waveney ICS.
+      </p>
+    </div>
+
+    <!-- KPI Metrics Strip -->
+    <div class="metrics animate-in animate-delay-3">
+      <div class="metric-tile">
+        <div class="metric-value">&pound;14.6<span class="metric-unit">M</span></div>
+        <div class="metric-label">Savings identified</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-value">&pound;220<span class="metric-unit">M</span></div>
+        <div class="metric-label">Budget oversight</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-value">8<span class="metric-unit">+</span></div>
+        <div class="metric-label">Years in healthcare</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-value">3</div>
+        <div class="metric-label">Teams built &amp; led</div>
+      </div>
+    </div>
+
+    <!-- Career Timeline -->
+    <div class="section-header animate-in animate-delay-4">
+      <i data-lucide="git-branch"></i>
+      Career Timeline
+    </div>
+
+    <div class="timeline animate-in animate-delay-4">
+
+      <div class="timeline-item">
+        <span class="timeline-date">2024</span>
+        <div class="timeline-connector">
+          <div class="timeline-dot current"></div>
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-role">
+            Deputy Head, Population Health &amp; Data Analysis
+            <span class="timeline-current-badge">Current</span>
+          </div>
+          <div class="timeline-org">
+            <span class="timeline-org-dot" style="background: #005EB8;"></span>
+            NHS Norfolk &amp; Waveney ICB
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <span class="timeline-date">2022</span>
+        <div class="timeline-connector">
+          <div class="timeline-dot"></div>
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-role">High-Cost Drugs &amp; Interface Pharmacist</div>
+          <div class="timeline-org">
+            <span class="timeline-org-dot" style="background: #005EB8;"></span>
+            NHS Norfolk &amp; Waveney ICB
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <span class="timeline-date">2017</span>
+        <div class="timeline-connector">
+          <div class="timeline-dot"></div>
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-role">Pharmacy Manager</div>
+          <div class="timeline-org">
+            <span class="timeline-org-dot" style="background: #00897B;"></span>
+            Tesco PLC
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <span class="timeline-date">2016</span>
+        <div class="timeline-connector">
+          <div class="timeline-dot"></div>
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-role">Duty Pharmacy Manager</div>
+          <div class="timeline-org">
+            <span class="timeline-org-dot" style="background: #00897B;"></span>
+            Tesco PLC
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Active Problems -->
+    <div class="section-header animate-in animate-delay-5">
+      <i data-lucide="alert-circle"></i>
+      Active Problems
+    </div>
+
+    <div class="problems animate-in animate-delay-5">
+      <div class="problem-list">
+
+        <div class="problem-row">
+          <div class="problem-dot active"></div>
+          <span class="problem-desc">&pound;220M prescribing budget oversight and management</span>
+          <span class="problem-status-label active">Active</span>
+          <span class="problem-since">Jul 2024</span>
+        </div>
+
+        <div class="problem-row">
+          <div class="problem-dot in-progress"></div>
+          <span class="problem-desc">Patient-level SQL analytics transformation</span>
+          <span class="problem-status-label in-progress">In Progress</span>
+          <span class="problem-since">2025</span>
+        </div>
+
+        <div class="problem-row">
+          <div class="problem-dot in-progress"></div>
+          <span class="problem-desc">Team data literacy programme</span>
+          <span class="problem-status-label in-progress">In Progress</span>
+          <span class="problem-since">Jul 2024</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Top Skills -->
+    <div class="section-header animate-in animate-delay-6">
+      <i data-lucide="bar-chart-3"></i>
+      Top Skills
+    </div>
+
+    <div class="skills animate-in animate-delay-6">
+      <div class="skills-list">
+
+        <div class="skill-row">
+          <span class="skill-name">Data Analysis</span>
+          <div class="skill-bar-track">
+            <div class="skill-bar-fill" style="width: 95%;"></div>
+          </div>
+          <span class="skill-pct">95%</span>
+        </div>
+
+        <div class="skill-row">
+          <span class="skill-name">Power BI</span>
+          <div class="skill-bar-track">
+            <div class="skill-bar-fill" style="width: 92%;"></div>
+          </div>
+          <span class="skill-pct">92%</span>
+        </div>
+
+        <div class="skill-row">
+          <span class="skill-name">Python</span>
+          <div class="skill-bar-track">
+            <div class="skill-bar-fill" style="width: 90%;"></div>
+          </div>
+          <span class="skill-pct">90%</span>
+        </div>
+
+        <div class="skill-row">
+          <span class="skill-name">SQL</span>
+          <div class="skill-bar-track">
+            <div class="skill-bar-fill" style="width: 88%;"></div>
+          </div>
+          <span class="skill-pct">88%</span>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+<script>
+  // Initialize Lucide icons
+  lucide.createIcons();
+
+  // Session time
+  function updateTime() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    const el = document.getElementById('session-time');
+    if (el) el.textContent = h + ':' + m + ':' + s;
+  }
+  updateTime();
+  setInterval(updateTime, 1000);
+
+  // Sidebar nav interaction
+  document.querySelectorAll('.sidebar-item').forEach(item => {
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.sidebar-item').forEach(i => {
+        i.classList.remove('active');
+        i.removeAttribute('aria-current');
+      });
+      this.classList.add('active');
+      this.setAttribute('aria-current', 'page');
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GP Clinical System — Timeline-Centric Clinical</title>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F7F7F5;
+  --white: #FFFFFF;
+  --left-panel: #F0EEEB;
+  --primary: #4338CA;
+  --consultation: #3B82F6;
+  --prescription: #F59E0B;
+  --result: #8B5CF6;
+  --referral: #10B981;
+  --immunisation: #14B8A6;
+  --letter: #6B7280;
+  --text: #1F2937;
+  --secondary: #6B7280;
+  --border: #E5E3DF;
+  --border-light: #EEECE8;
+  --danger: #DC2626;
+  --danger-bg: #FEF2F2;
+  --danger-border: #FECACA;
+  --selected-bg: #EEF2FF;
+  --hover-bg: #F9FAFB;
+}
+
+html { font-size: 14px; }
+body {
+  font-family: 'Albert Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono { font-family: 'Fira Code', monospace; font-size: 0.85em; }
+
+/* =========================================
+   PATIENT BANNER
+   ========================================= */
+.patient-banner {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  height: 75px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 24px;
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+.patient-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #818CF8, #6366F1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.patient-core {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.patient-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.patient-demo {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--secondary);
+  font-size: 13px;
+}
+
+.patient-demo .sep { color: var(--border); }
+
+.patient-details {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  font-size: 12.5px;
+  color: var(--secondary);
+  flex: 1;
+}
+
+.patient-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.patient-detail-item .label {
+  color: #9CA3AF;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+
+.patient-detail-item .value {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.patient-alerts {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.allergy-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: 20px;
+  padding: 5px 14px 5px 10px;
+  color: var(--danger);
+  font-weight: 600;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.allergy-badge svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.alerts-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #FEF3C7;
+  border: 1px solid #FDE68A;
+  border-radius: 20px;
+  padding: 5px 12px;
+  color: #92400E;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* =========================================
+   TOOLBAR
+   ========================================= */
+.toolbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 2px;
+  flex-shrink: 0;
+  z-index: 99;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border: none;
+  background: transparent;
+  color: var(--secondary);
+  font-family: 'Albert Sans', sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.toolbar-btn:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.toolbar-btn svg { width: 14px; height: 14px; }
+
+.toolbar-btn.primary {
+  background: var(--primary);
+  color: white;
+}
+
+.toolbar-btn.primary:hover {
+  background: #3730A3;
+}
+
+.toolbar-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+.toolbar-search {
+  margin-left: auto;
+  position: relative;
+}
+
+.toolbar-search input {
+  width: 220px;
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 10px 0 28px;
+  font-family: 'Albert Sans', sans-serif;
+  font-size: 12px;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.toolbar-search input:focus {
+  border-color: var(--primary);
+  background: var(--white);
+}
+
+.toolbar-search svg {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 13px;
+  height: 13px;
+  color: var(--secondary);
+}
+
+/* =========================================
+   MAIN LAYOUT
+   ========================================= */
+.main-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* =========================================
+   LEFT PANEL — PATIENT SUMMARY
+   ========================================= */
+.left-panel {
+  width: 240px;
+  min-width: 240px;
+  background: var(--left-panel);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.left-panel::-webkit-scrollbar { width: 4px; }
+.left-panel::-webkit-scrollbar-track { background: transparent; }
+.left-panel::-webkit-scrollbar-thumb { background: #D1CFC9; border-radius: 2px; }
+
+.summary-section {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-section:last-child { border-bottom: none; }
+
+.summary-heading {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9CA3AF;
+  margin-bottom: 8px;
+}
+
+.problem-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 3px 0;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+
+.problem-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.problem-name { font-weight: 500; color: var(--text); flex: 1; }
+
+.problem-meta {
+  font-size: 11px;
+  color: var(--secondary);
+  white-space: nowrap;
+}
+
+.med-item {
+  padding: 3px 0;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+
+.med-name { font-weight: 500; color: var(--text); }
+
+.med-dose {
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  color: var(--secondary);
+}
+
+.allergy-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.allergy-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.allergy-reaction {
+  font-weight: 400;
+  font-size: 11px;
+  color: #B91C1C;
+}
+
+.value-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 2.5px 0;
+  font-size: 12.5px;
+}
+
+.value-label { color: var(--secondary); }
+
+.value-data {
+  font-family: 'Fira Code', monospace;
+  font-weight: 500;
+  color: var(--text);
+  font-size: 11.5px;
+}
+
+.value-date {
+  font-size: 10px;
+  color: #9CA3AF;
+  margin-left: 4px;
+}
+
+.care-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 3px 0;
+  font-size: 12px;
+  color: var(--secondary);
+  line-height: 1.35;
+}
+
+.care-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--primary);
+}
+
+.care-due-date {
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* =========================================
+   CENTER — TIMELINE
+   ========================================= */
+.center-panel {
+  flex: 45;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.timeline-header {
+  padding: 12px 20px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.timeline-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 11px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1.5px solid transparent;
+  user-select: none;
+}
+
+.filter-pill .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.filter-pill[data-type="consultation"] { background: #EFF6FF; color: #1E40AF; }
+.filter-pill[data-type="consultation"] .dot { background: var(--consultation); }
+.filter-pill[data-type="consultation"].inactive { background: #F9FAFB; color: #9CA3AF; border-color: #E5E7EB; }
+.filter-pill[data-type="consultation"].inactive .dot { background: #D1D5DB; }
+
+.filter-pill[data-type="prescription"] { background: #FFFBEB; color: #92400E; }
+.filter-pill[data-type="prescription"] .dot { background: var(--prescription); }
+.filter-pill[data-type="prescription"].inactive { background: #F9FAFB; color: #9CA3AF; border-color: #E5E7EB; }
+.filter-pill[data-type="prescription"].inactive .dot { background: #D1D5DB; }
+
+.filter-pill[data-type="result"] { background: #F5F3FF; color: #5B21B6; }
+.filter-pill[data-type="result"] .dot { background: var(--result); }
+.filter-pill[data-type="result"].inactive { background: #F9FAFB; color: #9CA3AF; border-color: #E5E7EB; }
+.filter-pill[data-type="result"].inactive .dot { background: #D1D5DB; }
+
+.filter-pill[data-type="referral"] { background: #ECFDF5; color: #065F46; }
+.filter-pill[data-type="referral"] .dot { background: var(--referral); }
+.filter-pill[data-type="referral"].inactive { background: #F9FAFB; color: #9CA3AF; border-color: #E5E7EB; }
+.filter-pill[data-type="referral"].inactive .dot { background: #D1D5DB; }
+
+.filter-pill[data-type="immunisation"] { background: #F0FDFA; color: #115E59; }
+.filter-pill[data-type="immunisation"] .dot { background: var(--immunisation); }
+.filter-pill[data-type="immunisation"].inactive { background: #F9FAFB; color: #9CA3AF; border-color: #E5E7EB; }
+.filter-pill[data-type="immunisation"].inactive .dot { background: #D1D5DB; }
+
+.filter-pill[data-type="letter"] { background: #F3F4F6; color: #374151; }
+.filter-pill[data-type="letter"] .dot { background: var(--letter); }
+.filter-pill[data-type="letter"].inactive { background: #F9FAFB; color: #9CA3AF; border-color: #E5E7EB; }
+.filter-pill[data-type="letter"].inactive .dot { background: #D1D5DB; }
+
+.timeline-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px 40px;
+}
+
+.timeline-scroll::-webkit-scrollbar { width: 5px; }
+.timeline-scroll::-webkit-scrollbar-track { background: transparent; }
+.timeline-scroll::-webkit-scrollbar-thumb { background: #D1CFC9; border-radius: 3px; }
+
+.timeline-container {
+  position: relative;
+  padding-left: 24px;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+
+.timeline-event {
+  position: relative;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: opacity 0.25s;
+}
+
+.timeline-event.hidden {
+  display: none;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -21px;
+  top: 14px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2.5px solid var(--white);
+  z-index: 2;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.06);
+}
+
+.timeline-event[data-type="consultation"] .timeline-dot { background: var(--consultation); }
+.timeline-event[data-type="prescription"] .timeline-dot { background: var(--prescription); }
+.timeline-event[data-type="result"] .timeline-dot { background: var(--result); }
+.timeline-event[data-type="referral"] .timeline-dot { background: var(--referral); }
+.timeline-event[data-type="immunisation"] .timeline-dot { background: var(--immunisation); }
+.timeline-event[data-type="letter"] .timeline-dot { background: var(--letter); }
+
+.event-card {
+  background: var(--white);
+  border-radius: 8px;
+  padding: 11px 14px;
+  border: 1px solid var(--border-light);
+  border-left: 3.5px solid transparent;
+  transition: all 0.15s;
+}
+
+.timeline-event:hover .event-card {
+  border-color: #D5D3CF;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.timeline-event[data-type="consultation"] .event-card { border-left-color: var(--consultation); }
+.timeline-event[data-type="prescription"] .event-card { border-left-color: var(--prescription); }
+.timeline-event[data-type="result"] .event-card { border-left-color: var(--result); }
+.timeline-event[data-type="referral"] .event-card { border-left-color: var(--referral); }
+.timeline-event[data-type="immunisation"] .event-card { border-left-color: var(--immunisation); }
+.timeline-event[data-type="letter"] .event-card { border-left-color: var(--letter); }
+
+.timeline-event.selected .event-card {
+  background: var(--selected-bg);
+  border-color: #C7D2FE;
+  box-shadow: 0 0 0 1px #C7D2FE;
+}
+
+.event-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.event-date {
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  color: var(--secondary);
+  white-space: nowrap;
+}
+
+.event-type-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.timeline-event[data-type="consultation"] .event-type-label { color: #1E40AF; background: #DBEAFE; }
+.timeline-event[data-type="prescription"] .event-type-label { color: #92400E; background: #FEF3C7; }
+.timeline-event[data-type="result"] .event-type-label { color: #5B21B6; background: #EDE9FE; }
+.timeline-event[data-type="referral"] .event-type-label { color: #065F46; background: #D1FAE5; }
+.timeline-event[data-type="immunisation"] .event-type-label { color: #115E59; background: #CCFBF1; }
+.timeline-event[data-type="letter"] .event-type-label { color: #374151; background: #E5E7EB; }
+
+.event-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+
+.event-summary {
+  font-size: 12px;
+  color: var(--secondary);
+  line-height: 1.45;
+}
+
+/* =========================================
+   RIGHT PANEL — DETAIL
+   ========================================= */
+.right-panel {
+  flex: 35;
+  min-width: 0;
+  background: var(--white);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.right-panel::-webkit-scrollbar { width: 5px; }
+.right-panel::-webkit-scrollbar-track { background: transparent; }
+.right-panel::-webkit-scrollbar-thumb { background: #E5E3DF; border-radius: 3px; }
+
+.detail-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.detail-header-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.detail-type-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: #1E40AF;
+  background: #DBEAFE;
+}
+
+.detail-date {
+  font-family: 'Fira Code', monospace;
+  font-size: 12px;
+  color: var(--secondary);
+}
+
+.detail-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.detail-clinician {
+  font-size: 12.5px;
+  color: var(--secondary);
+}
+
+.detail-clinician strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.detail-body {
+  padding: 16px 20px 32px;
+  flex: 1;
+}
+
+.detail-section {
+  margin-bottom: 18px;
+}
+
+.detail-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9CA3AF;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.detail-text {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.detail-text p { margin-bottom: 6px; }
+
+.exam-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+}
+
+.exam-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 4px 8px;
+  background: #FAFAF8;
+  border-radius: 4px;
+}
+
+.exam-label {
+  font-size: 12.5px;
+  color: var(--secondary);
+}
+
+.exam-value {
+  font-family: 'Fira Code', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.assessment-list, .plan-list {
+  list-style: none;
+  padding: 0;
+}
+
+.assessment-list li, .plan-list li {
+  position: relative;
+  padding: 3px 0 3px 18px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.assessment-list li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.plan-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--primary);
+  border-radius: 2px;
+}
+
+.plan-list li.checked::before {
+  background: var(--primary);
+}
+
+.clinical-codes {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.code-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  padding: 2px 8px;
+  background: #F3F4F6;
+  border-radius: 4px;
+  color: var(--secondary);
+  border: 1px solid var(--border);
+}
+
+.detail-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #C4C0B9;
+  padding: 40px;
+  text-align: center;
+}
+
+.detail-placeholder svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  color: #D9D6D0;
+}
+
+.detail-placeholder p {
+  font-size: 13px;
+  font-weight: 500;
+}
+</style>
+</head>
+<body>
+
+<!-- =============================================
+     PATIENT BANNER
+     ============================================= -->
+<div class="patient-banner">
+  <div class="patient-avatar">SM</div>
+  <div class="patient-core">
+    <span class="patient-name">Sarah Mitchell</span>
+    <div class="patient-demo">
+      <span>F</span>
+      <span class="sep">&middot;</span>
+      <span>58y</span>
+      <span class="sep">&middot;</span>
+      <span>DOB 14/03/1967</span>
+    </div>
+  </div>
+  <div class="patient-details">
+    <div class="patient-detail-item">
+      <span class="label">NHS</span>
+      <span class="value mono">943 216 8821</span>
+    </div>
+    <div class="patient-detail-item">
+      <span class="label">Addr</span>
+      <span class="value">14 Oakfield Rd, Bristol BS8 2BN</span>
+    </div>
+    <div class="patient-detail-item">
+      <span class="label">Tel</span>
+      <span class="value">07712 845 392</span>
+    </div>
+    <div class="patient-detail-item">
+      <span class="label">GP</span>
+      <span class="value">Dr. J Patterson</span>
+    </div>
+  </div>
+  <div class="patient-alerts">
+    <div class="allergy-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      Penicillin &mdash; ALLERGY
+    </div>
+    <div class="alerts-badge">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+      2 Alerts
+    </div>
+  </div>
+</div>
+
+<!-- =============================================
+     TOOLBAR
+     ============================================= -->
+<div class="toolbar">
+  <button class="toolbar-btn primary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    New Consultation
+  </button>
+  <div class="toolbar-sep"></div>
+  <button class="toolbar-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12h6M12 9v6"/></svg>
+    Prescribe
+  </button>
+  <button class="toolbar-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M12 12v6M9 15h6"/></svg>
+    Add Problem
+  </button>
+  <button class="toolbar-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg>
+    Order Test
+  </button>
+  <button class="toolbar-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+    Refer
+  </button>
+  <button class="toolbar-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+    Fit Note
+  </button>
+  <button class="toolbar-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/><path d="M6 4h12"/></svg>
+    Print
+  </button>
+  <div class="toolbar-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input type="text" placeholder="Search record...">
+  </div>
+</div>
+
+<!-- =============================================
+     MAIN LAYOUT
+     ============================================= -->
+<div class="main-layout">
+
+  <!-- LEFT PANEL — PATIENT SUMMARY -->
+  <div class="left-panel">
+    <div class="summary-section">
+      <div class="summary-heading">Active Problems</div>
+      <div class="problem-item">
+        <div class="problem-dot"></div>
+        <span class="problem-name">Type 2 Diabetes Mellitus</span>
+        <span class="problem-meta">2019</span>
+      </div>
+      <div class="problem-item">
+        <div class="problem-dot"></div>
+        <span class="problem-name">Hypertension</span>
+        <span class="problem-meta">2015</span>
+      </div>
+      <div class="problem-item">
+        <div class="problem-dot" style="background: #F59E0B;"></div>
+        <span class="problem-name">OA Right Knee</span>
+        <span class="problem-meta">2021</span>
+      </div>
+    </div>
+
+    <div class="summary-section">
+      <div class="summary-heading">Current Medications</div>
+      <div class="med-item">
+        <div class="med-name">Metformin 500mg</div>
+        <div class="med-dose">BD &middot; Oral</div>
+      </div>
+      <div class="med-item">
+        <div class="med-name">Amlodipine 5mg</div>
+        <div class="med-dose">OD &middot; Oral</div>
+      </div>
+      <div class="med-item">
+        <div class="med-name">Ibuprofen 400mg</div>
+        <div class="med-dose">PRN &middot; Oral</div>
+      </div>
+    </div>
+
+    <div class="summary-section">
+      <div class="summary-heading">Allergies</div>
+      <div class="allergy-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        Penicillin
+        <span class="allergy-reaction">&mdash; Rash</span>
+      </div>
+    </div>
+
+    <div class="summary-section">
+      <div class="summary-heading">Latest Values</div>
+      <div class="value-row">
+        <span class="value-label">BP</span>
+        <span><span class="value-data">138/82</span><span class="value-date">13/02</span></span>
+      </div>
+      <div class="value-row">
+        <span class="value-label">HbA1c</span>
+        <span><span class="value-data">52</span><span class="value-date">07/02</span></span>
+      </div>
+      <div class="value-row">
+        <span class="value-label">eGFR</span>
+        <span><span class="value-data">78</span><span class="value-date">07/02</span></span>
+      </div>
+      <div class="value-row">
+        <span class="value-label">Chol</span>
+        <span><span class="value-data">5.2</span><span class="value-date">07/02</span></span>
+      </div>
+      <div class="value-row">
+        <span class="value-label">Weight</span>
+        <span><span class="value-data">74.2kg</span><span class="value-date">13/02</span></span>
+      </div>
+      <div class="value-row">
+        <span class="value-label">BMI</span>
+        <span><span class="value-data">27.4</span><span class="value-date">13/02</span></span>
+      </div>
+    </div>
+
+    <div class="summary-section">
+      <div class="summary-heading">Care Due</div>
+      <div class="care-item">
+        <svg class="care-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span>BP re-check <span class="care-due-date">Mar 2026</span></span>
+      </div>
+      <div class="care-item">
+        <svg class="care-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+        <span>Annual bloods <span class="care-due-date">Aug 2026</span></span>
+      </div>
+      <div class="care-item">
+        <svg class="care-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span>Foot check <span class="care-due-date">Feb 2027</span></span>
+      </div>
+      <div class="care-item">
+        <svg class="care-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span>Cervical screen <span class="care-due-date">May 2026</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER — THE TIMELINE -->
+  <div class="center-panel">
+    <div class="timeline-header">
+      <div class="timeline-title">Patient Timeline</div>
+      <div class="filter-bar">
+        <div class="filter-pill" data-type="consultation" onclick="toggleFilter(this)"><span class="dot"></span>Consultations</div>
+        <div class="filter-pill" data-type="prescription" onclick="toggleFilter(this)"><span class="dot"></span>Prescriptions</div>
+        <div class="filter-pill" data-type="result" onclick="toggleFilter(this)"><span class="dot"></span>Results</div>
+        <div class="filter-pill" data-type="referral" onclick="toggleFilter(this)"><span class="dot"></span>Referrals</div>
+        <div class="filter-pill" data-type="immunisation" onclick="toggleFilter(this)"><span class="dot"></span>Immunisations</div>
+        <div class="filter-pill" data-type="letter" onclick="toggleFilter(this)"><span class="dot"></span>Letters</div>
+      </div>
+    </div>
+    <div class="timeline-scroll">
+      <div class="timeline-container">
+        <div class="timeline-line"></div>
+
+        <!-- Event 1 — SELECTED -->
+        <div class="timeline-event selected" data-type="consultation" data-id="1" onclick="selectEvent(this)">
+          <div class="timeline-dot"></div>
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-date">13/02/2026</span>
+              <span class="event-type-label">Consultation</span>
+              <span class="event-title">Diabetes Annual Review</span>
+            </div>
+            <div class="event-summary">Dr Patterson. HbA1c 52 mmol/mol, BP 138/82. Reviewed medications, diet and exercise. Foot exam normal.</div>
+          </div>
+        </div>
+
+        <!-- Event 2 -->
+        <div class="timeline-event" data-type="result" data-id="2" onclick="selectEvent(this)">
+          <div class="timeline-dot"></div>
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-date">07/02/2026</span>
+              <span class="event-type-label">Result</span>
+              <span class="event-title">Blood Tests</span>
+            </div>
+            <div class="event-summary">HbA1c 52 mmol/mol, eGFR 78 mL/min, Total Cholesterol 5.2 mmol/L. All within acceptable range.</div>
+          </div>
+        </div>
+
+        <!-- Event 3 -->
+        <div class="timeline-event" data-type="consultation" data-id="3" onclick="selectEvent(this)">
+          <div class="timeline-dot"></div>
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-date">28/01/2026</span>
+              <span class="event-type-label">Consultation</span>
+              <span class="event-title">Knee Pain Review</span>
+            </div>
+            <div class="event-summary">Dr Williams. Right knee pain ongoing. X-ray confirms moderate OA changes. Discussed physio and weight management.</div>
+          </div>
+        </div>
+
+        <!-- Event 4 -->
+        <div class="timeline-event" data-type="consultation" data-id="4" onclick="selectEvent(this)">
+          <div class="timeline-dot"></div>
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-date">15/01/2026</span>
+              <span class="event-type-label">Consultation</span>
+              <span class="event-title">BP Check</span>
+            </div>
+            <div class="event-summary">Nurse Brown. BP 142/86 — slightly above target. Advised dietary salt reduction. Re-check in 4 weeks.</div>
+          </div>
+        </div>
+
+        <!-- Event 5 -->
+        <div class="timeline-event" data-type="result" data-id="5" onclick="selectEvent(this)">
+          <div class="timeline-dot"></div>
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-date">10/01/2026</span>
+              <span class="event-type-label">Result</span>
+              <span class="event-title">X-Ray Right Knee</span>
+            </div>
+            <div class="event-summary">Moderate osteoarthritic changes in right knee. Joint space narrowing. No fracture or effusion.</div>
+          </div>
+        </div>
+
+        <!-- Event 6 -->
+        <div class="timeline-event" data-type="consultation" data-id="6" onclick="selectEvent(this)">
+          <div class="timeline-dot"></div>
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-date">02/12/2025</span>
+              <span class="event-type-label">Consultation</span>
+              <span class="event-title">Medication Review</span>
+            </div>
+            <div class="event-summary">Dr Patterson. Routine medication review. All medications well tolerated. No changes required. Continue current regime.</div>
+          </div>
+        </div>
+
+        <!-- Event 7 -->
+        <div class="timeline-event" data-type="prescription" data-id="7" onclick="selectEvent(this)">
+          <div class="timeline-dot"></div>
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-date">02/12/2025</span>
+              <span class="event-type-label">Prescription</span>
+              <span class="event-title">Repeat Prescription Issued</span>
+            </div>
+            <div class="event-summary">Metformin 500mg tablets x56, Amlodipine 5mg tablets x28. Repeat authorised by Dr Patterson.</div>
+          </div>
+        </div>
+
+        <!-- Event 8 -->
+        <div class="timeline-event" data-type="consultation" data-id="8" onclick="selectEvent(this)">
+          <div class="timeline-dot"></div>
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-date">18/11/2025</span>
+              <span class="event-type-label">Consultation</span>
+              <span class="event-title">URTI</span>
+            </div>
+            <div class="event-summary">Dr Williams. Upper respiratory tract infection, 4-day history. No chest signs. Symptomatic relief advised.</div>
+          </div>
+        </div>
+
+        <!-- Event 9 -->
+        <div class="timeline-event" data-type="immunisation" data-id="9" onclick="selectEvent(this)">
+          <div class="timeline-dot"></div>
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-date">05/11/2025</span>
+              <span class="event-type-label">Immunisation</span>
+              <span class="event-title">Influenza Vaccine 2025/26</span>
+            </div>
+            <div class="event-summary">Seasonal influenza vaccination administered. Nurse Brown. Batch: FLU25-8891. Left deltoid. No adverse reaction.</div>
+          </div>
+        </div>
+
+        <!-- Event 10 -->
+        <div class="timeline-event" data-type="immunisation" data-id="10" onclick="selectEvent(this)">
+          <div class="timeline-dot"></div>
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-date">18/10/2025</span>
+              <span class="event-type-label">Immunisation</span>
+              <span class="event-title">COVID-19 Booster</span>
+            </div>
+            <div class="event-summary">COVID-19 autumn booster administered. Nurse Brown. Batch: COV25-4421. Right deltoid. No adverse reaction.</div>
+          </div>
+        </div>
+
+        <!-- Event 11 -->
+        <div class="timeline-event" data-type="consultation" data-id="11" onclick="selectEvent(this)">
+          <div class="timeline-dot"></div>
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-date">14/10/2025</span>
+              <span class="event-type-label">Consultation</span>
+              <span class="event-title">Chest Infection</span>
+            </div>
+            <div class="event-summary">Dr Patterson. Productive cough 7 days, green sputum. Crackles left base. Doxycycline prescribed. Review if not improving.</div>
+          </div>
+        </div>
+
+        <!-- Event 12 -->
+        <div class="timeline-event" data-type="prescription" data-id="12" onclick="selectEvent(this)">
+          <div class="timeline-dot"></div>
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-date">14/10/2025</span>
+              <span class="event-type-label">Prescription</span>
+              <span class="event-title">Acute Prescription</span>
+            </div>
+            <div class="event-summary">Doxycycline 200mg capsules x5. Acute issue. One daily for 5 days. Penicillin allergy — alternative antibiotic.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL — DETAIL -->
+  <div class="right-panel" id="detailPanel">
+    <div class="detail-header">
+      <div class="detail-header-top">
+        <span class="detail-type-badge">Consultation</span>
+        <span class="detail-date">13 February 2026 &middot; 09:40</span>
+      </div>
+      <div class="detail-title">Diabetes Annual Review</div>
+      <div class="detail-clinician">Clinician: <strong>Dr. J Patterson</strong> &middot; Oakfield Surgery</div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <div class="detail-section-title">History</div>
+        <div class="detail-text">
+          <p>Annual diabetic review. Patient reports generally well-controlled blood sugars with home monitoring. No episodes of hypoglycaemia. Diet remains good with regular walking 3&ndash;4 times per week. No polyuria, polydipsia or unexplained weight change. Reports occasional right knee pain limiting longer walks, managed with PRN ibuprofen. No foot problems, no visual changes.</p>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Examination</div>
+        <div class="exam-grid">
+          <div class="exam-item">
+            <span class="exam-label">BP</span>
+            <span class="exam-value">138/82 mmHg</span>
+          </div>
+          <div class="exam-item">
+            <span class="exam-label">Weight</span>
+            <span class="exam-value">74.2 kg</span>
+          </div>
+          <div class="exam-item">
+            <span class="exam-label">BMI</span>
+            <span class="exam-value">27.4</span>
+          </div>
+          <div class="exam-item">
+            <span class="exam-label">HbA1c</span>
+            <span class="exam-value">52 mmol/mol</span>
+          </div>
+          <div class="exam-item">
+            <span class="exam-label">Foot Exam</span>
+            <span class="exam-value">Normal pulses</span>
+          </div>
+          <div class="exam-item">
+            <span class="exam-label">Sensation</span>
+            <span class="exam-value">Intact bilat.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Assessment</div>
+        <ul class="assessment-list">
+          <li>Type 2 diabetes &mdash; reasonable control, HbA1c 52 within NICE target (&lt;53 for monotherapy). No microvascular complications identified on today&rsquo;s review.</li>
+          <li>Hypertension &mdash; BP marginally above target at 138/82. Recent readings variable (142/86 on 15/01). Continue to monitor; consider dose adjustment if persistently above 140/90.</li>
+          <li>Osteoarthritis right knee &mdash; stable, managing with activity modification and PRN ibuprofen. Mindful of renal function with regular NSAID use (eGFR 78).</li>
+        </ul>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Plan</div>
+        <ul class="plan-list">
+          <li>Continue Metformin 500mg BD &mdash; well tolerated, good glycaemic control</li>
+          <li>Continue Amlodipine 5mg OD &mdash; recheck BP in 4&ndash;6 weeks; if &gt;140/90 consider uptitrating to 10mg</li>
+          <li>Counsel re: ibuprofen use with eGFR 78 &mdash; avoid prolonged courses, consider paracetamol as alternative</li>
+          <li>Repeat bloods in 6 months (HbA1c, U&amp;E, lipids, LFT)</li>
+          <li>Diabetic retinal screening &mdash; confirm attendance for next scheduled appointment</li>
+          <li>Foot review in 12 months unless new symptoms. Patient to report any numbness, tingling or skin changes</li>
+        </ul>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Clinical Codes</div>
+        <div class="clinical-codes">
+          <span class="code-tag">C10E. Type 2 diabetes mellitus</span>
+          <span class="code-tag">XaJQp Diabetes annual review</span>
+          <span class="code-tag">XaJ4b HbA1c level</span>
+          <span class="code-tag">246.. O/E - blood pressure</span>
+          <span class="code-tag">22K.. Body mass index</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// =============================================
+// FILTER TOGGLE FUNCTIONALITY
+// =============================================
+function toggleFilter(pill) {
+  pill.classList.toggle('inactive');
+  const type = pill.getAttribute('data-type');
+  const events = document.querySelectorAll('.timeline-event[data-type="' + type + '"]');
+  const isInactive = pill.classList.contains('inactive');
+
+  events.forEach(function(ev) {
+    if (isInactive) {
+      ev.classList.add('hidden');
+    } else {
+      ev.classList.remove('hidden');
+    }
+  });
+}
+
+// =============================================
+// EVENT SELECTION
+// =============================================
+const eventDetails = {
+  '1': {
+    type: 'Consultation',
+    typeBg: '#DBEAFE',
+    typeColor: '#1E40AF',
+    date: '13 February 2026 &middot; 09:40',
+    title: 'Diabetes Annual Review',
+    clinician: 'Dr. J Patterson',
+    location: 'Oakfield Surgery',
+    html: '<div class="detail-section"><div class="detail-section-title">History</div><div class="detail-text"><p>Annual diabetic review. Patient reports generally well-controlled blood sugars with home monitoring. No episodes of hypoglycaemia. Diet remains good with regular walking 3&ndash;4 times per week. No polyuria, polydipsia or unexplained weight change. Reports occasional right knee pain limiting longer walks, managed with PRN ibuprofen. No foot problems, no visual changes.</p></div></div><div class="detail-section"><div class="detail-section-title">Examination</div><div class="exam-grid"><div class="exam-item"><span class="exam-label">BP</span><span class="exam-value">138/82 mmHg</span></div><div class="exam-item"><span class="exam-label">Weight</span><span class="exam-value">74.2 kg</span></div><div class="exam-item"><span class="exam-label">BMI</span><span class="exam-value">27.4</span></div><div class="exam-item"><span class="exam-label">HbA1c</span><span class="exam-value">52 mmol/mol</span></div><div class="exam-item"><span class="exam-label">Foot Exam</span><span class="exam-value">Normal pulses</span></div><div class="exam-item"><span class="exam-label">Sensation</span><span class="exam-value">Intact bilat.</span></div></div></div><div class="detail-section"><div class="detail-section-title">Assessment</div><ul class="assessment-list"><li>Type 2 diabetes &mdash; reasonable control, HbA1c 52 within NICE target (&lt;53 for monotherapy). No microvascular complications identified on today&rsquo;s review.</li><li>Hypertension &mdash; BP marginally above target at 138/82. Recent readings variable (142/86 on 15/01). Continue to monitor; consider dose adjustment if persistently above 140/90.</li><li>Osteoarthritis right knee &mdash; stable, managing with activity modification and PRN ibuprofen. Mindful of renal function with regular NSAID use (eGFR 78).</li></ul></div><div class="detail-section"><div class="detail-section-title">Plan</div><ul class="plan-list"><li>Continue Metformin 500mg BD &mdash; well tolerated, good glycaemic control</li><li>Continue Amlodipine 5mg OD &mdash; recheck BP in 4&ndash;6 weeks; if &gt;140/90 consider uptitrating to 10mg</li><li>Counsel re: ibuprofen use with eGFR 78 &mdash; avoid prolonged courses, consider paracetamol as alternative</li><li>Repeat bloods in 6 months (HbA1c, U&amp;E, lipids, LFT)</li><li>Diabetic retinal screening &mdash; confirm attendance for next scheduled appointment</li><li>Foot review in 12 months unless new symptoms. Patient to report any numbness, tingling or skin changes</li></ul></div><div class="detail-section"><div class="detail-section-title">Clinical Codes</div><div class="clinical-codes"><span class="code-tag">C10E. Type 2 diabetes mellitus</span><span class="code-tag">XaJQp Diabetes annual review</span><span class="code-tag">XaJ4b HbA1c level</span><span class="code-tag">246.. O/E - blood pressure</span><span class="code-tag">22K.. Body mass index</span></div></div>'
+  },
+  '2': {
+    type: 'Result',
+    typeBg: '#EDE9FE',
+    typeColor: '#5B21B6',
+    date: '07 February 2026',
+    title: 'Blood Tests',
+    clinician: 'Requested by Dr. J Patterson',
+    location: 'Southmead Hospital Lab',
+    html: '<div class="detail-section"><div class="detail-section-title">Results</div><div class="exam-grid"><div class="exam-item"><span class="exam-label">HbA1c</span><span class="exam-value">52 mmol/mol</span></div><div class="exam-item"><span class="exam-label">Glucose (fasting)</span><span class="exam-value">7.2 mmol/L</span></div><div class="exam-item"><span class="exam-label">eGFR</span><span class="exam-value">78 mL/min</span></div><div class="exam-item"><span class="exam-label">Creatinine</span><span class="exam-value">82 umol/L</span></div><div class="exam-item"><span class="exam-label">Total Cholesterol</span><span class="exam-value">5.2 mmol/L</span></div><div class="exam-item"><span class="exam-label">HDL</span><span class="exam-value">1.4 mmol/L</span></div><div class="exam-item"><span class="exam-label">LDL</span><span class="exam-value">3.1 mmol/L</span></div><div class="exam-item"><span class="exam-label">Triglycerides</span><span class="exam-value">1.5 mmol/L</span></div><div class="exam-item"><span class="exam-label">ALT</span><span class="exam-value">24 U/L</span></div><div class="exam-item"><span class="exam-label">TSH</span><span class="exam-value">2.1 mU/L</span></div></div></div><div class="detail-section"><div class="detail-section-title">Interpretation</div><div class="detail-text"><p>HbA1c 52 within NICE target for T2DM on monotherapy. Renal function stable (eGFR 78, previously 80). Lipid profile: total cholesterol mildly elevated but ratio acceptable. Liver function normal. Thyroid function normal.</p></div></div><div class="detail-section"><div class="detail-section-title">Clinical Codes</div><div class="clinical-codes"><span class="code-tag">XaJ4b HbA1c level</span><span class="code-tag">451F. eGFR</span><span class="code-tag">44P.. Serum cholesterol</span></div></div>'
+  },
+  '3': {
+    type: 'Consultation',
+    typeBg: '#DBEAFE',
+    typeColor: '#1E40AF',
+    date: '28 January 2026 &middot; 11:15',
+    title: 'Knee Pain Review',
+    clinician: 'Dr. R Williams',
+    location: 'Oakfield Surgery',
+    html: '<div class="detail-section"><div class="detail-section-title">History</div><div class="detail-text"><p>Follow-up for right knee pain. X-ray report received confirming moderate OA changes. Patient reports pain worse on stairs and after prolonged sitting. Morning stiffness lasting approximately 15 minutes. Managing with ibuprofen 400mg PRN, taking 2&ndash;3 times per week.</p></div></div><div class="detail-section"><div class="detail-section-title">Examination</div><div class="exam-grid"><div class="exam-item"><span class="exam-label">Right knee</span><span class="exam-value">Mild crepitus</span></div><div class="exam-item"><span class="exam-label">Effusion</span><span class="exam-value">None</span></div><div class="exam-item"><span class="exam-label">ROM</span><span class="exam-value">0&ndash;120&deg;</span></div><div class="exam-item"><span class="exam-label">Ligaments</span><span class="exam-value">Stable</span></div></div></div><div class="detail-section"><div class="detail-section-title">Plan</div><ul class="plan-list"><li>Physiotherapy referral &mdash; quadriceps strengthening programme</li><li>Continue ibuprofen PRN but limit to short courses</li><li>Weight management advice &mdash; even modest weight loss (5%) may improve symptoms</li><li>Consider topical NSAIDs as alternative to oral ibuprofen</li></ul></div><div class="detail-section"><div class="detail-section-title">Clinical Codes</div><div class="clinical-codes"><span class="code-tag">N05z4 OA of knee</span><span class="code-tag">XE0dn Knee pain</span></div></div>'
+  },
+  '4': {
+    type: 'Consultation',
+    typeBg: '#DBEAFE',
+    typeColor: '#1E40AF',
+    date: '15 January 2026 &middot; 14:20',
+    title: 'BP Check',
+    clinician: 'Nurse S Brown',
+    location: 'Oakfield Surgery',
+    html: '<div class="detail-section"><div class="detail-section-title">History</div><div class="detail-text"><p>Routine blood pressure check. Patient reports compliance with amlodipine 5mg OD. No headaches, dizziness or ankle swelling. Dietary salt intake discussed &mdash; admits to occasional processed food.</p></div></div><div class="detail-section"><div class="detail-section-title">Examination</div><div class="exam-grid"><div class="exam-item"><span class="exam-label">BP (1st)</span><span class="exam-value">146/88 mmHg</span></div><div class="exam-item"><span class="exam-label">BP (2nd)</span><span class="exam-value">142/86 mmHg</span></div><div class="exam-item"><span class="exam-label">BP (3rd)</span><span class="exam-value">140/84 mmHg</span></div><div class="exam-item"><span class="exam-label">Pulse</span><span class="exam-value">72 bpm, regular</span></div></div></div><div class="detail-section"><div class="detail-section-title">Plan</div><ul class="plan-list"><li>BP slightly above target &mdash; average 142/86</li><li>Dietary advice: reduce salt, increase fruit and vegetables</li><li>Continue amlodipine 5mg OD</li><li>Re-check BP in 4 weeks; if still above 140/90 to discuss with GP re dose increase</li></ul></div><div class="detail-section"><div class="detail-section-title">Clinical Codes</div><div class="clinical-codes"><span class="code-tag">246.. O/E - blood pressure</span><span class="code-tag">G20.. Essential hypertension</span></div></div>'
+  },
+  '5': {
+    type: 'Result',
+    typeBg: '#EDE9FE',
+    typeColor: '#5B21B6',
+    date: '10 January 2026',
+    title: 'X-Ray Right Knee',
+    clinician: 'Reported by Dr. A Khan, Radiology',
+    location: 'Bristol Royal Infirmary',
+    html: '<div class="detail-section"><div class="detail-section-title">Report</div><div class="detail-text"><p><strong>Clinical details:</strong> Right knee pain, ?OA. 58F.</p><p><strong>Findings:</strong> AP and lateral views of the right knee. Moderate degenerative changes with joint space narrowing of the medial compartment. Small marginal osteophytes at the medial tibial plateau and femoral condyle. Patellofemoral joint shows mild degenerative changes. No fracture or dislocation. No significant joint effusion. Soft tissues unremarkable.</p><p><strong>Conclusion:</strong> Moderate osteoarthritic changes of the right knee, predominantly affecting the medial compartment. No acute bony injury.</p></div></div><div class="detail-section"><div class="detail-section-title">Clinical Codes</div><div class="clinical-codes"><span class="code-tag">5653. Plain X-ray knee</span><span class="code-tag">N05z4 OA of knee</span></div></div>'
+  },
+  '6': {
+    type: 'Consultation',
+    typeBg: '#DBEAFE',
+    typeColor: '#1E40AF',
+    date: '02 December 2025 &middot; 10:00',
+    title: 'Medication Review',
+    clinician: 'Dr. J Patterson',
+    location: 'Oakfield Surgery',
+    html: '<div class="detail-section"><div class="detail-section-title">History</div><div class="detail-text"><p>Routine 6-monthly medication review. Patient reports good compliance with all medications. No side effects. Metformin well tolerated with no GI symptoms. No ankle swelling with amlodipine. Using ibuprofen occasionally for knee pain.</p></div></div><div class="detail-section"><div class="detail-section-title">Assessment</div><ul class="assessment-list"><li>All medications well tolerated &mdash; no changes required</li><li>Repeat prescriptions authorised for a further 6 months</li></ul></div><div class="detail-section"><div class="detail-section-title">Plan</div><ul class="plan-list"><li>Continue current medications unchanged</li><li>Issue repeat prescription: Metformin 500mg x56, Amlodipine 5mg x28</li><li>Next medication review in 6 months</li></ul></div><div class="detail-section"><div class="detail-section-title">Clinical Codes</div><div class="clinical-codes"><span class="code-tag">8B31. Drug therapy review</span></div></div>'
+  },
+  '7': {
+    type: 'Prescription',
+    typeBg: '#FEF3C7',
+    typeColor: '#92400E',
+    date: '02 December 2025',
+    title: 'Repeat Prescription Issued',
+    clinician: 'Authorised by Dr. J Patterson',
+    location: 'Oakfield Surgery',
+    html: '<div class="detail-section"><div class="detail-section-title">Items Prescribed</div><div class="exam-grid"><div class="exam-item"><span class="exam-label">Metformin 500mg tabs</span><span class="exam-value">x56 (28 days)</span></div><div class="exam-item"><span class="exam-label">Dosage</span><span class="exam-value">1 tab BD</span></div><div class="exam-item"><span class="exam-label">Amlodipine 5mg tabs</span><span class="exam-value">x28 (28 days)</span></div><div class="exam-item"><span class="exam-label">Dosage</span><span class="exam-value">1 tab OD</span></div></div></div><div class="detail-section"><div class="detail-section-title">Prescription Details</div><div class="detail-text"><p>Repeat prescription. EPS nominated pharmacy: Boots, Whiteladies Road, Bristol. Next issue due: 30 December 2025.</p></div></div><div class="detail-section"><div class="detail-section-title">Clinical Codes</div><div class="clinical-codes"><span class="code-tag">8B21. Repeat prescription</span></div></div>'
+  },
+  '8': {
+    type: 'Consultation',
+    typeBg: '#DBEAFE',
+    typeColor: '#1E40AF',
+    date: '18 November 2025 &middot; 16:45',
+    title: 'Upper Respiratory Tract Infection',
+    clinician: 'Dr. R Williams',
+    location: 'Oakfield Surgery',
+    html: '<div class="detail-section"><div class="detail-section-title">History</div><div class="detail-text"><p>4-day history of sore throat, nasal congestion, mild cough. Low-grade temperature. No earache. No significant sputum production. Eating and drinking normally. No rash.</p></div></div><div class="detail-section"><div class="detail-section-title">Examination</div><div class="exam-grid"><div class="exam-item"><span class="exam-label">Temp</span><span class="exam-value">37.4&deg;C</span></div><div class="exam-item"><span class="exam-label">Throat</span><span class="exam-value">Mildly erythematous</span></div><div class="exam-item"><span class="exam-label">Tonsils</span><span class="exam-value">No exudate</span></div><div class="exam-item"><span class="exam-label">Chest</span><span class="exam-value">Clear bilaterally</span></div><div class="exam-item"><span class="exam-label">Ears</span><span class="exam-value">Normal TMs</span></div><div class="exam-item"><span class="exam-label">Centor</span><span class="exam-value">1 (low risk)</span></div></div></div><div class="detail-section"><div class="detail-section-title">Plan</div><ul class="plan-list"><li>Viral URTI &mdash; antibiotics not indicated</li><li>Symptomatic relief: paracetamol, warm fluids, rest</li><li>Safety-net: return if symptoms worsen, difficulty breathing, or no improvement in 7 days</li></ul></div><div class="detail-section"><div class="detail-section-title">Clinical Codes</div><div class="clinical-codes"><span class="code-tag">H05.. Upper respiratory infection</span></div></div>'
+  },
+  '9': {
+    type: 'Immunisation',
+    typeBg: '#CCFBF1',
+    typeColor: '#115E59',
+    date: '05 November 2025 &middot; 10:30',
+    title: 'Influenza Vaccine 2025/26',
+    clinician: 'Nurse S Brown',
+    location: 'Oakfield Surgery',
+    html: '<div class="detail-section"><div class="detail-section-title">Vaccination Details</div><div class="exam-grid"><div class="exam-item"><span class="exam-label">Vaccine</span><span class="exam-value">Influenza (QIVe)</span></div><div class="exam-item"><span class="exam-label">Brand</span><span class="exam-value">Flucelvax Quad</span></div><div class="exam-item"><span class="exam-label">Batch</span><span class="exam-value mono">FLU25-8891</span></div><div class="exam-item"><span class="exam-label">Expiry</span><span class="exam-value mono">03/2026</span></div><div class="exam-item"><span class="exam-label">Site</span><span class="exam-value">Left deltoid</span></div><div class="exam-item"><span class="exam-label">Route</span><span class="exam-value">IM injection</span></div></div></div><div class="detail-section"><div class="detail-section-title">Consent &amp; Observations</div><div class="detail-text"><p>Verbal consent obtained. Patient screened: no acute illness, no previous severe reaction to influenza vaccine. 15-minute observation period completed. No adverse reaction observed.</p></div></div><div class="detail-section"><div class="detail-section-title">Indication</div><div class="detail-text"><p>Eligible for seasonal influenza vaccination due to: Age 58 with diabetes mellitus (clinical risk group).</p></div></div><div class="detail-section"><div class="detail-section-title">Clinical Codes</div><div class="clinical-codes"><span class="code-tag">65ED. Seasonal influenza vaccination</span></div></div>'
+  },
+  '10': {
+    type: 'Immunisation',
+    typeBg: '#CCFBF1',
+    typeColor: '#115E59',
+    date: '18 October 2025 &middot; 09:15',
+    title: 'COVID-19 Booster',
+    clinician: 'Nurse S Brown',
+    location: 'Oakfield Surgery',
+    html: '<div class="detail-section"><div class="detail-section-title">Vaccination Details</div><div class="exam-grid"><div class="exam-item"><span class="exam-label">Vaccine</span><span class="exam-value">COVID-19 mRNA</span></div><div class="exam-item"><span class="exam-label">Brand</span><span class="exam-value">Comirnaty XBB.1.5</span></div><div class="exam-item"><span class="exam-label">Batch</span><span class="exam-value mono">COV25-4421</span></div><div class="exam-item"><span class="exam-label">Expiry</span><span class="exam-value mono">01/2026</span></div><div class="exam-item"><span class="exam-label">Site</span><span class="exam-value">Right deltoid</span></div><div class="exam-item"><span class="exam-label">Route</span><span class="exam-value">IM injection</span></div></div></div><div class="detail-section"><div class="detail-section-title">Consent &amp; Observations</div><div class="detail-text"><p>Verbal consent obtained. Screened for contraindications &mdash; none identified. No previous adverse reactions to COVID-19 vaccines. 15-minute observation completed. No adverse reaction.</p></div></div><div class="detail-section"><div class="detail-section-title">Clinical Codes</div><div class="clinical-codes"><span class="code-tag">XaLBL COVID-19 vaccination</span></div></div>'
+  },
+  '11': {
+    type: 'Consultation',
+    typeBg: '#DBEAFE',
+    typeColor: '#1E40AF',
+    date: '14 October 2025 &middot; 11:30',
+    title: 'Chest Infection',
+    clinician: 'Dr. J Patterson',
+    location: 'Oakfield Surgery',
+    html: '<div class="detail-section"><div class="detail-section-title">History</div><div class="detail-text"><p>7-day history of productive cough with green sputum. Initially dry cough which became productive over last 3 days. Some mild pleuritic chest pain on deep inspiration left side. No haemoptysis. Low-grade fever last 2 days. No rigors. Otherwise well.</p><p><strong>Note:</strong> Patient allergic to Penicillin (rash) &mdash; alternative antibiotic required.</p></div></div><div class="detail-section"><div class="detail-section-title">Examination</div><div class="exam-grid"><div class="exam-item"><span class="exam-label">Temp</span><span class="exam-value">37.8&deg;C</span></div><div class="exam-item"><span class="exam-label">SpO2</span><span class="exam-value">97% (RA)</span></div><div class="exam-item"><span class="exam-label">RR</span><span class="exam-value">18 /min</span></div><div class="exam-item"><span class="exam-label">HR</span><span class="exam-value">82 bpm</span></div><div class="exam-item"><span class="exam-label">Chest L base</span><span class="exam-value">Coarse crackles</span></div><div class="exam-item"><span class="exam-label">Chest elsewhere</span><span class="exam-value">Clear</span></div></div></div><div class="detail-section"><div class="detail-section-title">Assessment</div><ul class="assessment-list"><li>Lower respiratory tract infection &mdash; likely bacterial given purulent sputum and focal chest signs. CRB-65 score 0 (suitable for community management).</li></ul></div><div class="detail-section"><div class="detail-section-title">Plan</div><ul class="plan-list"><li>Doxycycline 200mg on day 1, then 100mg days 2&ndash;5 (penicillin allergy &mdash; cannot use amoxicillin)</li><li>Paracetamol for fever and pleuritic pain</li><li>Adequate hydration, rest</li><li>Safety-net: return if deteriorating, haemoptysis, breathlessness at rest, or not improving after 48 hours of antibiotics</li></ul></div><div class="detail-section"><div class="detail-section-title">Clinical Codes</div><div class="clinical-codes"><span class="code-tag">H06z. Chest infection NOS</span><span class="code-tag">X77WI Acute cough</span></div></div>'
+  },
+  '12': {
+    type: 'Prescription',
+    typeBg: '#FEF3C7',
+    typeColor: '#92400E',
+    date: '14 October 2025',
+    title: 'Acute Prescription',
+    clinician: 'Prescribed by Dr. J Patterson',
+    location: 'Oakfield Surgery',
+    html: '<div class="detail-section"><div class="detail-section-title">Items Prescribed</div><div class="exam-grid"><div class="exam-item"><span class="exam-label">Doxycycline 200mg caps</span><span class="exam-value">x5</span></div><div class="exam-item"><span class="exam-label">Dosage</span><span class="exam-value">See directions</span></div></div></div><div class="detail-section"><div class="detail-section-title">Directions</div><div class="detail-text"><p>Day 1: Take ONE 200mg capsule. Days 2&ndash;5: Take ONE 100mg capsule daily (halve dose by taking alternate capsules from separate 100mg pack). Total course: 5 days.</p><p><strong>Note:</strong> Acute prescription for lower respiratory tract infection. Alternative to amoxicillin due to penicillin allergy. Swallow whole with plenty of water. Avoid lying down for 30 minutes after taking. Avoid prolonged sun exposure.</p></div></div><div class="detail-section"><div class="detail-section-title">Prescription Details</div><div class="detail-text"><p>Acute prescription. EPS to Boots, Whiteladies Road, Bristol. Linked consultation: Chest Infection (14/10/2025).</p></div></div><div class="detail-section"><div class="detail-section-title">Clinical Codes</div><div class="clinical-codes"><span class="code-tag">e911. Doxycycline</span><span class="code-tag">8B22. Acute prescription</span></div></div>'
+  }
+};
+
+function selectEvent(eventEl) {
+  // Remove previous selection
+  document.querySelectorAll('.timeline-event.selected').forEach(function(el) {
+    el.classList.remove('selected');
+  });
+
+  // Add selection
+  eventEl.classList.add('selected');
+
+  // Get detail data
+  var id = eventEl.getAttribute('data-id');
+  var detail = eventDetails[id];
+  if (!detail) return;
+
+  var panel = document.getElementById('detailPanel');
+  panel.innerHTML =
+    '<div class="detail-header">' +
+      '<div class="detail-header-top">' +
+        '<span class="detail-type-badge" style="background:' + detail.typeBg + ';color:' + detail.typeColor + ';">' + detail.type + '</span>' +
+        '<span class="detail-date">' + detail.date + '</span>' +
+      '</div>' +
+      '<div class="detail-title">' + detail.title + '</div>' +
+      '<div class="detail-clinician">Clinician: <strong>' + detail.clinician + '</strong> &middot; ' + detail.location + '</div>' +
+    '</div>' +
+    '<div class="detail-body">' + detail.html + '</div>';
+}
+</script>
+</body>
+</html>
