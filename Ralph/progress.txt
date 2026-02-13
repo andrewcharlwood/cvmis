@@ -732,5 +732,58 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 - Status border colors match the badge colors for visual consistency
 - Module-scope `prefersReducedMotion` (computed once) for performance — established pattern
 
-**Next task:** Task 12 — Rebuild ReferralsView (Contact)
+**Next task:** Task 13 — Fuzzy search with fuse.js
+
+### Iteration 13 — Task 12: Rebuild ReferralsView (Contact)
+**Completed:** Task 12
+**Changes made:**
+- **ReferralsView.tsx**: Updated all font references from `font-inter` to `font-ui` (Elvaro Grotesque) and `font-mono` to `font-geist`:
+  - **Module-scope `prefersReducedMotion`**: Moved from `useRef` pattern to module-level constant (consistent with other views)
+  - **PriorityOption component**: Updated label colors from `text-red-700`/`text-amber-700` to `text-red-600`/`text-amber-600` per ref spec. Added `font-ui` to label and tooltip text.
+  - **ContactMethodOption component**: Added `font-ui` to label text
+  - **FormField component**: All labels and error messages now use `font-ui`
+  - **DirectContactTable**:
+    - Card styling: `border-[#E5E7EB]`, `shadow-pmr` multi-layered shadow, `bg-[#F9FAFB]` header
+    - Row hover state: `hover:bg-[#EFF6FF]` (blue tint) for interactive rows
+    - Font updates: `font-ui` for labels, `font-geist` for contact values (email, phone, LinkedIn)
+    - Accessibility: `focus-visible:ring-2 focus-visible:ring-pmr-nhsblue/40` on all links
+  - **Form inputs**: Updated border color to `#D1D5DB`, focus ring to `ring-pmr-nhsblue/15`, transition to `transition-all duration-200`, `font-ui` for input text
+  - **Success state**:
+    - Card styling: `border-[#E5E7EB]`, `shadow-pmr`, `bg-[#F9FAFB]` header
+    - Reference number in `font-geist` (monospace)
+    - Button hover: `hover:bg-[#004D9F]` (darker NHS blue)
+    - Added `focus-visible:ring-2` on button
+  - **Form buttons**: Updated hover colors and added focus rings for accessibility
+
+**Codebase patterns discovered:**
+- Module-scope `prefersReducedMotion` constant is now the established pattern across all views (simpler than `useRef` approach)
+- Direct Contact table uses same hover color (`#EFF6FF`) as other interactive table rows for consistency
+- Priority radio buttons with colored dots (red/blue/amber) + text labels follow the traffic light pattern from other views
+- Form validation pattern: required fields check on submit, email regex validation, error display below fields
+- Reference number generation uses `REF-YYYY-MMDD-NNN` format with random sequence number
+- Success state pattern: CheckCircle icon → heading → reference (monospace) → description → action button
+
+**Quality checks:** All passed
+- TypeScript: No errors
+- ESLint: 1 pre-existing warning in AccessibilityContext.tsx (not our changes)
+- Build: Successful, 395.94 KB bundle
+
+**Visual review:** Completed via Playwright MCP at default viewport
+- Form state: All priority radio buttons render with correct colors (red/blue/amber dots), tooltips visible on hover
+- Input styling: Correct border color (#D1D5DB), NHS blue focus rings visible
+- Direct Contact table: Multi-layered shadow visible, hover states work (blue tint on rows)
+- Tested form submission: filled name + email, clicked "Send Referral"
+- Success state: Green checkmark icon, "Referral sent successfully" heading, reference number in Geist Mono (REF-2026-0213-527), "Send Another Referral" button in NHS blue
+- All fonts: Elvaro Grotesque for UI text, Geist Mono for NHS number and reference number
+- Card styling: `shadow-pmr` visible, `#E5E7EB` borders correct
+
+**Issues encountered:** None
+
+**Design decisions:**
+- Used module-scope `prefersReducedMotion` constant instead of `useRef` pattern (established convention from previous tasks)
+- Priority label colors: `text-red-600`/`text-amber-600` (was `text-red-700`/`text-amber-700`) per ref spec for better contrast balance
+- Direct Contact table rows use `hover:bg-[#EFF6FF]` (blue tint) consistent with other interactive tables
+- Input focus ring uses `/15` opacity (was `/20`) per design system spec for subtler glow
+
+**Next task:** Task 13 — Fuzzy search with fuse.js
 

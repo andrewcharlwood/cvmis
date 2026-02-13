@@ -56,7 +56,7 @@ Also read `CLAUDE.md` for font setup instructions (Elvaro Grotesque and Blumir c
 
 - [x] **Task 11: Rebuild InvestigationsView + DocumentsView.** Read `Ralph/refs/ref-investigations-documents.md`. Both views share the expandable-row pattern with tree-indented monospace content (box-drawing characters). Investigations: status badges (Complete/Ongoing/Live). Documents: type icons per document category. "View Results" button for PharMetrics only. Mobile: card layouts.
 
-- [ ] **Task 12: Rebuild ReferralsView (Contact).** Read `Ralph/refs/ref-referrals.md`. Clinical referral form with priority radio buttons (Urgent/Routine/Two-Week Wait with tongue-in-cheek tooltips). Form validation, reference number generation, success state. Direct contact table below form.
+- [x] **Task 12: Rebuild ReferralsView (Contact).** Read `Ralph/refs/ref-referrals.md`. Clinical referral form with priority radio buttons (Urgent/Routine/Two-Week Wait with tongue-in-cheek tooltips). Form validation, reference number generation, success state. Direct contact table below form.
 
 - [ ] **Task 13: Fuzzy search with fuse.js.** Read `Ralph/refs/ref-interactions.md` (Search section). Install fuse.js. Build search index from all content. Results dropdown grouped by section. Clicking a result navigates to section + expands matching item. Mobile: search at top of each view.
 
