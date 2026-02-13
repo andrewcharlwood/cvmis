@@ -3,7 +3,7 @@ import type { Phase } from './types'
 import { BootSequence } from './components/BootSequence'
 import { ECGAnimation } from './components/ECGAnimation'
 import { LoginScreen } from './components/LoginScreen'
-import { PMRInterface } from './components/PMRInterface'
+import { DashboardLayout } from './components/DashboardLayout'
 import { AccessibilityProvider } from './contexts/AccessibilityContext'
 
 function SkipButton({ onSkip }: { onSkip: () => void }) {
@@ -76,7 +76,7 @@ function App() {
           <LoginScreen onComplete={() => setPhase('pmr')} />
         )}
 
-        {phase === 'pmr' && <PMRInterface />}
+        {phase === 'pmr' && <DashboardLayout />}
 
         {(phase === 'boot' || phase === 'ecg') && (
           <SkipButton onSkip={skipToLogin} />

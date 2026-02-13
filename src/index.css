@@ -265,3 +265,14 @@ html {
 .pmr-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--text-tertiary);
 }
+
+/* Dashboard card grid responsive */
+.dashboard-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
