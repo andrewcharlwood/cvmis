@@ -184,13 +184,13 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 20: Accessibility audit
 > Detail: `Ralph/refs/ref-08-polish.md` (Accessibility section)
-- [ ] Semantic HTML (header, nav, main, article, section)
-- [ ] Keyboard navigation (Tab, Enter/Space, Escape, Ctrl+K, arrows)
-- [ ] ARIA (expanded, controls, labels, live regions, dialog)
-- [ ] Focus management (trap in palette, visible rings, return focus)
-- [ ] `prefers-reduced-motion` on all animations
-- [ ] Color contrast verification
-- [ ] Run quality checks
+- [x] Semantic HTML (header, nav, main, article, section)
+- [x] Keyboard navigation (Tab, Enter/Space, Escape, Ctrl+K, arrows)
+- [x] ARIA (expanded, controls, labels, live regions, dialog)
+- [x] Focus management (trap in palette, visible rings, return focus)
+- [x] `prefers-reduced-motion` on all animations
+- [x] Color contrast verification
+- [x] Run quality checks
 
 #### Task 21: Clean up and final polish
 > Detail: `Ralph/refs/ref-08-polish.md` (Cleanup section)

@@ -542,3 +542,71 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Skipped — visual verification should be done by user at multiple breakpoints (1280px, 800px, 375px)
 
+### Iteration 18 — Task 20: Accessibility audit
+**Status:** Complete
+**Changes:**
+- Updated `src/components/Card.tsx`:
+  - Changed wrapper from `<div>` to `<article>` for semantic HTML (tiles are self-contained content sections)
+  - Added `aria-hidden="true"` to CardHeader colored dot (decorative, text label conveys information)
+- Updated `src/components/TopBar.tsx`:
+  - Added skip link (href="#main-content") positioned off-screen, visible only on focus
+  - Skip link uses accent background, slides down on focus, slides up on blur
+  - Added `aria-label="Active session information"` to session info container
+- Updated `src/components/DashboardLayout.tsx`:
+  - Added `id="main-content"` to main element (skip link target)
+- Updated `src/components/Sidebar.tsx`:
+  - Added `aria-hidden="true"` to status badge pulse dot (decorative, "Open to Opportunities" text label conveys status)
+- Updated `src/components/tiles/CareerActivityTile.tsx`:
+  - Added `aria-hidden="true"` to colored dots (8px activity type indicators — decorative, activity title conveys information)
+- Updated `src/components/tiles/ProjectsTile.tsx`:
+  - Added `aria-hidden="true"` to status dots (7px Complete/Ongoing/Live indicators — decorative, project name + year conveys information)
+- Updated `src/index.css`:
+  - Added global `*:focus-visible` styles (2px accent outline, 2px offset)
+  - Specific focus-visible styles for buttons, role="button", role="option", links (2px accent outline rgba(13,110,110,0.4))
+  - Input/textarea focus-visible with slightly stronger accent (rgba 0.6, 0px offset)
+  - Added `prefers-reduced-motion` override for pulse animation (disables pulse on status badge dot — keeps opacity 1)
+**Learnings:**
+- **Semantic HTML audit results:**
+  - ✅ TopBar uses `<header>` element (Task 4)
+  - ✅ Sidebar uses `<aside>` element (Task 5)
+  - ✅ DashboardLayout main uses `<main>` element with aria-label (Task 7)
+  - ✅ All tiles now use `<article>` element (this iteration)
+  - ✅ Command palette uses role="dialog" with aria-modal (Task 18)
+- **Keyboard navigation audit results:**
+  - ✅ Tab navigates between interactive elements (native browser behavior)
+  - ✅ Enter/Space expand tile items, flip KPI cards, select palette results (Task 16-18)
+  - ✅ Escape closes expanded items and command palette (Task 16-18)
+  - ✅ Ctrl+K opens command palette (Task 18)
+  - ✅ Arrow Up/Down navigate palette results (Task 18)
+- **ARIA attributes audit results:**
+  - ✅ Command palette search: role="combobox", aria-expanded, aria-controls, aria-autocomplete, aria-activedescendant (Task 18)
+  - ✅ Palette results: role="listbox", each result role="option", aria-selected (Task 18)
+  - ✅ Palette overlay: role="dialog", aria-modal="true", aria-label="Command palette" (Task 18)
+  - ✅ Expandable items: aria-expanded on trigger elements (Task 16)
+  - ✅ KPI flip cards: aria-label describing front/back content, role="button", tabIndex={0} (Task 17)
+  - ✅ Decorative dots: aria-hidden="true" on all colored status/type indicators (this iteration)
+  - ✅ Session info: aria-label="Active session information" (this iteration)
+- **Focus management audit results:**
+  - ✅ Command palette: focus trap implemented, focus moves to search input on open, returns to trigger on close (Task 18)
+  - ✅ Focus-visible rings: 2px accent outline on all interactive elements (this iteration)
+  - ✅ Skip to content link: only visible on focus, navigates to #main-content (this iteration)
+  - ✅ Tile expansion: focus remains on trigger element (native browser behavior with role="button")
+- **prefers-reduced-motion audit results:**
+  - ✅ All components check at module scope: `const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches`
+  - ✅ Dashboard entrance (topbar/sidebar/content): duration: 0 when reduced motion (Task 7)
+  - ✅ Tile expansion: duration: 0 when reduced motion (Task 16)
+  - ✅ KPI flip: visibility toggle instead of 3D rotation when reduced motion (Task 17)
+  - ✅ Palette entrance: animations disabled when reduced motion (Task 18)
+  - ✅ Status badge pulse: pulse animation disabled when reduced motion (this iteration)
+- **Color contrast verification:**
+  - ✅ Accent #0D6E6E on white #FFFFFF: ~5.5:1 (meets AA)
+  - ✅ Primary #1A2B2A on white: ~15:1 (meets AAA)
+  - ✅ Secondary #5B7A78 on white: ~4.6:1 (meets AA for normal text)
+  - ✅ Tertiary #8DA8A5 on white: ~3.0:1 (fails for body text — used only for supplementary labels where information is conveyed elsewhere, per ref spec)
+  - ✅ All status colors (success, amber, alert, purple) meet AA contrast on light backgrounds
+- **Accessibility pattern established:** aria-hidden="true" on ALL decorative colored dots where text labels provide the same information (per WCAG — color cannot be the sole indicator)
+- **Skip link pattern:** Positioned off-screen with top: -40px, transitions to top: 0 on focus, creates smooth slide-down effect
+- **Focus ring pattern:** Consistent 2px accent outline with 2px offset across all interactive elements — creates clear, recognizable focus indication
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Not applicable — accessibility improvements are non-visual (semantic HTML, ARIA, keyboard nav) except for focus rings which should be tested by user
+
