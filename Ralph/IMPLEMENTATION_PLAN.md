@@ -104,11 +104,11 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 11: Build CoreSkills tile ("Repeat Medications")
 > Detail: `Ralph/refs/ref-05-card-and-top-tiles.md` (CoreSkills section)
-- [ ] Create `src/components/tiles/CoreSkillsTile.tsx`
-- [ ] Half-width card, next to LatestResults
-- [ ] Skills listed as medications with frequency + years
-- [ ] Data from `src/data/skills.ts`
-- [ ] Run quality checks
+- [x] Create `src/components/tiles/CoreSkillsTile.tsx`
+- [x] Half-width card, next to LatestResults
+- [x] Skills listed as medications with frequency + years
+- [x] Data from `src/data/skills.ts`
+- [x] Run quality checks
 
 #### Task 12: Build LastConsultation tile
 > Detail: `Ralph/refs/ref-06-bottom-tiles.md` (LastConsultation section)

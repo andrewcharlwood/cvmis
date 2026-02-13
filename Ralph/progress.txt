@@ -268,3 +268,27 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Skipped — no browser tools available.
 
+### Iteration 9 — Task 11: Build CoreSkills tile ("Repeat Medications")
+**Status:** Complete
+**Changes:**
+- Created `src/components/tiles/CoreSkillsTile.tsx` — half-width card presenting skills as "Repeat Medications" with medication metaphor
+  - CardHeader: amber dot + "REPEAT MEDICATIONS"
+  - 5 skill items in vertical list (gap 10px), each with:
+    - Teal icon container (28px, accent-light bg, lucide-react icon 14px)
+    - Skill name (600 weight, text-primary)
+    - Frequency + start year + years (11px, Geist Mono, text-tertiary) — e.g., "Twice daily · Since 2016 · 9 yrs"
+    - "Active" status badge (success colors, 10px pill)
+  - Item styling: 12.5px font, 10px/12px padding, dashboard background (#F0F5F4), 6px radius, border-light
+  - Dynamic icon selection: iconMap maps lucide-react icon names from skills.ts to components
+  - Data from `src/data/skills.ts` — 5 skills with user-specified frequencies (Data Analysis="Twice daily", Python="Daily", SQL="Daily", Power BI="Once weekly", JS/TS="When required")
+- Updated `src/components/DashboardLayout.tsx` — imported and rendered CoreSkillsTile in the right column next to LatestResultsTile
+**Learnings:**
+- The medication metaphor works well with the frequency strings + years of experience — creates authentic clinical texture
+- Icon container uses `var(--accent-light)` background with `var(--accent)` foreground — matches the teal accent system
+- Dashboard background (`var(--bg-dashboard)` = #F0F5F4) on items creates subtle contrast against white card surface
+- Status badge uses success color system (green) — could be made dynamic in Task 16 if proficiency levels need different colors
+- Each item has `cursor: default` since expansion interaction comes in Task 16 (no hover state yet)
+- The `iconMap` pattern for dynamic icon selection is consistent with the Sidebar's AlertFlag component
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Skipped — no browser tools available. Will verify visually after multiple tiles are in place.
+
