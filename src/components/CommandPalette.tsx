@@ -191,7 +191,8 @@ export function CommandPalette({ isOpen, onClose, onAction }: CommandPaletteProp
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        paddingTop: '12vh',
+        padding: '8px',
+        paddingTop: 'max(8px, 10vh)',
         backdropFilter: 'blur(4px)',
         WebkitBackdropFilter: 'blur(4px)',
         animation: prefersReducedMotion ? 'none' : 'palette-overlay-in 0.2s ease-out forwards',
@@ -200,10 +201,9 @@ export function CommandPalette({ isOpen, onClose, onAction }: CommandPaletteProp
     >
       {/* Palette modal */}
       <div
+        className="w-full max-w-[calc(100vw-16px)] md:max-w-[calc(100vw-32px)] md:w-[580px]"
         style={{
-          width: '580px',
-          maxWidth: 'calc(100vw - 32px)',
-          maxHeight: '520px',
+          maxHeight: 'calc(100vh - 24vh)',
           background: 'var(--surface)',
           borderRadius: '12px',
           boxShadow: '0 20px 60px rgba(26,43,42,0.2), 0 0 0 1px rgba(26,43,42,0.08)',
@@ -215,11 +215,11 @@ export function CommandPalette({ isOpen, onClose, onAction }: CommandPaletteProp
       >
         {/* Search input row */}
         <div
+          className="px-3 py-3 md:px-[18px] md:py-[14px]"
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            padding: '14px 18px',
             borderBottom: '1px solid var(--border-light)',
           }}
         >
@@ -276,10 +276,9 @@ export function CommandPalette({ isOpen, onClose, onAction }: CommandPaletteProp
           ref={resultsRef}
           role="listbox"
           aria-label="Search results"
-          className="pmr-scrollbar"
+          className="pmr-scrollbar p-2 md:p-[8px]"
           style={{
             overflowY: 'auto',
-            padding: '8px',
             flex: 1,
           }}
         >
@@ -387,11 +386,10 @@ export function CommandPalette({ isOpen, onClose, onAction }: CommandPaletteProp
 
         {/* Footer with keyboard hints */}
         <div
+          className="hidden md:flex px-3 py-2 md:px-[18px] md:py-[10px]"
           style={{
-            display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            padding: '10px 18px',
             borderTop: '1px solid var(--border-light)',
             fontSize: '11px',
             color: 'var(--text-tertiary)',

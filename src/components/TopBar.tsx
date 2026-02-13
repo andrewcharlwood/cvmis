@@ -34,7 +34,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
           aria-hidden="true"
         />
         <span
-          className="font-ui"
+          className="font-ui hidden sm:inline"
           style={{
             fontSize: '13px',
             fontWeight: 600,
@@ -44,6 +44,17 @@ export function TopBar({ onSearchClick }: TopBarProps) {
           Headhunt Medical Center
         </span>
         <span
+          className="font-ui sm:hidden"
+          style={{
+            fontSize: '13px',
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+          }}
+        >
+          HMC
+        </span>
+        <span
+          className="hidden md:inline"
           style={{
             fontSize: '11px',
             fontWeight: 400,
@@ -120,7 +131,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
       </button>
 
       {/* Session info (right) */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         <span
           className="hidden sm:inline"
           style={{
@@ -132,7 +143,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
           Dr. A.CHARLWOOD
         </span>
         <span
-          className="font-geist"
+          className="font-geist hidden xs:inline"
           style={{
             fontSize: '11px',
             color: 'var(--text-tertiary)',
@@ -143,6 +154,19 @@ export function TopBar({ onSearchClick }: TopBarProps) {
           }}
         >
           Active Session · {currentTime}
+        </span>
+        <span
+          className="font-geist xs:hidden"
+          style={{
+            fontSize: '11px',
+            color: 'var(--text-tertiary)',
+            background: 'var(--accent-light)',
+            padding: '3px 8px',
+            borderRadius: '4px',
+            border: '1px solid var(--accent-border)',
+          }}
+        >
+          {currentTime}
         </span>
       </div>
     </header>

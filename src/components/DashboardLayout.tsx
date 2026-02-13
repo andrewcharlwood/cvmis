@@ -122,11 +122,12 @@ export function DashboardLayout() {
           height: 'calc(100vh - var(--topbar-height))',
         }}
       >
-        {/* Sidebar — fixed left */}
+        {/* Sidebar — hidden on mobile/tablet, visible on desktop */}
         <motion.div
           initial="hidden"
           animate="visible"
           variants={sidebarVariants}
+          className="hidden lg:block"
           style={{ flexShrink: 0 }}
         >
           <Sidebar />
@@ -138,21 +139,13 @@ export function DashboardLayout() {
           animate="visible"
           variants={contentVariants}
           aria-label="Dashboard content"
-          className="pmr-scrollbar"
+          className="pmr-scrollbar p-4 pb-8 md:p-6 md:pb-10 lg:px-7 lg:pt-6 lg:pb-10"
           style={{
             flex: 1,
             overflowY: 'auto',
-            padding: '24px 28px 40px',
           }}
         >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '16px',
-            }}
-            className="dashboard-grid"
-          >
+          <div className="dashboard-grid">
             {/* PatientSummaryTile — full width */}
             <PatientSummaryTile />
 
