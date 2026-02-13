@@ -1,5 +1,6 @@
 import { Download, Mail, Linkedin, MoreHorizontal } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { patient } from '@/data/patient'
 import { useScrollCondensation } from '@/hooks/useScrollCondensation'
 
@@ -10,6 +11,10 @@ interface PatientBannerProps {
 
 export function PatientBanner({ isMobile = false, isTablet = false }: PatientBannerProps) {
   const { isCondensed, sentinelRef } = useScrollCondensation({ threshold: 100 })
+
+  const prefersReducedMotion = typeof window !== 'undefined'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false
 
   if (isMobile) {
     return (
@@ -37,16 +42,37 @@ export function PatientBanner({ isMobile = false, isTablet = false }: PatientBan
         className={`
           sticky top-0 z-40 w-full
           bg-pmr-banner border-b border-slate-600
+          shadow-pmr-banner
           transition-all duration-200 ease-out
           ${shouldCondense ? 'h-12' : 'h-20'}
         `}
         role="banner"
       >
-        {shouldCondense ? (
-          <CondensedBanner />
-        ) : (
-          <FullBanner />
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          {shouldCondense ? (
+            <motion.div
+              key="condensed"
+              initial={prefersReducedMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="h-full"
+            >
+              <CondensedBanner />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="full"
+              initial={prefersReducedMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="h-full"
+            >
+              <FullBanner />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
     </>
   )
@@ -54,24 +80,38 @@ export function PatientBanner({ isMobile = false, isTablet = false }: PatientBan
 
 function MobileBanner() {
   const [showOverflow, setShowOverflow] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  const handleClickOutside = useCallback((e: MouseEvent) => {
+    if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      setShowOverflow(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (showOverflow) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showOverflow, handleClickOutside])
 
   return (
     <header
-      className="sticky top-0 z-40 w-full h-12 bg-pmr-banner border-b border-slate-600"
+      className="sticky top-0 z-40 w-full h-12 bg-pmr-banner border-b border-slate-600 shadow-pmr-banner"
       role="banner"
     >
       <div className="h-full px-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <h1 className="font-inter font-semibold text-white text-sm tracking-tight truncate">
+          <h1 className="font-ui font-semibold text-white text-sm tracking-tight truncate">
             CHARLWOOD, A (Mr)
           </h1>
           <span className="text-slate-500">|</span>
           <span className="font-geist text-xs text-slate-300">
-            221 181 0
+            {patient.nhsNumber}
           </span>
-          <StatusDot status="Active" />
+          <StatusDot status={patient.status} />
         </div>
-        <div className="relative">
+        <div className="relative" ref={menuRef}>
           <button
             type="button"
             onClick={() => setShowOverflow(!showOverflow)}
@@ -81,17 +121,18 @@ function MobileBanner() {
           >
             <MoreHorizontal size={18} />
           </button>
-          {showOverflow && (
-            <>
-              <div 
-                className="fixed inset-0 z-40" 
-                onClick={() => setShowOverflow(false)}
-                aria-hidden="true"
-              />
-              <div className="absolute right-0 top-full mt-1 w-40 bg-white border border-gray-200 rounded shadow-lg z-50 py-1">
+          <AnimatePresence>
+            {showOverflow && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-0 top-full mt-1 w-44 bg-white border border-pmr-border rounded shadow-pmr z-50 py-1"
+              >
                 <a
                   href="/cv.pdf"
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-ui text-pmr-text-primary hover:bg-gray-50 transition-colors"
                   onClick={() => setShowOverflow(false)}
                 >
                   <Download size={14} />
@@ -99,7 +140,7 @@ function MobileBanner() {
                 </a>
                 <a
                   href={`mailto:${patient.email}`}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-ui text-pmr-text-primary hover:bg-gray-50 transition-colors"
                   onClick={() => setShowOverflow(false)}
                 >
                   <Mail size={14} />
@@ -109,15 +150,15 @@ function MobileBanner() {
                   href={`https://${patient.linkedin}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-ui text-pmr-text-primary hover:bg-gray-50 transition-colors"
                   onClick={() => setShowOverflow(false)}
                 >
                   <Linkedin size={14} />
                   LinkedIn
                 </a>
-              </div>
-            </>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </header>
@@ -129,29 +170,35 @@ function FullBanner() {
     <div className="h-full px-4 lg:px-6 flex flex-col justify-center">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
+          {/* Row 1: Name, status, badge */}
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="font-inter font-semibold text-white text-lg tracking-tight">
+            <h1 className="font-ui font-semibold text-white text-lg tracking-tight">
               {patient.name}
             </h1>
-            <StatusDot status={patient.status} />
-            <span className="text-slate-400 text-sm">{patient.status}</span>
-            <StatusBadge badge={patient.badge} />
+            <div className="flex items-center gap-1.5">
+              <StatusDot status={patient.status} />
+              <span className="text-slate-400 text-sm font-ui">{patient.status}</span>
+            </div>
+            {patient.badge && <StatusBadge badge={patient.badge} />}
           </div>
-          <div className="flex items-center gap-4 mt-1 flex-wrap text-sm text-slate-300">
+
+          {/* Row 2: Demographics with pipe separators */}
+          <div className="flex items-center gap-4 mt-1 flex-wrap text-sm text-slate-300 font-ui">
             <span>
-              <span className="text-slate-500">DOB:</span> {patient.dob}
+              <span className="text-slate-500">DOB:</span>{' '}
+              <span className="font-geist">{patient.dob}</span>
             </span>
             <span className="text-slate-500">|</span>
             <span className="flex items-center gap-1">
               <span className="text-slate-500">NHS No:</span>{' '}
-              <span className="font-geist" title={patient.nhsNumberTooltip}>
-                {patient.nhsNumber}
-              </span>
+              <NHSNumberWithTooltip />
             </span>
             <span className="text-slate-500">|</span>
             <span>{patient.address}</span>
           </div>
-          <div className="flex items-center gap-4 mt-1 flex-wrap text-sm text-slate-300">
+
+          {/* Row 3: Contact details */}
+          <div className="flex items-center gap-4 mt-1 flex-wrap text-sm text-slate-300 font-ui">
             <a
               href={`tel:${patient.phone}`}
               className="hover:text-white transition-colors"
@@ -167,6 +214,8 @@ function FullBanner() {
             </a>
           </div>
         </div>
+
+        {/* Action buttons */}
         <div className="flex items-center gap-2 flex-shrink-0">
           <ActionButton
             icon={<Download size={14} />}
@@ -194,18 +243,19 @@ function CondensedBanner() {
   return (
     <div className="h-full px-4 lg:px-6 flex items-center justify-between gap-4">
       <div className="flex items-center gap-4 min-w-0">
-        <h1 className="font-inter font-semibold text-white text-sm tracking-tight truncate">
+        <h1 className="font-ui font-semibold text-white text-sm tracking-tight truncate">
           {patient.name}
         </h1>
         <span className="text-slate-500">|</span>
         <span className="flex items-center gap-1 text-sm text-slate-300">
-          <span className="text-slate-500">NHS No:</span>{' '}
-          <span className="font-geist" title={patient.nhsNumberTooltip}>
-            {patient.nhsNumber}
-          </span>
+          <span className="text-slate-500 font-ui">NHS No:</span>{' '}
+          <NHSNumberWithTooltip condensed />
         </span>
         <span className="text-slate-500">|</span>
-        <StatusDot status={patient.status} />
+        <div className="flex items-center gap-1.5">
+          <StatusDot status={patient.status} />
+          <span className="text-slate-400 text-xs font-ui">{patient.status}</span>
+        </div>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         <ActionButton
@@ -222,6 +272,70 @@ function CondensedBanner() {
         />
       </div>
     </div>
+  )
+}
+
+/* --- Sub-components --- */
+
+interface NHSNumberWithTooltipProps {
+  condensed?: boolean
+}
+
+function NHSNumberWithTooltip({ condensed = false }: NHSNumberWithTooltipProps) {
+  const [showTooltip, setShowTooltip] = useState(false)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleMouseEnter = () => {
+    timeoutRef.current = setTimeout(() => setShowTooltip(true), 300)
+  }
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+    setShowTooltip(false)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
+
+  return (
+    <span
+      className="relative inline-flex items-center"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onFocus={() => setShowTooltip(true)}
+      onBlur={() => setShowTooltip(false)}
+    >
+      <span
+        className={`font-geist cursor-help border-b border-dotted border-slate-500 ${condensed ? 'text-sm' : ''}`}
+        tabIndex={0}
+        role="button"
+        aria-describedby="nhs-tooltip"
+      >
+        {patient.nhsNumber}
+      </span>
+      <AnimatePresence>
+        {showTooltip && (
+          <motion.span
+            id="nhs-tooltip"
+            role="tooltip"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.12 }}
+            className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-2.5 py-1 bg-slate-800 text-white text-xs font-ui rounded whitespace-nowrap z-50 shadow-lg pointer-events-none"
+          >
+            {patient.nhsNumberTooltip}
+            <span className="absolute left-1/2 -translate-x-1/2 -top-1 w-2 h-2 bg-slate-800 rotate-45" />
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </span>
   )
 }
 
@@ -245,7 +359,7 @@ interface StatusBadgeProps {
 
 function StatusBadge({ badge }: StatusBadgeProps) {
   return (
-    <span className="px-2 py-0.5 bg-pmr-nhsblue text-white text-xs font-medium rounded-sm">
+    <span className="px-2.5 py-0.5 bg-pmr-nhsblue text-white text-xs font-ui font-medium rounded-full">
       {badge}
     </span>
   )
@@ -269,10 +383,11 @@ function ActionButton({ icon, label, href, external, compact }: ActionButtonProp
         inline-flex items-center gap-1.5
         border border-pmr-nhsblue text-pmr-nhsblue
         hover:bg-pmr-nhsblue hover:text-white
-        transition-colors duration-100
+        transition-colors duration-150
         rounded
+        font-ui font-medium
+        focus:outline-none focus:ring-2 focus:ring-pmr-nhsblue/40 focus:ring-offset-1 focus:ring-offset-pmr-banner
         ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-1.5 text-sm'}
-        font-inter font-medium
       `}
     >
       {icon}
