@@ -306,3 +306,37 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 - Previous iterations skipped visual review because Chrome tools weren't available — Playwright MCP should now work
 ### New guardrails added: None
 
+### Iteration 5 — Task 4b: Fix PatientBanner scroll condensation
+**Completed:** Task 4b
+**Changes made:**
+- **Root cause identified:** The sentinel element (`absolute top-0 h-0`) was positioned at the viewport top inside a non-positioned parent. The IntersectionObserver with `-100px` rootMargin immediately reported "not intersecting", so the banner was permanently stuck in condensed state.
+- **PMRInterface.tsx:** Restructured layout from document-scroll (`min-h-screen`) to flex container (`flex h-screen overflow-hidden`). Sidebar and content column are siblings. Content column is `flex-1 flex flex-col min-w-0` with banner (flex-shrink-0) above scrollable main (`overflow-y-auto`).
+- **PatientBanner.tsx:** Now accepts `isCondensed` prop from parent instead of managing its own scroll detection. Removed sentinel element, removed `useScrollCondensation` import, removed `sticky top-0`. Banner is positioned above the scroll container, so it stays fixed naturally.
+- **ClinicalSidebar.tsx:** Changed `h-screen sticky top-0` to `h-full` — parent flex container handles sizing.
+- **useScrollCondensation.ts:** Replaced IntersectionObserver with scroll event listener. Accepts `scrollContainer` element directly (not a ref). Uses callback ref pattern in PMRInterface to handle Framer Motion mounting timing.
+
+**Codebase patterns discovered:**
+- **Callback ref pattern for Framer Motion:** `motion.main` elements may not be in the DOM when `useEffect` first runs. Using `useState` + callback ref (`setScrollContainer` via `useCallback`) triggers a re-render when the element mounts, ensuring the scroll listener attaches correctly.
+- **Flex h-screen overflow-hidden layout:** The recommended clinical system layout: sidebar + content column in a viewport-height flex container. Content column has banner (flex-shrink-0) + scrollable main (flex-1 overflow-y-auto). No sticky positioning needed — elements above the scroll container stay fixed.
+- **Scroll event vs IntersectionObserver:** For scroll-position-based condensation in a contained scroll area, a simple scroll event listener is more reliable than IntersectionObserver with rootMargin tricks.
+
+**Quality checks:** All passed (typecheck, lint, build — 394.61 KB bundle)
+
+**Visual review:** Completed via Playwright MCP at 1280x800.
+- Full banner (80px, 3 rows) displays correctly on page load at scrollTop=0
+- Condensed banner (48px, single row) activates after scrolling 100px+
+- Banner returns to full state when scrolling back to top
+- Layout: sidebar fixed, banner fixed, only main content scrolls
+
+**Issues encountered:**
+- First attempt placed sentinel in `<main>` but kept IntersectionObserver with default root (viewport) — failed because `overflow-y-auto` on main creates a separate scroll context
+- Second attempt used IntersectionObserver with `root: scrollContainerRef.current` — failed due to timing: Framer Motion hadn't mounted the element when the effect ran, so `ref.current` was null
+- Final solution: replaced IntersectionObserver with scroll event listener + callback ref pattern for reliable element access
+
+**Design decisions:**
+- Chose scroll event listener over IntersectionObserver for simplicity and reliability
+- Used `{ passive: true }` on scroll listener for performance
+- Removed min-height calculations from main (`min-h-[calc(100vh-48px)]` etc.) — flex-1 handles sizing naturally
+
+**Next task:** Task 5 — Rebuild ClinicalSidebar
+
