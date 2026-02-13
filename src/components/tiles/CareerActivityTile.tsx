@@ -1,10 +1,8 @@
 import React, { useState, useCallback } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { Card, CardHeader } from '../Card'
 import { documents } from '@/data/documents'
 import { consultations } from '@/data/consultations'
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+import { useDetailPanel } from '@/contexts/DetailPanelContext'
 
 type ActivityType = 'role' | 'project' | 'cert' | 'edu'
 
@@ -140,49 +138,46 @@ const dotColorMap: Record<ActivityType, string> = {
   edu: '#7C3AED',
 }
 
-const borderColorMap: Record<ActivityType, string> = {
-  role: '#0D6E6E',
-  project: '#D97706',
-  cert: '#059669',
-  edu: '#7C3AED',
-}
-
 interface ActivityItemProps {
   entry: ActivityEntry
-  isExpanded: boolean
-  onToggle: () => void
+  onItemClick: () => void
 }
 
-const ActivityItem: React.FC<ActivityItemProps> = ({ entry, isExpanded, onToggle }) => {
+const ActivityItem: React.FC<ActivityItemProps> = ({ entry, onItemClick }) => {
+  const [isHovered, setIsHovered] = useState(false)
   const dotColor = dotColorMap[entry.type]
-  const isExpandable = entry.type === 'role' && entry.consultationId
+  const isClickable = entry.type === 'role' && entry.consultationId
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (!isExpandable) return
+      if (!isClickable) return
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
-        onToggle()
-      } else if (e.key === 'Escape' && isExpanded) {
-        e.preventDefault()
-        onToggle()
+        onItemClick()
       }
     },
-    [isExpandable, isExpanded, onToggle],
+    [isClickable, onItemClick],
   )
 
-  // Get consultation data for expanded content
-  const consultation = isExpandable
+  // Get consultation data for preview text
+  const consultation = isClickable
     ? consultations.find((c) => c.id === entry.consultationId)
     : null
 
+  // Get preview text (first 1-2 lines from examination)
+  const previewText =
+    consultation && consultation.examination.length > 0
+      ? consultation.examination[0]
+      : null
+
   return (
     <div
-      role={isExpandable ? 'button' : undefined}
-      tabIndex={isExpandable ? 0 : undefined}
-      aria-expanded={isExpandable ? isExpanded : undefined}
-      onClick={isExpandable ? onToggle : undefined}
-      onKeyDown={isExpandable ? handleKeyDown : undefined}
+      role={isClickable ? 'button' : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      onClick={isClickable ? onItemClick : undefined}
+      onKeyDown={isClickable ? handleKeyDown : undefined}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -190,21 +185,13 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ entry, isExpanded, onToggle
         borderRadius: 'var(--radius-sm)',
         border: '1px solid var(--border-light)',
         fontSize: '12px',
-        transition: 'border-color 0.15s',
-        cursor: isExpandable ? 'pointer' : 'default',
-        ...(isExpanded && {
-          borderColor: 'var(--accent-border)',
-        }),
-      }}
-      onMouseEnter={(e) => {
-        if (isExpandable) {
-          e.currentTarget.style.borderColor = 'var(--accent-border)'
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (isExpandable && !isExpanded) {
-          e.currentTarget.style.borderColor = 'var(--border-light)'
-        }
+        transition: 'all 0.15s ease-out',
+        cursor: isClickable ? 'pointer' : 'default',
+        transform: isHovered && isClickable ? 'translateY(-1px)' : 'none',
+        boxShadow: isHovered && isClickable
+          ? '0 2px 8px rgba(26,43,42,0.08)'
+          : '0 1px 2px rgba(26,43,42,0.05)',
+        borderColor: isHovered && isClickable ? 'var(--accent-border)' : 'var(--border-light)',
       }}
     >
       {/* Item header row */}
@@ -249,142 +236,76 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ entry, isExpanded, onToggle
           >
             {entry.date}
           </div>
-        </div>
-      </div>
 
-      {/* Expanded content */}
-      <AnimatePresence initial={false}>
-        {isExpanded && consultation && (
-          <motion.div
-            initial={{ height: 0 }}
-            animate={{ height: 'auto' }}
-            exit={{ height: 0 }}
-            transition={
-              prefersReducedMotion
-                ? { duration: 0 }
-                : { duration: 0.2, ease: 'easeOut' }
-            }
-            style={{ overflow: 'hidden' }}
-          >
+          {/* Hover preview text for roles */}
+          {isHovered && previewText && (
             <div
               style={{
-                borderLeft: `2px solid ${borderColorMap[entry.type]}`,
-                marginLeft: '16px',
-                marginRight: '12px',
-                marginBottom: '12px',
-                paddingLeft: '14px',
-                paddingTop: '4px',
+                fontSize: '11px',
+                color: 'var(--text-secondary)',
+                marginTop: '6px',
+                lineHeight: 1.4,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
               }}
             >
-              {/* Role title */}
-              <div
-                style={{
-                  fontSize: '12.5px',
-                  fontWeight: 600,
-                  color: 'var(--accent)',
-                  marginBottom: '8px',
-                }}
-              >
-                {consultation.role}
-              </div>
-
-              {/* Achievement bullets */}
-              {consultation.examination.length > 0 && (
-                <ul
-                  style={{
-                    listStyle: 'none',
-                    padding: 0,
-                    margin: '0 0 10px 0',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '5px',
-                  }}
-                >
-                  {consultation.examination.map((item, i) => (
-                    <li
-                      key={i}
-                      style={{
-                        display: 'flex',
-                        gap: '8px',
-                        fontSize: '11.5px',
-                        color: 'var(--text-primary)',
-                        lineHeight: 1.45,
-                      }}
-                    >
-                      <span
-                        style={{
-                          color: 'var(--accent)',
-                          opacity: 0.5,
-                          flexShrink: 0,
-                          marginTop: '1px',
-                        }}
-                      >
-                        •
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              {/* Coded entries */}
-              {consultation.codedEntries && consultation.codedEntries.length > 0 && (
-                <div
-                  style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '6px',
-                    marginTop: '4px',
-                  }}
-                >
-                  {consultation.codedEntries.map((entry) => (
-                    <span
-                      key={entry.code}
-                      style={{
-                        fontSize: '10px',
-                        fontFamily: 'var(--font-mono)',
-                        padding: '2px 6px',
-                        borderRadius: '3px',
-                        background: 'var(--accent-light)',
-                        color: 'var(--accent)',
-                        border: '1px solid var(--accent-border)',
-                      }}
-                    >
-                      {entry.code}
-                    </span>
-                  ))}
-                </div>
-              )}
+              {previewText}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
 
 export const CareerActivityTile: React.FC = () => {
   const timeline = buildTimeline()
-  const [expandedItemId, setExpandedItemId] = useState<string | null>(null)
+  const { openPanel } = useDetailPanel()
 
-  const handleToggle = useCallback(
-    (id: string) => {
-      setExpandedItemId((prev) => (prev === id ? null : id))
+  const handleItemClick = useCallback(
+    (entry: ActivityEntry) => {
+      if (entry.type === 'role' && entry.consultationId) {
+        const consultation = consultations.find((c) => c.id === entry.consultationId)
+        if (consultation) {
+          openPanel({ type: 'career-role', consultation })
+        }
+      }
     },
-    [],
+    [openPanel],
   )
 
   return (
     <Card full tileId="career-activity">
       <CardHeader dotColor="teal" title="CAREER ACTIVITY" rightText="Full timeline" />
 
+      {/* Placeholder for CareerConstellation component (to be added later) */}
+      <div
+        style={{
+          minHeight: '200px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--bg-dashboard)',
+          borderRadius: 'var(--radius-sm)',
+          border: '1px dashed var(--border-light)',
+          marginBottom: '20px',
+          color: 'var(--text-tertiary)',
+          fontSize: '12px',
+          fontStyle: 'italic',
+        }}
+      >
+        Career Constellation visualization (to be implemented)
+      </div>
+
       <div className="activity-grid">
         {timeline.map((entry) => (
           <ActivityItem
             key={entry.id}
             entry={entry}
-            isExpanded={expandedItemId === entry.id}
-            onToggle={() => handleToggle(entry.id)}
+            onItemClick={() => handleItemClick(entry)}
           />
         ))}
       </div>
