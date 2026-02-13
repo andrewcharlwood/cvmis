@@ -1,0 +1,588 @@
+{
+  "project": "GP Clinical Record — Depth Enhancement",
+  "branchName": "ralph/depth-enhancement",
+  "description": "Add depth, interactivity, and rich content to the GP clinical record dashboard: slide-in detail panels, sub-navigation, expanded skills/KPI data, career constellation D3 visualization, and login refresh. Full spec in Ralph/depth-design.md, requirements in Ralph/depth-requirements.md, workflow in Ralph/workflow_depth.md.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Clean up unused legacy components and hooks",
+      "description": "As a developer, I need to remove all dead code from the previous PMR interface so the codebase is clean before adding new features. Delete all files listed below and verify no dead imports remain.",
+      "acceptanceCriteria": [
+        "Delete src/components/PMRInterface.tsx",
+        "Delete src/components/PatientBanner.tsx",
+        "Delete src/components/ClinicalSidebar.tsx",
+        "Delete src/components/Breadcrumb.tsx",
+        "Delete src/components/MobileBottomNav.tsx",
+        "Delete all files in src/components/views/ directory (SummaryView, ConsultationsView, MedicationsView, ProblemsView, InvestigationsView, DocumentsView, ReferralsView) and remove the views/ directory",
+        "Delete src/components/Contact.tsx, Education.tsx, Experience.tsx, FloatingNav.tsx, Footer.tsx, Hero.tsx, Projects.tsx, Skills.tsx (old portfolio components)",
+        "Delete src/hooks/useScrollCondensation.ts",
+        "Delete src/hooks/useActiveSection.ts (will be recreated in a later story)",
+        "Delete src/hooks/useScrollReveal.ts if unused",
+        "Verify no remaining files import any of the deleted files (fix any dead imports)",
+        "npm run build succeeds with zero errors",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Add new TypeScript types and CSS custom properties for depth features",
+      "description": "As a developer, I need new types and CSS foundations that subsequent stories will use. Add types to src/types/pmr.ts and CSS variables + keyframes to src/index.css. See Ralph/depth-design.md Section 4 for type definitions and Section 9 for CSS.",
+      "acceptanceCriteria": [
+        "Add SkillCategory type: 'Technical' | 'Domain' | 'Leadership' to src/types/pmr.ts",
+        "Add KPIStory interface with fields: context (string), role (string), outcomes (string[]), period (string optional) to src/types/pmr.ts",
+        "Add optional story?: KPIStory field to existing KPI interface in src/types/pmr.ts",
+        "Add ConstellationNode interface (id, type: 'role'|'skill', label, shortLabel?, organization?, startYear?, endYear?, orgColor?, domain?) to src/types/pmr.ts",
+        "Add ConstellationLink interface (source, target, strength) to src/types/pmr.ts",
+        "Add DetailPanelContent discriminated union type (kpi | skill | skills-all | consultation | project | education | career-role) to src/types/pmr.ts",
+        "Add EducationExtra interface (documentId, extracurriculars?, researchDescription?, programmeDetail?) to src/types/pmr.ts",
+        "Add CSS custom properties to :root in src/index.css: --subnav-height: 36px, --panel-narrow: 400px, --panel-wide: 60vw, --backdrop-blur: 4px, --backdrop-bg: rgba(26,43,42,0.15)",
+        "Add @keyframes panel-slide-in (translateX 100% to 0), panel-slide-out (reverse), backdrop-fade-in (opacity 0 to 1) to src/index.css",
+        "Add prefers-reduced-motion overrides for all new keyframes (instant, no transform/opacity change)",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Create DetailPanelContext, DetailPanel component, and useFocusTrap hook",
+      "description": "As a developer, I need the core detail panel infrastructure: a context for managing panel state, the slide-in panel component, and a focus trap hook. Create 3 new files. The panel renders placeholder content for now (real renderers come later). See Ralph/depth-design.md Sections 2.1, 2.2 for full interface specs.",
+      "acceptanceCriteria": [
+        "Create src/contexts/DetailPanelContext.tsx with DetailPanelProvider that manages: content (DetailPanelContent | null), openPanel, closePanel, isOpen",
+        "Width mapping is deterministic from content.type: kpi/skill/skills-all/education → 'narrow' (var(--panel-narrow)), consultation/project/career-role → 'wide' (var(--panel-wide))",
+        "Title mapping derives from content data (e.g., kpi → kpi.label, skill → skill.name, consultation → consultation.role)",
+        "Create src/components/DetailPanel.tsx: full-screen backdrop (var(--backdrop-bg) + backdrop-filter: blur(var(--backdrop-blur))) with panel sliding from right",
+        "Panel has header with X close button (lucide X icon), colored dot matching tile, and title text",
+        "Panel body is scrollable and renders placeholder text showing content type",
+        "Close triggers: backdrop click, Escape key, X button",
+        "ARIA: aria-modal=true, role=dialog, aria-labelledby pointing to title",
+        "Mobile (<768px): both narrow and wide become 100vw",
+        "prefers-reduced-motion: instant appear, no slide animation",
+        "Create src/hooks/useFocusTrap.ts: useFocusTrap(containerRef, isActive) traps Tab/Shift+Tab within container when active, returns focus to previous element when deactivated",
+        "DetailPanel uses useFocusTrap when open",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Create SubNav component and useActiveSection hook",
+      "description": "As a developer, I need a sticky sub-navigation bar below the TopBar for section jumping, plus a hook that tracks which section is visible. Create src/components/SubNav.tsx and src/hooks/useActiveSection.ts (the old one was deleted in cleanup). See Ralph/depth-design.md Section 2.3.",
+      "acceptanceCriteria": [
+        "Create src/components/SubNav.tsx with 5 sections: Overview (patient-summary), Skills (core-skills), Experience (career-activity), Projects (projects), Education (education)",
+        "SubNav is sticky below TopBar (top: 48px, z-index: 99)",
+        "Height 36px, background var(--surface), bottom border var(--border-light)",
+        "Tabs: 13px font, weight 500, gap 24px, centered text",
+        "Active tab: teal underline (2px) with 200ms slide transition, text color var(--accent)",
+        "Inactive tabs: var(--text-secondary)",
+        "Click scrolls smoothly to [data-tile-id=tileId] element",
+        "Create src/hooks/useActiveSection.ts using IntersectionObserver to track visible tile by data-tile-id attribute",
+        "Maps tile IDs to section IDs: patient-summary→overview, core-skills→skills, career-activity→experience, projects→projects, education→education",
+        "SubNav accepts activeSection and onSectionClick props",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Expand skills data from 5 to ~20 with three categories",
+      "description": "As a developer, I need to expand src/data/skills.ts from 5 skills to ~21 skills across 3 categories. Source content from References/CV_v4.md Core Competencies. Each skill retains the medication metaphor (frequency, status, proficiency). See Ralph/depth-design.md Section 5.1 and Ralph/depth-requirements.md Section 4.4.",
+      "acceptanceCriteria": [
+        "src/data/skills.ts has ~21 SkillMedication entries",
+        "Technical category (8): Data Analysis, Python, SQL, Power BI, JavaScript/TypeScript, Excel, Algorithm Design, Data Pipelines",
+        "Healthcare Domain category (6): Medicines Optimisation, Population Health, NICE TA Implementation, Health Economics, Clinical Pathways, Controlled Drugs",
+        "Strategic & Leadership category (7): Budget Management, Stakeholder Engagement, Pharmaceutical Negotiation, Team Development, Change Management, Financial Modelling, Executive Communication",
+        "Each skill has: id (kebab-case), name, frequency (medication-style: Daily, Twice daily, Once weekly, When required, etc.), startYear, yearsOfExperience, proficiency (0-100), category, status (Active/Historical), icon (lucide icon name)",
+        "Frequency and proficiency values are realistic based on CV_v4.md role descriptions",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Add KPI story data and update 4th KPI",
+      "description": "As a developer, I need to add rich story content to each KPI in src/data/kpis.ts for the detail panel, and change the 4th KPI from '12 Team Size Led' to '1.2M Population served'. Source from References/CV_v4.md. See Ralph/depth-design.md Section 5.2.",
+      "acceptanceCriteria": [
+        "Change 4th KPI from {id:'team', value:'12', label:'Team Size Led'} to {id:'population', value:'1.2M', label:'Population Served', sub:'Norfolk & Waveney ICS', colorVariant:'teal'}",
+        "Add story field (KPIStory) to all 4 KPIs with: context, role, outcomes[], period",
+        "£220M story: context about ICB prescribing budget for 1.2M population, role about forecasting models and ICB board accountability, outcomes about proactive financial planning",
+        "£14.6M story: context about efficiency programme, role about data analysis identification, outcomes about over-target performance",
+        "9+ Years story: context about career span Aug 2016-present, role about progression from community pharmacy to system-level leadership",
+        "1.2M story: context about Norfolk & Waveney ICS population, role about population health analytics and data-driven decision making",
+        "Add explanation field to 4th KPI matching the story context",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Create education extras data file",
+      "description": "As a developer, I need src/data/educationExtras.ts with expanded detail for the education detail panel. Source from References/CV_v4.md Education section. See Ralph/depth-design.md Section 5.4.",
+      "acceptanceCriteria": [
+        "Create src/data/educationExtras.ts exporting educationExtras array of EducationExtra objects",
+        "MPharm entry (documentId matching doc-mpharm or equivalent from documents.ts): extracurriculars ['President of UEA Pharmacy Society', 'Secretary & Vice-President of UEA Ultimate Frisbee', 'Publicity Officer for UEA Alzheimer\\'s Society'], researchDescription about cocrystal formation for drug delivery",
+        "Mary Seacole entry: programmeDetail about NHS leadership qualification, change management, healthcare leadership, system-level thinking",
+        "Document IDs match those used in src/data/documents.ts",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Restructure DashboardLayout with SubNav, new tile order, and DetailPanel",
+      "description": "As a developer, I need to update DashboardLayout.tsx to: wrap with DetailPanelProvider, add SubNav between TopBar and content, reorder tiles per the new layout, render DetailPanel, and adjust spacing. See Ralph/depth-design.md Section 3.1.",
+      "acceptanceCriteria": [
+        "DashboardLayout (or App.tsx) wraps content with DetailPanelProvider from DetailPanelContext",
+        "SubNav renders between TopBar and the flex container",
+        "Content area marginTop accounts for both TopBar and SubNav: calc(var(--topbar-height) + var(--subnav-height))",
+        "Tile order: PatientSummaryTile (full), LatestResultsTile (half) + ProjectsTile (half) side-by-side, CoreSkillsTile (full), LastConsultationTile (full), CareerActivityTile (full), EducationTile (full)",
+        "DetailPanel component renders alongside CommandPalette",
+        "SubNav activeSection state managed via useActiveSection hook",
+        "All tiles have data-tile-id attributes (Card tileId prop)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Create constellation data mapping file",
+      "description": "As a developer, I need src/data/constellation.ts defining the role-skill mapping for the D3 career constellation graph. Maps 6 career roles to their associated skills with connection strengths. See Ralph/depth-design.md Section 5.3 and 2.4.",
+      "acceptanceCriteria": [
+        "Create src/data/constellation.ts with RoleSkillMapping interface (roleId: string, skillIds: string[])",
+        "Export roleSkillMappings array mapping 6 roles to skill IDs from skills.ts",
+        "Roles: pre-reg-pharmacist-2015, duty-pharmacy-manager-2016, pharmacy-manager-2017, hcd-pharmacist-2022, deputy-head-2024, interim-head-2025 (IDs should match or reference consultation IDs from consultations.ts)",
+        "Export constellationNodes array of ConstellationNode objects for all role nodes (with organization, startYear, endYear, orgColor) and skill nodes (with domain)",
+        "Export constellationLinks array of ConstellationLink objects connecting skills to roles with strength values (0-1)",
+        "Role orgColors: Paydens gets one color, Tesco another, NHS another (use distinct teal/blue/green tones)",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Modify LatestResultsTile: remove flip, bigger numbers, panel trigger",
+      "description": "As a developer, I need to redesign the KPI cards in LatestResultsTile.tsx: remove the CSS flip animation, make headline numbers larger and bolder, and make each card clickable to open the detail panel. See Ralph/depth-design.md Section 3.5.",
+      "acceptanceCriteria": [
+        "Remove flip card animation entirely (no more .metric-card, .metric-card-inner, .metric-card-front, .metric-card-back CSS classes from index.css if they exist)",
+        "Each KPI renders as a clickable button/card with: value at 28-32px font-size, weight 700, colored by kpi.colorVariant",
+        "Label at 12px, weight 500, color var(--text-primary), marginTop 4px",
+        "Sub-text at 10px, font-family var(--font-geist-mono), color var(--text-tertiary), marginTop 2px",
+        "Click calls openPanel({ type: 'kpi', kpi }) from DetailPanelContext",
+        "Hover: border color shift + shadow deepens (transition 150ms)",
+        "Keyboard: Enter/Space triggers panel open",
+        "Card styling: padding 16px, background var(--surface), border 1px solid var(--border-light), border-radius var(--radius-sm)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Modify CoreSkillsTile: full width, categorised groups, panel triggers",
+      "description": "As a developer, I need to redesign CoreSkillsTile.tsx as full-width with skills grouped by 3 categories, showing top 3-4 per category with 'view all' buttons. Individual skills and 'view all' trigger the detail panel. See Ralph/depth-design.md Section 3.4.",
+      "acceptanceCriteria": [
+        "Card uses full prop (spans both grid columns)",
+        "Skills grouped by category: Technical, Healthcare Domain (Domain), Strategic & Leadership (Leadership)",
+        "Each category has a header: thin divider line with category label (styled like sidebar section dividers: 10px, uppercase, var(--text-tertiary))",
+        "Show top 3-4 skills per category on the dashboard tile (sorted by proficiency or relevance)",
+        "Each skill row is clickable → openPanel({ type: 'skill', skill }) from DetailPanelContext",
+        "Each category with >4 skills shows a 'View all (N)' button → openPanel({ type: 'skills-all', category })",
+        "Retain medication metaphor display (frequency, status badge)",
+        "Remove old single-expand accordion for skills (replaced by panel)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Modify ProjectsTile: half width, compact card grid, panel trigger",
+      "description": "As a developer, I need to change ProjectsTile.tsx from full-width to half-width (positioned alongside LatestResultsTile by the layout reorder in US-008). Compact cards with click to open detail panel. See Ralph/depth-design.md Section 3.6.",
+      "acceptanceCriteria": [
+        "Remove full prop from Card (half-width, single grid column)",
+        "Compact project cards: status dot + name + year (right-aligned) per row",
+        "Tech stack shown as small inline tags",
+        "Each project card clickable → openPanel({ type: 'project', investigation }) from DetailPanelContext",
+        "Remove old in-place expansion (replaced by panel)",
+        "Hover: border color shift, shadow deepens",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Modify LastConsultationTile: add panel trigger",
+      "description": "As a developer, I need to add a 'View full record' button to LastConsultationTile.tsx that opens the detail panel with full role details. See Ralph/depth-design.md Section 3.9.",
+      "acceptanceCriteria": [
+        "Add 'View full record' link/button at the bottom of the tile",
+        "Click → openPanel({ type: 'consultation', consultation }) from DetailPanelContext, passing the first consultation entry",
+        "Make the tile header area also clickable (opens same panel)",
+        "Keep existing inline content (header info row, achievement bullets)",
+        "Hover state on clickable areas",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Modify CareerActivityTile: panel triggers and hover preview",
+      "description": "As a developer, I need to change CareerActivityTile.tsx so timeline items click to open the detail panel instead of expanding in-place, and add hover previews. See Ralph/depth-design.md Section 3.7.",
+      "acceptanceCriteria": [
+        "Role timeline items click → openPanel({ type: 'career-role', consultation }) from DetailPanelContext",
+        "Remove in-place accordion expansion for career items (replaced by panel)",
+        "Hover preview: items lift slightly on hover with shadow deepens, show 1-2 lines of preview text",
+        "Keep color-coded dots and entry type styling (teal roles, amber projects, green certs, purple education)",
+        "Reserve a container/placeholder for CareerConstellation component (will be added later)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Modify EducationTile: richer content, panel trigger",
+      "description": "As a developer, I need to enhance EducationTile.tsx with richer inline content and click-to-panel interaction. See Ralph/depth-design.md Section 3.8.",
+      "acceptanceCriteria": [
+        "Show richer inline content: MPharm research project score (75.1%), OSCE score (80%), A-level grades (A* Maths, B Chemistry, C Politics)",
+        "Each education entry is clickable → openPanel({ type: 'education', document }) from DetailPanelContext",
+        "Hover: border color shift on clickable entries",
+        "Use education extras data from src/data/educationExtras.ts for inline detail where appropriate",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Modify PatientSummaryTile: structured presentation with highlight strip",
+      "description": "As a developer, I need to improve PatientSummaryTile.tsx with the full CV_v4.md profile text and a visual highlight strip. See Ralph/depth-design.md Section 3.10 and Ralph/depth-requirements.md Section 4.1.",
+      "acceptanceCriteria": [
+        "Verify src/data/profile.ts has the complete profile text from References/CV_v4.md (update if needed)",
+        "Add a visual highlight strip showing key stats: e.g. '9+ Years Experience', '1.2M Population', '£220M Budget' as small styled badges or pills",
+        "Profile text is not a wall of text — use hierarchy: bold key phrases, structured paragraphs if needed",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Create KPIDetail renderer for detail panel",
+      "description": "As a developer, I need src/components/detail/KPIDetail.tsx that renders rich KPI story content inside the detail panel. Wire it into DetailPanel so content.type === 'kpi' renders this component. See Ralph/depth-design.md Section 6.1.",
+      "acceptanceCriteria": [
+        "Create src/components/detail/KPIDetail.tsx accepting a KPI prop",
+        "Renders: headline number (large, colored by kpi.colorVariant), context paragraph (story.context), 'Your role' paragraph (story.role), outcome bullets (story.outcomes), period badge (story.period)",
+        "Graceful fallback if story is undefined (show kpi.explanation instead)",
+        "Wire into DetailPanel: when content.type === 'kpi', render <KPIDetail kpi={content.kpi} />",
+        "Styling matches dashboard design system (fonts, colors, spacing)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Create ConsultationDetail renderer for detail panel",
+      "description": "As a developer, I need src/components/detail/ConsultationDetail.tsx for displaying full role details in the detail panel. Used for both 'consultation' and 'career-role' content types. See Ralph/depth-design.md Section 6.4.",
+      "acceptanceCriteria": [
+        "Create src/components/detail/ConsultationDetail.tsx accepting a Consultation prop",
+        "Renders: role title + organization + dates, history paragraph (consultation.history), achievement bullets (consultation.examination), plan/outcomes (consultation.plan), coded entries as badges (consultation.codedEntries)",
+        "Wire into DetailPanel: content.type === 'consultation' or 'career-role' renders this component",
+        "Styled consistently with dashboard design system",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Create ProjectDetail renderer for detail panel",
+      "description": "As a developer, I need src/components/detail/ProjectDetail.tsx for displaying full project information in the wide detail panel. See Ralph/depth-design.md Section 6.5.",
+      "acceptanceCriteria": [
+        "Create src/components/detail/ProjectDetail.tsx accepting an Investigation prop",
+        "Renders: project name + year + status badge, methodology description, tech stack as tags, results bullets, external link button (if investigation.externalUrl exists, opens in new tab)",
+        "Wire into DetailPanel: content.type === 'project' renders this component",
+        "External link uses rel='noopener noreferrer'",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Create SkillDetail renderer for detail panel",
+      "description": "As a developer, I need src/components/detail/SkillDetail.tsx for displaying individual skill detail in the narrow detail panel. See Ralph/depth-design.md Section 6.2.",
+      "acceptanceCriteria": [
+        "Create src/components/detail/SkillDetail.tsx accepting a SkillMedication prop",
+        "Renders: skill name + frequency + status badge, visual proficiency bar (0-100%), years of experience, category label",
+        "If constellation data is available, show 'Used in' section listing roles that used this skill (import from src/data/constellation.ts)",
+        "Wire into DetailPanel: content.type === 'skill' renders this component",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Create SkillsAllDetail renderer for detail panel",
+      "description": "As a developer, I need src/components/detail/SkillsAllDetail.tsx showing the full categorised list of all skills. Clicking an individual skill switches the panel to SkillDetail. See Ralph/depth-design.md Section 6.3.",
+      "acceptanceCriteria": [
+        "Create src/components/detail/SkillsAllDetail.tsx",
+        "Shows full list grouped by Technical / Healthcare Domain / Strategic & Leadership",
+        "Category headers styled consistently with CoreSkillsTile category headers",
+        "Each skill row is clickable → calls openPanel({ type: 'skill', skill }) to switch panel content",
+        "If opened with a category filter (content.category), scroll to or highlight that category",
+        "Wire into DetailPanel: content.type === 'skills-all' renders this component",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Create EducationDetail renderer for detail panel",
+      "description": "As a developer, I need src/components/detail/EducationDetail.tsx for displaying full education details including extras. See Ralph/depth-design.md Section 6.6.",
+      "acceptanceCriteria": [
+        "Create src/components/detail/EducationDetail.tsx accepting a Document prop",
+        "Renders: title + institution + dates + classification",
+        "Imports educationExtras from src/data/educationExtras.ts and finds matching extra by document ID",
+        "If MPharm: shows research project description, extracurricular activities list",
+        "If Mary Seacole: shows programme detail",
+        "Shows notes from document data if present",
+        "Wire into DetailPanel: content.type === 'education' renders this component",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Install D3 and scaffold CareerConstellation component",
+      "description": "As a developer, I need to install d3 as a dependency and create a scaffolded CareerConstellation component with an SVG container. See Ralph/depth-design.md Section 2.4.",
+      "acceptanceCriteria": [
+        "Run npm install d3 @types/d3",
+        "Create src/components/CareerConstellation.tsx with props: onRoleClick(id: string), onSkillClick(id: string)",
+        "Component renders a responsive SVG container using useRef<SVGSVGElement>",
+        "Container: full width, height 400px desktop / 300px tablet / 250px mobile (use CSS or media queries)",
+        "SVG has viewBox for responsive scaling",
+        "Import constellation data from src/data/constellation.ts",
+        "Subtle radial gradient background from var(--bg-dashboard) center to var(--surface) edge",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Build D3 force-directed graph rendering in CareerConstellation",
+      "description": "As a developer, I need the D3 force simulation to render role and skill nodes with links in the CareerConstellation component. D3 operates imperatively via useEffect on the SVG ref. See Ralph/depth-design.md Section 2.4 for exact force configuration.",
+      "acceptanceCriteria": [
+        "D3 force simulation with: forceManyBody(-200), forceLink(distance 80, strength from data), forceX chronological (roles positioned left-to-right by startYear), forceY centered, forceCollide(30)",
+        "Role nodes: 24px radius circles, filled with orgColor, white text label",
+        "Skill nodes: 10px radius, color-coded by domain: clinical=var(--success), technical=var(--accent), leadership=var(--amber)",
+        "Links: thin lines (1px), var(--border) color, opacity 0.3",
+        "D3 integration: useEffect on SVG ref, no React state for node positions",
+        "Simulation runs and nodes settle into stable positions",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Add accessibility to CareerConstellation",
+      "description": "As a developer, I need the CareerConstellation to be accessible: keyboard navigable, screen-reader friendly, and respecting reduced motion. See Ralph/depth-design.md Section 2.4 accessibility notes.",
+      "acceptanceCriteria": [
+        "SVG has role=img and aria-label describing the graph ('Career constellation showing roles and skills across career timeline')",
+        "Screen-reader-only text description of graph structure (hidden visually, available to assistive tech)",
+        "Keyboard navigation: Tab through role nodes, Enter/Space opens detail panel for focused node",
+        "Focus indicators visible on keyboard-focused nodes",
+        "prefers-reduced-motion: disable force simulation animation, render nodes at calculated static positions immediately",
+        "Typecheck passes"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Add hover and click interactions to CareerConstellation",
+      "description": "As a developer, I need hover highlighting and click-to-panel interactions on the CareerConstellation. This connects the graph to the detail panel system. See Ralph/depth-design.md Section 2.4.",
+      "acceptanceCriteria": [
+        "Hover role node: connected skill nodes scale up, links brighten to var(--accent), non-connected nodes fade to 0.15 opacity",
+        "Hover skill node: all connected role nodes highlight, link paths illuminate",
+        "Click role node: calls onRoleClick(id) prop",
+        "Click skill node: calls onSkillClick(id) prop",
+        "Integrate into CareerActivityTile: wire onRoleClick to open ConsultationDetail panel, onSkillClick to open SkillDetail panel",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "Restyle LoginScreen with teal accents",
+      "description": "As a developer, I need to visually refresh the LoginScreen with teal accents replacing the current blue. See Ralph/depth-design.md Section 3.3 and Ralph/depth-requirements.md Section 5.",
+      "acceptanceCriteria": [
+        "Replace #005EB8 with #0D6E6E throughout LoginScreen (shield icon bg, active field border, cursor, button)",
+        "Replace #004D9F with #0A8080 (button hover state)",
+        "Replace #004494 with #085858 (button pressed state)",
+        "Background color: keep #1E293B or change to #1A2B2A",
+        "Login card feels cohesive with the dashboard teal palette",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-028",
+      "title": "Change login username to a.recruiter and add connection status indicator",
+      "description": "As a developer, I need to change the typed username from a.charlwood to a.recruiter and add a connection status indicator below the login button. See Ralph/depth-design.md Section 3.3.",
+      "acceptanceCriteria": [
+        "Username typed in login animation is 'a.recruiter' (not 'A.CHARLWOOD' or similar)",
+        "Connection status indicator appears below the login button: 6px dot + text",
+        "Initial state: red/alert dot + 'Awaiting secure connection...' (var(--alert) color)",
+        "After ~2000ms: dot transitions to green + 'Secure connection established' (var(--success) color, 300ms transition)",
+        "Text: 10px, font-family var(--font-geist-mono), color var(--text-tertiary)",
+        "Login button disabled until BOTH typing is complete AND connectionState === 'connected'",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 28,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-029",
+      "title": "Add post-login loading state and update TopBar session name",
+      "description": "As a developer, I need a brief loading state after clicking the login button before the dashboard appears, and the TopBar should show A.RECRUITER as the session user. See Ralph/depth-design.md Sections 3.3 and 3.2.",
+      "acceptanceCriteria": [
+        "On login button click: isLoading=true, card content replaced with spinner + 'Loading clinical records...' text",
+        "Loading state lasts ~600ms, then calls onComplete() to transition to dashboard",
+        "Spinner is a CSS-animated spinner (not a GIF), styled with var(--accent) or similar",
+        "Loading text: 12px, color var(--text-secondary)",
+        "In TopBar.tsx: change session display name from 'Dr. A.CHARLWOOD' (or current value) to 'A.RECRUITER'",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 29,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-030",
+      "title": "Update CommandPalette for expanded content and panel actions",
+      "description": "As a developer, I need to update the CommandPalette search index and actions to work with the expanded skills data (~20 skills) and add actions that open the detail panel directly. See Ralph/depth-design.md Section 10, Phase 6.",
+      "acceptanceCriteria": [
+        "Search index in src/lib/search.ts includes all ~21 skills (not just the original 5)",
+        "Selecting a skill result opens the detail panel for that skill (openPanel call or dispatch event)",
+        "Selecting a KPI result opens the KPI detail panel",
+        "Selecting a project result opens the project detail panel",
+        "Ensure DashboardLayout handlePaletteAction supports a new 'panel' action type or adapts existing types to trigger detail panel",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-031",
+      "title": "Responsive testing and fixes for all new components",
+      "description": "As a developer, I need to verify and fix responsive behavior for the detail panel, sub-nav, constellation, and restructured layout at all breakpoints.",
+      "acceptanceCriteria": [
+        "DetailPanel: both narrow and wide render as 100vw on mobile (<768px)",
+        "SubNav: works on tablet/mobile (horizontal scroll if needed, no overflow)",
+        "CareerConstellation: renders at 300px height on tablet, 250px on mobile",
+        "Projects + KPIs: stack vertically on mobile when grid falls to single column",
+        "CoreSkillsTile: full-width layout works on all breakpoints",
+        "All interactive elements have touch targets >= 44px on mobile",
+        "No horizontal overflow at 375px viewport width",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 31,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-032",
+      "title": "Reduced motion audit, final cleanup, and visual review",
+      "description": "As a developer, I need to verify all new animations respect prefers-reduced-motion, remove any dead code introduced during development, and do a final build verification.",
+      "acceptanceCriteria": [
+        "DetailPanel slide animation: instant appear with prefers-reduced-motion",
+        "Backdrop fade: instant with prefers-reduced-motion",
+        "SubNav underline transition: instant with prefers-reduced-motion",
+        "CareerConstellation: static layout (no force simulation animation) with prefers-reduced-motion",
+        "Connection status dot transition: instant with prefers-reduced-motion",
+        "Post-login spinner: static indicator with prefers-reduced-motion",
+        "No dead imports across all files",
+        "Remove any unused flip card CSS (.metric-card-inner etc.) if still present in index.css",
+        "npm run build succeeds cleanly",
+        "npm run typecheck passes with zero errors",
+        "npm run lint passes (pre-existing AccessibilityContext warning OK)",
+        "Typecheck passes"
+      ],
+      "priority": 32,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
