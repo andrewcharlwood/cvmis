@@ -129,10 +129,10 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 14: Build Education tile
 > Detail: `Ralph/refs/ref-06-bottom-tiles.md` (Education section)
-- [ ] Create `src/components/tiles/EducationTile.tsx`
-- [ ] Full-width card, below Career Activity
-- [ ] Education entries from documents data
-- [ ] Run quality checks
+- [x] Create `src/components/tiles/EducationTile.tsx`
+- [x] Full-width card, below Career Activity
+- [x] Education entries from documents data
+- [x] Run quality checks
 
 #### Task 15: Build Projects tile
 > Detail: `Ralph/refs/ref-06-bottom-tiles.md` (Projects section)

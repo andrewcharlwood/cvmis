@@ -355,3 +355,27 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Skipped — no browser tools available. Will verify visually after multiple tiles are in place.
 
+### Iteration 12 — Task 14: Build Education tile
+**Status:** Complete
+**Changes:**
+- Created `src/components/tiles/EducationTile.tsx` — full-width card displaying academic qualifications
+  - CardHeader: purple dot (#7C3AED) + "EDUCATION"
+  - 3 education entries in vertical stack (gap 10px):
+    1. MPharm (Hons) — 2:1 (University of East Anglia · 2015)
+    2. NHS Leadership Academy — Mary Seacole Programme (2018 · 78%)
+    3. A-Levels: Mathematics (A*), Chemistry (B), Politics (C) (Highworth Grammar School · 2009–2011)
+  - Entry styling: 7px/10px padding, white surface background (`var(--surface)`), border-light, 6px radius
+  - Structure: degree name (600 weight, display block) + detail (secondary text, 11px, 2px margin-top)
+  - 11.5px base font size for entries
+- Updated `src/components/DashboardLayout.tsx` — imported and rendered EducationTile below CareerActivity
+**Learnings:**
+- Education data presented in simple display-only format — no expansion interaction needed (unlike Career Activity or Projects)
+- Ref spec mentioned filtering documents.ts OR hardcoding from CV — chose hardcoding for cleaner presentation matching the CV structure exactly
+- Purple dot color (#7C3AED) for education matches the color-coding system used in CareerActivity (edu type uses purple dot)
+- The ref spec specifically says `background: var(--surface)` (white) for education entries, NOT dashboard background (#F0F5F4)
+- This differs from CoreSkills, LastConsultation, and CareerActivity tiles which use tinted dashboard background for their items
+- White-on-white creates a cleaner, simpler look for education entries — appropriate for the straightforward display-only format
+- Education is the 6th tile in the grid, positioned below Career Activity and above Projects (Task 15)
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Skipped — no browser tools available. Will verify visually after all tiles are in place.
+
