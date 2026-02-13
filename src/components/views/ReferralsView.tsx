@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { Send, Mail, Phone, MapPin, ExternalLink, Loader2, CheckCircle } from 'lucide-react'
 import { patient } from '@/data/patient'
 
@@ -18,6 +18,11 @@ interface FormErrors {
   referrerName?: string
   referrerEmail?: string
 }
+
+const prefersReducedMotion =
+  typeof window !== 'undefined'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false
 
 function generateRefNumber(): string {
   const now = new Date()
@@ -48,9 +53,9 @@ function PriorityOption({
   }
 
   const labelColors: Record<Priority, string> = {
-    urgent: 'text-red-700',
+    urgent: 'text-red-600',
     routine: 'text-pmr-nhsblue',
-    'two-week-wait': 'text-amber-700',
+    'two-week-wait': 'text-amber-600',
   }
 
   return (
@@ -70,9 +75,9 @@ function PriorityOption({
       >
         {selected && <span className={`w-2 h-2 rounded-full ${dotColors[value]}`} />}
       </span>
-      <span className={`text-sm font-medium ${labelColors[value]}`}>{label}</span>
+      <span className={`font-ui text-sm font-medium ${labelColors[value]}`}>{label}</span>
       <span
-        className="absolute left-0 bottom-full mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10"
+        className="absolute left-0 bottom-full mb-2 px-2 py-1 bg-gray-900 text-white text-xs font-ui rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10"
         role="tooltip"
       >
         {tooltip}
@@ -109,7 +114,7 @@ function ContactMethodOption({
       >
         {selected && <span className="w-2 h-2 rounded-full bg-pmr-nhsblue" />}
       </span>
-      <span className="text-sm text-gray-700">{label}</span>
+      <span className="font-ui text-sm text-gray-700">{label}</span>
     </label>
   )
 }
@@ -129,12 +134,12 @@ function FormField({
 }) {
   return (
     <div className="space-y-1">
-      <label htmlFor={id} className="block font-inter font-medium text-[13px] text-gray-600">
+      <label htmlFor={id} className="block font-ui font-medium text-[13px] text-gray-600">
         {label}
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       {children}
-      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+      {error && <p className="font-ui text-xs text-red-600 mt-1">{error}</p>}
     </div>
   )
 }
@@ -173,29 +178,29 @@ function DirectContactTable() {
   ]
 
   return (
-    <div className="bg-white border border-gray-200 rounded">
-      <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
-        <h3 className="font-inter font-semibold text-sm uppercase tracking-wider text-gray-500">
+    <div className="bg-white border border-[#E5E7EB] rounded shadow-pmr">
+      <div className="bg-[#F9FAFB] border-b border-[#E5E7EB] px-4 py-3">
+        <h3 className="font-ui font-semibold text-sm uppercase tracking-wider text-gray-500">
           Direct Contact
         </h3>
       </div>
-      <div className="divide-y divide-gray-200">
+      <div className="divide-y divide-[#E5E7EB]">
         {contactMethods.map((method) => (
-          <div key={method.label} className="flex items-center justify-between px-4 py-3">
+          <div key={method.label} className="flex items-center justify-between px-4 py-3 hover:bg-[#EFF6FF] transition-colors">
             <div className="flex items-center gap-3">
               <method.icon className="w-4 h-4 text-gray-400" />
-              <span className="font-inter text-sm text-gray-500 w-20">{method.label}</span>
+              <span className="font-ui text-sm text-gray-500 w-20">{method.label}</span>
               {method.href ? (
                 <a
                   href={method.href}
                   target={method.external ? '_blank' : undefined}
                   rel={method.external ? 'noopener noreferrer' : undefined}
-                  className="font-mono text-sm text-pmr-nhsblue hover:underline"
+                  className="font-geist text-sm text-pmr-nhsblue hover:underline focus-visible:ring-2 focus-visible:ring-pmr-nhsblue/40 focus-visible:outline-none rounded"
                 >
                   {method.value}
                 </a>
               ) : (
-                <span className="font-mono text-sm text-gray-900">{method.value}</span>
+                <span className="font-geist text-sm text-gray-900">{method.value}</span>
               )}
             </div>
             {method.href && (
@@ -203,7 +208,7 @@ function DirectContactTable() {
                 href={method.href}
                 target={method.external ? '_blank' : undefined}
                 rel={method.external ? 'noopener noreferrer' : undefined}
-                className="font-inter text-xs text-pmr-nhsblue hover:underline flex items-center gap-1"
+                className="font-ui text-xs text-pmr-nhsblue hover:underline flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-pmr-nhsblue/40 focus-visible:outline-none rounded"
               >
                 {method.action}
                 {method.external && <ExternalLink className="w-3 h-3" />}
@@ -217,10 +222,6 @@ function DirectContactTable() {
 }
 
 export function ReferralsView() {
-  const prefersReducedMotion = useRef(
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  ).current
-
   const [formData, setFormData] = useState<FormData>({
     priority: 'routine',
     referrerName: '',
@@ -281,9 +282,9 @@ export function ReferralsView() {
   if (isSuccess) {
     return (
       <div className="space-y-6">
-        <div className="bg-white border border-gray-200 rounded">
-          <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
-            <h2 className="font-inter font-semibold text-sm uppercase tracking-wider text-gray-500">
+        <div className="bg-white border border-[#E5E7EB] rounded shadow-pmr">
+          <div className="bg-[#F9FAFB] border-b border-[#E5E7EB] px-4 py-3">
+            <h2 className="font-ui font-semibold text-sm uppercase tracking-wider text-gray-500">
               New Referral
             </h2>
           </div>
@@ -295,16 +296,16 @@ export function ReferralsView() {
             >
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
-            <h3 className="font-inter font-semibold text-lg text-gray-900 mb-2">
+            <h3 className="font-ui font-semibold text-lg text-gray-900 mb-2">
               Referral sent successfully
             </h3>
-            <p className="font-mono text-sm text-gray-500 mb-1">Reference: {refNumber}</p>
-            <p className="font-inter text-sm text-gray-500 mb-6">
+            <p className="font-geist text-sm text-gray-500 mb-1">Reference: {refNumber}</p>
+            <p className="font-ui text-sm text-gray-500 mb-6">
               Expected response time: 24-48 hours
             </p>
             <button
               onClick={handleReset}
-              className="font-inter font-medium text-sm px-4 py-2 bg-pmr-nhsblue text-white rounded hover:bg-blue-700 transition-colors"
+              className="font-ui font-medium text-sm px-4 py-2 bg-pmr-nhsblue text-white rounded hover:bg-[#004D9F] transition-colors focus-visible:ring-2 focus-visible:ring-pmr-nhsblue/40 focus-visible:outline-none"
             >
               Send Another Referral
             </button>
@@ -317,33 +318,33 @@ export function ReferralsView() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white border border-gray-200 rounded">
-        <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
-          <h2 className="font-inter font-semibold text-sm uppercase tracking-wider text-gray-500">
+      <div className="bg-white border border-[#E5E7EB] rounded shadow-pmr">
+        <div className="bg-[#F9FAFB] border-b border-[#E5E7EB] px-4 py-3">
+          <h2 className="font-ui font-semibold text-sm uppercase tracking-wider text-gray-500">
             New Referral
           </h2>
-          <p className="font-inter text-xs text-gray-400 mt-1">
+          <p className="font-ui text-xs text-gray-400 mt-1">
             Contact Andy using a clinical referral form format.
           </p>
         </div>
         <form onSubmit={handleSubmit} className="p-4 space-y-6">
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-1">
-              <span className="block font-inter font-medium text-[13px] text-gray-600">
+              <span className="block font-ui font-medium text-[13px] text-gray-600">
                 Referring to
               </span>
-              <span className="font-inter text-sm text-gray-900">{patient.name}</span>
+              <span className="font-ui text-sm text-gray-900">{patient.name}</span>
             </div>
             <div className="space-y-1">
-              <span className="block font-inter font-medium text-[13px] text-gray-600">
+              <span className="block font-ui font-medium text-[13px] text-gray-600">
                 NHS Number
               </span>
-              <span className="font-mono text-sm text-gray-900">{patient.nhsNumber}</span>
+              <span className="font-geist text-sm text-gray-900">{patient.nhsNumber}</span>
             </div>
           </div>
 
           <div className="space-y-2">
-            <span className="block font-inter font-medium text-[13px] text-gray-600">
+            <span className="block font-ui font-medium text-[13px] text-gray-600">
               Priority
             </span>
             <div className="flex gap-6">
@@ -383,7 +384,7 @@ export function ReferralsView() {
                 id="referrerName"
                 value={formData.referrerName}
                 onChange={(e) => setFormData({ ...formData, referrerName: e.target.value })}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm font-inter text-gray-900 focus:border-pmr-nhsblue focus:ring-2 focus:ring-pmr-nhsblue/20 focus:outline-none transition-colors"
+                className="w-full border border-[#D1D5DB] rounded px-3 py-2 text-sm font-ui text-gray-900 placeholder-gray-400 focus:border-pmr-nhsblue focus:ring-2 focus:ring-pmr-nhsblue/15 focus:outline-none transition-all duration-200"
                 placeholder="Your name"
               />
             </FormField>
@@ -398,7 +399,7 @@ export function ReferralsView() {
                 id="referrerEmail"
                 value={formData.referrerEmail}
                 onChange={(e) => setFormData({ ...formData, referrerEmail: e.target.value })}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm font-inter text-gray-900 focus:border-pmr-nhsblue focus:ring-2 focus:ring-pmr-nhsblue/20 focus:outline-none transition-colors"
+                className="w-full border border-[#D1D5DB] rounded px-3 py-2 text-sm font-ui text-gray-900 placeholder-gray-400 focus:border-pmr-nhsblue focus:ring-2 focus:ring-pmr-nhsblue/15 focus:outline-none transition-all duration-200"
                 placeholder="your.email@example.com"
               />
             </FormField>
@@ -410,7 +411,7 @@ export function ReferralsView() {
               id="referrerOrg"
               value={formData.referrerOrg}
               onChange={(e) => setFormData({ ...formData, referrerOrg: e.target.value })}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm font-inter text-gray-900 focus:border-pmr-nhsblue focus:ring-2 focus:ring-pmr-nhsblue/20 focus:outline-none transition-colors"
+              className="w-full border border-[#D1D5DB] rounded px-3 py-2 text-sm font-ui text-gray-900 placeholder-gray-400 focus:border-pmr-nhsblue focus:ring-2 focus:ring-pmr-nhsblue/15 focus:outline-none transition-all duration-200"
               placeholder="Organisation name (optional)"
             />
           </FormField>
@@ -421,13 +422,13 @@ export function ReferralsView() {
               value={formData.reason}
               onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
               rows={4}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm font-inter text-gray-900 focus:border-pmr-nhsblue focus:ring-2 focus:ring-pmr-nhsblue/20 focus:outline-none transition-colors resize-y"
+              className="w-full border border-[#D1D5DB] rounded px-3 py-2 text-sm font-ui text-gray-900 placeholder-gray-400 focus:border-pmr-nhsblue focus:ring-2 focus:ring-pmr-nhsblue/15 focus:outline-none transition-all duration-200 resize-y"
               placeholder="Describe the opportunity or reason for contact..."
             />
           </FormField>
 
           <div className="space-y-2">
-            <span className="block font-inter font-medium text-[13px] text-gray-600">
+            <span className="block font-ui font-medium text-[13px] text-gray-600">
               Contact Method
             </span>
             <div className="flex gap-6">
@@ -452,18 +453,18 @@ export function ReferralsView() {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end gap-3 pt-4 border-t border-[#E5E7EB]">
             <button
               type="button"
               onClick={handleReset}
-              className="font-inter font-medium text-sm px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors"
+              className="font-ui font-medium text-sm px-4 py-2 border border-[#D1D5DB] text-gray-700 rounded hover:bg-gray-50 transition-colors focus-visible:ring-2 focus-visible:ring-pmr-nhsblue/40 focus-visible:outline-none"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="font-inter font-medium text-sm px-6 py-2 bg-pmr-nhsblue text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="font-ui font-medium text-sm px-6 py-2 bg-pmr-nhsblue text-white rounded hover:bg-[#004D9F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-pmr-nhsblue/40 focus-visible:outline-none"
             >
               {isSubmitting ? (
                 <>
