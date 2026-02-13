@@ -1,10 +1,25 @@
 import React from 'react'
 import { Card, CardHeader } from '../Card'
 import { consultations } from '@/data/consultations'
+import { useDetailPanel } from '@/contexts/DetailPanelContext'
+import { ChevronRight } from 'lucide-react'
 
 export const LastConsultationTile: React.FC = () => {
+  const { openPanel } = useDetailPanel()
+
   // Use the most recent consultation (first in array)
   const consultation = consultations[0]
+
+  const handleOpenPanel = () => {
+    openPanel({ type: 'consultation', consultation })
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleOpenPanel()
+    }
+  }
 
   // Format date to "May 2025" format
   const formatDate = (dateStr: string): string => {
@@ -33,8 +48,12 @@ export const LastConsultationTile: React.FC = () => {
     <Card full tileId="last-consultation">
       <CardHeader dotColor="green" title="LAST CONSULTATION" rightText="Most recent role" />
 
-      {/* Header info row */}
+      {/* Header info row - clickable */}
       <div
+        role="button"
+        tabIndex={0}
+        onClick={handleOpenPanel}
+        onKeyDown={handleKeyDown}
         style={{
           display: 'flex',
           flexWrap: 'wrap',
@@ -42,7 +61,19 @@ export const LastConsultationTile: React.FC = () => {
           marginBottom: '14px',
           paddingBottom: '14px',
           borderBottom: '1px solid var(--border-light)',
+          cursor: 'pointer',
+          borderRadius: 'var(--radius-sm)',
+          padding: '8px',
+          margin: '-8px -8px 14px -8px',
+          transition: 'background-color 150ms ease-out',
         }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(10,128,128,0.04)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent'
+        }}
+        aria-label={`View full details for ${consultation.role}`}
       >
         <div>
           <div
@@ -158,6 +189,7 @@ export const LastConsultationTile: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           gap: '7px',
+          marginBottom: '16px',
         }}
       >
         {consultation.examination.map((bullet, index) => (
@@ -188,6 +220,35 @@ export const LastConsultationTile: React.FC = () => {
           </li>
         ))}
       </ul>
+
+      {/* View full record button */}
+      <button
+        onClick={handleOpenPanel}
+        onKeyDown={handleKeyDown}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          fontSize: '12px',
+          fontWeight: 500,
+          color: 'var(--accent)',
+          background: 'transparent',
+          border: 'none',
+          padding: '6px 0',
+          cursor: 'pointer',
+          transition: 'color 150ms ease-out',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = 'var(--accent-hover)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = 'var(--accent)'
+        }}
+        aria-label="View full consultation record"
+      >
+        <span>View full record</span>
+        <ChevronRight size={14} strokeWidth={2.5} />
+      </button>
     </Card>
   )
 }
