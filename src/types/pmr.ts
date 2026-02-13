@@ -113,3 +113,35 @@ export interface ReferralFormData {
   reason: string
   contactMethod: 'Email' | 'Phone' | 'LinkedIn'
 }
+
+export interface Tag {
+  label: string
+  colorVariant: 'teal' | 'amber' | 'green'
+}
+
+export interface Alert {
+  message: string
+  severity: 'alert' | 'amber'
+  icon: string
+}
+
+export interface KPI {
+  id: string
+  value: string
+  label: string
+  sub: string
+  colorVariant: 'green' | 'amber' | 'teal'
+  explanation: string
+}
+
+export interface SkillMedication {
+  id: string
+  name: string
+  frequency: string
+  startYear: number
+  yearsOfExperience: number
+  proficiency: number
+  category: 'Technical' | 'Domain' | 'Leadership'
+  status: 'Active' | 'Historical'
+  icon: string
+}
