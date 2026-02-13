@@ -52,7 +52,7 @@ Also read `CLAUDE.md` for font setup instructions (Elvaro Grotesque and Blumir c
 
 - [x] **Task 9: Rebuild MedicationsView.** Read `Ralph/refs/ref-medications.md`. Three category tabs (Active/Clinical/PRN). Semantic `<table>` with sortable columns. Expandable prescribing history in Geist Mono. Status dots with text labels. Mobile: card layout.
 
-- [ ] **Task 10: Rebuild ProblemsView.** Read `Ralph/refs/ref-problems.md`. Two sections: Active Problems and Resolved Problems. Traffic light dots (8px, always with text labels). Code column in Geist Mono. Expandable rows with narrative + linked consultation navigation. Mobile: card layout.
+- [x] **Task 10: Rebuild ProblemsView.** Read `Ralph/refs/ref-problems.md`. Two sections: Active Problems and Resolved Problems. Traffic light dots (8px, always with text labels). Code column in Geist Mono. Expandable rows with narrative + linked consultation navigation. Mobile: card layout.
 
 - [ ] **Task 11: Rebuild InvestigationsView + DocumentsView.** Read `Ralph/refs/ref-investigations-documents.md`. Both views share the expandable-row pattern with tree-indented monospace content (box-drawing characters). Investigations: status badges (Complete/Ongoing/Live). Documents: type icons per document category. "View Results" button for PharMetrics only. Mobile: card layouts.
 

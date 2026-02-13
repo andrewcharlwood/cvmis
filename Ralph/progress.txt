@@ -612,3 +612,56 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 
 **Next task:** Task 10 — Rebuild ProblemsView (Achievements view)
 
+### Iteration 11 — Task 10: Rebuild ProblemsView (Achievements view)
+**Completed:** Task 10
+**Changes made:**
+- **ProblemsView.tsx**: Complete rebuild from ref-problems.md spec:
+  - **Font updates**: All `font-inter` → `font-ui` (Elvaro Grotesque), `font-mono` → `font-geist` for codes/dates
+  - **Card styling**: Added `shadow-pmr` multi-layered shadows to both Active and Resolved Problems containers
+  - **Framer Motion expand/collapse**: Replaced CSS transition with `AnimatePresence` + `motion.tr`/`motion.div` for height-only animation (200ms ease-out, no opacity fade per guardrail)
+  - **Chevron rotation**: `motion.div` with `animate={{ rotate: isExpanded ? 180 : 0 }}` — consistent with ConsultationsView/MedicationsView pattern
+  - **Hover colors**: Changed from `bg-blue-50` → `bg-[#EFF6FF]` (subtle blue tint) for row hover states
+  - **Font sizes per spec**: Headers `text-[13px]`, problem descriptions `text-[14px]`, codes/dates `text-xs`, narrative `text-[14px]`
+  - **TrafficLight component**: Added `font-ui` to text labels for WCAG-compliant status indicators (dot + text)
+  - **Two semantic tables**: Active Problems (4 columns: Status, Code, Problem, Since) and Resolved Problems (6 columns: + Resolved, Outcome)
+  - **Expandable rows**: Full-width sub-row with `bg-gray-50` background, narrative text, and linked consultations section
+  - **Linked consultations**: `ExternalLink` icon + clickable links in NHS blue with `focus-visible:ring-2` for keyboard nav
+  - **AccessibilityContext integration**: `setExpandedItem` called on expand/collapse to update breadcrumb with problem description
+  - **Mobile cards**: Updated to use `font-ui`/`font-geist`, added `shadow-pmr`, Framer Motion expand animation, `focus-visible` rings
+  - **Reduced motion support**: All Framer Motion animations use `duration: 0` when `prefersReducedMotion` is true
+  - **Module-scope `prefersReducedMotion`**: Computed once at module load, not per render
+
+**Codebase patterns discovered:**
+- `AnimatePresence initial={false}` + `motion.tr` for table row expand is consistent across all expandable table views
+- Traffic light dots (8px circles) MUST always have text labels per WCAG guardrail — never color-only indicators
+- `font-geist` is used for all coded entries (SNOMED-style codes like `[MGT001]`, `[EFF002]`) and dates
+- Linked consultations pattern: `ExternalLink` icon + clickable link that calls `onNavigate('consultations', consultationId)`
+- Breadcrumb updates via AccessibilityContext: pass expanded item name (string) to `setExpandedItem`, not an object
+
+**Quality checks:** All passed
+- TypeScript: No errors
+- ESLint: 1 pre-existing warning in AccessibilityContext.tsx (not our changes)
+- Build: Successful, 395.86 KB bundle
+
+**Visual review:** Completed via Playwright MCP at default viewport
+- Both tables render correctly: Active Problems (3 items) and Resolved Problems (8 items)
+- Traffic lights visible with text labels: Green "Active", Amber "In Progress", Green "Resolved"
+- Codes display in Geist Mono: `[MGT001]`, `[TRN001]`, `[EFF001]`, etc.
+- Multi-layered shadows visible on both card containers
+- Expanded first resolved problem row: narrative text displays in Elvaro 14px, `bg-gray-50` background
+- Linked Consultations section: "LINKED CONSULTATIONS:" header + NHS blue clickable link with ExternalLink icon
+- Chevron rotation animation smooth (180° when expanded)
+- Column borders: `1px solid #E5E7EB` visible between all table cells
+- Table headers: uppercase, `text-[13px]`, gray-400 color
+
+**Issues encountered:** None
+
+**Design decisions:**
+- Moved `prefersReducedMotion` to module scope (computed once) for performance — pattern from MedicationsView
+- Used `useCallback` for `handleToggle` to prevent unnecessary re-renders when passing to child components
+- Breadcrumb receives problem description string (not object) — AccessibilityContext stores simple string IDs
+- Traffic light text labels use `text-xs` and `text-gray-600` for subtle but readable status indicators
+- Expandable content wraps in `motion.div` with `overflow: hidden` for smooth height animation
+
+**Next task:** Task 11 — Rebuild InvestigationsView + DocumentsView (Projects + Education views)
+
