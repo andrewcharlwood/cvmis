@@ -35,7 +35,7 @@ export function Card({ children, full, className, tileId }: CardProps) {
   )
 }
 
-interface CardHeaderProps {
+export interface CardHeaderProps {
   dotColor: 'teal' | 'amber' | 'green' | 'alert' | 'purple'
   title: string
   rightText?: string

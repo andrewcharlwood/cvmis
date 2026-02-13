@@ -423,6 +423,23 @@ textarea:focus-visible {
   to { opacity: 1; }
 }
 
+/* Detail panel responsive widths */
+.detail-panel[data-width="narrow"] {
+  width: var(--panel-narrow);
+}
+
+.detail-panel[data-width="wide"] {
+  width: var(--panel-wide);
+}
+
+/* Mobile: both narrow and wide become full-width */
+@media (max-width: 767px) {
+  .detail-panel[data-width="narrow"],
+  .detail-panel[data-width="wide"] {
+    width: 100vw;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* Disable pulse animation on status badge dot */
   @keyframes pulse {
