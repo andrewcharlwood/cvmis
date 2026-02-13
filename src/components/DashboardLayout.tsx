@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { TopBar } from './TopBar'
 import Sidebar from './Sidebar'
+import { PatientSummaryTile } from './tiles/PatientSummaryTile'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -93,8 +94,9 @@ export function DashboardLayout() {
             }}
             className="dashboard-grid"
           >
-            {/* Tiles will be added in Tasks 8-15 */}
             {/* PatientSummaryTile — full width */}
+            <PatientSummaryTile />
+
             {/* LatestResultsTile — half width (left) */}
             {/* CoreSkillsTile — half width (right) */}
             {/* LastConsultationTile — full width */}
