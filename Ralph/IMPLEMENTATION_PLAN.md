@@ -156,11 +156,11 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 17: KPI flip card interaction
 > Detail: `Ralph/refs/ref-07-interactions.md` (KPI Flip section)
-- [ ] LatestResults metrics flip on click
-- [ ] Front: value + label. Back: explanation text
-- [ ] CSS perspective flip (400ms) or instant swap with reduced motion
-- [ ] One card flipped at a time
-- [ ] Run quality checks
+- [x] LatestResults metrics flip on click
+- [x] Front: value + label. Back: explanation text
+- [x] CSS perspective flip (400ms) or instant swap with reduced motion
+- [x] One card flipped at a time
+- [x] Run quality checks
 
 #### Task 18: Build Command Palette
 > Detail: `Ralph/refs/ref-07-interactions.md` (Command Palette section)

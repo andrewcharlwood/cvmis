@@ -412,6 +412,33 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Skipped — no browser tools available. All tiles now in place — visual review recommended for Task 16.
 
+### Iteration 15 — Task 17: KPI flip card interaction
+**Status:** Complete
+**Changes:**
+- Updated `src/components/tiles/LatestResultsTile.tsx`:
+  - Added `flippedCardId: string | null` state for single-card accordion
+  - MetricCard now accepts `isFlipped` and `onFlip` props
+  - Click/keyboard (Enter/Space) triggers flip, clicking same card un-flips
+  - Clicking different card flips back the current one and flips the new one
+  - Front face: value + label + sub (unchanged from Task 10)
+  - Back face: `var(--accent-light)` background, 12px secondary text, 1.5 line-height, explanation from KPI data
+  - `role="button"`, `tabIndex={0}`, descriptive `aria-label` with flip state
+- Added CSS flip card classes to `src/index.css`:
+  - `.metric-card`: perspective: 1000px, cursor: pointer
+  - `.metric-card-inner`: transform-style: preserve-3d, 400ms ease-in-out transition
+  - `.metric-card-inner.flipped`: rotateY(180deg)
+  - `.metric-card-front/.metric-card-back`: backface-visibility: hidden
+  - `.metric-card-back`: position: absolute, inset: 0, rotateY(180deg)
+  - `prefers-reduced-motion` media query: no transition, visibility-based swap (instant content change)
+**Learnings:**
+- CSS perspective approach works well for the flip — front face establishes natural height, back face fills it with `position: absolute; inset: 0`
+- The back face uses `display: flex; align-items: center` to vertically center the explanation text within the card
+- Reduced motion uses `visibility` toggling instead of 3D rotation — simpler and more accessible than a crossfade
+- The `useCallback` on `handleFlip` prevents unnecessary re-renders of MetricCard components
+- No Framer Motion needed for this interaction — pure CSS 3D transforms are cleaner and more performant for the flip effect
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Skipped — no browser tools available.
+
 ### Iteration 14 — Task 16: Tile expansion system
 **Status:** Complete
 **Changes:**
