@@ -146,13 +146,13 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 16: Tile expansion system
 > Detail: `Ralph/refs/ref-07-interactions.md` (Tile Expansion section)
-- [ ] CareerActivity items expand to show full role detail
-- [ ] Projects items expand to show methodology, tech stack, results
-- [ ] CoreSkills items expand to show prescribing history
-- [ ] Height-only animation (200ms, no opacity fade)
-- [ ] Single-expand accordion
-- [ ] Keyboard: Enter/Space to expand, Escape to collapse
-- [ ] Run quality checks
+- [x] CareerActivity items expand to show full role detail
+- [x] Projects items expand to show methodology, tech stack, results
+- [x] CoreSkills items expand to show prescribing history
+- [x] Height-only animation (200ms, no opacity fade)
+- [x] Single-expand accordion
+- [x] Keyboard: Enter/Space to expand, Escape to collapse
+- [x] Run quality checks
 
 #### Task 17: KPI flip card interaction
 > Detail: `Ralph/refs/ref-07-interactions.md` (KPI Flip section)

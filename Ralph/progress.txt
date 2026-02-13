@@ -59,6 +59,17 @@
 - Sidebar: default export (`import Sidebar from './Sidebar'`), TopBar: named export (`import { TopBar } from './TopBar'`)
 - Background color transition: DashboardLayout covers App.tsx's `bg-black` with `var(--bg-dashboard)` + `minHeight: 100vh`
 
+### Tile Expansion Pattern
+- Framer Motion `AnimatePresence` + `motion.div` with `initial={{ height: 0 }}`, `animate={{ height: 'auto' }}`, `exit={{ height: 0 }}`
+- `overflow: hidden` on the motion.div
+- `prefers-reduced-motion` checked at module scope: `const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches`
+- Transition: `prefersReducedMotion ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }`
+- State: `expandedItemId: string | null` per tile component
+- Keyboard: Enter/Space toggle, Escape collapse
+- `role="button"`, `tabIndex={0}`, `aria-expanded` on clickable items
+- Colored left border (2px) on expanded content panel
+- CareerActivity maps activity→consultation via `consultationId`, CoreSkills maps skill→medication by name match
+
 ### Visual Review
 - Dev server runs on `http://localhost:5173` throughout the loop
 - App has boot→ECG→login→dashboard sequence (~15s on first load)
@@ -400,4 +411,37 @@
 - Phase 2 (Dashboard Tiles) is now complete — Phase 3 (Interactions) begins next
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Skipped — no browser tools available. All tiles now in place — visual review recommended for Task 16.
+
+### Iteration 14 — Task 16: Tile expansion system
+**Status:** Complete
+**Changes:**
+- Updated `src/components/tiles/CareerActivityTile.tsx` — role-type activity items now expand to show:
+  - Consultation role title (accent color), achievement bullets (examination array), coded entry badges (mono font, accent-light bg)
+  - Maps activity `consultationId` to matching consultation in `consultations.ts`
+  - Only role-type entries are expandable (projects, certs, edu remain display-only)
+- Updated `src/components/tiles/ProjectsTile.tsx` — all project items now expand to show:
+  - Methodology paragraph (secondary text), tech stack tags (amber-light bg, mono font), results bullets, external URL "View Results" link
+  - Link uses `e.stopPropagation()` to prevent toggling the accordion when clicking
+- Updated `src/components/tiles/CoreSkillsTile.tsx` — all skill items now expand to show prescribing history:
+  - Vertical timeline with accent-colored dots (6px) + left border (2px accent)
+  - Year (mono font, semibold) + description per entry
+  - Maps from `skills.ts` names to `medications.ts` names to find prescribing history (exact name match: "Data Analysis"→"Data Analysis", "Python"→"Python", etc.)
+- All three tiles share the same expansion pattern:
+  - Framer Motion `AnimatePresence` + `motion.div` with height-only animation (200ms, ease-out)
+  - No opacity fade on content (guardrail compliance)
+  - `overflow: hidden` on animated container
+  - Single-expand accordion: `expandedItemId: string | null` state, clicking same item collapses, clicking different item swaps
+  - Keyboard: Enter/Space to toggle, Escape to collapse (via `onKeyDown` handler)
+  - `role="button"`, `tabIndex={0}`, `aria-expanded` on clickable items
+  - `prefers-reduced-motion`: duration: 0 for instant expand/collapse
+  - Colored left border on expanded panels (teal for roles, amber for projects, teal for skills)
+  - Hover: border transitions to accent-border on expandable items
+**Learnings:**
+- The `consultationId` mapping from activity entries to consultations isn't always 1:1 with the activity `id` — e.g., "Prescribing Data Pharmacist" activity maps to `pharmacy-manager-2017` consultation, "Community Pharmacist" maps to `duty-pharmacist-2016`
+- Skills→medications mapping is by exact name match (both files use same names: "Data Analysis", "Python", "SQL", "Power BI", "JavaScript / TypeScript")
+- `e.stopPropagation()` on the "View Results" link in Projects prevents the click from bubbling up and toggling the accordion
+- The expanded content structure varies per tile (bullets + codes for career, methodology + tags + results for projects, timeline for skills) but the AnimatePresence/motion.div wrapper is identical
+- All three tiles now have `cursor: 'pointer'` on expandable items and `border-color` transitions on hover/expand
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Skipped — no browser tools available.
 
