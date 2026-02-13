@@ -44,7 +44,7 @@ Also read `CLAUDE.md` for font setup instructions (Elvaro Grotesque and Blumir c
 
 - [x] **Task 5: Rebuild ClinicalSidebar.** Read `Ralph/refs/ref-banner-sidebar.md` (Left Sidebar + Navigation sections). CV-friendly labels: Summary, Experience, Skills, Achievements, Projects, Education, Contact. 220px fixed width. Header branding, search input, navigation items with exact states (default/hover/active), separator line, footer with session info. Tablet mode: 56px icon-only. Keyboard shortcuts: Alt+1-7, arrow keys, "/" for search. URL hash routing.
 
-- [ ] **Task 6: Rebuild PMRInterface layout + Breadcrumb.** Read `Ralph/refs/ref-banner-sidebar.md` (PMRInterface Layout + Breadcrumb sections). Fixed sidebar + sticky banner + scrollable content on `#F5F7FA`. Create `Breadcrumb.tsx`. Interface materialization animations (banner → sidebar → content stagger). View switching is INSTANT. Mobile: bottom nav bar. Update ViewId type if needed.
+- [x] **Task 6: Rebuild PMRInterface layout + Breadcrumb.** Read `Ralph/refs/ref-banner-sidebar.md` (PMRInterface Layout + Breadcrumb sections). Fixed sidebar + sticky banner + scrollable content on `#F5F7FA`. Create `Breadcrumb.tsx`. Interface materialization animations (banner → sidebar → content stagger). View switching is INSTANT. Mobile: bottom nav bar. Update ViewId type if needed.
 
 - [ ] **Task 7: Rebuild SummaryView + Clinical Alert.** Read `Ralph/refs/ref-summary-alert.md`. Clinical Alert with spring animation entrance, acknowledge → checkmark → collapse sequence. Summary cards: Demographics (full-width key-value), Active Problems (traffic lights), Current Skills quick table, Last Consultation preview. 2-column grid desktop, single column mobile. Navigation links to other views.
 

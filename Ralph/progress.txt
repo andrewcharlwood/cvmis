@@ -389,3 +389,53 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 
 **Next task:** Task 6 — Rebuild PMRInterface layout + Breadcrumb
 
+### Iteration 7 — Task 6: Rebuild PMRInterface layout + Breadcrumb
+**Completed:** Task 6
+**Changes made:**
+- **Breadcrumb.tsx**: Created new component with Patient Record > [View] > [Expanded Item] navigation pattern
+  - Accepts `currentView`, `expandedItem`, `onNavigateToView`, `onCollapseItem` props
+  - Uses `viewLabels` record mapping ViewId to CV-friendly names (Summary, Experience, Skills, etc.)
+  - "Patient Record" root is clickable, navigates to summary view
+  - Current view is clickable when an item is expanded, collapses the expanded item
+  - Expanded item name (if present) appears as third breadcrumb segment
+  - Styling: 13px font-ui, gray-400 text for clickable items, gray-600 for current location
+  - ChevronRight icons (14px, gray-300) as separators
+  - Hover state: text-pmr-nhsblue on clickable segments
+- **PMRInterface.tsx**: Integrated Breadcrumb component and updated font references
+  - Added Breadcrumb import
+  - Integrated Breadcrumb between screen reader heading and content (desktop/tablet only, not mobile)
+  - Breadcrumb receives `activeView`, `expandedItemId` from AccessibilityContext, navigation callbacks
+  - Replaced all `font-inter` references with `font-ui` (4 locations: default view placeholder, mobile search input, mobile back button)
+  - Added `shadow-pmr` to default view placeholder card for visual consistency
+  - Layout unchanged from Task 4b fix (flex h-screen overflow-hidden pattern already correct)
+
+**Codebase patterns discovered:**
+- Breadcrumb navigation pattern: root (Patient Record) → section (view label) → detail (expanded item)
+- Breadcrumb should be hidden on mobile (mobile has "Back to Summary" button instead)
+- `expandedItemId` from AccessibilityContext is a string (item name), needs to be wrapped in object `{ name, type }` for Breadcrumb
+- ViewId mapping must be consistent across ClinicalSidebar, MobileBottomNav, PMRInterface viewLabels, and Breadcrumb viewLabels
+
+**Quality checks:** All passed
+- TypeScript: No errors
+- ESLint: 1 pre-existing warning in AccessibilityContext.tsx (not our changes)
+- Build: Successful, 396.39 KB bundle
+
+**Visual review:** Completed via Playwright MCP at default viewport
+- Breadcrumb renders correctly on Summary view: "Patient Record > Summary"
+- Breadcrumb updates on navigation to Experience: "Patient Record > Experience"
+- Styling correct: 13px font-ui (Elvaro Grotesque), gray-400 clickable text, gray-300 chevrons
+- Positioned correctly above view content with mb-6 spacing
+- Layout verified: fixed 220px sidebar, sticky banner, scrollable content area
+- View switching instant — no animation between Summary → Experience
+- Interface materialization animations work (banner → sidebar → content stagger on initial PMR load)
+
+**Issues encountered:** None
+
+**Design decisions:**
+- Breadcrumb shows on desktop/tablet only — mobile uses "Back to Summary" button instead (simpler UX on small screens)
+- "Patient Record" root always navigates to Summary (the logical "home" view)
+- When an item is expanded, clicking the current view name collapses it (returns to list view)
+- Used `onNavigateToView` callback pattern for breadcrumb navigation (consistent with existing PMRInterface pattern)
+
+**Next task:** Task 7 — Rebuild SummaryView + Clinical Alert
+
