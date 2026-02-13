@@ -292,3 +292,30 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Skipped — no browser tools available. Will verify visually after multiple tiles are in place.
 
+
+### Iteration 10 — Task 12: Build LastConsultation tile
+**Status:** Complete
+**Changes:**
+- Created `src/components/tiles/LastConsultationTile.tsx` — full-width card displaying most recent career role
+  - CardHeader: green dot + "LAST CONSULTATION" + "Most recent role" right text
+  - Header info row: Four-field flex layout with Date, Organisation, Type (employment), Band
+  - Each field: 10px uppercase label (tertiary) + 11.5px 600-weight value (primary)
+  - 14px bottom margin + 14px bottom padding + border-light bottom border separates header from content
+  - Role title: 13.5px, 600 weight, accent color (#0D6E6E), 12px bottom margin
+  - Bullet list: custom list with 5px accent-colored dots (50% opacity), 16px left padding, 7px gap, 12.5px text, 1.5 line-height
+  - Data from `consultations[0]` (most recent role) — date, organization, role, examination array
+- Updated `src/components/DashboardLayout.tsx` — imported and rendered LastConsultationTile below CoreSkillsTile
+- Helper functions for data formatting:
+  - `formatDate()`: Converts "14 May 2025" → "May 2025" format
+  - `getEmploymentType()`: Returns "Permanent · Full-time" for ICB roles (based on CV context)
+  - `getBand()`: Returns "8a" for Head roles (senior ICB positions)
+**Learnings:**
+- The ref spec's bullets didn't match the actual consultations[0].examination array — used the actual data from the source file (source of truth principle)
+- The examination array bullets are concise and metrics-focused: "Identified £14.6M...", "Built Python-based algorithm...", "Automated incentive scheme..."
+- Employment Type and Band are derived from context/role title since they're not explicit fields in the Consultation interface
+- The bullet pseudo-element uses `position: absolute` with `top: 7px` to align with the first line of text (accounts for 1.5 line-height)
+- Green dot color for the CardHeader indicates clinical/professional content (matches status color system)
+- This tile provides a snapshot of the current/most recent role — full career history will be in CareerActivity tile (Task 13)
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Skipped — no browser tools available. Will verify visually after multiple tiles are in place.
+

@@ -112,12 +112,12 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 12: Build LastConsultation tile
 > Detail: `Ralph/refs/ref-06-bottom-tiles.md` (LastConsultation section)
-- [ ] Create `src/components/tiles/LastConsultationTile.tsx`
-- [ ] Full-width card
-- [ ] Header info row (Date, Org, Type, Band)
-- [ ] Role title + achievement bullet list
-- [ ] Data from first entry in `src/data/consultations.ts`
-- [ ] Run quality checks
+- [x] Create `src/components/tiles/LastConsultationTile.tsx`
+- [x] Full-width card
+- [x] Header info row (Date, Org, Type, Band)
+- [x] Role title + achievement bullet list
+- [x] Data from first entry in `src/data/consultations.ts`
+- [x] Run quality checks
 
 #### Task 13: Build CareerActivity tile
 > Detail: `Ralph/refs/ref-06-bottom-tiles.md` (CareerActivity section)
