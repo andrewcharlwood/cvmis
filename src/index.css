@@ -295,53 +295,6 @@ html {
   }
 }
 
-/* KPI flip cards */
-.metric-card {
-  perspective: 1000px;
-  cursor: pointer;
-}
-
-.metric-card-inner {
-  transition: transform 0.4s ease-in-out;
-  transform-style: preserve-3d;
-  position: relative;
-}
-
-.metric-card-inner.flipped {
-  transform: rotateY(180deg);
-}
-
-.metric-card-front,
-.metric-card-back {
-  backface-visibility: hidden;
-}
-
-.metric-card-back {
-  transform: rotateY(180deg);
-  position: absolute;
-  inset: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .metric-card-inner {
-    transition: none;
-  }
-
-  .metric-card-inner.flipped .metric-card-front {
-    visibility: hidden;
-  }
-
-  .metric-card-inner .metric-card-back {
-    visibility: hidden;
-  }
-
-  .metric-card-inner.flipped .metric-card-back {
-    visibility: visible;
-    transform: none;
-    position: absolute;
-    inset: 0;
-  }
-}
 
 /* Activity grid responsive — mobile-first (used in CareerActivityTile) */
 .activity-grid {
