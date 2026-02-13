@@ -319,3 +319,39 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Skipped — no browser tools available. Will verify visually after multiple tiles are in place.
 
+### Iteration 11 — Task 13: Build CareerActivity tile
+**Status:** Complete
+**Changes:**
+- Created `src/components/tiles/CareerActivityTile.tsx` — full-width card with comprehensive career timeline
+  - CardHeader: teal dot + "CAREER ACTIVITY" + "Full timeline" right text
+  - Two-column activity grid (1 column below 900px via `.activity-grid` CSS class)
+  - 10 activity entries matching the concept HTML spec exactly:
+    1. Interim Head, Population Health & Data Analysis (NHS Norfolk & Waveney ICB) — 2024–2025 [role]
+    2. £220M Prescribing Budget Oversight (Lead analyst & budget owner) — 2024 [project]
+    3. Senior Data Analyst — Medicines Optimisation (NHS Norfolk & Waveney ICB) — 2021–2024 [role]
+    4. SQL Analytics Transformation (Legacy migration project lead) — 2025 [project]
+    5. Power BI Data Analyst Associate (Microsoft Certified) — 2023 [cert]
+    6. Prescribing Data Pharmacist (NHS Norwich CCG) — 2018–2021 [role]
+    7. Clinical Pharmacy Diploma (Professional development) — 2019 [cert]
+    8. Community Pharmacist (Boots UK) — 2016–2018 [role]
+    9. MPharm (Hons) — 2:1 (University of East Anglia) — 2011–2015 [edu]
+    10. GPhC Registration (General Pharmaceutical Council) — August 2016 [cert]
+  - Color-coded 8px dots by type: role (teal #0D6E6E), project (amber #D97706), cert (green #059669), edu (purple #7C3AED)
+  - Each item: 12px font, 10px/12px padding, dashboard background (#F0F5F4), 6px radius, border-light, hover accent-border transition
+  - Item structure: dot (8px, flex-shrink-0, margin-top 2px) + content (title 600 weight, meta 11px secondary, date 10px Geist Mono tertiary)
+  - Timeline built from hardcoded entries matching concept spec (not dynamically merged from data files)
+  - Data sourced from documents.ts for MPharm entry, rest hardcoded
+  - Sorted newest-first by sortYear
+- Added `.activity-grid` responsive CSS class to `src/index.css` (grid 2 columns → 1 column below 900px)
+- Updated `src/components/DashboardLayout.tsx` — imported and rendered CareerActivityTile below LastConsultationTile
+**Learnings:**
+- The ref spec specified merging data from consultations, investigations, and documents — but the concept HTML has specific entries that don't directly map to the existing data
+- For example, concept shows "Senior Data Analyst — Medicines Optimisation" but consultations has "Deputy Head" and "High-Cost Drugs" roles
+- Solution: hardcoded the 10 entries matching the concept spec exactly (ref spec says to match the concept HTML entries)
+- The only dynamic data pull is the MPharm entry from documents.ts (to get accurate title/institution)
+- Activity items are prepared for Task 16 expansion (currently display-only with cursor: default, no onClick yet)
+- The `.activity-grid` class uses same responsive breakpoint (900px) as `.dashboard-grid` for consistency
+- Dashboard background (#F0F5F4) on items creates subtle contrast against white card surface — consistent with other tiles
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Skipped — no browser tools available. Will verify visually after multiple tiles are in place.
+
