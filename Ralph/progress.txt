@@ -248,3 +248,23 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Skipped — no browser tools available. Will verify visually after multiple tiles are in place.
 
+### Iteration 8 — Task 10: Build LatestResults tile
+**Status:** Complete
+**Changes:**
+- Created `src/components/tiles/LatestResultsTile.tsx` — half-width card with 2×2 metric grid
+  - CardHeader: teal dot + "LATEST RESULTS" + "Updated May 2025" right text (Geist Mono)
+  - 2×2 CSS grid (1fr 1fr, 12px gap) containing four MetricCard sub-components
+  - Each MetricCard: 14px padding, 6px radius, border-light, dashboard background (#F0F5F4)
+  - Value: 22px, 700 weight, -0.02em letter-spacing, line-height 1.2, colored by variant (green/amber/teal)
+  - Label: 11px, 500 weight, text-secondary
+  - Sub: 10px, text-tertiary, Geist Mono font
+  - Added `data-kpi-id` attribute on each metric card for Task 17 flip interaction hookup
+- Updated `src/components/DashboardLayout.tsx` — imported and rendered LatestResultsTile in the half-width left column position
+**Learnings:**
+- MetricCard uses `var(--bg-dashboard)` for background (#F0F5F4) as specified in ref — creates subtle contrast against the white card surface
+- The colorMap for KPI values maps green/amber/teal variant strings to hex colors — same approach as Card's dotColorMap
+- Half-width tiles (no `full` prop) naturally fill one grid column in the 2-column dashboard grid
+- The `data-kpi-id` attribute provides a hook for Task 17's flip card interaction without adding click handlers yet
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Skipped — no browser tools available.
+
