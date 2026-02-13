@@ -133,8 +133,16 @@ The `src/components/views/` directory contains the old view components. Some may
 
 **Rule: Only remove files that are confirmed unused.** Run a grep for imports before deleting.
 
-### Hooks to Remove
+### Hooks to Assess
 - `src/hooks/useScrollCondensation.ts` — only used by PatientBanner. If PatientBanner is removed, this can go too.
+- `src/hooks/useBreakpoint.ts` — may still be useful for responsive tile layouts. Check if any new dashboard component uses it. If not, remove.
+
+### Context to Simplify
+- `src/contexts/AccessibilityContext.tsx` — the existing context has `activeView`, `setActiveView`, `expandedItemId`, `setExpandedItem` designed for the old view-switching navigation. With the new single-page dashboard:
+  - `activeView` / `setActiveView` are no longer relevant (no view switching)
+  - `expandedItemId` / `setExpandedItem` may still be useful if tiles report their expanded item for accessibility announcements
+  - Assess whether to simplify the context or remove it entirely and manage expansion state locally in each tile
+  - **Note:** This context has 1 pre-existing ESLint warning — that's expected.
 
 ### Verification Checklist
 - [ ] No dead imports (run `npm run lint` — ESLint catches unused imports)

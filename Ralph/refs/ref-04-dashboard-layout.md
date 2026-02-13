@@ -134,3 +134,30 @@ The login screen has background `#1E293B`. The dashboard has background `#F0F5F4
 3. Handle it in App.tsx with a state-based background
 
 The simplest approach is option 1 — the dashboard's entrance animation effectively replaces the dark login background with the light dashboard.
+
+---
+
+## Established Patterns (from previous iterations)
+
+These patterns were established across 16 iterations of the old PMR build. Reuse them:
+
+### Phase name is `'pmr'`
+The Phase type in `src/types/index.ts` is `'boot' | 'ecg' | 'login' | 'pmr'`. The `'pmr'` case renders the dashboard. Do NOT rename the phase — just change what it renders.
+
+### Module-scope `prefersReducedMotion`
+All animation components should compute this once at module level, not per render:
+```typescript
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+```
+This is the established pattern across all existing view components.
+
+### Pre-existing ESLint warning
+`AccessibilityContext.tsx` has 1 pre-existing ESLint warning. This is expected — do not attempt to fix it. Quality checks pass with this warning present.
+
+### Callback ref pattern for Framer Motion
+If you need a ref to a `motion.*` element (e.g., for scroll detection), use `useState` + callback ref instead of `useRef`. Framer Motion elements may not be in the DOM when `useEffect` first runs:
+```typescript
+const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null)
+// On the element: ref={el => { if (el) setScrollContainer(el) }}
+```
+This avoids null ref issues with animated mount timing.

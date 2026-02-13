@@ -26,7 +26,7 @@ No test framework is configured.
 
 ### Four-Phase UI Flow
 
-`App.tsx` manages a `Phase` state (`'boot'` → `'ecg'` → `'login'` → `'dashboard'`). Each phase renders exclusively:
+`App.tsx` manages a `Phase` state (`'boot'` → `'ecg'` → `'login'` → `'pmr'`). Each phase renders exclusively:
 
 1. **BootSequence** — Terminal typing animation (~4s), green-on-black aesthetic. Fira Code font, matrix-green palette. **Locked — do not change.**
 2. **ECGAnimation** — Canvas-based heartbeat animation with mask-based letter tracing. Background transitions from black to `#1E293B`. **Locked — do not change.**

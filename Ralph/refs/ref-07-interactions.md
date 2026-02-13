@@ -68,7 +68,7 @@ When a project item is expanded:
 
 When a skill item is expanded:
 - Show "prescribing history" — a timeline of skill development
-- Source: Can use the existing `medications` data which has `prescribingHistory` entries
+- **Data source:** `import { medications } from '@/data/medications'` (NOT `skills.ts`). The `medications.ts` file has 18 entries, each with a `prescribingHistory` array of `{ year, description }` entries. Map from `skills.ts` to `medications.ts` by matching skill name to medication name (e.g., "Data Analysis" in skills.ts → find the medication with `name: "Data Analysis"` in medications.ts to get its `prescribingHistory`).
 - Format: vertical timeline with year markers and descriptions
   - Timeline dots: accent color, 6px, with connecting line
   - Year: mono font, 12px, semibold
@@ -205,8 +205,19 @@ Section label: 10px, 600 weight, uppercase, `letter-spacing: 0.08em`, text-terti
 
 ### Fuzzy Search
 
-Adapt existing `src/lib/search.ts` (fuse.js integration):
-- Rebuild search index to include new data (skills from skills.ts, KPIs, etc.)
+Adapt existing `src/lib/search.ts` (fuse.js v7.0.0, already installed):
+
+**Existing code:** `src/lib/search.ts` has `buildSearchIndex()` which creates a Fuse index from consultations, medications, problems, investigations, and documents. It groups results by `sectionLabel` via `groupResultsBySection()`. The `SearchResult` interface has `{ id, title, section: ViewId, sectionLabel, highlight }`.
+
+**What needs changing:**
+- The `section: ViewId` field is designed for view-switching navigation (navigating to `#consultations`, `#medications`, etc.). The new dashboard has no views — it's a single scrollable page. Results should either scroll to the relevant tile or expand an item within a tile.
+- Add `skills.ts` data to the index (currently only `medications.ts` is indexed, not the new 5-skill entries)
+- Add `kpis.ts` data to the index
+- Add Quick Actions (Download CV, Send Email, View LinkedIn, View Projects)
+- Update section labels to match palette grouping: "Experience", "Core Skills", "Active Projects", "Achievements", "Education", "Quick Actions"
+- Add an `action` field to `SearchResult` so each result knows what to do when selected (scroll to tile, expand item, open link, etc.)
+
+**Config (keep existing):**
 - `threshold: 0.3`, weighted keys (title: 2, content: 1)
 - `minMatchCharLength: 2`
 - Group results by section

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a tile-based GP System dashboard. Reference design: `References/GPSystemconcept.html`.
+Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a tile-based GP System dashboard called "CVMIS" Reference design: `References/GPSystemconcept.html`.
 
 ## Quality Checks
 
@@ -22,10 +22,10 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 1: Update design tokens and Tailwind config
 > Detail: `Ralph/refs/ref-01-design-tokens.md`
-- [ ] Update CSS custom properties in `src/index.css` (new palette, shadows, layout vars)
-- [ ] Update `tailwind.config.js` (colors, shadows, borders, radius)
-- [ ] Keep boot/ECG/login tokens unchanged
-- [ ] Run quality checks
+- [x] Update CSS custom properties in `src/index.css` (new palette, shadows, layout vars)
+- [x] Update `tailwind.config.js` (colors, shadows, borders, radius)
+- [x] Keep boot/ECG/login tokens unchanged
+- [x] Run quality checks
 
 #### Task 2: Create new data files and update types
 > Detail: `Ralph/refs/ref-02-data-types.md`

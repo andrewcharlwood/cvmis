@@ -90,6 +90,27 @@ borderRadius: {
 }
 ```
 
+## Existing Tokens to Replace/Update
+
+The Tailwind config and CSS already have tokens from the old PMR design. Task 1 needs to UPDATE these, not just add new ones alongside:
+
+**Existing Tailwind shadow tokens (replace with new three-tier system):**
+- `pmr`: `'0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)'` → replace with `pmr-sm`
+- `pmr-hover`: `'0 2px 4px rgba(0,0,0,0.06), 0 8px 16px rgba(0,0,0,0.04)'` → replace with `pmr-md`
+- `pmr-banner`: `'0 2px 8px rgba(0,0,0,0.12)'` → remove (no banner in new design)
+
+**Existing Tailwind color tokens (keep during transition, Task 21 cleans up):**
+- `pmr-nhsblue: '#005EB8'` — keep for login screen (still uses NHS blue)
+- `pmr-content: '#F5F7FA'` → update to `pmr-content: '#F0F5F4'` (new bg color)
+- `pmr-sidebar: '#1E293B'` → update to `pmr-sidebar: '#F7FAFA'` (light sidebar)
+
+**Existing CSS custom properties (in `--pmr-*` namespace):**
+- Previous iterations added `--pmr-*` variables. The new tokens use shorter names (e.g., `--bg`, `--surface`, `--accent`). Add the new tokens AND keep `--pmr-*` aliases during transition so existing components don't break before they're rebuilt.
+
+**Existing border-radius tokens:**
+- `card: '4px'` → update to `card: '8px'`
+- `login: '12px'` — keep unchanged
+
 ## What NOT to Change
 
 - Boot phase variables (`--matrix-*`, `--terminal-*`)
