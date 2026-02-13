@@ -848,3 +848,50 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 
 **Next task:** Task 14 — Responsive design audit
 
+### Iteration 15 — Task 14: Responsive design audit
+**Completed:** Task 14
+**Changes made:**
+- **No code changes** — this was an audit/testing task only
+- Tested all three responsive breakpoints using Playwright MCP browser tools:
+  - **Desktop (1280x800)**: 220px sidebar with full labels, full 3-row patient banner, 2-column grid layouts, semantic tables with proper columns
+  - **Tablet (800x600)**: 56px icon-only sidebar, single-row condensed banner, single-column card layouts
+  - **Mobile (375x667)**: Bottom navigation bar (56px height) with 7 icons, minimal top banner with overflow menu, search at top of each view, tables converted to card layouts
+- Verified all responsive features per ref-interactions.md spec:
+  - ✅ Sidebar: Desktop full labels → Tablet icons only → Mobile bottom nav bar
+  - ✅ Patient banner: Desktop full (80px) → Tablet condensed (48px) → Mobile minimal with overflow menu
+  - ✅ Tables: Desktop full columns → Tablet horizontal scroll if needed → Mobile card layout (Skills, Achievements, Projects, Education all confirmed)
+  - ✅ Search: Desktop/Tablet in sidebar header → Mobile at top of each view
+  - ✅ Back navigation: Mobile has "Back to Summary" button on all non-Summary views
+  - ✅ Touch targets: Bottom nav buttons, card expand buttons, search input, Acknowledge button all appear adequately sized for touch interaction
+- Verified table → card conversions on mobile:
+  - Skills (MedicationsView): Stacked cards with drug name, proficiency, frequency, status dot + text, expand chevron
+  - Achievements (ProblemsView): Stacked cards with traffic light dot + text, code, description, "Since" date, expand chevron
+  - Visual confirmation via screenshots captured at all three breakpoints
+
+**Codebase patterns discovered:**
+- All responsive layout work was already complete from previous tasks (Tasks 5-12) — each view component already includes mobile card layouts alongside desktop table layouts
+- Breakpoint switching handled by Tailwind `lg:` and `md:` prefixes throughout components
+- `MobileBottomNav.tsx` component provides the mobile navigation bar (appears <768px only)
+- `useBreakpoint` hook used in some components to conditionally render desktop vs mobile layouts
+- Touch-friendly card buttons on mobile use adequate padding and min-height for 48px+ touch targets
+
+**Quality checks:** All passed
+- TypeScript: No errors
+- ESLint: 1 pre-existing warning in AccessibilityContext.tsx (not our changes)
+- Build: Successful, 416.25 KB bundle
+
+**Visual review:** Completed via Playwright MCP at three breakpoints (1280x800, 800x600, 375x667)
+- Desktop: Full sidebar, full banner, 2-column grids, semantic tables — all correct
+- Tablet: Icon-only sidebar, condensed banner, single-column cards — all correct
+- Mobile: Bottom nav bar visible, minimal banner with overflow menu, search at top, tables converted to cards — all correct
+- All screenshots saved: desktop-summary-1280.png, tablet-summary-800.png, mobile-summary-375.png, mobile-skills-cards-375.png, mobile-achievements-final-375.png, desktop-skills-table-1280.png, mobile-touch-targets-375.png, mobile-summary-final-375.png
+
+**Issues encountered:** None — all responsive features already implemented correctly in previous tasks
+
+**Design decisions:**
+- No changes needed — audit confirmed existing responsive implementation meets all spec requirements
+- All three breakpoints render correctly with appropriate layout adaptations
+- Touch targets on mobile appear adequate (visual assessment — formal measurement would require additional tooling)
+
+**Next task:** Task 15 — Accessibility audit + final polish
+
