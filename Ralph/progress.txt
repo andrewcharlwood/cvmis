@@ -340,3 +340,52 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 
 **Next task:** Task 5 — Rebuild ClinicalSidebar
 
+### Iteration 6 — Task 5: Rebuild ClinicalSidebar
+**Completed:** Task 5
+**Changes made:**
+- **ClinicalSidebar.tsx**: Rebuilt with all ref spec requirements:
+  - Replaced clinical jargon labels with CV-friendly terms: Experience (not Consultations), Skills (not Medications), Achievements (not Problems), Projects (not Investigations), Education (not Documents), Contact (not Referrals)
+  - Replaced all `font-inter` references with `font-ui` (Elvaro Grotesque)
+  - Fixed Tailwind opacity syntax: `bg-white/12` → `bg-white/[0.12]`, `bg-white/8` → `bg-white/[0.08]`, `bg-white/5` → `bg-white/[0.05]`, `bg-white/10` → `bg-white/[0.10]`
+  - Added right edge border (`border-r border-[#334155]`) per design system (sidebar depth)
+  - Added `focus-visible:ring-2 focus-visible:ring-pmr-nhsblue/40 focus-visible:ring-inset` on all nav buttons
+  - Set explicit `h-[44px]` and `text-[14px]` per spec (was `h-11` which is equivalent, but explicit is clearer)
+  - Active state: `font-semibold`, inactive state: `font-medium` per spec
+  - Added `border-l-[3px] border-transparent` on inactive items to prevent layout shift when switching to active
+  - Icon container uses `w-[18px] h-[18px] flex items-center justify-center` for consistent alignment
+  - Footer text color changed to `text-[#64748B]` per spec
+  - Tablet tooltip uses `font-ui` with `shadow-lg` and `pointer-events-none`
+- **MobileBottomNav.tsx**: Updated all labels to CV-friendly terms and `font-inter` → `font-ui`
+- **PMRInterface.tsx**: Updated `viewLabels` record from clinical names to CV-friendly names for screen reader consistency
+
+**Codebase patterns discovered:**
+- Tailwind arbitrary opacity syntax: `bg-white/[0.12]` not `bg-white/12` (the latter works in newer Tailwind but the bracket syntax is more explicit and universally supported)
+- `border-l-[3px] border-transparent` on inactive items prevents layout shift when active state adds `border-pmr-nhsblue` — the 3px border is always present, only color changes
+- Navigation labels MUST be consistent across ClinicalSidebar, MobileBottomNav, and PMRInterface viewLabels — all three need updating when label convention changes
+
+**Quality checks:** All passed
+- TypeScript: No errors
+- ESLint: 1 pre-existing warning in AccessibilityContext.tsx (not our changes)
+- Build: Successful, 395.07 KB bundle
+
+**Visual review:** Completed via Playwright MCP at default viewport
+- Sidebar renders with correct CV-friendly labels: Summary, Experience, Skills, Achievements, Projects, Education, Contact
+- 220px width, dark #1E293B background with right edge border visible
+- Header branding "CareerRecord PMR / v1.0.0" in premium font at 50% opacity
+- Search input with magnifying glass icon, properly styled
+- Separator line between Summary and Experience — correct position
+- Active state (tested on Summary and Experience): white text, NHS blue left border, bg-white/[0.12] highlight, font-semibold
+- Default state: white text at 70% opacity, transparent background
+- Footer: "Session: A.CHARLWOOD / Logged in: [time]" in #64748B
+- View switching instant — no animation between views
+- URL hash routing works (#summary, #consultations)
+
+**Issues encountered:** None
+
+**Design decisions:**
+- Used `border-r border-[#334155]` instead of a shadow for the sidebar right edge — cleaner, more clinical
+- Kept the existing search functionality (local filter) as-is — Task 13 will replace it with fuse.js
+- Used `pointer-events-none` on tablet tooltips to prevent tooltip interfering with clicks
+
+**Next task:** Task 6 — Rebuild PMRInterface layout + Breadcrumb
+
