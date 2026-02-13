@@ -195,8 +195,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
   // ── Tablet: 56px icon-only sidebar ──
   if (isTablet) {
     return (
-      <aside
-        role="navigation"
+      <nav
         aria-label="Clinical record navigation"
         className="hidden md:flex lg:hidden flex-col w-14 h-full bg-pmr-sidebar border-r border-[#334155] text-white"
       >
@@ -208,7 +207,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-2 overflow-y-auto">
+        <div className="flex-1 py-2 overflow-y-auto">
           <ul role="menu" aria-label="Record sections">
             {navItems.map((item, index) => (
               <li key={item.id} role="none" className="relative">
@@ -248,7 +247,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
               </li>
             ))}
           </ul>
-        </nav>
+        </div>
 
         {/* Footer */}
         <div className="p-2 border-t border-white/10">
@@ -257,14 +256,13 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
             <div>{currentTime}</div>
           </div>
         </div>
-      </aside>
+      </nav>
     )
   }
 
   // ── Desktop: 220px full sidebar ──
   return (
-    <aside
-      role="navigation"
+    <nav
       aria-label="Clinical record navigation"
       className="hidden lg:flex flex-col w-[220px] h-full bg-pmr-sidebar border-r border-[#334155] text-white"
     >
@@ -285,7 +283,12 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
           />
           <input
             id="sidebar-search"
-            type="text"
+            type="search"
+            role="combobox"
+            aria-label="Search record"
+            aria-expanded={searchQuery.trim().length >= 2 && groupedResults.size > 0}
+            aria-controls="search-results-listbox"
+            aria-autocomplete="list"
             placeholder="Search record..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
@@ -306,16 +309,21 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
           )}
           {/* Search results dropdown — grouped by section */}
           {searchQuery.trim().length >= 2 && groupedResults.size > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-pmr-sidebar border border-white/10 rounded overflow-hidden z-50 max-h-[400px] overflow-y-auto shadow-lg">
+            <div
+              id="search-results-listbox"
+              role="listbox"
+              aria-label="Search results"
+              className="absolute top-full left-0 right-0 mt-1 bg-pmr-sidebar border border-white/10 rounded overflow-hidden z-50 max-h-[400px] overflow-y-auto shadow-lg"
+            >
               {Array.from(groupedResults.entries()).map(([sectionLabel, results]) => {
                 // Find section icon
                 const navItem = navItems.find(item => item.label === sectionLabel)
                 return (
-                  <div key={sectionLabel}>
+                  <div key={sectionLabel} role="group" aria-label={sectionLabel}>
                     {/* Section header */}
                     <div className="px-3 py-1.5 bg-white/[0.05] border-b border-white/10">
                       <div className="flex items-center gap-2">
-                        {navItem && <span className="text-white/40">{navItem.icon}</span>}
+                        {navItem && <span className="text-white/40" aria-hidden="true">{navItem.icon}</span>}
                         <span className="font-ui text-xs font-semibold uppercase tracking-wide text-white/50">
                           {sectionLabel}
                         </span>
@@ -329,6 +337,8 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
                       <button
                         key={result.item.id}
                         type="button"
+                        role="option"
+                        aria-selected={false}
                         onClick={() => handleSearchResultClick(result)}
                         className="w-full px-3 py-2.5 text-left hover:bg-white/[0.10] transition-colors border-b border-white/5 last:border-b-0"
                       >
@@ -349,7 +359,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
       </div>
 
       {/* Navigation items */}
-      <nav className="flex-1 py-2 overflow-y-auto">
+      <div className="flex-1 py-2 overflow-y-auto">
         <ul role="menu" aria-label="Record sections">
           {navItems.map((item, index) => (
             <li key={item.id} role="none">
@@ -382,7 +392,7 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
             </li>
           ))}
         </ul>
-      </nav>
+      </div>
 
       {/* Footer: session info */}
       <div className="p-4 border-t border-white/10">
@@ -391,6 +401,6 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
           <div>Logged in: {currentTime}</div>
         </div>
       </div>
-    </aside>
+    </nav>
   )
 }

@@ -30,6 +30,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   const passwordIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const cursorIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const timeoutRefs = useRef<ReturnType<typeof setTimeout>[]>([])
+  const loginButtonRef = useRef<HTMLButtonElement>(null)
 
   const addTimeout = useCallback((fn: () => void, delay: number) => {
     const id = setTimeout(fn, delay)
@@ -92,6 +93,13 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
     }, 80)
   }, [prefersReducedMotion, addTimeout])
 
+  // Focus the login button when typing completes for keyboard accessibility
+  useEffect(() => {
+    if (typingComplete && loginButtonRef.current) {
+      loginButtonRef.current.focus()
+    }
+  }, [typingComplete])
+
   useEffect(() => {
     // Cursor blink: 530ms interval
     cursorIntervalRef.current = setInterval(() => {
@@ -125,8 +133,9 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
     <div
       className="fixed inset-0 flex items-center justify-center z-50"
       style={{ backgroundColor: '#1E293B' }}
-      role="status"
+      role="dialog"
       aria-label="Clinical system login"
+      aria-modal="true"
     >
       <motion.div
         className="bg-white"
@@ -273,10 +282,12 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
 
           {/* Log In Button — user clicks to proceed */}
           <button
+            ref={loginButtonRef}
             onClick={handleLogin}
             disabled={!typingComplete}
             onMouseEnter={() => setButtonHovered(true)}
             onMouseLeave={() => setButtonHovered(false)}
+            className="focus-visible:ring-2 focus-visible:ring-[#005EB8]/40 focus-visible:ring-offset-2 focus:outline-none"
             style={{
               width: '100%',
               padding: '10px 16px',

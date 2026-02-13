@@ -170,6 +170,7 @@ function ClinicalAlert({
           type="button"
           onClick={onAcknowledge}
           disabled={isAcknowledging}
+          aria-label="Acknowledge clinical alert"
           className="flex-shrink-0 px-3 py-1.5 text-xs font-ui font-medium border rounded transition-colors duration-100 hover:bg-[#F59E0B] hover:text-white disabled:opacity-50"
           style={{
             borderColor: '#F59E0B',

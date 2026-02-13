@@ -66,7 +66,7 @@ function ConsultationEntry({
   const keyCodedEntry = consultation.codedEntries[0]
 
   return (
-    <div
+    <article
       className="bg-white border border-[#E5E7EB] rounded shadow-pmr overflow-hidden"
       style={{ borderLeftWidth: '3px', borderLeftColor: consultation.orgColor }}
     >
@@ -136,7 +136,7 @@ function ConsultationEntry({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </article>
   )
 }
 

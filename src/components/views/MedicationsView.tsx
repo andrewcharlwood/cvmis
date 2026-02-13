@@ -119,6 +119,7 @@ export function MedicationsView() {
             {categoryTabs.map((tab) => (
               <button
                 key={tab.id}
+                id={`tab-${tab.id}`}
                 role="tab"
                 aria-selected={activeTab === tab.id}
                 aria-controls={`panel-${tab.id}`}
@@ -159,7 +160,7 @@ export function MedicationsView() {
         <div
           id={`panel-${activeTab}`}
           role="tabpanel"
-          aria-labelledby={activeTab}
+          aria-labelledby={`tab-${activeTab}`}
         >
           {isMobile ? (
             <MobileMedicationList

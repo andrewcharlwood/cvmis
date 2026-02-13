@@ -330,6 +330,7 @@ function StatusDot({ status }: StatusDotProps) {
   return (
     <span
       className={`w-2 h-2 rounded-full ${colorClass} flex-shrink-0`}
+      role="img"
       aria-label={`Status: ${status}`}
     />
   )
@@ -368,7 +369,7 @@ function ActionButton({ icon, label, href, external, compact }: ActionButtonProp
         transition-colors duration-150
         rounded
         font-ui font-medium
-        focus:outline-none focus:ring-2 focus:ring-pmr-nhsblue/40 focus:ring-offset-1 focus:ring-offset-pmr-banner
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-pmr-nhsblue/40 focus-visible:ring-offset-1 focus-visible:ring-offset-pmr-banner
         ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-1.5 text-sm'}
       `}
     >

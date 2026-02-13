@@ -26,8 +26,7 @@ function TrafficLight({ status }: { status: ProblemStatus }) {
     <div className="flex items-center gap-2">
       <span
         className={`w-2 h-2 rounded-full ${bg}`}
-        aria-label={`Status: ${label}`}
-        role="img"
+        aria-hidden="true"
       />
       <span className="font-ui text-xs text-gray-600">{label}</span>
     </div>

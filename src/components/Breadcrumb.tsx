@@ -56,7 +56,7 @@ export function Breadcrumb({
           </button>
         </li>
 
-        <li>
+        <li aria-hidden="true">
           <ChevronRight size={14} className="text-gray-300" />
         </li>
 
@@ -71,7 +71,7 @@ export function Breadcrumb({
               {viewLabels[currentView]}
             </button>
           ) : (
-            <span className="text-[13px] font-ui font-normal text-gray-600">
+            <span className="text-[13px] font-ui font-normal text-gray-600" aria-current="page">
               {viewLabels[currentView]}
             </span>
           )}
@@ -80,11 +80,11 @@ export function Breadcrumb({
         {/* Expanded item (if any) */}
         {expandedItem && (
           <>
-            <li>
+            <li aria-hidden="true">
               <ChevronRight size={14} className="text-gray-300" />
             </li>
             <li>
-              <span className="text-[13px] font-ui font-normal text-gray-600">
+              <span className="text-[13px] font-ui font-normal text-gray-600" aria-current="page">
                 {expandedItem.name}
               </span>
             </li>

@@ -179,8 +179,7 @@ function PMRContent({ children }: PMRInterfaceProps) {
         <motion.main
           ref={scrollContainerCallbackRef}
           variants={contentVariants}
-          role="main"
-          aria-label={`${activeView} view`}
+          aria-label={`${viewLabels[activeView]} view`}
           className={`
             flex-1 overflow-y-auto p-4 md:p-6
             ${isMobile ? 'pb-20' : ''}
@@ -258,7 +257,8 @@ function MobileSearchBar({ query, onChange }: MobileSearchBarProps) {
           className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
         />
         <input
-          type="text"
+          type="search"
+          aria-label="Search record"
           placeholder="Search record..."
           value={query}
           onChange={e => onChange(e.target.value)}

@@ -18,7 +18,7 @@ function SkipButton({ onSkip }: { onSkip: () => void }) {
     <button
       onClick={onSkip}
       aria-label="Skip intro animation"
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-4 py-1.5 text-xs tracking-widest uppercase font-mono border rounded transition-all duration-700 cursor-pointer select-none"
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-4 py-1.5 text-xs tracking-widest uppercase font-mono border rounded transition-all duration-700 cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
       style={{
         color: '#555',
         borderColor: '#333',
@@ -51,6 +51,13 @@ function App() {
   return (
     <AccessibilityProvider>
       <div className="min-h-screen bg-black">
+        {/* Screen reader announcement for PMR phase */}
+        {phase === 'pmr' && (
+          <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+            Patient Record for Charlwood, Andrew. Summary view.
+          </div>
+        )}
+
         {phase === 'boot' && (
           <BootSequence
             onComplete={() => setPhase('ecg')}
