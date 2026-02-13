@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef } from 'react'
-import { ChevronDown, ChevronUp, ExternalLink } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronDown, ExternalLink } from 'lucide-react'
 import { problems } from '@/data/problems'
 import { consultations } from '@/data/consultations'
 import type { Problem, Consultation } from '@/types/pmr'
 import { useBreakpoint } from '@/hooks/useBreakpoint'
+import { useAccessibility } from '@/contexts/AccessibilityContext'
 
 interface ProblemsViewProps {
   onNavigate?: (view: 'consultations', itemId?: string) => void
@@ -27,10 +29,12 @@ function TrafficLight({ status }: { status: ProblemStatus }) {
         aria-label={`Status: ${label}`}
         role="img"
       />
-      <span className="text-xs text-gray-600">{label}</span>
+      <span className="font-ui text-xs text-gray-600">{label}</span>
     </div>
   )
 }
+
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 function ProblemRow({
   problem,
@@ -45,18 +49,6 @@ function ProblemRow({
   onNavigate?: (view: 'consultations', itemId?: string) => void
   showOutcome: boolean
 }) {
-  const contentRef = useRef<HTMLDivElement>(null)
-  const [contentHeight, setContentHeight] = useState<number | undefined>(undefined)
-  const prefersReducedMotion = useRef(
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  ).current
-
-  useEffect(() => {
-    if (contentRef.current) {
-      setContentHeight(contentRef.current.scrollHeight)
-    }
-  }, [isExpanded])
-
   const linkedConsultations = (problem.linkedConsultations ?? [])
     .map((id) => consultations.find((c) => c.id === id))
     .filter((c): c is Consultation => c !== undefined)
@@ -69,86 +61,99 @@ function ProblemRow({
 
   return (
     <>
-      <tr
-        className={`cursor-pointer hover:bg-blue-50 transition-colors ${
-          isExpanded ? 'bg-blue-50' : ''
+      <motion.tr
+        className={`cursor-pointer hover:bg-[#EFF6FF] transition-colors ${
+          isExpanded ? 'bg-[#EFF6FF]' : ''
         }`}
         onClick={onToggle}
         aria-expanded={isExpanded}
+        initial={false}
       >
         <td className="border border-gray-200 px-3 py-2.5">
           <TrafficLight status={problem.status} />
         </td>
         <td className="border border-gray-200 px-3 py-2.5">
-          <span className="font-mono text-xs text-gray-500">[{problem.code}]</span>
+          <span className="font-geist text-xs text-gray-500">[{problem.code}]</span>
         </td>
         <td className="border border-gray-200 px-3 py-2.5">
-          <span className="text-sm text-gray-900">{problem.description}</span>
+          <span className="font-ui text-[14px] text-gray-900">{problem.description}</span>
         </td>
         <td className="border border-gray-200 px-3 py-2.5">
-          <span className="font-mono text-xs text-gray-500">
+          <span className="font-geist text-xs text-gray-500">
             {problem.resolved || problem.since}
           </span>
         </td>
         {showOutcome && (
           <td className="border border-gray-200 px-3 py-2.5">
             {problem.outcome && (
-              <span className="text-sm text-gray-700">{problem.outcome}</span>
+              <span className="font-ui text-[13px] text-gray-700">{problem.outcome}</span>
             )}
           </td>
         )}
         <td className="border border-gray-200 px-3 py-2.5 w-10">
-          <button
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
-            aria-label={isExpanded ? 'Collapse' : 'Expand'}
+          <motion.div
+            animate={{ rotate: isExpanded ? 180 : 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
+            className="inline-block"
           >
-            {isExpanded ? (
-              <ChevronUp className="w-4 h-4 text-gray-400" />
-            ) : (
+            <button
+              className="p-1 hover:bg-gray-100 rounded transition-colors"
+              aria-label={isExpanded ? 'Collapse' : 'Expand'}
+            >
               <ChevronDown className="w-4 h-4 text-gray-400" />
-            )}
-          </button>
+            </button>
+          </motion.div>
         </td>
-      </tr>
-      <tr>
-        <td colSpan={showOutcome ? 6 : 5} className="p-0 border border-gray-200">
-          <div
-            style={{
-              height: isExpanded ? contentHeight : 0,
-              overflow: 'hidden',
-              transition: prefersReducedMotion ? 'none' : 'height 200ms ease-out',
-            }}
+      </motion.tr>
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.tr
+            key={`${problem.id}-expanded`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' }}
           >
-            <div ref={contentRef} className="bg-gray-50 p-4">
-              <div className="text-sm text-gray-700 leading-relaxed mb-4">
-                {problem.narrative}
-              </div>
-              {linkedConsultations.length > 0 && (
-                <div>
-                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Linked Consultations:
-                  </span>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {linkedConsultations.map((consultation) => (
-                      <button
-                        key={consultation.id}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleLinkedClick(consultation.id)
-                        }}
-                        className="inline-flex items-center gap-1 text-xs text-pmr-nhsblue hover:underline"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        {consultation.organization} — {consultation.role}
-                      </button>
-                    ))}
+            <td colSpan={showOutcome ? 6 : 5} className="p-0 border border-gray-200">
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: 'auto' }}
+                exit={{ height: 0 }}
+                transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' }}
+                style={{ overflow: 'hidden' }}
+              >
+                <div className="bg-gray-50 p-4">
+                  <div className="font-ui text-[14px] text-gray-700 leading-relaxed mb-4">
+                    {problem.narrative}
                   </div>
+                  {linkedConsultations.length > 0 && (
+                    <div>
+                      <span className="font-ui text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Linked Consultations:
+                      </span>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {linkedConsultations.map((consultation) => (
+                          <button
+                            key={consultation.id}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleLinkedClick(consultation.id)
+                            }}
+                            className="inline-flex items-center gap-1 text-xs text-pmr-nhsblue hover:underline focus-visible:ring-2 focus-visible:ring-pmr-nhsblue/40"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            {consultation.organization} — {consultation.role}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-        </td>
-      </tr>
+              </motion.div>
+            </td>
+          </motion.tr>
+        )}
+      </AnimatePresence>
     </>
   )
 }
@@ -177,23 +182,23 @@ function MobileProblemCard({
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded">
+    <div className="bg-white border border-gray-200 rounded shadow-pmr">
       <button
         type="button"
         onClick={onToggle}
-        className="w-full p-4 text-left"
+        className="w-full p-4 text-left focus-visible:ring-2 focus-visible:ring-pmr-nhsblue/40"
         aria-expanded={isExpanded}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <TrafficLight status={problem.status} />
-              <span className="font-mono text-xs text-gray-500">[{problem.code}]</span>
+              <span className="font-geist text-xs text-gray-500">[{problem.code}]</span>
             </div>
-            <h3 className="font-inter font-medium text-sm text-gray-900">
+            <h3 className="font-ui font-medium text-[14px] text-gray-900">
               {problem.description}
             </h3>
-            <div className="flex items-center gap-2 mt-1.5 text-xs text-gray-500">
+            <div className="flex items-center gap-2 mt-1.5 text-xs text-gray-500 font-ui">
               <span>{showOutcome ? 'Resolved' : 'Since'}: {problem.resolved || problem.since}</span>
               {showOutcome && problem.outcome && (
                 <>
@@ -203,44 +208,55 @@ function MobileProblemCard({
               )}
             </div>
           </div>
-          <div className="flex-shrink-0 mt-1">
-            {isExpanded ? (
-              <ChevronUp size={16} className="text-gray-400" />
-            ) : (
-              <ChevronDown size={16} className="text-gray-400" />
-            )}
-          </div>
+          <motion.div
+            animate={{ rotate: isExpanded ? 180 : 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
+            className="flex-shrink-0 mt-1"
+          >
+            <ChevronDown size={16} className="text-gray-400" />
+          </motion.div>
         </div>
       </button>
-      {isExpanded && (
-        <div className="px-4 pb-4 border-t border-gray-100">
-          <div className="pt-3 text-sm text-gray-700 leading-relaxed">
-            {problem.narrative}
-          </div>
-          {linkedConsultations.length > 0 && (
-            <div className="mt-3">
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                Linked Consultations:
-              </span>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {linkedConsultations.map((consultation) => (
-                  <button
-                    key={consultation.id}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleLinkedClick(consultation.id)
-                    }}
-                    className="inline-flex items-center gap-1 text-xs text-pmr-nhsblue hover:underline"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    {consultation.organization}
-                  </button>
-                ))}
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' }}
+            style={{ overflow: 'hidden' }}
+            className="border-t border-gray-100"
+          >
+            <div className="px-4 pb-4">
+              <div className="pt-3 font-ui text-[14px] text-gray-700 leading-relaxed">
+                {problem.narrative}
               </div>
+              {linkedConsultations.length > 0 && (
+                <div className="mt-3">
+                  <span className="font-ui text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Linked Consultations:
+                  </span>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {linkedConsultations.map((consultation) => (
+                      <button
+                        key={consultation.id}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleLinkedClick(consultation.id)
+                        }}
+                        className="inline-flex items-center gap-1 text-xs text-pmr-nhsblue hover:underline focus-visible:ring-2 focus-visible:ring-pmr-nhsblue/40"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        {consultation.organization} — {consultation.role}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -248,21 +264,36 @@ function MobileProblemCard({
 export function ProblemsView({ onNavigate }: ProblemsViewProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const { isMobile } = useBreakpoint()
+  const { setExpandedItem } = useAccessibility()
 
   const activeProblems = problems.filter(
     (p) => p.status === 'Active' || p.status === 'In Progress'
   )
   const resolvedProblems = problems.filter((p) => p.status === 'Resolved')
 
-  const handleToggle = (id: string) => {
-    setExpandedId(expandedId === id ? null : id)
-  }
+  const handleToggle = useCallback(
+    (id: string) => {
+      const newExpandedId = expandedId === id ? null : id
+      setExpandedId(newExpandedId)
+
+      // Update breadcrumb context - pass the problem description as the expanded item ID
+      if (newExpandedId) {
+        const problem = problems.find((p) => p.id === newExpandedId)
+        if (problem) {
+          setExpandedItem(problem.description)
+        }
+      } else {
+        setExpandedItem(null)
+      }
+    },
+    [expandedId, setExpandedItem]
+  )
 
   return (
     <div className="space-y-6">
-      <div className="bg-white border border-gray-200 rounded overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded overflow-hidden shadow-pmr">
         <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
-          <h2 className="font-inter font-semibold text-sm uppercase tracking-wider text-gray-500">
+          <h2 className="font-ui font-semibold text-[13px] uppercase tracking-wider text-gray-500">
             Active Problems
           </h2>
         </div>
@@ -285,31 +316,31 @@ export function ProblemsView({ onNavigate }: ProblemsViewProps) {
               <tr className="bg-gray-50">
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-28"
+                  className="border border-gray-200 px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-wider text-gray-400 w-28"
                 >
                   Status
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-28"
+                  className="border border-gray-200 px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-wider text-gray-400 w-28"
                 >
                   Code
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400"
+                  className="border border-gray-200 px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-wider text-gray-400"
                 >
                   Problem
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-28"
+                  className="border border-gray-200 px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-wider text-gray-400 w-28"
                 >
                   Since
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-10"
+                  className="border border-gray-200 px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-wider text-gray-400 w-10"
                 >
                   <span className="sr-only">Expand</span>
                 </th>
@@ -330,13 +361,13 @@ export function ProblemsView({ onNavigate }: ProblemsViewProps) {
           </table>
         )}
         {activeProblems.length === 0 && (
-          <div className="p-4 text-sm text-gray-500 text-center">No active problems</div>
+          <div className="p-4 font-ui text-[14px] text-gray-500 text-center">No active problems</div>
         )}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded overflow-hidden shadow-pmr">
         <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
-          <h2 className="font-inter font-semibold text-sm uppercase tracking-wider text-gray-500">
+          <h2 className="font-ui font-semibold text-[13px] uppercase tracking-wider text-gray-500">
             Resolved Problems
           </h2>
         </div>
@@ -359,37 +390,37 @@ export function ProblemsView({ onNavigate }: ProblemsViewProps) {
               <tr className="bg-gray-50">
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-28"
+                  className="border border-gray-200 px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-wider text-gray-400 w-28"
                 >
                   Status
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-28"
+                  className="border border-gray-200 px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-wider text-gray-400 w-28"
                 >
                   Code
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400"
+                  className="border border-gray-200 px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-wider text-gray-400"
                 >
                   Problem
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-28"
+                  className="border border-gray-200 px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-wider text-gray-400 w-28"
                 >
                   Resolved
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400"
+                  className="border border-gray-200 px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-wider text-gray-400"
                 >
                   Outcome
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-10"
+                  className="border border-gray-200 px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-wider text-gray-400 w-10"
                 >
                   <span className="sr-only">Expand</span>
                 </th>
@@ -410,7 +441,7 @@ export function ProblemsView({ onNavigate }: ProblemsViewProps) {
           </table>
         )}
         {resolvedProblems.length === 0 && (
-          <div className="p-4 text-sm text-gray-500 text-center">No resolved problems</div>
+          <div className="p-4 font-ui text-[14px] text-gray-500 text-center">No resolved problems</div>
         )}
       </div>
     </div>
