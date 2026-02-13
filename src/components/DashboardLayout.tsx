@@ -4,6 +4,7 @@ import { TopBar } from './TopBar'
 import Sidebar from './Sidebar'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
 import { LatestResultsTile } from './tiles/LatestResultsTile'
+import { CoreSkillsTile } from './tiles/CoreSkillsTile'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -101,6 +102,7 @@ export function DashboardLayout() {
             {/* LatestResultsTile — half width (left) */}
             <LatestResultsTile />
             {/* CoreSkillsTile — half width (right) */}
+            <CoreSkillsTile />
             {/* LastConsultationTile — full width */}
             {/* CareerActivityTile — full width */}
             {/* EducationTile — full width */}
