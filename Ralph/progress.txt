@@ -379,3 +379,25 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Skipped — no browser tools available. Will verify visually after all tiles are in place.
 
+### Iteration 13 — Task 15: Build Projects tile
+**Status:** Complete
+**Changes:**
+- Created `src/components/tiles/ProjectsTile.tsx` — full-width card displaying projects from investigations.ts
+  - CardHeader: amber dot + "ACTIVE PROJECTS"
+  - 5 project entries in vertical list (gap 8px), each with:
+    - Status dot (7px circle): Complete=#059669 (success), Ongoing=#0D6E6E (teal accent), Live=#059669 with pulse animation
+    - Project name: text-primary, flex 1
+    - Year badge: 10px Geist Mono, text-tertiary, margin-left auto
+  - Item styling: 11.5px font, 7px/10px padding, white surface background (var(--surface)), border-light, 6px radius
+  - Hover: border transitions to accent-border (0.15s)
+  - Items prepared for Task 16 expansion (cursor: default, no onClick yet)
+- Updated `src/components/DashboardLayout.tsx` — imported and rendered ProjectsTile as last tile in grid
+**Learnings:**
+- Projects tile uses white surface background (var(--surface)) for items, matching the Education tile pattern — not the tinted dashboard background used by CoreSkills and CareerActivity
+- The Investigation interface has a union type for status: 'Complete' | 'Ongoing' | 'Live' — mapped directly to dot colors
+- "Live" status (PharMetrics) gets the pulse animation keyframe already defined in index.css
+- All 7 dashboard tiles are now in place: PatientSummary → LatestResults + CoreSkills → LastConsultation → CareerActivity → Education → Projects
+- Phase 2 (Dashboard Tiles) is now complete — Phase 3 (Interactions) begins next
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Skipped — no browser tools available. All tiles now in place — visual review recommended for Task 16.
+

@@ -136,11 +136,11 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 15: Build Projects tile
 > Detail: `Ralph/refs/ref-06-bottom-tiles.md` (Projects section)
-- [ ] Create `src/components/tiles/ProjectsTile.tsx`
-- [ ] Full-width card, prominent presentation
-- [ ] Status badges, project names, years, descriptions
-- [ ] Data from `src/data/investigations.ts`
-- [ ] Run quality checks
+- [x] Create `src/components/tiles/ProjectsTile.tsx`
+- [x] Full-width card, prominent presentation
+- [x] Status badges, project names, years, descriptions
+- [x] Data from `src/data/investigations.ts`
+- [x] Run quality checks
 
 ### Phase 3: Interactions
 
