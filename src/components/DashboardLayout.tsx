@@ -8,6 +8,7 @@ import { CoreSkillsTile } from './tiles/CoreSkillsTile'
 import { LastConsultationTile } from './tiles/LastConsultationTile'
 import { CareerActivityTile } from './tiles/CareerActivityTile'
 import { EducationTile } from './tiles/EducationTile'
+import { ProjectsTile } from './tiles/ProjectsTile'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -117,6 +118,7 @@ export function DashboardLayout() {
             <EducationTile />
 
             {/* ProjectsTile — full width */}
+            <ProjectsTile />
           </div>
         </motion.main>
       </div>
