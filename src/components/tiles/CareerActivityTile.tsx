@@ -218,6 +218,7 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ entry, isExpanded, onToggle
             flexShrink: 0,
             marginTop: '2px',
           }}
+          aria-hidden="true"
         />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div

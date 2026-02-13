@@ -219,6 +219,7 @@ export default function Sidebar() {
               background: 'var(--success)',
               animation: 'pulse 2s infinite',
             }}
+            aria-hidden="true"
           />
           <span>{patient.badge}</span>
         </div>

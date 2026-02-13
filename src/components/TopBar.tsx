@@ -26,6 +26,32 @@ export function TopBar({ onSearchClick }: TopBarProps) {
         zIndex: 100,
       }}
     >
+      {/* Skip to main content link (only visible on focus) */}
+      <a
+        href="#main-content"
+        className="skip-link"
+        style={{
+          position: 'absolute',
+          top: '-40px',
+          left: '0',
+          background: 'var(--accent)',
+          color: '#FFFFFF',
+          padding: '8px 16px',
+          textDecoration: 'none',
+          zIndex: 101,
+          borderRadius: '0 0 4px 0',
+          fontSize: '13px',
+          fontWeight: 600,
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.top = '0'
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.top = '-40px'
+        }}
+      >
+        Skip to main content
+      </a>
       {/* Brand */}
       <div className="flex items-center gap-2 shrink-0">
         <Home
@@ -131,7 +157,10 @@ export function TopBar({ onSearchClick }: TopBarProps) {
       </button>
 
       {/* Session info (right) */}
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+      <div
+        className="flex items-center gap-2 sm:gap-3 shrink-0"
+        aria-label="Active session information"
+      >
         <span
           className="hidden sm:inline"
           style={{

@@ -135,6 +135,7 @@ export function DashboardLayout() {
 
         {/* Main content — scrollable card grid */}
         <motion.main
+          id="main-content"
           initial="hidden"
           animate="visible"
           variants={contentVariants}

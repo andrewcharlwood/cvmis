@@ -23,7 +23,7 @@ export function Card({ children, full, className, tileId }: CardProps) {
   }
 
   return (
-    <div
+    <article
       style={baseStyles}
       className={className}
       data-tile-id={tileId}
@@ -31,7 +31,7 @@ export function Card({ children, full, className, tileId }: CardProps) {
       onMouseLeave={() => setIsHovered(false)}
     >
       {children}
-    </div>
+    </article>
   )
 }
 
@@ -85,7 +85,7 @@ export function CardHeader({ dotColor, title, rightText }: CardHeaderProps) {
 
   return (
     <div style={headerStyles}>
-      <div style={dotStyles} />
+      <div style={dotStyles} aria-hidden="true" />
       <span style={titleStyles}>{title}</span>
       {rightText && <span style={rightTextStyles}>{rightText}</span>}
     </div>

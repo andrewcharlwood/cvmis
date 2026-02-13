@@ -85,6 +85,7 @@ function ProjectItem({ project, isExpanded, onToggle }: ProjectItemProps) {
             marginTop: '4px',
             animation: isLive ? 'pulse 2s infinite' : undefined,
           }}
+          aria-hidden="true"
         />
         <span style={{ flex: 1 }}>{project.name}</span>
         <span

@@ -371,3 +371,39 @@ html {
     to { transform: none; opacity: 1; }
   }
 }
+
+/* ===== FOCUS VISIBLE STYLES (WCAG Compliance) ===== */
+/* Default focus ring for all focusable elements */
+*:focus-visible {
+  outline: 2px solid rgba(13, 110, 110, 0.4);
+  outline-offset: 2px;
+}
+
+/* Button-like interactive elements */
+button:focus-visible,
+[role="button"]:focus-visible,
+[role="option"]:focus-visible {
+  outline: 2px solid rgba(13, 110, 110, 0.4);
+  outline-offset: 2px;
+}
+
+/* Links */
+a:focus-visible {
+  outline: 2px solid rgba(13, 110, 110, 0.4);
+  outline-offset: 2px;
+}
+
+/* Inputs and textareas */
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid rgba(13, 110, 110, 0.6);
+  outline-offset: 0px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Disable pulse animation on status badge dot */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 1; }
+  }
+}
