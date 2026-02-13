@@ -1,39 +1,75 @@
-import { useState, useEffect, useRef } from 'react'
-import { ChevronDown, ChevronUp, ExternalLink, Circle } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronDown, ExternalLink } from 'lucide-react'
 import { investigations } from '@/data/investigations'
 import type { Investigation } from '@/types/pmr'
 import { useBreakpoint } from '@/hooks/useBreakpoint'
+import { useAccessibility } from '@/contexts/AccessibilityContext'
 
 type InvestigationStatus = 'Complete' | 'Ongoing' | 'Live'
 
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
 function StatusBadge({ status }: { status: InvestigationStatus }) {
-  if (status === 'Live') {
-    return (
-      <div className="flex items-center gap-2">
-        <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-          <Circle className="relative inline-flex rounded-full h-2 w-2 bg-green-500 fill-green-500" />
-        </span>
-        <span className="text-xs text-gray-600">Live</span>
-      </div>
-    )
+  const styles: Record<InvestigationStatus, { badge: string; dot: string; label: string }> = {
+    Complete: {
+      badge: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      dot: 'bg-emerald-500',
+      label: 'Complete',
+    },
+    Ongoing: {
+      badge: 'bg-amber-100 text-amber-800 border-amber-200',
+      dot: 'bg-amber-500',
+      label: 'Ongoing',
+    },
+    Live: {
+      badge: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      dot: 'bg-emerald-500',
+      label: 'Live',
+    },
   }
 
-  const colorMap: Record<Exclude<InvestigationStatus, 'Live'>, { bg: string; label: string }> = {
-    Complete: { bg: 'bg-green-500', label: 'Complete' },
-    Ongoing: { bg: 'bg-amber-500', label: 'Ongoing' },
-  }
-
-  const { bg, label } = colorMap[status as Exclude<InvestigationStatus, 'Live'>]
+  const { badge, dot, label } = styles[status]
 
   return (
-    <div className="flex items-center gap-2">
-      <span
-        className={`w-2 h-2 rounded-full ${bg}`}
-        aria-label={`Status: ${status}`}
-        role="img"
-      />
-      <span className="text-xs text-gray-600">{label}</span>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium border ${badge}`}>
+      <span className="relative flex h-1.5 w-1.5">
+        {status === 'Live' && (
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+        )}
+        <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${dot}`} />
+      </span>
+      {label}
+    </span>
+  )
+}
+
+interface TreeLineProps {
+  label: string
+  value: React.ReactNode
+  isLast?: boolean
+}
+
+function TreeLine({ label, value, isLast = false }: TreeLineProps) {
+  return (
+    <div className="flex">
+      <span className="text-gray-400 select-none">{isLast ? '└─ ' : '├─ '}</span>
+      <span className="text-gray-500 shrink-0 min-w-[160px]">{label}:</span>
+      <span className="ml-2 flex-1">{value}</span>
+    </div>
+  )
+}
+
+function TreeBranch({ label, children, isLast = false }: { label: string; children: React.ReactNode; isLast?: boolean }) {
+  return (
+    <div>
+      <div className="flex">
+        <span className="text-gray-400 select-none">{isLast ? '└─ ' : '├─ '}</span>
+        <span className="text-gray-500 shrink-0 min-w-[160px]">{label}:</span>
+      </div>
+      <div className="ml-[18px]">
+        {children}
+      </div>
     </div>
   )
 }
@@ -42,127 +78,125 @@ function InvestigationRow({
   investigation,
   isExpanded,
   onToggle,
+  index,
 }: {
   investigation: Investigation
   isExpanded: boolean
   onToggle: () => void
+  index: number
 }) {
-  const contentRef = useRef<HTMLDivElement>(null)
-  const [contentHeight, setContentHeight] = useState<number | undefined>(undefined)
-  const prefersReducedMotion = useRef(
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  ).current
-
-  useEffect(() => {
-    if (contentRef.current) {
-      setContentHeight(contentRef.current.scrollHeight)
-    }
-  }, [isExpanded])
+  const statusBorderColor: Record<InvestigationStatus, string> = {
+    Complete: '#10B981',
+    Ongoing: '#F59E0B',
+    Live: '#10B981',
+  }
 
   return (
     <>
       <tr
-        className={`cursor-pointer hover:bg-blue-50 transition-colors ${
-          isExpanded ? 'bg-blue-50' : ''
-        }`}
+        className={`cursor-pointer transition-colors h-[40px] ${
+          isExpanded ? 'bg-[#EFF6FF]' : index % 2 === 0 ? 'bg-white' : 'bg-[#F9FAFB]'
+        } hover:bg-[#EFF6FF]`}
         onClick={onToggle}
+        tabIndex={0}
+        role="button"
         aria-expanded={isExpanded}
+        aria-label={`${investigation.name} — ${investigation.status}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onToggle()
+          }
+        }}
       >
-        <td className="border border-gray-200 px-3 py-2.5">
-          <span className="text-sm text-gray-900">{investigation.name}</span>
-        </td>
-        <td className="border border-gray-200 px-3 py-2.5">
-          <span className="font-mono text-xs text-gray-500">{investigation.requestedYear}</span>
-        </td>
-        <td className="border border-gray-200 px-3 py-2.5">
-          <StatusBadge status={investigation.status} />
-        </td>
-        <td className="border border-gray-200 px-3 py-2.5">
-          <span className="text-sm text-gray-700">{investigation.resultSummary}</span>
-        </td>
-        <td className="border border-gray-200 px-3 py-2.5 w-10">
-          <button
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
-            aria-label={isExpanded ? 'Collapse' : 'Expand'}
-          >
-            {isExpanded ? (
-              <ChevronUp className="w-4 h-4 text-gray-400" />
-            ) : (
+        <td className="border-b border-r border-[#E5E7EB] px-3 py-2">
+          <div className="flex items-center gap-2">
+            <motion.div
+              animate={{ rotate: isExpanded ? 180 : 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
+            >
               <ChevronDown className="w-4 h-4 text-gray-400" />
-            )}
-          </button>
-        </td>
-      </tr>
-      <tr>
-        <td colSpan={5} className="p-0 border border-gray-200">
-          <div
-            style={{
-              height: isExpanded ? contentHeight : 0,
-              overflow: 'hidden',
-              transition: prefersReducedMotion ? 'none' : 'height 200ms ease-out',
-            }}
-          >
-            <div ref={contentRef} className="bg-gray-50 p-4">
-              <div className="font-mono text-sm text-gray-700 leading-relaxed space-y-1">
-                <div className="flex">
-                  <span className="text-gray-400 w-40 shrink-0">Date Requested:</span>
-                  <span>{investigation.requestedYear}</span>
-                </div>
-                <div className="flex">
-                  <span className="text-gray-400 w-40 shrink-0">Date Reported:</span>
-                  <span>{investigation.reportedYear ?? 'Pending'}</span>
-                </div>
-                <div className="flex">
-                  <span className="text-gray-400 w-40 shrink-0">Status:</span>
-                  <span>
-                    {investigation.status}
-                    {investigation.status === 'Live' && investigation.externalUrl && (
-                      <> — Live at {investigation.externalUrl.replace('https://', '')}</>
-                    )}
-                  </span>
-                </div>
-                <div className="flex">
-                  <span className="text-gray-400 w-40 shrink-0">Requesting Clinician:</span>
-                  <span>{investigation.requestingClinician}</span>
-                </div>
-                <div className="flex">
-                  <span className="text-gray-400 w-40 shrink-0">Methodology:</span>
-                  <span className="flex-1">{investigation.methodology}</span>
-                </div>
-                <div className="flex">
-                  <span className="text-gray-400 w-40 shrink-0">Results:</span>
-                  <ul className="flex-1 space-y-1">
-                    {investigation.results.map((result, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <span className="text-gray-300 mt-1">-</span>
-                        <span>{result}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="flex">
-                  <span className="text-gray-400 w-40 shrink-0">Tech Stack:</span>
-                  <span>{investigation.techStack.join(', ')}</span>
-                </div>
-              </div>
-              {investigation.externalUrl && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <a
-                    href={investigation.externalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-pmr-nhsblue text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors"
-                  >
-                    View Results
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                </div>
-              )}
-            </div>
+            </motion.div>
+            <span className="font-ui text-[14px] text-gray-900">{investigation.name}</span>
           </div>
         </td>
+        <td className="border-b border-r border-[#E5E7EB] px-3 py-2">
+          <span className="font-geist text-[13px] text-gray-500">{investigation.requestedYear}</span>
+        </td>
+        <td className="border-b border-r border-[#E5E7EB] px-3 py-2">
+          <StatusBadge status={investigation.status} />
+        </td>
+        <td className="border-b border-[#E5E7EB] px-3 py-2">
+          <span className="font-ui text-[13px] text-gray-700">{investigation.resultSummary}</span>
+        </td>
       </tr>
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.tr
+            initial={{ height: 0 }}
+            animate={{ height: 'auto' }}
+            exit={{ height: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' }}
+          >
+            <td colSpan={4} className="p-0 border-b border-[#E5E7EB]">
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: 'auto' }}
+                exit={{ height: 0 }}
+                transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' }}
+                style={{ overflow: 'hidden' }}
+              >
+                <div
+                  className="bg-[#F9FAFB] p-4 border-l-4"
+                  style={{ borderLeftColor: statusBorderColor[investigation.status] }}
+                >
+                  <div className="font-geist text-[12px] text-gray-700 leading-relaxed space-y-0.5">
+                    <TreeLine label="Date Requested" value={String(investigation.requestedYear)} />
+                    <TreeLine label="Date Reported" value={investigation.reportedYear ? String(investigation.reportedYear) : 'Pending'} />
+                    <TreeLine
+                      label="Status"
+                      value={
+                        <>
+                          {investigation.status}
+                          {investigation.status === 'Live' && investigation.externalUrl && (
+                            <> — Live at {investigation.externalUrl.replace('https://', '')}</>
+                          )}
+                        </>
+                      }
+                    />
+                    <TreeLine label="Requesting Clinician" value={investigation.requestingClinician} />
+                    <TreeLine label="Methodology" value={investigation.methodology} />
+                    <TreeBranch label="Results">
+                      {investigation.results.map((result, idx) => (
+                        <div key={idx} className="flex">
+                          <span className="text-gray-400 select-none">{idx === investigation.results.length - 1 ? '└─ ' : '├─ '}</span>
+                          <span>{result}</span>
+                        </div>
+                      ))}
+                    </TreeBranch>
+                    <TreeLine label="Tech Stack" value={investigation.techStack.join(', ')} isLast={!investigation.externalUrl} />
+                    {investigation.externalUrl && (
+                      <div className="flex items-center pt-2">
+                        <span className="text-gray-400 select-none">└─ </span>
+                        <a
+                          href={investigation.externalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#005EB8] text-white text-[12px] font-medium rounded hover:bg-[#004D9F] transition-colors focus-visible:ring-2 focus-visible:ring-[#005EB8]/40 focus-visible:outline-none"
+                        >
+                          View Results
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            </td>
+          </motion.tr>
+        )}
+      </AnimatePresence>
     </>
   )
 }
@@ -176,97 +210,100 @@ function MobileInvestigationCard({
   isExpanded: boolean
   onToggle: () => void
 }) {
+  const statusBorderColor: Record<InvestigationStatus, string> = {
+    Complete: '#10B981',
+    Ongoing: '#F59E0B',
+    Live: '#10B981',
+  }
+
   return (
-    <div className="bg-white border border-gray-200 rounded">
+    <div className="bg-white border border-[#E5E7EB] rounded shadow-pmr overflow-hidden">
       <button
         type="button"
         onClick={onToggle}
-        className="w-full p-4 text-left"
+        className="w-full p-4 text-left focus-visible:ring-2 focus-visible:ring-[#005EB8]/40 focus-visible:ring-inset focus-visible:outline-none"
         aria-expanded={isExpanded}
+        aria-label={`${investigation.name} — ${investigation.status}`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <h3 className="font-inter font-medium text-sm text-gray-900">
+            <h3 className="font-ui font-medium text-[14px] text-gray-900">
               {investigation.name}
             </h3>
-            <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
-              <span className="font-geist">{investigation.requestedYear}</span>
-              <span>•</span>
+            <div className="flex items-center gap-3 mt-1.5">
+              <span className="font-geist text-[12px] text-gray-500">{investigation.requestedYear}</span>
               <StatusBadge status={investigation.status} />
             </div>
-            <p className="text-xs text-gray-700 mt-2 line-clamp-2">
+            <p className="font-ui text-[12px] text-gray-700 mt-2 line-clamp-2">
               {investigation.resultSummary}
             </p>
           </div>
-          <div className="flex-shrink-0 mt-1">
-            {isExpanded ? (
-              <ChevronUp size={16} className="text-gray-400" />
-            ) : (
-              <ChevronDown size={16} className="text-gray-400" />
-            )}
-          </div>
+          <motion.div
+            animate={{ rotate: isExpanded ? 180 : 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
+            className="flex-shrink-0 mt-1"
+          >
+            <ChevronDown size={16} className="text-gray-400" />
+          </motion.div>
         </div>
       </button>
-      {isExpanded && (
-        <div className="px-4 pb-4 border-t border-gray-100">
-          <div className="pt-3 font-mono text-xs text-gray-700 leading-relaxed space-y-2">
-            <div className="flex">
-              <span className="text-gray-400 w-28 shrink-0">Date Requested:</span>
-              <span>{investigation.requestedYear}</span>
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0 }}
+            animate={{ height: 'auto' }}
+            exit={{ height: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div
+              className="px-4 pb-4 border-t border-[#E5E7EB] border-l-4"
+              style={{ borderLeftColor: statusBorderColor[investigation.status] }}
+            >
+              <div className="pt-3 font-geist text-[12px] text-gray-700 leading-relaxed space-y-0.5">
+                <TreeLine label="Date Requested" value={String(investigation.requestedYear)} />
+                <TreeLine label="Date Reported" value={investigation.reportedYear ? String(investigation.reportedYear) : 'Pending'} />
+                <TreeLine
+                  label="Status"
+                  value={
+                    <>
+                      {investigation.status}
+                      {investigation.status === 'Live' && investigation.externalUrl && (
+                        <> — Live at {investigation.externalUrl.replace('https://', '')}</>
+                      )}
+                    </>
+                  }
+                />
+                <TreeLine label="Clinician" value={investigation.requestingClinician} />
+                <TreeLine label="Methodology" value={investigation.methodology} />
+                <TreeBranch label="Results">
+                  {investigation.results.map((result, idx) => (
+                    <div key={idx} className="flex">
+                      <span className="text-gray-400 select-none">{idx === investigation.results.length - 1 ? '└─ ' : '├─ '}</span>
+                      <span>{result}</span>
+                    </div>
+                  ))}
+                </TreeBranch>
+                <TreeLine label="Tech Stack" value={investigation.techStack.join(', ')} isLast={!investigation.externalUrl} />
+              </div>
+              {investigation.externalUrl && (
+                <div className="mt-3">
+                  <a
+                    href={investigation.externalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#005EB8] text-white text-[12px] font-medium rounded hover:bg-[#004D9F] transition-colors focus-visible:ring-2 focus-visible:ring-[#005EB8]/40 focus-visible:outline-none"
+                  >
+                    View Results
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              )}
             </div>
-            <div className="flex">
-              <span className="text-gray-400 w-28 shrink-0">Date Reported:</span>
-              <span>{investigation.reportedYear ?? 'Pending'}</span>
-            </div>
-            <div className="flex">
-              <span className="text-gray-400 w-28 shrink-0">Status:</span>
-              <span>
-                {investigation.status}
-                {investigation.status === 'Live' && investigation.externalUrl && (
-                  <> — Live at {investigation.externalUrl.replace('https://', '')}</>
-                )}
-              </span>
-            </div>
-            <div className="flex">
-              <span className="text-gray-400 w-28 shrink-0">Clinician:</span>
-              <span>{investigation.requestingClinician}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-gray-400 w-28 shrink-0">Methodology:</span>
-              <span className="mt-1">{investigation.methodology}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-gray-400 w-28 shrink-0">Results:</span>
-              <ul className="mt-1 space-y-0.5">
-                {investigation.results.map((result, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <span className="text-gray-300 mt-0.5">-</span>
-                    <span>{result}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex">
-              <span className="text-gray-400 w-28 shrink-0">Tech Stack:</span>
-              <span>{investigation.techStack.join(', ')}</span>
-            </div>
-          </div>
-          {investigation.externalUrl && (
-            <div className="mt-4">
-              <a
-                href={investigation.externalUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-pmr-nhsblue text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
-              >
-                View Results
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            </div>
-          )}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -274,29 +311,32 @@ function MobileInvestigationCard({
 export function InvestigationsView() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const { isMobile } = useBreakpoint()
+  const { setExpandedItem } = useAccessibility()
 
-  const handleToggle = (id: string) => {
-    setExpandedId(expandedId === id ? null : id)
-  }
+  const handleToggle = useCallback((id: string, name: string) => {
+    const newId = expandedId === id ? null : id
+    setExpandedId(newId)
+    setExpandedItem(newId ? name : null)
+  }, [expandedId, setExpandedItem])
 
   return (
-    <div className="bg-white border border-gray-200 rounded overflow-hidden">
-      <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
-        <h2 className="font-inter font-semibold text-sm uppercase tracking-wider text-gray-500">
+    <div className="bg-white border border-[#E5E7EB] rounded shadow-pmr overflow-hidden">
+      <div className="bg-[#F9FAFB] border-b border-[#E5E7EB] px-4 py-3">
+        <h2 className="font-ui font-semibold text-[13px] uppercase tracking-[0.05em] text-gray-500">
           Investigation Results
         </h2>
-        <p className="font-inter text-xs text-gray-400 mt-1">
-          Projects presented as diagnostic investigations — tests that were ordered, performed, and returned results.
+        <p className="font-ui text-[12px] text-gray-400 mt-1">
+          {investigations.length} investigation{investigations.length !== 1 ? 's' : ''} on record. Click a row to view full results.
         </p>
       </div>
       {isMobile ? (
-        <div className="p-3 space-y-3 bg-pmr-content">
+        <div className="p-3 space-y-3 bg-[#F5F7FA]">
           {investigations.map((investigation) => (
             <MobileInvestigationCard
               key={investigation.id}
               investigation={investigation}
               isExpanded={expandedId === investigation.id}
-              onToggle={() => handleToggle(investigation.id)}
+              onToggle={() => handleToggle(investigation.id, investigation.name)}
             />
           ))}
         </div>
@@ -304,54 +344,46 @@ export function InvestigationsView() {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-gray-50">
+              <tr className="bg-[#F9FAFB]">
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400"
+                  className="border-b border-r border-[#E5E7EB] px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-[0.05em] text-gray-400"
                 >
                   Test Name
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-24"
+                  className="border-b border-r border-[#E5E7EB] px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-[0.05em] text-gray-400 w-24"
                 >
                   Requested
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-28"
+                  className="border-b border-r border-[#E5E7EB] px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-[0.05em] text-gray-400 w-28"
                 >
                   Status
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400"
+                  className="border-b border-[#E5E7EB] px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-[0.05em] text-gray-400"
                 >
                   Result
-                </th>
-                <th
-                  scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-10"
-                >
-                  <span className="sr-only">Expand</span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {investigations.map((investigation) => (
+              {investigations.map((investigation, index) => (
                 <InvestigationRow
                   key={investigation.id}
                   investigation={investigation}
                   isExpanded={expandedId === investigation.id}
-                  onToggle={() => handleToggle(investigation.id)}
+                  onToggle={() => handleToggle(investigation.id, investigation.name)}
+                  index={index}
                 />
               ))}
             </tbody>
           </table>
         </div>
-      )}
-      {investigations.length === 0 && (
-        <div className="p-4 text-sm text-gray-500 text-center">No investigation results</div>
       )}
     </div>
   )

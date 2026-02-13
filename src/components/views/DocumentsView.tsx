@@ -1,144 +1,170 @@
-import { useState, useEffect, useRef } from 'react'
-import { ChevronDown, ChevronUp, FileText, Award, GraduationCap, FlaskConical } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronDown, FileText, Award, GraduationCap, FlaskConical } from 'lucide-react'
 import { documents } from '@/data/documents'
 import type { Document, DocumentType } from '@/types/pmr'
 import { useBreakpoint } from '@/hooks/useBreakpoint'
+import { useAccessibility } from '@/contexts/AccessibilityContext'
+
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+const documentIcons: Record<DocumentType, React.FC<{ className?: string }>> = {
+  Certificate: FileText,
+  Registration: Award,
+  Results: GraduationCap,
+  Research: FlaskConical,
+}
 
 function DocumentTypeIcon({ type }: { type: DocumentType }) {
-  const iconMap: Record<DocumentType, React.ReactNode> = {
-    Certificate: <FileText className="w-4 h-4 text-gray-500" />,
-    Registration: <Award className="w-4 h-4 text-gray-500" />,
-    Results: <GraduationCap className="w-4 h-4 text-gray-500" />,
-    Research: <FlaskConical className="w-4 h-4 text-gray-500" />,
-  }
-
+  const Icon = documentIcons[type]
   return (
     <div className="flex items-center justify-center">
-      {iconMap[type]}
+      <Icon className="w-4 h-4 text-gray-500" />
+    </div>
+  )
+}
+
+const documentBorderColors: Record<DocumentType, string> = {
+  Certificate: '#005EB8',
+  Registration: '#10B981',
+  Results: '#6366F1',
+  Research: '#8B5CF6',
+}
+
+interface TreeLineProps {
+  label: string
+  value: React.ReactNode
+  isLast?: boolean
+}
+
+function TreeLine({ label, value, isLast = false }: TreeLineProps) {
+  return (
+    <div className="flex">
+      <span className="text-gray-400 select-none">{isLast ? '└─ ' : '├─ '}</span>
+      <span className="text-gray-500 shrink-0 min-w-[160px]">{label}:</span>
+      <span className="ml-2 flex-1">{value}</span>
     </div>
   )
 }
 
 function DocumentRow({
-  document,
+  document: doc,
   isExpanded,
   onToggle,
+  index,
 }: {
   document: Document
   isExpanded: boolean
   onToggle: () => void
+  index: number
 }) {
-  const contentRef = useRef<HTMLDivElement>(null)
-  const [contentHeight, setContentHeight] = useState<number | undefined>(undefined)
-  const prefersReducedMotion = useRef(
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  ).current
+  const fields: Array<{ label: string; value: React.ReactNode }> = [
+    { label: 'Type', value: doc.type },
+    { label: 'Date Awarded', value: doc.date },
+  ]
 
-  useEffect(() => {
-    if (contentRef.current) {
-      setContentHeight(contentRef.current.scrollHeight)
-    }
-  }, [isExpanded])
+  if (doc.institution) fields.push({ label: 'Institution', value: doc.institution })
+  if (doc.classification) fields.push({ label: 'Classification', value: doc.classification })
+  if (doc.duration) fields.push({ label: 'Duration', value: doc.duration })
+  if (doc.researchDetail) {
+    fields.push({
+      label: 'Research',
+      value: (
+        <>
+          {doc.researchDetail}
+          {doc.researchGrade && (
+            <>
+              <br />
+              <span className="text-gray-500">Grade: {doc.researchGrade}</span>
+            </>
+          )}
+        </>
+      ),
+    })
+  }
+  if (doc.notes) fields.push({ label: 'Notes', value: <span className="text-gray-600">{doc.notes}</span> })
 
   return (
     <>
       <tr
-        className={`cursor-pointer hover:bg-blue-50 transition-colors ${
-          isExpanded ? 'bg-blue-50' : ''
-        }`}
+        className={`cursor-pointer transition-colors h-[40px] ${
+          isExpanded ? 'bg-[#EFF6FF]' : index % 2 === 0 ? 'bg-white' : 'bg-[#F9FAFB]'
+        } hover:bg-[#EFF6FF]`}
         onClick={onToggle}
+        tabIndex={0}
+        role="button"
         aria-expanded={isExpanded}
+        aria-label={`${doc.title} — ${doc.type}, ${doc.date}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onToggle()
+          }
+        }}
       >
-        <td className="border border-gray-200 px-3 py-2.5 w-12">
-          <DocumentTypeIcon type={document.type} />
+        <td className="border-b border-r border-[#E5E7EB] px-3 py-2 w-12">
+          <DocumentTypeIcon type={doc.type} />
         </td>
-        <td className="border border-gray-200 px-3 py-2.5">
-          <span className="text-sm text-gray-900">{document.title}</span>
-        </td>
-        <td className="border border-gray-200 px-3 py-2.5">
-          <span className="font-mono text-xs text-gray-500">{document.date}</span>
-        </td>
-        <td className="border border-gray-200 px-3 py-2.5">
-          <span className="text-sm text-gray-700">{document.source}</span>
-        </td>
-        <td className="border border-gray-200 px-3 py-2.5 w-10">
-          <button
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
-            aria-label={isExpanded ? 'Collapse' : 'Expand'}
-          >
-            {isExpanded ? (
-              <ChevronUp className="w-4 h-4 text-gray-400" />
-            ) : (
+        <td className="border-b border-r border-[#E5E7EB] px-3 py-2">
+          <div className="flex items-center gap-2">
+            <motion.div
+              animate={{ rotate: isExpanded ? 180 : 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
+            >
               <ChevronDown className="w-4 h-4 text-gray-400" />
-            )}
-          </button>
-        </td>
-      </tr>
-      <tr>
-        <td colSpan={5} className="p-0 border border-gray-200">
-          <div
-            style={{
-              height: isExpanded ? contentHeight : 0,
-              overflow: 'hidden',
-              transition: prefersReducedMotion ? 'none' : 'height 200ms ease-out',
-            }}
-          >
-            <div ref={contentRef} className="bg-gray-50 p-4">
-              <div className="font-mono text-sm text-gray-700 leading-relaxed space-y-1">
-                <div className="flex">
-                  <span className="text-gray-400 w-40 shrink-0">Type:</span>
-                  <span>{document.type}</span>
-                </div>
-                <div className="flex">
-                  <span className="text-gray-400 w-40 shrink-0">Date Awarded:</span>
-                  <span>{document.date}</span>
-                </div>
-                {document.institution && (
-                  <div className="flex">
-                    <span className="text-gray-400 w-40 shrink-0">Institution:</span>
-                    <span>{document.institution}</span>
-                  </div>
-                )}
-                {document.classification && (
-                  <div className="flex">
-                    <span className="text-gray-400 w-40 shrink-0">Classification:</span>
-                    <span>{document.classification}</span>
-                  </div>
-                )}
-                {document.duration && (
-                  <div className="flex">
-                    <span className="text-gray-400 w-40 shrink-0">Duration:</span>
-                    <span>{document.duration}</span>
-                  </div>
-                )}
-                {document.researchDetail && (
-                  <div className="flex">
-                    <span className="text-gray-400 w-40 shrink-0">Research:</span>
-                    <span className="flex-1">
-                      {document.researchDetail}
-                      {document.researchGrade && (
-                        <><br />Grade: {document.researchGrade}</>
-                      )}
-                    </span>
-                  </div>
-                )}
-                {document.notes && (
-                  <div className="flex">
-                    <span className="text-gray-400 w-40 shrink-0">Notes:</span>
-                    <span className="flex-1 text-gray-600">{document.notes}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+            </motion.div>
+            <span className="font-ui text-[14px] text-gray-900">{doc.title}</span>
           </div>
         </td>
+        <td className="border-b border-r border-[#E5E7EB] px-3 py-2">
+          <span className="font-geist text-[13px] text-gray-500">{doc.date}</span>
+        </td>
+        <td className="border-b border-[#E5E7EB] px-3 py-2">
+          <span className="font-ui text-[13px] text-gray-700">{doc.source}</span>
+        </td>
       </tr>
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.tr
+            initial={{ height: 0 }}
+            animate={{ height: 'auto' }}
+            exit={{ height: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' }}
+          >
+            <td colSpan={4} className="p-0 border-b border-[#E5E7EB]">
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: 'auto' }}
+                exit={{ height: 0 }}
+                transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' }}
+                style={{ overflow: 'hidden' }}
+              >
+                <div
+                  className="bg-[#F9FAFB] p-4 border-l-4"
+                  style={{ borderLeftColor: documentBorderColors[doc.type] }}
+                >
+                  <div className="font-geist text-[12px] text-gray-700 leading-relaxed space-y-0.5">
+                    {fields.map((field, idx) => (
+                      <TreeLine
+                        key={field.label}
+                        label={field.label}
+                        value={field.value}
+                        isLast={idx === fields.length - 1}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            </td>
+          </motion.tr>
+        )}
+      </AnimatePresence>
     </>
   )
 }
 
 function MobileDocumentCard({
-  document,
+  document: doc,
   isExpanded,
   onToggle,
 }: {
@@ -146,87 +172,92 @@ function MobileDocumentCard({
   isExpanded: boolean
   onToggle: () => void
 }) {
+  const fields: Array<{ label: string; value: React.ReactNode }> = [
+    { label: 'Type', value: doc.type },
+    { label: 'Date Awarded', value: doc.date },
+  ]
+
+  if (doc.institution) fields.push({ label: 'Institution', value: doc.institution })
+  if (doc.classification) fields.push({ label: 'Classification', value: doc.classification })
+  if (doc.duration) fields.push({ label: 'Duration', value: doc.duration })
+  if (doc.researchDetail) {
+    fields.push({
+      label: 'Research',
+      value: (
+        <>
+          {doc.researchDetail}
+          {doc.researchGrade && (
+            <>
+              <br />
+              <span className="text-gray-500">Grade: {doc.researchGrade}</span>
+            </>
+          )}
+        </>
+      ),
+    })
+  }
+  if (doc.notes) fields.push({ label: 'Notes', value: <span className="text-gray-600">{doc.notes}</span> })
+
   return (
-    <div className="bg-white border border-gray-200 rounded">
+    <div className="bg-white border border-[#E5E7EB] rounded shadow-pmr overflow-hidden">
       <button
         type="button"
         onClick={onToggle}
-        className="w-full p-4 text-left"
+        className="w-full p-4 text-left focus-visible:ring-2 focus-visible:ring-[#005EB8]/40 focus-visible:ring-inset focus-visible:outline-none"
         aria-expanded={isExpanded}
+        aria-label={`${doc.title} — ${doc.type}, ${doc.date}`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <DocumentTypeIcon type={document.type} />
-              <span className="text-xs text-gray-500">{document.type}</span>
+              <DocumentTypeIcon type={doc.type} />
+              <span className="font-ui text-[12px] text-gray-500">{doc.type}</span>
             </div>
-            <h3 className="font-inter font-medium text-sm text-gray-900">
-              {document.title}
+            <h3 className="font-ui font-medium text-[14px] text-gray-900">
+              {doc.title}
             </h3>
-            <div className="flex items-center gap-2 mt-1.5 text-xs text-gray-500">
-              <span className="font-geist">{document.date}</span>
-              <span>•</span>
-              <span>{document.source}</span>
+            <div className="flex items-center gap-2 mt-1.5">
+              <span className="font-geist text-[12px] text-gray-500">{doc.date}</span>
+              <span className="text-gray-300">•</span>
+              <span className="font-ui text-[12px] text-gray-500">{doc.source}</span>
             </div>
           </div>
-          <div className="flex-shrink-0 mt-1">
-            {isExpanded ? (
-              <ChevronUp size={16} className="text-gray-400" />
-            ) : (
-              <ChevronDown size={16} className="text-gray-400" />
-            )}
-          </div>
+          <motion.div
+            animate={{ rotate: isExpanded ? 180 : 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
+            className="flex-shrink-0 mt-1"
+          >
+            <ChevronDown size={16} className="text-gray-400" />
+          </motion.div>
         </div>
       </button>
-      {isExpanded && (
-        <div className="px-4 pb-4 border-t border-gray-100">
-          <div className="pt-3 font-mono text-xs text-gray-700 leading-relaxed space-y-2">
-            <div className="flex">
-              <span className="text-gray-400 w-28 shrink-0">Type:</span>
-              <span>{document.type}</span>
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0 }}
+            animate={{ height: 'auto' }}
+            exit={{ height: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div
+              className="px-4 pb-4 border-t border-[#E5E7EB] border-l-4"
+              style={{ borderLeftColor: documentBorderColors[doc.type] }}
+            >
+              <div className="pt-3 font-geist text-[12px] text-gray-700 leading-relaxed space-y-0.5">
+                {fields.map((field, idx) => (
+                  <TreeLine
+                    key={field.label}
+                    label={field.label}
+                    value={field.value}
+                    isLast={idx === fields.length - 1}
+                  />
+                ))}
+              </div>
             </div>
-            <div className="flex">
-              <span className="text-gray-400 w-28 shrink-0">Date Awarded:</span>
-              <span>{document.date}</span>
-            </div>
-            {document.institution && (
-              <div className="flex">
-                <span className="text-gray-400 w-28 shrink-0">Institution:</span>
-                <span>{document.institution}</span>
-              </div>
-            )}
-            {document.classification && (
-              <div className="flex">
-                <span className="text-gray-400 w-28 shrink-0">Classification:</span>
-                <span>{document.classification}</span>
-              </div>
-            )}
-            {document.duration && (
-              <div className="flex">
-                <span className="text-gray-400 w-28 shrink-0">Duration:</span>
-                <span>{document.duration}</span>
-              </div>
-            )}
-            {document.researchDetail && (
-              <div className="flex flex-col">
-                <span className="text-gray-400 w-28 shrink-0">Research:</span>
-                <span className="mt-1">
-                  {document.researchDetail}
-                  {document.researchGrade && (
-                    <><br />Grade: {document.researchGrade}</>
-                  )}
-                </span>
-              </div>
-            )}
-            {document.notes && (
-              <div className="flex flex-col">
-                <span className="text-gray-400 w-28 shrink-0">Notes:</span>
-                <span className="mt-1 text-gray-600">{document.notes}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -234,29 +265,32 @@ function MobileDocumentCard({
 export function DocumentsView() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const { isMobile } = useBreakpoint()
+  const { setExpandedItem } = useAccessibility()
 
-  const handleToggle = (id: string) => {
-    setExpandedId(expandedId === id ? null : id)
-  }
+  const handleToggle = useCallback((id: string, title: string) => {
+    const newId = expandedId === id ? null : id
+    setExpandedId(newId)
+    setExpandedItem(newId ? title : null)
+  }, [expandedId, setExpandedItem])
 
   return (
-    <div className="bg-white border border-gray-200 rounded overflow-hidden">
-      <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
-        <h2 className="font-inter font-semibold text-sm uppercase tracking-wider text-gray-500">
+    <div className="bg-white border border-[#E5E7EB] rounded shadow-pmr overflow-hidden">
+      <div className="bg-[#F9FAFB] border-b border-[#E5E7EB] px-4 py-3">
+        <h2 className="font-ui font-semibold text-[13px] uppercase tracking-[0.05em] text-gray-500">
           Attached Documents
         </h2>
-        <p className="font-inter text-xs text-gray-400 mt-1">
-          Education and certifications presented as attached documents in the patient record.
+        <p className="font-ui text-[12px] text-gray-400 mt-1">
+          {documents.length} document{documents.length !== 1 ? 's' : ''} attached. Click a row to view details.
         </p>
       </div>
       {isMobile ? (
-        <div className="p-3 space-y-3 bg-pmr-content">
-          {documents.map((document) => (
+        <div className="p-3 space-y-3 bg-[#F5F7FA]">
+          {documents.map((doc) => (
             <MobileDocumentCard
-              key={document.id}
-              document={document}
-              isExpanded={expandedId === document.id}
-              onToggle={() => handleToggle(document.id)}
+              key={doc.id}
+              document={doc}
+              isExpanded={expandedId === doc.id}
+              onToggle={() => handleToggle(doc.id, doc.title)}
             />
           ))}
         </div>
@@ -264,54 +298,46 @@ export function DocumentsView() {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-gray-50">
+              <tr className="bg-[#F9FAFB]">
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-12"
+                  className="border-b border-r border-[#E5E7EB] px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-[0.05em] text-gray-400 w-12"
                 >
                   Type
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400"
+                  className="border-b border-r border-[#E5E7EB] px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-[0.05em] text-gray-400"
                 >
                   Document
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-20"
+                  className="border-b border-r border-[#E5E7EB] px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-[0.05em] text-gray-400 w-20"
                 >
                   Date
                 </th>
                 <th
                   scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-32"
+                  className="border-b border-[#E5E7EB] px-3 py-2 text-left font-ui font-semibold text-[13px] uppercase tracking-[0.05em] text-gray-400 w-32"
                 >
                   Source
-                </th>
-                <th
-                  scope="col"
-                  className="border border-gray-200 px-3 py-2 text-left font-inter font-semibold text-xs uppercase tracking-wider text-gray-400 w-10"
-                >
-                  <span className="sr-only">Expand</span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {documents.map((document) => (
+              {documents.map((doc, index) => (
                 <DocumentRow
-                  key={document.id}
-                  document={document}
-                  isExpanded={expandedId === document.id}
-                  onToggle={() => handleToggle(document.id)}
+                  key={doc.id}
+                  document={doc}
+                  isExpanded={expandedId === doc.id}
+                  onToggle={() => handleToggle(doc.id, doc.title)}
+                  index={index}
                 />
               ))}
             </tbody>
           </table>
         </div>
-      )}
-      {documents.length === 0 && (
-        <div className="p-4 text-sm text-gray-500 text-center">No documents attached</div>
       )}
     </div>
   )
