@@ -1,65 +1,201 @@
-# Implementation Plan — The Clinical Record (v3)
+# Implementation Plan — GP System Dashboard Overhaul
 
 ## Project Overview
 
-A premium portfolio CV presented as a clinical information system. The *structure* and *layout* come from GP software (EMIS Web, SystmOne) — patient banner, sidebar navigation, consultation journal, medications table, etc. — but the *execution* is **Clinical Luxury**: refined typography, layered shadows, generous spacing, premium fonts, atmospheric depth.
-
-**This is NOT a faithful NHS clone.** It's a showcase portfolio that *evokes* clinical software while being distinctly beautiful.
-
-**What's already done:** Data files (`src/data/*`), type system (`src/types/pmr.ts`), phase management (`App.tsx`), boot sequence, ECG animation, and design system foundation (Tailwind tokens, fonts, CSS variables).
-
-**What this plan builds:** The visual layer from login screen through to the full PMR interface — every component rebuilt to Clinical Luxury quality with the new premium font, refined surfaces, and user-interactive login.
+Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a tile-based GP System dashboard. Reference design: `References/GPSystemconcept.html`.
 
 ## Quality Checks
 
-Run after every task. All must pass before committing.
+- `npm run typecheck` — zero errors
+- `npm run lint` — pass (pre-existing AccessibilityContext warning OK)
+- `npm run build` — must succeed
 
-```
-npm run typecheck
-npm run lint
-npm run build
-```
+## Important
 
-## Reference Files
+**This file is for progress tracking only.** For implementation detail on any task, read the referenced file in `Ralph/refs/`. Do NOT bloat this file with implementation notes — keep it lean.
 
-Each task references files in `Ralph/refs/`. Read the referenced file(s) for full design specs, implementation patterns, and code snippets. The ref files ARE the spec — do not duplicate their content here.
-
-Always also read `Ralph/refs/ref-design-system.md` — it is the single source of truth for colors, typography, spacing, surfaces, and motion.
-
-Also read `CLAUDE.md` for font setup instructions (Elvaro Grotesque and Blumir candidates in `Fonts/` directory).
+---
 
 ## Tasks
 
-- [x] **Task 1: Design system foundation.** Tailwind config, CSS variables, font loading. *(Completed — see progress.txt)*
+### Phase 0: Foundation
 
-- [x] **Task 1b: Boot sequence and ECG animation.** *(Completed and locked — do not modify)*
+#### Task 1: Update design tokens and Tailwind config
+> Detail: `Ralph/refs/ref-01-design-tokens.md`
+- [ ] Update CSS custom properties in `src/index.css` (new palette, shadows, layout vars)
+- [ ] Update `tailwind.config.js` (colors, shadows, borders, radius)
+- [ ] Keep boot/ECG/login tokens unchanged
+- [ ] Run quality checks
 
-- [x] **Task 2: Set up premium font and update Tailwind config.** Read `CLAUDE.md` (Typography section) and `Ralph/refs/ref-design-system.md`. Load both candidate fonts from `Fonts/` directory (Elvaro Grotesque WOFF2 files and Blumir variable font WOFF2). Add `@font-face` declarations in `src/index.css`. Update Tailwind config to add `font-ui` family pointing to the chosen font (start with Elvaro, can be swapped later). Replace `font-inter` references in Tailwind config with `font-ui`. Ensure Geist Mono remains the monospace font. Keep Fira Code for boot/ECG phases only.
+#### Task 2: Create new data files and update types
+> Detail: `Ralph/refs/ref-02-data-types.md`
+- [ ] Create `src/data/profile.ts` (personal statement)
+- [ ] Create `src/data/tags.ts` (sidebar tags)
+- [ ] Create `src/data/alerts.ts` (sidebar alert flags)
+- [ ] Create `src/data/kpis.ts` (Latest Results metrics)
+- [ ] Create `src/data/skills.ts` (skills with medication frequency + years)
+- [ ] Update `src/types/pmr.ts` (new interfaces)
+- [ ] Run quality checks
 
-- [x] **Task 3: Rebuild LoginScreen.** Read `Ralph/refs/ref-transition-login.md`. Key changes from prior version: (a) Typing speed is now **80ms/char** for username, **60ms/dot** for password — natural pace, not frantic. (b) After typing completes, the "Log In" button becomes **user-interactive** — the user clicks it to proceed. It is NOT auto-triggered. Button should have hover state, full opacity when ready, disabled/dimmed while typing. (c) Card shadow uses multi-layered shadow per design system. (d) Uses [UI font] for labels, Geist Mono for input fields. (e) `prefers-reduced-motion`: typing completes instantly, button is immediately interactive.
+#### Task 3: Update CLAUDE.md for new architecture
+- [x] Already completed during project setup (manual intervention 2026-02-13)
 
-- [x] **Task 4: Rebuild PatientBanner.** Read `Ralph/refs/ref-banner-sidebar.md` (Patient Banner section). Full banner (80px) with surname-first format, demographic details, action buttons. Condensed banner (48px) via IntersectionObserver at 100px scroll. Mobile minimal banner with overflow menu. Uses [UI font] throughout. NHS Number tooltip: "GPhC Registration Number".
+### Phase 1: Core Layout
 
-- [x] **Task 4b: Fix PatientBanner scroll condensation.** Read `Ralph/refs/ref-banner-sidebar.md` (Patient Banner section + Implementation Patterns). The full 3-row banner (80px — name/status, demographics, contact) never displays because the IntersectionObserver sentinel is broken. The sentinel (`absolute top-0` with `h-0`) is inside a React fragment next to the sticky header — it positions relative to the viewport, and the `-100px` rootMargin means it's immediately "not intersecting", so the banner always shows as condensed. Fix: ensure the sentinel is placed in the document flow ABOVE the scrollable content area (not absolute-positioned inside the banner fragment), so it's naturally visible on load and only scrolls out of view when the user scrolls 100px. Verify that on page load the full banner displays, and after scrolling 100px it smoothly condenses to the single-row 48px layout.
+#### Task 4: Build TopBar component
+> Detail: `Ralph/refs/ref-03-topbar-sidebar.md` (TopBar section)
+- [ ] Create `src/components/TopBar.tsx`
+- [ ] Brand section (icon + name + version tag)
+- [ ] Search bar (triggers command palette, not inline search)
+- [ ] Session info (mono font, pill badge)
+- [ ] Fixed position, 48px height, white bg, bottom border
+- [ ] Run quality checks
 
-- [x] **Task 5: Rebuild ClinicalSidebar.** Read `Ralph/refs/ref-banner-sidebar.md` (Left Sidebar + Navigation sections). CV-friendly labels: Summary, Experience, Skills, Achievements, Projects, Education, Contact. 220px fixed width. Header branding, search input, navigation items with exact states (default/hover/active), separator line, footer with session info. Tablet mode: 56px icon-only. Keyboard shortcuts: Alt+1-7, arrow keys, "/" for search. URL hash routing.
+#### Task 5: Build new Sidebar — PersonHeader
+> Detail: `Ralph/refs/ref-03-topbar-sidebar.md` (Sidebar PersonHeader section)
+- [ ] Create `src/components/Sidebar.tsx`
+- [ ] Avatar circle (52px, teal gradient, initials)
+- [ ] Name, title, status badge with pulse dot
+- [ ] Details grid (GPhC, Education, Location, Phone, Email, Registered)
+- [ ] 272px width, light background, right border
+- [ ] Run quality checks
 
-- [x] **Task 6: Rebuild PMRInterface layout + Breadcrumb.** Read `Ralph/refs/ref-banner-sidebar.md` (PMRInterface Layout + Breadcrumb sections). Fixed sidebar + sticky banner + scrollable content on `#F5F7FA`. Create `Breadcrumb.tsx`. Interface materialization animations (banner → sidebar → content stagger). View switching is INSTANT. Mobile: bottom nav bar. Update ViewId type if needed.
+#### Task 6: Build new Sidebar — Tags + Alerts
+> Detail: `Ralph/refs/ref-03-topbar-sidebar.md` (Tags and Alerts section)
+- [ ] Section title component (uppercase, divider line)
+- [ ] Tags section (flex wrap pills, color variants)
+- [ ] Alerts section (colored flag items with icons)
+- [ ] Run quality checks
 
-- [x] **Task 7: Rebuild SummaryView + Clinical Alert.** Read `Ralph/refs/ref-summary-alert.md`. Clinical Alert with spring animation entrance, acknowledge → checkmark → collapse sequence. Summary cards: Demographics (full-width key-value), Active Problems (traffic lights), Current Skills quick table, Last Consultation preview. 2-column grid desktop, single column mobile. Navigation links to other views.
+#### Task 7: Build DashboardLayout and wire up App.tsx
+> Detail: `Ralph/refs/ref-04-dashboard-layout.md`
+- [ ] Create `src/components/DashboardLayout.tsx`
+- [ ] Three-zone layout: TopBar (fixed) + Sidebar (fixed) + Main (scrollable card grid)
+- [ ] Card grid: 2 columns desktop, 1 column <900px
+- [ ] Framer Motion entrance animations (topbar → sidebar → content)
+- [ ] Update App.tsx: replace PMRInterface with DashboardLayout in PMR phase
+- [ ] Verify boot → ECG → login → dashboard transition works
+- [ ] Run quality checks
 
-- [x] **Task 8: Rebuild ConsultationsView.** Read `Ralph/refs/ref-consultations.md`. Reverse-chronological journal. Collapsed entries with date, org, role, key achievement. Expanded: H/E/P structure with coded entries. Height-only expand animation (no opacity fade). One expanded at a time. 3px left border color-coded by employer. Second clinical alert on first visit.
+### Phase 2: Dashboard Tiles
 
-- [x] **Task 9: Rebuild MedicationsView.** Read `Ralph/refs/ref-medications.md`. Three category tabs (Active/Clinical/PRN). Semantic `<table>` with sortable columns. Expandable prescribing history in Geist Mono. Status dots with text labels. Mobile: card layout.
+#### Task 8: Build reusable Card component
+> Detail: `Ralph/refs/ref-05-card-and-top-tiles.md` (Card section)
+- [ ] Create `src/components/Card.tsx`
+- [ ] Base card styling (white, border, radius 8px, shadow-sm, hover shadow-md)
+- [ ] `full` variant (spans both grid columns)
+- [ ] CardHeader sub-component (dot + title + optional right text)
+- [ ] Run quality checks
 
-- [x] **Task 10: Rebuild ProblemsView.** Read `Ralph/refs/ref-problems.md`. Two sections: Active Problems and Resolved Problems. Traffic light dots (8px, always with text labels). Code column in Geist Mono. Expandable rows with narrative + linked consultation navigation. Mobile: card layout.
+#### Task 9: Build PatientSummary tile
+> Detail: `Ralph/refs/ref-05-card-and-top-tiles.md` (PatientSummary section)
+- [ ] Create `src/components/tiles/PatientSummaryTile.tsx`
+- [ ] Full-width card, first in grid
+- [ ] Personal statement from `src/data/profile.ts`
+- [ ] Run quality checks
 
-- [x] **Task 11: Rebuild InvestigationsView + DocumentsView.** Read `Ralph/refs/ref-investigations-documents.md`. Both views share the expandable-row pattern with tree-indented monospace content (box-drawing characters). Investigations: status badges (Complete/Ongoing/Live). Documents: type icons per document category. "View Results" button for PharMetrics only. Mobile: card layouts.
+#### Task 10: Build LatestResults tile
+> Detail: `Ralph/refs/ref-05-card-and-top-tiles.md` (LatestResults section)
+- [ ] Create `src/components/tiles/LatestResultsTile.tsx`
+- [ ] Half-width card, 2x2 metric grid
+- [ ] Four KPI metric cards with colored values
+- [ ] Data from `src/data/kpis.ts`
+- [ ] Run quality checks
 
-- [x] **Task 12: Rebuild ReferralsView (Contact).** Read `Ralph/refs/ref-referrals.md`. Clinical referral form with priority radio buttons (Urgent/Routine/Two-Week Wait with tongue-in-cheek tooltips). Form validation, reference number generation, success state. Direct contact table below form.
+#### Task 11: Build CoreSkills tile ("Repeat Medications")
+> Detail: `Ralph/refs/ref-05-card-and-top-tiles.md` (CoreSkills section)
+- [ ] Create `src/components/tiles/CoreSkillsTile.tsx`
+- [ ] Half-width card, next to LatestResults
+- [ ] Skills listed as medications with frequency + years
+- [ ] Data from `src/data/skills.ts`
+- [ ] Run quality checks
 
-- [x] **Task 13: Fuzzy search with fuse.js.** Read `Ralph/refs/ref-interactions.md` (Search section). Install fuse.js. Build search index from all content. Results dropdown grouped by section. Clicking a result navigates to section + expands matching item. Mobile: search at top of each view.
+#### Task 12: Build LastConsultation tile
+> Detail: `Ralph/refs/ref-06-bottom-tiles.md` (LastConsultation section)
+- [ ] Create `src/components/tiles/LastConsultationTile.tsx`
+- [ ] Full-width card
+- [ ] Header info row (Date, Org, Type, Band)
+- [ ] Role title + achievement bullet list
+- [ ] Data from first entry in `src/data/consultations.ts`
+- [ ] Run quality checks
 
-- [x] **Task 14: Responsive design audit.** Read `Ralph/refs/ref-interactions.md` (Responsive Strategy section). Test all three breakpoints: Desktop (>1024px), Tablet (768-1024px), Mobile (<768px). Tables → card layouts on mobile. Bottom nav bar. Touch targets ≥48px.
+#### Task 13: Build CareerActivity tile
+> Detail: `Ralph/refs/ref-06-bottom-tiles.md` (CareerActivity section)
+- [ ] Create `src/components/tiles/CareerActivityTile.tsx`
+- [ ] Full-width card, two-column activity grid
+- [ ] Merge roles + projects + certs + education into timeline
+- [ ] Color-coded dots by entry type
+- [ ] Run quality checks
 
-- [x] **Task 15: Accessibility audit + final polish.** Read `Ralph/refs/ref-interactions.md` (Accessibility section). Semantic HTML, ARIA attributes, focus management, keyboard navigation, screen reader announcements, `prefers-reduced-motion` support, WCAG 2.1 AA contrast. Final visual consistency pass.
+#### Task 14: Build Education tile
+> Detail: `Ralph/refs/ref-06-bottom-tiles.md` (Education section)
+- [ ] Create `src/components/tiles/EducationTile.tsx`
+- [ ] Full-width card, below Career Activity
+- [ ] Education entries from documents data
+- [ ] Run quality checks
+
+#### Task 15: Build Projects tile
+> Detail: `Ralph/refs/ref-06-bottom-tiles.md` (Projects section)
+- [ ] Create `src/components/tiles/ProjectsTile.tsx`
+- [ ] Full-width card, prominent presentation
+- [ ] Status badges, project names, years, descriptions
+- [ ] Data from `src/data/investigations.ts`
+- [ ] Run quality checks
+
+### Phase 3: Interactions
+
+#### Task 16: Tile expansion system
+> Detail: `Ralph/refs/ref-07-interactions.md` (Tile Expansion section)
+- [ ] CareerActivity items expand to show full role detail
+- [ ] Projects items expand to show methodology, tech stack, results
+- [ ] CoreSkills items expand to show prescribing history
+- [ ] Height-only animation (200ms, no opacity fade)
+- [ ] Single-expand accordion
+- [ ] Keyboard: Enter/Space to expand, Escape to collapse
+- [ ] Run quality checks
+
+#### Task 17: KPI flip card interaction
+> Detail: `Ralph/refs/ref-07-interactions.md` (KPI Flip section)
+- [ ] LatestResults metrics flip on click
+- [ ] Front: value + label. Back: explanation text
+- [ ] CSS perspective flip (400ms) or instant swap with reduced motion
+- [ ] One card flipped at a time
+- [ ] Run quality checks
+
+#### Task 18: Build Command Palette
+> Detail: `Ralph/refs/ref-07-interactions.md` (Command Palette section)
+- [ ] Create `src/components/CommandPalette.tsx`
+- [ ] Ctrl+K trigger + search bar click trigger
+- [ ] Overlay with backdrop blur, ESC to close
+- [ ] Fuzzy search via fuse.js (adapt `src/lib/search.ts`)
+- [ ] Grouped results by section + Quick Actions
+- [ ] Keyboard navigation (arrows, Enter, Escape)
+- [ ] Run quality checks
+
+### Phase 4: Polish
+
+#### Task 19: Responsive design
+> Detail: `Ralph/refs/ref-08-polish.md` (Responsive section)
+- [ ] Desktop (>1024px): full sidebar + 2-column grid
+- [ ] Tablet (768–1024px): collapsed/hidden sidebar + adapted grid
+- [ ] Mobile (<768px): no sidebar, single-column tiles, simplified topbar
+- [ ] Touch-friendly targets (48px+)
+- [ ] Run quality checks
+
+#### Task 20: Accessibility audit
+> Detail: `Ralph/refs/ref-08-polish.md` (Accessibility section)
+- [ ] Semantic HTML (header, nav, main, article, section)
+- [ ] Keyboard navigation (Tab, Enter/Space, Escape, Ctrl+K, arrows)
+- [ ] ARIA (expanded, controls, labels, live regions, dialog)
+- [ ] Focus management (trap in palette, visible rings, return focus)
+- [ ] `prefers-reduced-motion` on all animations
+- [ ] Color contrast verification
+- [ ] Run quality checks
+
+#### Task 21: Clean up and final polish
+> Detail: `Ralph/refs/ref-08-polish.md` (Cleanup section)
+- [ ] Remove unused old components (PatientBanner, ClinicalSidebar, Breadcrumb, etc.)
+- [ ] Remove unused hooks (useScrollCondensation if unused)
+- [ ] Verify no dead imports
+- [ ] Final visual review against concept HTML
+- [ ] Run quality checks (clean build)

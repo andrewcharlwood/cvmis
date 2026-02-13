@@ -115,8 +115,8 @@
   --pmr-alert-text: #92400E;
   --pmr-radius: 4px;
   --pmr-radius-login: 12px;
-  --font-ui: 'Elvaro Grotesque', system-ui, sans-serif;
-  --font-ui-alt: 'Blumir', system-ui, sans-serif;
+  --font-ui: 'Blumir', system-ui, sans-serif;
+  --font-ui-alt: 'Elvaro Grotesque', system-ui, sans-serif;
   --font-geist-mono: 'Geist Mono', 'Fira Code', monospace;
 }
 

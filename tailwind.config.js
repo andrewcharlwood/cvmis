@@ -58,8 +58,8 @@ export default {
         primary: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
         secondary: ['Inter Tight', 'system-ui', 'sans-serif'],
         mono: ['Fira Code', 'monospace'],
-        ui: ['Elvaro Grotesque', 'system-ui', 'sans-serif'],
-        'ui-alt': ['Blumir', 'system-ui', 'sans-serif'],
+        ui: ['Blumir', 'system-ui', 'sans-serif'],
+        'ui-alt': ['Elvaro Grotesque', 'system-ui', 'sans-serif'],
         geist: ['Geist Mono', 'Fira Code', 'monospace'],
       },
       boxShadow: {

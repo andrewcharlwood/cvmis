@@ -941,3 +941,81 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 
 **ALL TASKS COMPLETE** — Implementation plan fully checked off (Tasks 1-15)
 
+## Manual Intervention — 2026-02-13
+### Reason: Complete redesign — replacing CareerRecord PMR with GP System Dashboard
+### Changes made:
+- **IMPLEMENTATION_PLAN.md**: Completely rewritten with 21 new tasks for GP System dashboard overhaul
+- **guardrails.md**: Completely rewritten for new design direction (teal palette, tile-based layout, 8px radius, new shadow system)
+- **progress.txt**: This intervention entry added
+- **CLAUDE.md**: Will be updated by Task 3 in the new plan (architecture, colors, components, styling)
+
+### Previous plan status: 15/15 tasks completed (all checked off)
+### New plan: 21 tasks across 4 phases (Foundation → Core Layout → Dashboard Tiles → Interactions → Polish)
+
+### What's being replaced:
+- `PatientBanner.tsx` → `TopBar.tsx` (white top bar with search and session info)
+- `ClinicalSidebar.tsx` → `Sidebar.tsx` (light background #F7FAFA, person header, tags, alerts only)
+- `PMRInterface.tsx` → `DashboardLayout.tsx` (topbar + sidebar + scrollable card grid)
+- All 7 `views/*.tsx` files → Dashboard tile components in `src/components/tiles/`
+- Color palette: dark sidebar (#1E293B) + NHS Blue (#005EB8) → light sidebar (#F7FAFA) + teal (#0D6E6E)
+- Navigation: sidebar-nav view-switching → single scrollable dashboard with expandable tiles
+- Patient banner scroll condensation → removed (no banner, just topbar)
+
+### What's preserved:
+- Boot sequence (BootSequence.tsx) — LOCKED
+- ECG animation (ECGAnimation.tsx) — LOCKED
+- Login screen (LoginScreen.tsx) — unchanged
+- Font setup: Elvaro Grotesque (primary UI), Blumir (alt), Geist Mono (data), Fira Code (terminal only)
+- All data files in src/data/ — content unchanged, new data files added
+- fuse.js dependency — reused for command palette search
+- App.tsx phase management (boot → ecg → login → pmr) — pmr phase now renders DashboardLayout
+
+### Tasks in new plan:
+Phase 0 — Foundation:
+1. Update design tokens + Tailwind config
+2. Create new data files + update types
+3. Update CLAUDE.md for new architecture
+
+Phase 1 — Core Layout:
+4. Build TopBar component
+5. Build Sidebar — PersonHeader
+6. Build Sidebar — Tags, Alerts
+7. Build DashboardLayout + wire up App.tsx
+
+Phase 2 — Dashboard Tiles:
+8. Build reusable Card component
+9. Build PatientSummary tile
+10. Build LatestResults tile
+11. Build CoreSkills tile ("Repeat Medications")
+12. Build LastConsultation tile
+13. Build CareerActivity tile
+14. Build Education tile
+15. Build Projects tile
+
+Phase 3 — Interactions:
+16. Tile expansion system
+17. KPI flip card interaction
+18. Build Command Palette
+
+Phase 4 — Polish:
+19. Responsive design
+20. Accessibility audit
+21. Clean up + final polish
+
+### Context for next iteration:
+- The reference design is `References/GPSystemconcept.html` — READ THIS before starting any visual task
+- The old PMR components STILL EXIST in the codebase. Don't delete them yet — some expand/collapse patterns and data rendering can be reused inside tile expansion (Task 16). Cleanup happens in Task 21.
+- Login screen still transitions to `#1E293B` background. The new dashboard has `#F0F5F4` background. The LoginScreen.tsx may need a background color update, or the transition can be handled in DashboardLayout's entrance animation.
+- The concept HTML uses DM Sans font — this is a PLACEHOLDER. Production uses Elvaro Grotesque (font-ui). Do not switch to DM Sans.
+- The concept's command palette has a comprehensive data model — use it as reference for building the palette in Task 18.
+- Tile interactions (expansion, KPI flip) are in Phase 3. Tiles in Phase 2 should be built as static/display-only first, with data attributes or props that Phase 3 can hook into.
+
+### New guardrails added:
+- Accent color: teal #0D6E6E (replacing NHS Blue #005EB8 as primary interactive color)
+- Border radius: 8px for cards (was 4px)
+- Shadow system: three-tier (sm/md/lg) replacing single pmr shadow
+- Sidebar: light background, PersonHeader + Tags + Alerts ONLY (projects, skills, education moved to tiles)
+- Layout: TopBar + Sidebar + Card Grid (replacing PatientBanner + ClinicalSidebar + view switching)
+- Tile ordering: Patient Summary → Latest Results + Core Skills → Last Consultation → Career Activity → Education → Projects
+- Skills frequency: user-specified values (Data Analysis=twice daily, etc.)
+
