@@ -89,10 +89,10 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 9: Build PatientSummary tile
 > Detail: `Ralph/refs/ref-05-card-and-top-tiles.md` (PatientSummary section)
-- [ ] Create `src/components/tiles/PatientSummaryTile.tsx`
-- [ ] Full-width card, first in grid
-- [ ] Personal statement from `src/data/profile.ts`
-- [ ] Run quality checks
+- [x] Create `src/components/tiles/PatientSummaryTile.tsx`
+- [x] Full-width card, first in grid
+- [x] Personal statement from `src/data/profile.ts`
+- [x] Run quality checks
 
 #### Task 10: Build LatestResults tile
 > Detail: `Ralph/refs/ref-05-card-and-top-tiles.md` (LatestResults section)

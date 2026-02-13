@@ -231,3 +231,20 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Not applicable — base component, will be visible once integrated into tiles
 
+### Iteration 7 — Task 9: Build PatientSummary tile
+**Status:** Complete
+**Changes:**
+- Created `src/components/tiles/PatientSummaryTile.tsx` — simple read-only tile displaying personal statement
+- Full-width card (via `full` prop on Card component) with teal dot CardHeader
+- Body text: 13px, line-height 1.6, text-primary color, font-ui (Elvaro Grotesque)
+- Content sourced from `src/data/profile.ts` (personalStatement export)
+- Updated `src/components/DashboardLayout.tsx` to import and render PatientSummaryTile as first tile in grid
+**Learnings:**
+- PatientSummaryTile is the simplest tile — no expansion, no interactivity, just display
+- The `full` prop on Card correctly spans both grid columns (grid-column: 1 / -1)
+- CardHeader with teal dot + "PATIENT SUMMARY" matches the spec exactly
+- Personal statement text is substantial (4 sentences, ~110 words) — 13px with 1.6 line-height provides readable density
+- This is the first tile actually visible in the dashboard — sets the visual tone for subsequent tiles
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Skipped — no browser tools available. Will verify visually after multiple tiles are in place.
+
