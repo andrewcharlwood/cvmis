@@ -439,3 +439,68 @@ Do NOT invoke the `/frontend-design` skill at runtime — it was pre-run and the
 
 **Next task:** Task 7 — Rebuild SummaryView + Clinical Alert
 
+### Iteration 8 — Task 7: Rebuild SummaryView + Clinical Alert
+**Completed:** Task 7
+**Changes made:**
+- **SummaryView.tsx**: Complete rebuild from ref-summary-alert.md spec:
+  - **ClinicalAlert**: Replaced CSS transition-based animation with Framer Motion spring animation
+    - State machine: `'visible' | 'acknowledging' | 'dismissed'` (was: 3 separate boolean states)
+    - Entrance: `type: 'spring', stiffness: 300, damping: 25` — creates subtle overshoot effect
+    - Dismiss sequence: icon crossfade (AlertTriangle → CheckCircle, 200ms) → hold beat (200ms) → height collapse (200ms ease-out)
+    - `AnimatePresence` wraps alert for exit animation (height → 0, opacity → 0)
+    - Button disables during acknowledging state, text changes to "Acknowledged"
+    - `prefers-reduced-motion`: instant appear/dismiss, no animation
+  - **DemographicsCard**: Full-width (`lg:col-span-2`), 2-column key-value layout
+    - Labels: `font-ui font-medium text-[13px] text-gray-500`, right-aligned, min-width 100px
+    - Values: `font-ui text-sm text-gray-900` (or `font-geist` for coded data like DOB, registration number)
+    - Proper spacing: `gap-x-12 gap-y-2` between columns and rows
+  - **ActiveProblemsCard**: Traffic light dots now include text labels (was: dot-only, guardrail violation)
+    - Green dot + "Active" text, amber dot + "In Progress" text
+    - Hover state: `bg-[#EFF6FF]` blue tint (was: `bg-gray-50`)
+  - **QuickMedsCard**: Proper semantic `<table>` with hover states
+    - Row height: 40px, alternating `#FFFFFF` / `#F9FAFB` backgrounds
+    - Hover: `bg-[#EFF6FF]` on rows
+    - Status dots with text labels in each cell
+  - **LastConsultationCard**: Full-width, proper typography hierarchy
+    - Date: `font-geist text-[12px]` (monospace), separator: `text-gray-300`
+    - Role title: `font-ui font-semibold text-[15px]`
+    - History: `leading-relaxed line-clamp-3`
+  - **All cards**: `shadow-pmr` (multi-layered), `border border-[#E5E7EB]`, `rounded` (4px)
+  - **All fonts**: `font-inter` → `font-ui` throughout (Elvaro Grotesque)
+  - **CardHeader**: Extracted reusable component — `bg-[#F9FAFB]`, `border-b border-[#E5E7EB]`, uppercase title
+  - **Grid layout**: `grid grid-cols-1 lg:grid-cols-2 gap-6` — demographics + last consultation span full, problems + meds side-by-side
+  - **Types**: Props now use proper imported types (`Problem[]`, `Medication[]`, `Consultation`) instead of `typeof` references
+
+**Codebase patterns discovered:**
+- Framer Motion `AnimatePresence` + `motion.div` with `exit` prop is the right pattern for elements that animate out (alert collapse)
+- Alert state machine with 3 states is cleaner than 3 separate boolean states — eliminates impossible state combinations
+- `CardHeader` component is reusable across all summary cards and potentially other views
+- `TrafficLight` component with mandatory text labels should be reused wherever status dots appear
+- Hover color `#EFF6FF` (blue tint) is more refined than `gray-50` for interactive rows in a clinical context
+
+**Quality checks:** All passed
+- TypeScript: No errors
+- ESLint: 1 pre-existing warning in AccessibilityContext.tsx (not our changes)
+- Build: Successful, 396.05 KB bundle
+
+**Visual review:** Completed via Playwright MCP at default viewport
+- Clinical Alert: Amber banner with spring entrance, icon visible, Acknowledge button styled correctly
+- Alert dismiss: Clicked Acknowledge → icon crossfade → hold → collapse. Content slides up smoothly
+- Demographics: Full-width card, 2-column layout, proper label-value alignment
+- Active Problems: 3 items with green/amber dots AND text labels (Active, In Progress)
+- Quick Medications: 5-row table with alternating backgrounds, status column with dots + text
+- Last Consultation: Full-width, Geist Mono date, NHS blue org name, role title, truncated history
+- All cards have visible multi-layered shadows and #E5E7EB borders
+- Grid layout correct: demographics full-width → problems + meds side-by-side → last consultation full-width
+
+**Issues encountered:** None
+
+**Design decisions:**
+- Extracted `CardHeader` as shared component for consistent card headers across all summary cards
+- Alert dismiss sequence uses `setTimeout(400)` for the acknowledging→dismissed transition (200ms icon crossfade + 200ms hold)
+- Used `AnimatePresence mode="wait"` for icon crossfade inside alert (not just opacity toggle)
+- Button text changes from "Acknowledge" to "Acknowledged" during dismissal for clear user feedback
+- Demographics card uses `gap-x-12` (48px) between columns for generous spacing per Clinical Luxury direction
+
+**Next task:** Task 8 — Rebuild ConsultationsView (Experience view)
+

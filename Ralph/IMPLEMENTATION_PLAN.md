@@ -46,7 +46,7 @@ Also read `CLAUDE.md` for font setup instructions (Elvaro Grotesque and Blumir c
 
 - [x] **Task 6: Rebuild PMRInterface layout + Breadcrumb.** Read `Ralph/refs/ref-banner-sidebar.md` (PMRInterface Layout + Breadcrumb sections). Fixed sidebar + sticky banner + scrollable content on `#F5F7FA`. Create `Breadcrumb.tsx`. Interface materialization animations (banner → sidebar → content stagger). View switching is INSTANT. Mobile: bottom nav bar. Update ViewId type if needed.
 
-- [ ] **Task 7: Rebuild SummaryView + Clinical Alert.** Read `Ralph/refs/ref-summary-alert.md`. Clinical Alert with spring animation entrance, acknowledge → checkmark → collapse sequence. Summary cards: Demographics (full-width key-value), Active Problems (traffic lights), Current Skills quick table, Last Consultation preview. 2-column grid desktop, single column mobile. Navigation links to other views.
+- [x] **Task 7: Rebuild SummaryView + Clinical Alert.** Read `Ralph/refs/ref-summary-alert.md`. Clinical Alert with spring animation entrance, acknowledge → checkmark → collapse sequence. Summary cards: Demographics (full-width key-value), Active Problems (traffic lights), Current Skills quick table, Last Consultation preview. 2-column grid desktop, single column mobile. Navigation links to other views.
 
 - [ ] **Task 8: Rebuild ConsultationsView.** Read `Ralph/refs/ref-consultations.md`. Reverse-chronological journal. Collapsed entries with date, org, role, key achievement. Expanded: H/E/P structure with coded entries. Height-only expand animation (no opacity fade). One expanded at a time. 3px left border color-coded by employer. Second clinical alert on first visit.
 
