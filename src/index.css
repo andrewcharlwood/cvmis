@@ -87,37 +87,70 @@
   --coral: #FF6B6B;
   --coral-light: rgba(255, 107, 107, 0.08);
   --muted: #94A3B8;
-  --border: #E2E8F0;
   --card-bg: #FFFFFF;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.1);
   --radius: 16px;
   --font-primary: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-secondary: 'Inter Tight', system-ui, sans-serif;
 
-  /* PMR-specific tokens */
-  --pmr-content: #F5F7FA;
+  /* Typography — Elvaro Grotesque primary, Blumir alternative */
+  --font-ui: 'Elvaro Grotesque', system-ui, sans-serif;
+  --font-ui-alt: 'Blumir', system-ui, sans-serif;
+  --font-geist-mono: 'Geist Mono', 'Fira Code', monospace;
+
+  /* GP System Dashboard tokens */
+  --bg-dashboard: #F0F5F4;
+  --surface: #FFFFFF;
+  --sidebar-bg: #F7FAFA;
+  --text-primary: #1A2B2A;
+  --text-secondary: #5B7A78;
+  --text-tertiary: #8DA8A5;
+  --accent: #0D6E6E;
+  --accent-hover: #0A8080;
+  --accent-light: rgba(10,128,128,0.08);
+  --accent-border: rgba(10,128,128,0.18);
+  --amber: #D97706;
+  --amber-light: rgba(217,119,6,0.08);
+  --amber-border: rgba(217,119,6,0.18);
+  --success: #059669;
+  --success-light: rgba(5,150,105,0.08);
+  --success-border: rgba(5,150,105,0.18);
+  --alert: #DC2626;
+  --alert-light: rgba(220,38,38,0.08);
+  --alert-border: rgba(220,38,38,0.18);
+  --purple: #7C3AED;
+  --purple-light: rgba(124,58,237,0.08);
+  --purple-border: rgba(124,58,237,0.18);
+  --border: #D4E0DE;
+  --border-light: #E4EDEB;
+  --sidebar-width: 272px;
+  --topbar-height: 48px;
+  --radius-card: 8px;
+  --radius-sm: 6px;
+  --shadow-sm: 0 1px 2px rgba(26,43,42,0.05);
+  --shadow-md: 0 2px 8px rgba(26,43,42,0.08);
+  --shadow-lg: 0 8px 32px rgba(26,43,42,0.12);
+  --font-body: var(--font-ui);
+  --font-mono-dashboard: 'Geist Mono', 'Fira Code', monospace;
+
+  /* Legacy PMR tokens — kept for backward compat during transition (cleaned up in Task 21) */
+  --pmr-content: #F0F5F4;
   --pmr-card: #FFFFFF;
-  --pmr-sidebar: #1E293B;
+  --pmr-sidebar: #F7FAFA;
   --pmr-banner: #334155;
   --pmr-nhs-blue: #005EB8;
   --pmr-green: #22C55E;
   --pmr-amber: #F59E0B;
   --pmr-red: #EF4444;
-  --pmr-text-primary: #111827;
-  --pmr-text-secondary: #6B7280;
-  --pmr-border: #E5E7EB;
+  --pmr-text-primary: #1A2B2A;
+  --pmr-text-secondary: #5B7A78;
+  --pmr-border: #D4E0DE;
   --pmr-border-dark: #D1D5DB;
   --pmr-selected: #EFF6FF;
   --pmr-alert-bg: #FEF3C7;
   --pmr-alert-border: #F59E0B;
   --pmr-alert-text: #92400E;
-  --pmr-radius: 4px;
+  --pmr-radius: 8px;
   --pmr-radius-login: 12px;
-  --font-ui: 'Blumir', system-ui, sans-serif;
-  --font-ui-alt: 'Elvaro Grotesque', system-ui, sans-serif;
-  --font-geist-mono: 'Geist Mono', 'Fira Code', monospace;
 }
 
 * {
@@ -154,8 +187,8 @@ body {
     font-family: var(--font-geist-mono);
   }
   .pmr-theme {
-    background-color: var(--pmr-content);
-    color: var(--pmr-text-primary);
+    background-color: var(--bg-dashboard);
+    color: var(--text-primary);
     font-family: var(--font-ui);
   }
 }
