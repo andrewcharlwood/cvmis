@@ -70,6 +70,16 @@
 - Colored left border (2px) on expanded content panel
 - CareerActivity maps activity→consultation via `consultationId`, CoreSkills maps skill→medication by name match
 
+### Command Palette
+- `CommandPalette.tsx` renders at DashboardLayout level (z-index 1000, fixed overlay)
+- Triggered by Ctrl+K (global listener in DashboardLayout) or TopBar search bar click
+- Data model: `PaletteItem` with `PaletteAction` union (scroll, expand, link, download)
+- `buildPaletteData()` returns 24 items across 6 sections, `buildSearchIndex()` wraps fuse.js
+- `groupBySection()` maintains section order: Experience → Core Skills → Active Projects → Achievements → Education → Quick Actions
+- All tiles have `data-tile-id` attribute (via Card `tileId` prop) for scroll targeting
+- CSS animations in index.css: `palette-overlay-in`, `palette-modal-in` with `prefers-reduced-motion` overrides
+- Legacy search exports (`SearchResult`, `buildLegacySearchIndex`, `groupResultsBySection`) kept for ClinicalSidebar backward compat — remove in Task 21
+
 ### Visual Review
 - Dev server runs on `http://localhost:5173` throughout the loop
 - App has boot→ECG→login→dashboard sequence (~15s on first load)
@@ -469,6 +479,37 @@
 - `e.stopPropagation()` on the "View Results" link in Projects prevents the click from bubbling up and toggling the accordion
 - The expanded content structure varies per tile (bullets + codes for career, methodology + tags + results for projects, timeline for skills) but the AnimatePresence/motion.div wrapper is identical
 - All three tiles now have `cursor: 'pointer'` on expandable items and `border-color` transitions on hover/expand
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
+**Visual review:** Skipped — no browser tools available.
+
+### Iteration 16 — Task 18: Build Command Palette
+**Status:** Complete
+**Changes:**
+- Created `src/components/CommandPalette.tsx` — full command palette overlay with:
+  - Fixed overlay: `rgba(26,43,42,0.45)` background, `backdrop-filter: blur(4px)`, z-index 1000
+  - Modal: 580px width, max-height 520px, 12px border-radius, two-layer shadow matching concept CSS
+  - Search input row: Search icon (accent), auto-focus input (15px, font-ui), ESC kbd badge (mono)
+  - Results area: scrollable, grouped by section with styled labels (10px, 600 weight, uppercase, 0.08em tracking)
+  - Result items: 28px icon container (6px radius, colored bg per section), title (500 weight) + subtitle (11px, tertiary, ellipsis), hover/selected highlight (accent-light bg + accent-border outline)
+  - Icon colors: teal (Experience, Quick Actions), green (Core Skills), amber (Active Projects, Achievements), purple (Education)
+  - Footer: keyboard hints with styled kbd elements
+  - CSS entrance animations: `palette-overlay-in` + `palette-modal-in`, 200ms with reduced-motion support
+- Rebuilt `src/lib/search.ts` with new palette data model:
+  - `PaletteItem` interface with action union: scroll, expand, link, download
+  - `buildPaletteData()`: 24 entries across 6 sections matching concept HTML exactly
+  - `buildSearchIndex()`: fuse.js with weighted keys, threshold 0.3
+  - `groupBySection()`: maintains defined section order
+  - Legacy exports maintained for backward compat (ClinicalSidebar until Task 21)
+- Updated `src/components/DashboardLayout.tsx`: Ctrl+K listener, search bar click, action handler, CommandPalette rendered at layout level
+- Updated `src/components/Card.tsx`: added `tileId` prop → `data-tile-id` attribute
+- Updated all 7 tile components to pass `tileId` for scroll targeting
+- Added CSS keyframe animations in `src/index.css`
+**Learnings:**
+- Concept HTML palette has 24 curated entries — matched exactly rather than dynamically building from data files
+- `LucideIcon` type needed for icon map (not `React.ComponentType<{ size: number }>`)
+- `data-tile-id` on Card enables palette → tile scroll targeting
+- Custom event (`palette-expand`) dispatched for expand-on-select (not yet consumed by tiles)
+- Backward-compatible legacy exports prevent breaking old components
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Skipped — no browser tools available.
 

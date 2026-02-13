@@ -164,13 +164,13 @@ Replace the "CareerRecord PMR" sidebar-nav + view-switching interface with a til
 
 #### Task 18: Build Command Palette
 > Detail: `Ralph/refs/ref-07-interactions.md` (Command Palette section)
-- [ ] Create `src/components/CommandPalette.tsx`
-- [ ] Ctrl+K trigger + search bar click trigger
-- [ ] Overlay with backdrop blur, ESC to close
-- [ ] Fuzzy search via fuse.js (adapt `src/lib/search.ts`)
-- [ ] Grouped results by section + Quick Actions
-- [ ] Keyboard navigation (arrows, Enter, Escape)
-- [ ] Run quality checks
+- [x] Create `src/components/CommandPalette.tsx`
+- [x] Ctrl+K trigger + search bar click trigger
+- [x] Overlay with backdrop blur, ESC to close
+- [x] Fuzzy search via fuse.js (adapt `src/lib/search.ts`)
+- [x] Grouped results by section + Quick Actions
+- [x] Keyboard navigation (arrows, Enter, Escape)
+- [x] Run quality checks
 
 ### Phase 4: Polish
 
