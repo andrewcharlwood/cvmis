@@ -5,6 +5,7 @@ import type { ViewId } from '../types/pmr'
 import { ClinicalSidebar } from './ClinicalSidebar'
 import { PatientBanner } from './PatientBanner'
 import { MobileBottomNav } from './MobileBottomNav'
+import { Breadcrumb } from './Breadcrumb'
 import { SummaryView } from './views/SummaryView'
 import { ConsultationsView } from './views/ConsultationsView'
 import { MedicationsView } from './views/MedicationsView'
@@ -130,11 +131,11 @@ function PMRContent({ children }: PMRInterfaceProps) {
         return <ReferralsView />
       default:
         return (
-          <div className="bg-white border border-gray-200 rounded p-6">
-            <h1 className="font-inter font-semibold text-lg text-gray-900 capitalize">
+          <div className="bg-white border border-gray-200 rounded p-6 shadow-pmr">
+            <h1 className="font-ui font-semibold text-lg text-gray-900 capitalize">
               {activeView} View
             </h1>
-            <p className="font-inter text-sm text-gray-500 mt-2">
+            <p className="font-ui text-sm text-gray-500 mt-2">
               Content for {activeView} will be implemented in a separate task.
             </p>
           </div>
@@ -201,11 +202,26 @@ function PMRContent({ children }: PMRInterfaceProps) {
             <h1 className="sr-only">{viewLabels[activeView]}</h1>
           </div>
 
+          {/* Breadcrumb (desktop/tablet only) */}
+          {!isMobile && (
+            <Breadcrumb
+              currentView={activeView}
+              expandedItem={
+                expandedItemId
+                  ? { name: expandedItemId, type: activeView }
+                  : undefined
+              }
+              onNavigateToView={handleNavigate}
+              onCollapseItem={() => setExpandedItem(null)}
+            />
+          )}
+
+          {/* Mobile back button (mobile only) */}
           {isMobile && activeView !== 'summary' && (
             <button
               type="button"
               onClick={handleBackToSummary}
-              className="flex items-center gap-1 text-pmr-nhsblue text-sm font-inter font-medium mb-4 hover:underline"
+              className="flex items-center gap-1 text-pmr-nhsblue text-sm font-ui font-medium mb-4 hover:underline"
             >
               <ArrowLeft size={14} />
               Back to Summary
@@ -246,7 +262,7 @@ function MobileSearchBar({ query, onChange }: MobileSearchBarProps) {
           placeholder="Search record..."
           value={query}
           onChange={e => onChange(e.target.value)}
-          className="w-full h-10 pl-10 pr-10 bg-white border border-gray-200 rounded text-sm font-inter text-gray-900 placeholder-gray-400 focus:outline-none focus:border-pmr-nhsblue focus:ring-1 focus:ring-pmr-nhsblue/20 transition-colors"
+          className="w-full h-10 pl-10 pr-10 bg-white border border-gray-200 rounded text-sm font-ui text-gray-900 placeholder-gray-400 focus:outline-none focus:border-pmr-nhsblue focus:ring-1 focus:ring-pmr-nhsblue/20 transition-colors"
         />
         {query && (
           <button
