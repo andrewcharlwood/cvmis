@@ -12,6 +12,8 @@ import {
 } from 'lucide-react'
 import type { ViewId } from '../types/pmr'
 import { useAccessibility } from '../contexts/AccessibilityContext'
+import { buildSearchIndex, groupResultsBySection, type SearchResult } from '../lib/search'
+import type { FuseResult } from 'fuse.js'
 
 interface NavItem {
   id: ViewId
@@ -50,7 +52,10 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
   const [hoveredItem, setHoveredItem] = useState<ViewId | null>(null)
   const navButtonRefs = useRef<(HTMLButtonElement | null)[]>([])
-  const { focusAfterLoginRef } = useAccessibility()
+  const { focusAfterLoginRef, setExpandedItem } = useAccessibility()
+
+  // Build search index once on mount
+  const searchIndex = useMemo(() => buildSearchIndex(), [])
 
   const handleNavClick = useCallback(
     (view: ViewId) => {
@@ -159,13 +164,33 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
     searchInput?.focus()
   }
 
-  const filteredItems = useMemo(() => {
-    if (!searchQuery.trim()) return []
-    const query = searchQuery.toLowerCase()
-    return navItems.filter(item =>
-      item.label.toLowerCase().includes(query)
-    )
-  }, [searchQuery])
+  // Fuzzy search with fuse.js
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim() || searchQuery.length < 2) return []
+    const results = searchIndex.search(searchQuery)
+    return results.slice(0, 10) // Limit to top 10 results
+  }, [searchQuery, searchIndex])
+
+  // Group results by section for organized display
+  const groupedResults = useMemo(() => {
+    if (searchResults.length === 0) return new Map()
+    return groupResultsBySection(searchResults)
+  }, [searchResults])
+
+  const handleSearchResultClick = useCallback(
+    (result: FuseResult<SearchResult>) => {
+      // Navigate to the section
+      onViewChange(result.item.section)
+      window.location.hash = result.item.section
+
+      // Expand the matching item
+      setExpandedItem(result.item.id)
+
+      // Clear search
+      setSearchQuery('')
+    },
+    [onViewChange, setExpandedItem]
+  )
 
   // ── Tablet: 56px icon-only sidebar ──
   if (isTablet) {
@@ -279,23 +304,45 @@ export function ClinicalSidebar({ activeView, onViewChange, isTablet = false }: 
               <X size={14} />
             </button>
           )}
-          {/* Search results dropdown */}
-          {searchQuery && filteredItems.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-pmr-sidebar border border-white/10 rounded overflow-hidden z-50">
-              {filteredItems.map(item => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    handleNavClick(item.id)
-                    setSearchQuery('')
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.10] transition-colors"
-                >
-                  <span className="text-white/60">{item.icon}</span>
-                  <span className="font-ui text-sm">{item.label}</span>
-                </button>
-              ))}
+          {/* Search results dropdown — grouped by section */}
+          {searchQuery.trim().length >= 2 && groupedResults.size > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-pmr-sidebar border border-white/10 rounded overflow-hidden z-50 max-h-[400px] overflow-y-auto shadow-lg">
+              {Array.from(groupedResults.entries()).map(([sectionLabel, results]) => {
+                // Find section icon
+                const navItem = navItems.find(item => item.label === sectionLabel)
+                return (
+                  <div key={sectionLabel}>
+                    {/* Section header */}
+                    <div className="px-3 py-1.5 bg-white/[0.05] border-b border-white/10">
+                      <div className="flex items-center gap-2">
+                        {navItem && <span className="text-white/40">{navItem.icon}</span>}
+                        <span className="font-ui text-xs font-semibold uppercase tracking-wide text-white/50">
+                          {sectionLabel}
+                        </span>
+                        <span className="font-ui text-xs text-white/30">
+                          ({results.length})
+                        </span>
+                      </div>
+                    </div>
+                    {/* Results for this section */}
+                    {results.map((result: FuseResult<SearchResult>) => (
+                      <button
+                        key={result.item.id}
+                        type="button"
+                        onClick={() => handleSearchResultClick(result)}
+                        className="w-full px-3 py-2.5 text-left hover:bg-white/[0.10] transition-colors border-b border-white/5 last:border-b-0"
+                      >
+                        <div className="font-ui text-sm text-white leading-snug">
+                          {result.item.title}
+                        </div>
+                        <div className="font-ui text-xs text-white/50 mt-0.5 line-clamp-1">
+                          {result.item.highlight}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>
