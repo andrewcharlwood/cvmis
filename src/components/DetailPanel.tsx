@@ -4,6 +4,7 @@ import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { DetailPanelContent } from '@/types/pmr'
 import type { CardHeaderProps } from './Card'
+import { KPIDetail } from './detail/KPIDetail'
 
 // Width mapping from content type
 const widthMap: Record<DetailPanelContent['type'], 'narrow' | 'wide'> = {
@@ -207,21 +208,26 @@ export function DetailPanel() {
             padding: '24px',
           }}
         >
-          {/* Placeholder content - actual renderers will be added in later stories */}
-          <div
-            style={{
-              fontFamily: 'var(--font-ui)',
-              color: 'var(--text-secondary)',
-              fontSize: '14px',
-            }}
-          >
-            <p>
-              Detail panel for: <strong>{content.type}</strong>
-            </p>
-            <p style={{ marginTop: '8px', fontSize: '12px' }}>
-              Content renderers will be implemented in subsequent user stories.
-            </p>
-          </div>
+          {/* Render content based on type */}
+          {content.type === 'kpi' && <KPIDetail kpi={content.kpi} />}
+
+          {/* Other content types - placeholder for future stories */}
+          {content.type !== 'kpi' && (
+            <div
+              style={{
+                fontFamily: 'var(--font-ui)',
+                color: 'var(--text-secondary)',
+                fontSize: '14px',
+              }}
+            >
+              <p>
+                Detail panel for: <strong>{content.type}</strong>
+              </p>
+              <p style={{ marginTop: '8px', fontSize: '12px' }}>
+                Content renderers will be implemented in subsequent user stories.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </>

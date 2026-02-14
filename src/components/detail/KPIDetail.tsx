@@ -1,0 +1,196 @@
+import type { KPI } from '@/types/pmr'
+
+interface KPIDetailProps {
+  kpi: KPI
+}
+
+// Color map for KPI values
+const colorMap: Record<KPI['colorVariant'], string> = {
+  green: '#059669',
+  amber: '#D97706',
+  teal: '#0D6E6E',
+}
+
+export function KPIDetail({ kpi }: KPIDetailProps) {
+  // If story exists, render rich content; otherwise fallback to explanation
+  if (!kpi.story) {
+    return (
+      <div
+        style={{
+          fontFamily: 'var(--font-ui)',
+          fontSize: '14px',
+          lineHeight: '1.6',
+          color: 'var(--text-primary)',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '32px',
+            fontWeight: 700,
+            color: colorMap[kpi.colorVariant],
+            marginBottom: '16px',
+          }}
+        >
+          {kpi.value}
+        </div>
+        <p>{kpi.explanation}</p>
+      </div>
+    )
+  }
+
+  const { context, role, outcomes, period } = kpi.story
+
+  return (
+    <div
+      style={{
+        fontFamily: 'var(--font-ui)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px',
+      }}
+    >
+      {/* Headline number */}
+      <div>
+        <div
+          style={{
+            fontSize: '48px',
+            fontWeight: 700,
+            color: colorMap[kpi.colorVariant],
+            lineHeight: '1',
+            marginBottom: '8px',
+          }}
+        >
+          {kpi.value}
+        </div>
+        <div
+          style={{
+            fontSize: '14px',
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+          }}
+        >
+          {kpi.label}
+        </div>
+        <div
+          style={{
+            fontSize: '12px',
+            fontFamily: 'var(--font-geist)',
+            color: 'var(--text-tertiary)',
+            marginTop: '2px',
+          }}
+        >
+          {kpi.sub}
+        </div>
+      </div>
+
+      {/* Period badge (if present) */}
+      {period && (
+        <div
+          style={{
+            display: 'inline-block',
+            padding: '4px 10px',
+            backgroundColor: 'var(--accent-light)',
+            color: 'var(--accent)',
+            fontSize: '11px',
+            fontWeight: 600,
+            borderRadius: 'var(--radius-sm)',
+            fontFamily: 'var(--font-geist)',
+            alignSelf: 'flex-start',
+          }}
+        >
+          {period}
+        </div>
+      )}
+
+      {/* Context paragraph */}
+      <div>
+        <h3
+          style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            marginBottom: '8px',
+          }}
+        >
+          Context
+        </h3>
+        <p
+          style={{
+            fontSize: '14px',
+            lineHeight: '1.6',
+            color: 'var(--text-primary)',
+            margin: 0,
+          }}
+        >
+          {context}
+        </p>
+      </div>
+
+      {/* Your role paragraph */}
+      <div>
+        <h3
+          style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            marginBottom: '8px',
+          }}
+        >
+          Your Role
+        </h3>
+        <p
+          style={{
+            fontSize: '14px',
+            lineHeight: '1.6',
+            color: 'var(--text-primary)',
+            margin: 0,
+          }}
+        >
+          {role}
+        </p>
+      </div>
+
+      {/* Outcome bullets */}
+      <div>
+        <h3
+          style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            marginBottom: '8px',
+          }}
+        >
+          Key Outcomes
+        </h3>
+        <ul
+          style={{
+            margin: 0,
+            paddingLeft: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+          }}
+        >
+          {outcomes.map((outcome, index) => (
+            <li
+              key={index}
+              style={{
+                fontSize: '14px',
+                lineHeight: '1.6',
+                color: 'var(--text-primary)',
+              }}
+            >
+              {outcome}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
