@@ -14,6 +14,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   const [activeField, setActiveField] = useState<'username' | 'password' | 'done' | null>('username')
   const [buttonPressed, setButtonPressed] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [typingComplete, setTypingComplete] = useState(false)
   const [buttonHovered, setButtonHovered] = useState(false)
   const [connectionState, setConnectionState] = useState<'connecting' | 'connected'>('connecting')
@@ -42,16 +43,19 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   const canLogin = typingComplete && connectionState === 'connected'
 
   const handleLogin = useCallback(() => {
-    if (!canLogin || isExiting) return
+    if (!canLogin || isExiting || isLoading) return
     setButtonPressed(true)
     addTimeout(() => {
-      setIsExiting(true)
+      setIsLoading(true)
       addTimeout(() => {
-        requestFocusAfterLogin()
-        onComplete()
-      }, prefersReducedMotion ? 0 : 200)
+        setIsExiting(true)
+        addTimeout(() => {
+          requestFocusAfterLogin()
+          onComplete()
+        }, prefersReducedMotion ? 0 : 200)
+      }, prefersReducedMotion ? 0 : 600)
     }, 100)
-  }, [canLogin, isExiting, onComplete, requestFocusAfterLogin, prefersReducedMotion, addTimeout])
+  }, [canLogin, isExiting, isLoading, onComplete, requestFocusAfterLogin, prefersReducedMotion, addTimeout])
 
   const startLoginSequence = useCallback(() => {
     if (prefersReducedMotion) {
@@ -159,216 +163,253 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
         animate={isExiting ? { scale: 1.03, opacity: 0 } : { scale: 1, opacity: 1 }}
         transition={{ duration: 0.2, ease: 'easeOut' }}
       >
-        {/* Branding Header */}
-        <div
-          className="flex flex-col items-center"
-          style={{ marginBottom: '28px' }}
-        >
-          <div
-            style={{
-              padding: '10px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(13, 110, 110, 0.08)',
-              marginBottom: '10px',
-            }}
-          >
-            <Shield
-              size={26}
-              style={{ color: '#0D6E6E' }}
-              strokeWidth={2.5}
-            />
-          </div>
-          <span
-            style={{
-              fontFamily: "var(--font-ui)",
-              fontSize: '13px',
-              fontWeight: 600,
-              color: '#64748B',
-              letterSpacing: '0.01em',
-            }}
-          >
-            CareerRecord PMR
-          </span>
-          <span
-            style={{
-              fontFamily: "var(--font-ui)",
-              fontSize: '11px',
-              fontWeight: 400,
-              color: '#94A3B8',
-              marginTop: '2px',
-            }}
-          >
-            Clinical Information System
-          </span>
-        </div>
-
-        {/* Login Form */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Username Field */}
-          <div>
-            <label
-              style={{
-                display: 'block',
-                fontFamily: "var(--font-ui)",
-                fontSize: '12px',
-                fontWeight: 500,
-                color: '#64748B',
-                marginBottom: '6px',
-              }}
-            >
-              Username
-            </label>
-            <div
-              style={{
-                width: '100%',
-                padding: '9px 11px',
-                fontFamily: "'Geist Mono', 'Fira Code', monospace",
-                fontSize: '13px',
-                backgroundColor: activeField === 'username' ? '#FFFFFF' : '#FAFAFA',
-                border: activeField === 'username' ? '1px solid #0D6E6E' : '1px solid #E5E7EB',
-                borderRadius: '4px',
-                color: '#111827',
-                minHeight: '38px',
-                display: 'flex',
-                alignItems: 'center',
-                transition: 'background-color 150ms ease-out, border-color 150ms ease-out',
-              }}
-            >
-              <span>{username}</span>
-              {activeField === 'username' && (
-                <span
-                  style={{ opacity: showCursor ? 1 : 0, color: '#0D6E6E' }}
-                  aria-hidden="true"
-                >
-                  |
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Password Field */}
-          <div>
-            <label
-              style={{
-                display: 'block',
-                fontFamily: "var(--font-ui)",
-                fontSize: '12px',
-                fontWeight: 500,
-                color: '#64748B',
-                marginBottom: '6px',
-              }}
-            >
-              Password
-            </label>
-            <div
-              style={{
-                width: '100%',
-                padding: '9px 11px',
-                fontFamily: "'Geist Mono', 'Fira Code', monospace",
-                fontSize: '13px',
-                backgroundColor: activeField === 'password' ? '#FFFFFF' : '#FAFAFA',
-                border: activeField === 'password' ? '1px solid #0D6E6E' : '1px solid #E5E7EB',
-                borderRadius: '4px',
-                color: '#111827',
-                letterSpacing: '0.15em',
-                minHeight: '38px',
-                display: 'flex',
-                alignItems: 'center',
-                transition: 'background-color 150ms ease-out, border-color 150ms ease-out',
-              }}
-            >
-              <span>{'\u2022'.repeat(passwordDots)}</span>
-              {activeField === 'password' && (
-                <span
-                  style={{ opacity: showCursor ? 1 : 0, color: '#0D6E6E' }}
-                  aria-hidden="true"
-                >
-                  |
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Log In Button — user clicks to proceed */}
-          <button
-            ref={loginButtonRef}
-            onClick={handleLogin}
-            disabled={!canLogin}
-            onMouseEnter={() => setButtonHovered(true)}
-            onMouseLeave={() => setButtonHovered(false)}
-            className="focus-visible:ring-2 focus-visible:ring-[#0D6E6E]/40 focus-visible:ring-offset-2 focus:outline-none"
-            style={{
-              width: '100%',
-              padding: '10px 16px',
-              fontFamily: "var(--font-ui)",
-              fontSize: '14px',
-              fontWeight: 600,
-              color: '#FFFFFF',
-              backgroundColor: buttonBg,
-              border: 'none',
-              borderRadius: '4px',
-              cursor: canLogin ? 'pointer' : 'default',
-              opacity: canLogin ? 1 : 0.6,
-              transition: 'background-color 150ms, opacity 300ms',
-            }}
-          >
-            Log In
-          </button>
-
-          {/* Connection Status Indicator */}
+        {isLoading ? (
           <div
             style={{
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '6px',
-              marginTop: '4px',
+              padding: '48px 0',
+              gap: '16px',
             }}
           >
-            <span
+            <div
+              className="login-spinner"
               style={{
-                width: '6px',
-                height: '6px',
+                width: '32px',
+                height: '32px',
+                border: '3px solid #E5E7EB',
+                borderTopColor: '#0D6E6E',
                 borderRadius: '50%',
-                backgroundColor: connectionState === 'connected' ? '#059669' : '#DC2626',
-                transition: 'background-color 300ms ease',
-                flexShrink: 0,
               }}
+              role="status"
+              aria-label="Loading clinical records"
             />
             <span
               style={{
-                fontFamily: "var(--font-geist-mono, 'Geist Mono', monospace)",
-                fontSize: '10px',
-                color: connectionState === 'connected' ? '#059669' : '#8DA8A5',
-                transition: 'color 300ms ease',
+                fontFamily: "var(--font-ui)",
+                fontSize: '12px',
+                color: 'var(--text-secondary, #5B7A78)',
               }}
             >
-              {connectionState === 'connected'
-                ? 'Secure connection established'
-                : 'Awaiting secure connection...'}
+              Loading clinical records...
             </span>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Branding Header */}
+            <div
+              className="flex flex-col items-center"
+              style={{ marginBottom: '28px' }}
+            >
+              <div
+                style={{
+                  padding: '10px',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(13, 110, 110, 0.08)',
+                  marginBottom: '10px',
+                }}
+              >
+                <Shield
+                  size={26}
+                  style={{ color: '#0D6E6E' }}
+                  strokeWidth={2.5}
+                />
+              </div>
+              <span
+                style={{
+                  fontFamily: "var(--font-ui)",
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: '#64748B',
+                  letterSpacing: '0.01em',
+                }}
+              >
+                CareerRecord PMR
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--font-ui)",
+                  fontSize: '11px',
+                  fontWeight: 400,
+                  color: '#94A3B8',
+                  marginTop: '2px',
+                }}
+              >
+                Clinical Information System
+              </span>
+            </div>
 
-        {/* Footer */}
-        <div
-          style={{
-            marginTop: '22px',
-            paddingTop: '18px',
-            borderTop: '1px solid #E5E7EB',
-          }}
-        >
-          <p
-            style={{
-              fontFamily: "var(--font-ui)",
-              fontSize: '11px',
-              color: '#94A3B8',
-              textAlign: 'center',
-            }}
-          >
-            Secure clinical system login
-          </p>
-        </div>
+            {/* Login Form */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Username Field */}
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontFamily: "var(--font-ui)",
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    color: '#64748B',
+                    marginBottom: '6px',
+                  }}
+                >
+                  Username
+                </label>
+                <div
+                  style={{
+                    width: '100%',
+                    padding: '9px 11px',
+                    fontFamily: "'Geist Mono', 'Fira Code', monospace",
+                    fontSize: '13px',
+                    backgroundColor: activeField === 'username' ? '#FFFFFF' : '#FAFAFA',
+                    border: activeField === 'username' ? '1px solid #0D6E6E' : '1px solid #E5E7EB',
+                    borderRadius: '4px',
+                    color: '#111827',
+                    minHeight: '38px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: 'background-color 150ms ease-out, border-color 150ms ease-out',
+                  }}
+                >
+                  <span>{username}</span>
+                  {activeField === 'username' && (
+                    <span
+                      style={{ opacity: showCursor ? 1 : 0, color: '#0D6E6E' }}
+                      aria-hidden="true"
+                    >
+                      |
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontFamily: "var(--font-ui)",
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    color: '#64748B',
+                    marginBottom: '6px',
+                  }}
+                >
+                  Password
+                </label>
+                <div
+                  style={{
+                    width: '100%',
+                    padding: '9px 11px',
+                    fontFamily: "'Geist Mono', 'Fira Code', monospace",
+                    fontSize: '13px',
+                    backgroundColor: activeField === 'password' ? '#FFFFFF' : '#FAFAFA',
+                    border: activeField === 'password' ? '1px solid #0D6E6E' : '1px solid #E5E7EB',
+                    borderRadius: '4px',
+                    color: '#111827',
+                    letterSpacing: '0.15em',
+                    minHeight: '38px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: 'background-color 150ms ease-out, border-color 150ms ease-out',
+                  }}
+                >
+                  <span>{'\u2022'.repeat(passwordDots)}</span>
+                  {activeField === 'password' && (
+                    <span
+                      style={{ opacity: showCursor ? 1 : 0, color: '#0D6E6E' }}
+                      aria-hidden="true"
+                    >
+                      |
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Log In Button — user clicks to proceed */}
+              <button
+                ref={loginButtonRef}
+                onClick={handleLogin}
+                disabled={!canLogin}
+                onMouseEnter={() => setButtonHovered(true)}
+                onMouseLeave={() => setButtonHovered(false)}
+                className="focus-visible:ring-2 focus-visible:ring-[#0D6E6E]/40 focus-visible:ring-offset-2 focus:outline-none"
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  fontFamily: "var(--font-ui)",
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: '#FFFFFF',
+                  backgroundColor: buttonBg,
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: canLogin ? 'pointer' : 'default',
+                  opacity: canLogin ? 1 : 0.6,
+                  transition: 'background-color 150ms, opacity 300ms',
+                }}
+              >
+                Log In
+              </button>
+
+              {/* Connection Status Indicator */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  marginTop: '4px',
+                }}
+              >
+                <span
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    backgroundColor: connectionState === 'connected' ? '#059669' : '#DC2626',
+                    transition: 'background-color 300ms ease',
+                    flexShrink: 0,
+                  }}
+                />
+                <span
+                  style={{
+                    fontFamily: "var(--font-geist-mono, 'Geist Mono', monospace)",
+                    fontSize: '10px',
+                    color: connectionState === 'connected' ? '#059669' : '#8DA8A5',
+                    transition: 'color 300ms ease',
+                  }}
+                >
+                  {connectionState === 'connected'
+                    ? 'Secure connection established'
+                    : 'Awaiting secure connection...'}
+                </span>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div
+              style={{
+                marginTop: '22px',
+                paddingTop: '18px',
+                borderTop: '1px solid #E5E7EB',
+              }}
+            >
+              <p
+                style={{
+                  fontFamily: "var(--font-ui)",
+                  fontSize: '11px',
+                  color: '#94A3B8',
+                  textAlign: 'center',
+                }}
+              >
+                Secure clinical system login
+              </p>
+            </div>
+          </>
+        )}
       </motion.div>
     </div>
   )

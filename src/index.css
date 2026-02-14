@@ -250,6 +250,15 @@ html {
   }
 }
 
+/* Login spinner */
+@keyframes login-spin {
+  to { transform: rotate(360deg); }
+}
+
+.login-spinner {
+  animation: login-spin 0.8s linear infinite;
+}
+
 /* Custom scrollbar for sidebar */
 .pmr-scrollbar {
   scrollbar-width: thin;
@@ -414,5 +423,11 @@ textarea:focus-visible {
   @keyframes backdrop-fade-in {
     from { opacity: 1; }
     to { opacity: 1; }
+  }
+
+  /* Static login spinner indicator */
+  .login-spinner {
+    animation: none;
+    border-top-color: #0D6E6E;
   }
 }

@@ -169,7 +169,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
             fontFamily: 'var(--font-ui)',
           }}
         >
-          Dr. A.CHARLWOOD
+          A.RECRUITER
         </span>
         <span
           className="font-geist hidden xs:inline"
