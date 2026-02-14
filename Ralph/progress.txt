@@ -610,3 +610,28 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing warning), build ✓
 **Visual review:** Not applicable — accessibility improvements are non-visual (semantic HTML, ARIA, keyboard nav) except for focus rings which should be tested by user
 
+### Iteration 19 — US-018: ConsultationDetail renderer (already complete)
+**Status:** Already implemented by prior iteration — marked as passed
+**Changes:** None needed — `src/components/detail/ConsultationDetail.tsx` already existed with full implementation (role header, history, achievements, outcomes, coded entries), wired into DetailPanel for both `consultation` and `career-role` types.
+
+### Iteration 19b — US-020: Create SkillDetail renderer for detail panel
+**Status:** Complete
+**Changes:**
+- Created `src/components/detail/SkillDetail.tsx` — narrow panel renderer for individual skills:
+  - Skill header: 20px name, frequency badge (accent-light), status badge (success/neutral)
+  - Category label: 11px uppercase tertiary text (Technical / Healthcare Domain / Strategic & Leadership)
+  - Proficiency bar: 6px height, color-coded (green >=90%, teal >=75%, amber <75%), percentage label
+  - Experience section: large year number (28px) + "years" + "Since YYYY" (Geist Mono)
+  - "Used in" section: lists roles from constellation data (roleSkillMappings), with org-colored dots, role labels, organization + date range
+- Updated `src/components/DetailPanel.tsx`:
+  - Added import for SkillDetail
+  - Added `content.type === 'skill'` rendering branch
+  - Narrowed placeholder fallback to exclude 'skill' type
+**Learnings:**
+- Constellation data provides the skill-to-role mapping via `roleSkillMappings` — filter by skill ID, then look up role nodes for display
+- Role nodes sorted chronologically (earliest first) gives a natural career progression view
+- The non-null assertions on `node!` are safe because the `.filter(Boolean)` ensures no nulls
+- Pre-existing lint error (`_sectionId` in DashboardLayout:64) is unrelated to this work
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing error + 2 warnings), build ✓
+**Visual review:** Skipped — no browser tools available.
+

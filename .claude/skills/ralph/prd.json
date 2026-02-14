@@ -364,8 +364,8 @@
                                                        "Verify in browser using dev-browser skill"
                                                    ],
                             "priority":  20,
-                            "passes":  false,
-                            "notes":  ""
+                            "passes":  true,
+                            "notes":  "Completed. Component renders skill header with frequency/status badges, category label, proficiency bar (color-coded), years of experience, and 'Used in' section from constellation data."
                         },
                         {
                             "id":  "US-021",
