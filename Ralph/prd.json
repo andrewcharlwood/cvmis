@@ -231,7 +231,7 @@
         "Typecheck passes"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": "The palette data model uses tileId for scroll targeting — these need to match the new data-tile-id attributes on ParentSection components."
     },
     {

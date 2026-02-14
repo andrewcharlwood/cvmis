@@ -1015,3 +1015,17 @@
   - External highlight useEffect must reset styles when highlightedNodeId becomes null — use the same baseline values as the hover mouseleave handler
   - The onNodeHighlight callbacks integrate cleanly with existing mouseenter/mouseleave handlers in SkillRow (just append the highlight call)
 ---
+
+## 2026-02-14 - US-013
+- Updated command palette data to reflect restructured dashboard with accurate entries
+- **Experience**: Replaced 4 hardcoded inaccurate role entries with dynamic iteration over all consultations from consultations.ts. Changed action from `expand` (targeting deleted career-activity tile) to `panel` (opening career-role detail panel directly)
+- **Projects**: Replaced 3 hardcoded fake entries (£220M Budget, SQL Analytics Transformation, Team Data Literacy) with dynamic iteration over all 5 investigations from investigations.ts. Subtitle uses first sentence of methodology + year
+- **Education**: Removed Power BI Data Analyst Associate cert and Clinical Pharmacy Diploma (not in CV). Added Mary Seacole Programme and A-Levels. Updated tileId from `education` to `patient-pathway`
+- **Achievements**: Updated fallback tileId from `latest-results` to `patient-summary` (LatestResults is now a subsection within PatientSummary)
+- **Legacy exports**: Removed `SearchResult` interface, `buildLegacySearchIndex()`, and `groupResultsBySection()` — confirmed no imports exist anywhere in the codebase. Also removed unused imports (medications, problems, documents, ViewId, FuseResult)
+- Files changed: src/lib/search.ts, Ralph/prd.json, Ralph/progress.txt
+- **Learnings for future iterations:**
+  - Investigation type uses `requestedYear` not `year` — always check the type interface before referencing properties
+  - Dynamically iterating over data arrays (consultations, investigations, skills) is more maintainable than hardcoded entries — data changes propagate automatically
+  - The `expand` palette action type is still in the union but no longer used by any items — keeping the handler in DashboardLayout is harmless
+---
