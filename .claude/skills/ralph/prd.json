@@ -332,8 +332,8 @@
                                                        "Verify in browser using dev-browser skill"
                                                    ],
                             "priority":  18,
-                            "passes":  false,
-                            "notes":  ""
+                            "passes":  true,
+                            "notes":  "Already implemented by prior iteration. Component exists with full content, wired into DetailPanel for consultation and career-role types."
                         },
                         {
                             "id":  "US-019",

@@ -6,6 +6,7 @@ import { DetailPanelContent } from '@/types/pmr'
 import type { CardHeaderProps } from './Card'
 import { KPIDetail } from './detail/KPIDetail'
 import { ConsultationDetail } from './detail/ConsultationDetail'
+import { SkillDetail } from './detail/SkillDetail'
 
 // Width mapping from content type
 const widthMap: Record<DetailPanelContent['type'], 'narrow' | 'wide'> = {
@@ -215,10 +216,13 @@ export function DetailPanel() {
             <ConsultationDetail consultation={content.consultation} />
           )}
 
+          {content.type === 'skill' && <SkillDetail skill={content.skill} />}
+
           {/* Other content types - placeholder for future stories */}
           {content.type !== 'kpi' &&
             content.type !== 'consultation' &&
-            content.type !== 'career-role' && (
+            content.type !== 'career-role' &&
+            content.type !== 'skill' && (
               <div
                 style={{
                   fontFamily: 'var(--font-ui)',
