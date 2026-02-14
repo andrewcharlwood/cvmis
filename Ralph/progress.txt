@@ -881,6 +881,19 @@
   - After removal: 4 consultations, 4 role nodes, 4 role-skill mappings, 21 skill nodes remain
 ---
 
+## 2026-02-14 - US-004
+- Created `src/components/ParentSection.tsx` — wrapper component for top-level dashboard sections
+- Uses existing `Card` component with `full` prop for full-width spanning
+- Header: `<h2>` at 2.4rem, weight 700, `--text-primary` color, no colored dot
+- 1.333rem (20px) padding below header before children render
+- Props: `title`, `children`, optional `className` and `tileId` (passed through to Card)
+- Files changed: src/components/ParentSection.tsx (new)
+- **Learnings for future iterations:**
+  - ParentSection is intentionally thin — it wraps Card and adds the large header, nothing more
+  - The `tileId` prop passes through to Card for command palette scroll targeting
+  - Subsection headers (CardHeader with colored dots) remain the existing pattern — ParentSection headers are visually distinct by size and weight alone
+---
+
 ## 2026-02-14 - US-003
 - Fixed inaccurate timeline entries in CareerActivityTile.tsx buildTimeline() to match CV_v4.md
 - **Removed:** Power BI Data Analyst Associate cert, Clinical Pharmacy Diploma cert, SQL Analytics Transformation project, Budget Oversight project, Community Pharmacist role (dangling duty-pharmacist-2016 reference)

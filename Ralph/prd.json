@@ -68,7 +68,7 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "This is a new component — not modifying Card.tsx. ParentSection wraps Card and adds the large header treatment. Subsection headers continue to use the existing CardHeader style (12px uppercase with colored dot)."
     },
     {
