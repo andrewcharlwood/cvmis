@@ -8,11 +8,14 @@ import { DetailPanel } from './DetailPanel'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
 import { CoreSkillsTile } from './tiles/CoreSkillsTile'
 import { LastConsultationTile } from './tiles/LastConsultationTile'
-import { CareerActivityTile } from './tiles/CareerActivityTile'
 import { EducationTile } from './tiles/EducationTile'
 import { ProjectsTile } from './tiles/ProjectsTile'
+import { ParentSection } from './ParentSection'
+import CareerConstellation from './CareerConstellation'
 import { useActiveSection } from '@/hooks/useActiveSection'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
+import { consultations } from '@/data/consultations'
+import { skills } from '@/data/skills'
 import type { PaletteAction } from '@/lib/search'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -66,6 +69,27 @@ export function DashboardLayout() {
   const handleSectionClick = useCallback((_sectionId: string) => {
     // SubNav handles scrolling internally
   }, [])
+
+  // Constellation graph handlers
+  const handleRoleClick = useCallback(
+    (roleId: string) => {
+      const consultation = consultations.find((c) => c.id === roleId)
+      if (consultation) {
+        openPanel({ type: 'career-role', consultation })
+      }
+    },
+    [openPanel],
+  )
+
+  const handleSkillClick = useCallback(
+    (skillId: string) => {
+      const skill = skills.find((s) => s.id === skillId)
+      if (skill) {
+        openPanel({ type: 'skill', skill })
+      }
+    },
+    [openPanel],
+  )
 
   // Global Ctrl+K listener to open command palette
   useEffect(() => {
@@ -176,8 +200,13 @@ export function DashboardLayout() {
             {/* LastConsultationTile — full width */}
             <LastConsultationTile />
 
-            {/* CareerActivityTile — full width */}
-            <CareerActivityTile />
+            {/* Patient Pathway — parent section with constellation graph */}
+            <ParentSection title="Patient Pathway" tileId="patient-pathway">
+              <CareerConstellation
+                onRoleClick={handleRoleClick}
+                onSkillClick={handleSkillClick}
+              />
+            </ParentSection>
 
             {/* EducationTile — full width */}
             <EducationTile />
