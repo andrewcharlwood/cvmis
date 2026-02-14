@@ -117,3 +117,17 @@
   - The sublabel uses font-geist (monospace) for the "technical texture" pattern
 ---
 
+## 2026-02-14 — US-023
+- Scaled LastConsultationSubsection: field label 10px→12px, field value 11.5px→13px, role title 13.5px→15px
+- Examination bullet fontSize 12.5px→14px, bullet dot top offset 7px→8px for new line height
+- View full record button 12px→13px, ChevronRight 14→15
+- Field gap 16px→20px for better spacing between metadata fields
+- Updated main content padding from 'p-4 pb-8 md:p-6 md:pb-10 lg:px-7 lg:pt-6 lg:pb-10' to 'p-5 pb-10 md:p-7 md:pb-12 lg:px-8 lg:pt-7 lg:pb-12'
+- Files changed: src/components/DashboardLayout.tsx
+- **Learnings for future iterations:**
+  - LastConsultationSubsection is defined inline in DashboardLayout.tsx (lines ~57-232), not in a separate file
+  - fieldLabelStyle and fieldValueStyle are shared CSSProperties objects — changing them updates all 4 field columns (Date, Organisation, Type, Band) at once
+  - The bullet dot `top` offset needs to be adjusted when bullet fontSize changes — at 14px text with 1.5 line-height, 8px top centers the 5px dot
+  - Main content padding uses Tailwind responsive classes on <motion.main> — these are cumulative (p-5 base, md:p-7 overrides, lg:px-8/lg:pt-7 overrides further)
+---
+

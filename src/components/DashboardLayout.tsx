@@ -89,7 +89,7 @@ function LastConsultationSubsection() {
   }
 
   const fieldLabelStyle: React.CSSProperties = {
-    fontSize: '10px',
+    fontSize: '12px',
     textTransform: 'uppercase',
     letterSpacing: '0.06em',
     color: 'var(--text-tertiary)',
@@ -97,7 +97,7 @@ function LastConsultationSubsection() {
   }
 
   const fieldValueStyle: React.CSSProperties = {
-    fontSize: '11.5px',
+    fontSize: '13px',
     fontWeight: 600,
     color: 'var(--text-primary)',
   }
@@ -114,7 +114,7 @@ function LastConsultationSubsection() {
         style={{
           display: 'flex',
           flexWrap: 'wrap',
-          gap: '16px',
+          gap: '20px',
           marginBottom: '14px',
           paddingBottom: '14px',
           borderBottom: '1px solid var(--border-light)',
@@ -152,7 +152,7 @@ function LastConsultationSubsection() {
 
       <div
         style={{
-          fontSize: '13.5px',
+          fontSize: '15px',
           fontWeight: 600,
           color: 'var(--accent)',
           marginBottom: '12px',
@@ -176,7 +176,7 @@ function LastConsultationSubsection() {
           <li
             key={index}
             style={{
-              fontSize: '12.5px',
+              fontSize: '14px',
               color: 'var(--text-primary)',
               paddingLeft: '16px',
               lineHeight: '1.5',
@@ -188,7 +188,7 @@ function LastConsultationSubsection() {
               style={{
                 position: 'absolute',
                 left: '0',
-                top: '7px',
+                top: '8px',
                 width: '5px',
                 height: '5px',
                 borderRadius: '50%',
@@ -207,7 +207,7 @@ function LastConsultationSubsection() {
           display: 'flex',
           alignItems: 'center',
           gap: '6px',
-          fontSize: '12px',
+          fontSize: '13px',
           fontWeight: 500,
           color: 'var(--accent)',
           background: 'transparent',
@@ -226,7 +226,7 @@ function LastConsultationSubsection() {
         aria-label="View full consultation record"
       >
         <span>View full record</span>
-        <ChevronRight size={14} strokeWidth={2.5} />
+        <ChevronRight size={15} strokeWidth={2.5} />
       </button>
     </div>
   )
@@ -366,7 +366,7 @@ export function DashboardLayout() {
           animate="visible"
           variants={contentVariants}
           aria-label="Dashboard content"
-          className="pmr-scrollbar p-4 pb-8 md:p-6 md:pb-10 lg:px-7 lg:pt-6 lg:pb-10"
+          className="pmr-scrollbar p-5 pb-10 md:p-7 md:pb-12 lg:px-8 lg:pt-7 lg:pb-12"
           style={{
             flex: 1,
             overflowY: 'auto',
