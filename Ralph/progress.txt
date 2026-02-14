@@ -49,6 +49,14 @@
 - src/components/RepeatMedicationsSubsection.tsx — skill rows, category sections
 - src/components/ParentSection.tsx — parent heading sizing
 
+### Responsive Breakpoints
+- Sidebar shows at `lg` (1024px) — uses `lg:block` in DashboardLayout.tsx
+- TopBar search bar shows at `lg` (1024px) — uses `lg:flex` in TopBar.tsx
+- TopBar "Remote" label shows at `lg` (1024px) — uses `lg:inline`
+- Brand switches from "HMC" to "Headhunt Medical Center" at `sm` (640px)
+- Session badge switches from time-only to "Active Session · time" at `xs` (480px)
+- SubNav is horizontally scrollable on mobile (overflow-x: auto, scrollbarWidth: none)
+
 ### Sizing Context
 - Target display: 2560x1440 (QHD)
 - Current body text: 13px → target: 15px
@@ -163,5 +171,35 @@
   - RepeatMedicationsSubsection has CategorySection as a local component — category label and item count fontSize are in there, not in SkillRow
   - The category section label fontSize (`10px`) appears once as a unique pattern (with textTransform: 'uppercase') — safe to use replace_all
   - SkillRow gap is inside CategorySection's visibleSkills container, not on the outer RepeatMedicationsSubsection
+---
+
+## 2026-02-14 — US-026
+- Evaluated ParentSection heading sizes against scaled body text at 2560x1440
+- Before: lg heading 2.2rem (35.2px), paddingBottom 1.333rem (21.3px) — ratio to 15px body was 2.35:1
+- After: lg heading 2.4rem (38.4px), paddingBottom 1.5rem (24px) — ratio restored to 2.56:1
+- Mobile/tablet breakpoints (1.375rem, 1.6rem, 1.8rem) left unchanged — they scale proportionally at smaller viewports
+- Files changed: src/components/ParentSection.tsx
+- **Learnings for future iterations:**
+  - ParentSection is used by PatientSummaryTile ("Patient Summary") and the Patient Pathway card — only 2 h2 headings in the dashboard
+  - The heading-to-body ratio should stay above 2.4:1 for clear visual hierarchy at QHD resolution
+  - Only the lg breakpoint needed adjustment — smaller breakpoints paired with smaller body text already maintain good proportions
+  - paddingBottom in rem scales with root font size, making it future-proof for further type scale changes
+---
+
+## 2026-02-14 — US-027
+- Visual regression check across 5 breakpoints: 2560x1440, 1920x1080, 1440x900, 768x1024, 375x812
+- No horizontal scrollbar at any tested width
+- Issue found: TopBar search bar (minWidth 400px) and "Remote" label overflowed at 768px tablet width
+- Fix: Changed search bar from `md:flex` to `lg:flex` and "Remote" label from `md:inline` to `lg:inline` in TopBar.tsx
+- All other breakpoints clean — no overflow, truncation, or layout breaks
+- SubNav at 375px hides "Education" tab off-screen but is scrollable (standard mobile pattern)
+- npm run build and typecheck both pass
+- Files changed: src/components/TopBar.tsx
+- **Learnings for future iterations:**
+  - TopBar search bar has minWidth: 400px which is too wide for md (768px) — must use lg (1024px) breakpoint for search bar visibility
+  - The "Remote" label should match the search bar's breakpoint since they compete for the same horizontal space
+  - Sidebar already uses `lg:block` so TopBar search/Remote at `lg` is consistent with the sidebar showing
+  - SubNav has overflow-x: auto with scrollbarWidth: none — horizontal scroll on mobile is by design, not a bug
+  - At 768px without sidebar or search bar, the TopBar cleanly shows brand + A.RECRUITER + session badge
 ---
 

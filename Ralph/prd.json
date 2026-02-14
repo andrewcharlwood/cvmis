@@ -214,7 +214,7 @@
         "Typecheck passes"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "Use Playwright browser_resize to test each breakpoint. Take screenshots at each size. Fix any issues found — this may involve adding responsive overrides or adjusting min-widths."
     },
     {
