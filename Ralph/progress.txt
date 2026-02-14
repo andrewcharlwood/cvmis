@@ -1124,3 +1124,45 @@ Applied the selected typography from US-015 to ParentSection.tsx:
 - Both "Patient Summary" and "Patient Pathway" headers identical
 - Clear hierarchy: parent headers (2.2rem/600) > sub-headers (12px/600 uppercase) > body (13px/400)
 ---
+
+## Iteration 17 — US-017: Re-enable boot/login sequence
+**Status**: PASS
+**Commit**: (this iteration)
+
+### What was done
+Reverted the initial Phase state in App.tsx from `'pmr'` back to `'boot'`, restoring the full intro sequence for production.
+
+### Changes
+- **App.tsx**: Line 47, `useState<Phase>('pmr')` → `useState<Phase>('boot')`
+
+### Verification (Playwright)
+- App loads to boot sequence (terminal-style animation with "Skip" button)
+- After ~6s, transitions to ECG animation (canvas heartbeat)
+- After ~16s total, reaches login screen with auto-typed credentials
+- "Log In" button is interactive — clicked successfully
+- Dashboard loads with full restructured layout: Patient Summary, Projects, Patient Pathway (constellation + experience/skills + education)
+- No console errors (2 canvas readback warnings from ECG — pre-existing, non-blocking)
+
+---
+
+## PRD COMPLETION SUMMARY
+
+All 17 user stories pass:
+- **US-001**: Skip boot sequence for dev ✅
+- **US-002**: Remove inaccurate CV data ✅
+- **US-003**: Fix timeline entries ✅
+- **US-004**: Create Latest Results subsection ✅
+- **US-005**: Restructure Patient Summary ✅
+- **US-006**: Create Patient Pathway parent section ✅
+- **US-007**: Move Last Consultation into Pathway ✅
+- **US-008**: Two-column experience/skills layout ✅
+- **US-009**: Move Education into Pathway ✅
+- **US-010**: Improve constellation graph clarity ✅
+- **US-011**: Add accessible role legend ✅
+- **US-012**: Hover-highlighting between experience/skills and graph ✅
+- **US-013**: Update command palette data ✅
+- **US-014**: Responsive verification and fixes ✅
+- **US-015**: Explore parent header typography ✅
+- **US-016**: Apply chosen typography ✅
+- **US-017**: Re-enable boot/login sequence ✅
+---

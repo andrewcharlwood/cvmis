@@ -300,8 +300,8 @@
         "Verify in browser using dev-browser skill: app starts at boot, progresses through ECG and login, arrives at restructured dashboard"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": "Reverts the change from US-001. Must be the final story."
+      "passes": true,
+      "notes": "Reverted initial phase from 'pmr' to 'boot'. Full flow verified: boot → ECG → login (credentials auto-typed) → click Log In → restructured dashboard loads with all sections."
     }
   ]
 }
