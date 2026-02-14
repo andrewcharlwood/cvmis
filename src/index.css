@@ -282,6 +282,11 @@ html {
   background: var(--text-tertiary);
 }
 
+/* SubNav horizontal scroll — hide scrollbar */
+.subnav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 /* Dashboard card grid responsive — mobile-first */
 .dashboard-grid {
   display: grid;

@@ -42,6 +42,7 @@ function ProjectItem({ project, onClick }: ProjectItemProps) {
         border: '1px solid var(--border-light)',
         borderRadius: 'var(--radius-sm)',
         padding: '10px 12px',
+        minHeight: '44px',
         fontSize: '11.5px',
         color: 'var(--text-primary)',
         transition: 'border-color 0.15s, box-shadow 0.15s',

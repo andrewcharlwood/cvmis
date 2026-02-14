@@ -506,8 +506,8 @@
                                                        "Verify in browser using dev-browser skill"
                                                    ],
                             "priority":  28,
-                            "passes":  false,
-                            "notes":  ""
+                            "passes":  true,
+                            "notes":  "Completed. Username changed to a.recruiter, connection status indicator with red→green 300ms transition, button disabled until typing complete AND connected."
                         },
                         {
                             "id":  "US-029",
@@ -523,8 +523,8 @@
                                                        "Verify in browser using dev-browser skill"
                                                    ],
                             "priority":  29,
-                            "passes":  false,
-                            "notes":  ""
+                            "passes":  true,
+                            "notes":  "Completed. Loading state with CSS spinner replaces card content on login click (~600ms), TopBar shows A.RECRUITER, prefers-reduced-motion skips spinner animation."
                         },
                         {
                             "id":  "US-030",
@@ -540,8 +540,8 @@
                                                        "Verify in browser using dev-browser skill"
                                                    ],
                             "priority":  30,
-                            "passes":  false,
-                            "notes":  ""
+                            "passes":  true,
+                            "notes":  "Completed. All 21 skills in search index, panel action type added. Skills/KPIs/projects open detail panel directly from command palette."
                         },
                         {
                             "id":  "US-031",
@@ -559,8 +559,8 @@
                                                        "Verify in browser using dev-browser skill"
                                                    ],
                             "priority":  31,
-                            "passes":  false,
-                            "notes":  ""
+                            "passes":  true,
+                            "notes":  "Completed. SubNav horizontal scroll with hidden scrollbar, 44px min touch targets on all interactive elements, DetailPanel close button enlarged to 44px."
                         },
                         {
                             "id":  "US-032",

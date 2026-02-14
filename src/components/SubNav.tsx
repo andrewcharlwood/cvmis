@@ -31,6 +31,7 @@ export function SubNav({ activeSection, onSectionClick }: SubNavProps) {
   return (
     <nav
       aria-label="Section navigation"
+      className="subnav-scroll"
       style={{
         position: 'sticky',
         top: 'var(--topbar-height)',
@@ -42,6 +43,10 @@ export function SubNav({ activeSection, onSectionClick }: SubNavProps) {
         alignItems: 'center',
         justifyContent: 'center',
         gap: '24px',
+        overflowX: 'auto',
+        overflowY: 'hidden',
+        padding: '0 16px',
+        scrollbarWidth: 'none',
       }}
     >
       {sections.map((section) => {
@@ -59,10 +64,14 @@ export function SubNav({ activeSection, onSectionClick }: SubNavProps) {
               color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
               background: 'none',
               border: 'none',
-              padding: '0 0 2px 0',
+              padding: '0 4px 2px',
               cursor: 'pointer',
               transition: 'color 200ms ease-out',
               fontFamily: 'var(--font-ui)',
+              flexShrink: 0,
+              minHeight: '36px',
+              display: 'flex',
+              alignItems: 'center',
             }}
           >
             {section.label}

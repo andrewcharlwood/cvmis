@@ -785,3 +785,62 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing error + 2 warnings), build ✓
 **Visual review:** Skipped — no browser tools available.
 
+---
+
+## 2026-02-14 - US-028
+- **What was implemented:** Changed login username from A.CHARLWOOD to a.recruiter, added connection status indicator with red→green transition, updated button disabled logic to require both typing complete AND connection established.
+- **Files changed:**
+  - `src/components/LoginScreen.tsx` — new `connectionState` state, connection timer (2000ms), connection status indicator UI (6px dot + Geist Mono text), `canLogin` derived state replacing `typingComplete` for button control
+  - `src/components/DashboardLayout.tsx` — fixed pre-existing lint error (unused `_sectionId` parameter, added eslint-disable comment)
+- **Learnings for future iterations:**
+  - The DashboardLayout had a pre-existing lint error with `_sectionId` — ESLint config doesn't respect underscore-prefix unused var convention, needed `eslint-disable-next-line` comment. TypeScript `tsc -b` (used in build) DOES respect underscore prefix though.
+  - Connection status uses CSS `transition: 300ms` for the color change — matches the spec for smooth dot/text color transition
+  - `canLogin` is a derived value (not state) combining `typingComplete && connectionState === 'connected'` — cleaner than adding another state variable
+
+---
+
+## 2026-02-14 - US-029
+- **What was implemented:** Added post-login loading state with CSS spinner (~600ms) that replaces the login card content after clicking Log In. Updated TopBar session display name from "Dr. A.CHARLWOOD" to "A.RECRUITER".
+- **Files changed:**
+  - `src/components/LoginScreen.tsx` — new `isLoading` state, handleLogin now sets isLoading before isExiting, card content conditionally renders either login form or spinner + "Loading clinical records..." text. Spinner uses CSS `login-spin` animation.
+  - `src/components/TopBar.tsx` — changed session name from "Dr. A.CHARLWOOD" to "A.RECRUITER"
+  - `src/index.css` — added `@keyframes login-spin` and `.login-spinner` class, plus `prefers-reduced-motion` override (static indicator, no spin)
+- **Learnings for future iterations:**
+  - The loading state replaces card content via conditional rendering (`isLoading ? spinner : form`) rather than an overlay — keeps the card dimensions stable
+  - The sequence is: buttonPressed (100ms) → isLoading (600ms) → isExiting (200ms) → onComplete. With reduced motion, loading and exit delays are 0ms.
+  - Spinner uses pure CSS animation (`border-top-color` trick) — no library needed
+
+---
+
+## 2026-02-14 - US-030
+- **What was implemented:** Updated CommandPalette search index to include all 21 skills (not just 5), added `panel` action type to PaletteAction union, and wired skill/KPI/project palette results to open detail panels directly.
+- **Files changed:**
+  - `src/lib/search.ts` — Added `panel` action type with `DetailPanelContent` payload. Skills section now iterates all 21 skills from `skills.ts` (was hardcoded to 5). Project results find matching `Investigation` by ID and use `panel` action. Achievement results find matching `KPI` by ID and use `panel` action. Imported `kpis` and `DetailPanelContent` type.
+  - `src/components/DashboardLayout.tsx` — Added `panel` case to `handlePaletteAction` switch that calls `openPanel(action.panelContent)`. Imported `useDetailPanel` from context.
+- **Learnings for future iterations:**
+  - The `panel` action type carries a full `DetailPanelContent` discriminated union payload — this means any palette item can open any detail panel type without intermediate mapping
+  - Achievement "Team of 12 Led" was updated to "1.2M Population Served" to match the KPI data change from US-006
+  - For projects, a fallback to `scroll` action is used when the investigation ID doesn't match — defensive pattern for data mismatches
+
+---
+
+## 2026-02-14 - US-031
+- **What was implemented:** Responsive testing and fixes for all new components. Audited DetailPanel, SubNav, CareerConstellation, dashboard grid, CoreSkillsTile, touch targets, and 375px overflow.
+- **Files changed:**
+  - `src/components/SubNav.tsx` — Added `overflowX: auto`, `scrollbarWidth: 'none'`, horizontal padding, `flexShrink: 0` on tab buttons, `minHeight: 36px` for touch targets, flex layout for vertical centering
+  - `src/index.css` — Added `.subnav-scroll::-webkit-scrollbar { display: none }` for WebKit scrollbar hiding
+  - `src/components/DetailPanel.tsx` — Enlarged close button from 32x32px to 44x44px for mobile touch target compliance
+  - `src/components/tiles/CoreSkillsTile.tsx` — Added `minHeight: 44px` to SkillRow and "View all" button for touch target compliance
+  - `src/components/tiles/ProjectsTile.tsx` — Added `minHeight: 44px` to ProjectItem for touch target compliance
+  - `src/components/tiles/LastConsultationTile.tsx` — Added `minHeight: 44px` to "View full record" button
+- **Audit results (already passing):**
+  - DetailPanel: `@media (max-width: 767px)` already set both widths to 100vw ✓
+  - CareerConstellation: `getHeight()` already returns 400/300/250px by breakpoint ✓
+  - Dashboard grid: mobile-first 1fr → 2fr at 768px, KPIs + Projects stack correctly ✓
+  - CoreSkillsTile: `full` prop spans both columns at all breakpoints ✓
+  - No horizontal overflow at 375px: TopBar search hidden <768px, no problematic nowrap on wide content ✓
+- **Learnings for future iterations:**
+  - `scrollbarWidth: 'none'` (Firefox) + `::-webkit-scrollbar { display: none }` (Chrome/Safari) together hide scrollbars cross-browser
+  - WCAG touch target minimum is 44x44px — check all `role="button"`, `<button>`, and clickable elements
+  - SubNav at 375px has ~345px available (375 - 2*16px padding) — 5 short labels with 24px gaps fit without scroll, but the scroll fallback is good insurance
+

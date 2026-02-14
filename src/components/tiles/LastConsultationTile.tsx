@@ -235,6 +235,7 @@ export const LastConsultationTile: React.FC = () => {
           background: 'transparent',
           border: 'none',
           padding: '6px 0',
+          minHeight: '44px',
           cursor: 'pointer',
           transition: 'color 150ms ease-out',
         }}
