@@ -871,3 +871,24 @@
   - Branch `ralph/dashboard-restructure` created fresh from master
   - All previous codebase patterns still apply
 ---
+
+## 2026-02-14 - US-002
+- Removed the fabricated 'duty-pharmacist-2016' entry (Duty Pharmacy Manager, Tesco, Aug 2016–Nov 2017) from consultations.ts, constellation nodes, constellation links, and roleSkillMappings
+- Files changed: src/data/consultations.ts, src/data/constellation.ts
+- **Learnings for future iterations:**
+  - CareerActivityTile.tsx still has a `consultationId: 'duty-pharmacist-2016'` reference on the "Community Pharmacist" timeline entry — this is a dangling reference that US-003 will clean up by removing that timeline entry
+  - The constellation data (nodes, links, roleSkillMappings) all reference each other by string ID — removing a role requires removing from all three arrays
+  - After removal: 4 consultations, 4 role nodes, 4 role-skill mappings, 21 skill nodes remain
+---
+
+## 2026-02-14 - US-003
+- Fixed inaccurate timeline entries in CareerActivityTile.tsx buildTimeline() to match CV_v4.md
+- **Removed:** Power BI Data Analyst Associate cert, Clinical Pharmacy Diploma cert, SQL Analytics Transformation project, Budget Oversight project, Community Pharmacist role (dangling duty-pharmacist-2016 reference)
+- **Added:** NHS Leadership Academy — Mary Seacole Programme cert (2018), A-Levels education entry (2009–2011)
+- **Fixed role titles/dates:** Deputy Head (was "Senior Data Analyst"), High-Cost Drugs & Interface Pharmacist (was "Prescribing Data Pharmacist"), Pharmacy Manager at Tesco (was "Community Pharmacist at Boots UK"). All consultationIds now map to existing consultations.
+- Files changed: src/components/tiles/CareerActivityTile.tsx
+- **Learnings for future iterations:**
+  - The previous timeline had inaccurate role titles that didn't match consultations.ts or CV_v4.md — always cross-reference both data source and CV
+  - All 4 role entries now correctly reference their matching consultation IDs: interim-head-2025, deputy-head-2024, high-cost-drugs-2022, pharmacy-manager-2017
+  - Timeline now has 8 entries: 4 roles + GPhC cert + Mary Seacole cert + MPharm edu + A-Levels edu
+---

@@ -31,7 +31,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Check References/CV_v4.md for the accurate role list. The CV has 4 roles: Interim Head, Deputy Head, High-Cost Drugs, Pharmacy Manager (Tesco)."
     },
     {
@@ -49,7 +49,7 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Reference CV at References/CV_v4.md. The role entries in the timeline reference consultations by consultationId — since duty-pharmacist-2016 was removed in US-002, also remove any timeline entry referencing it."
     },
     {

@@ -26,85 +26,48 @@ interface ActivityEntry {
 function buildTimeline(): ActivityEntry[] {
   const entries: ActivityEntry[] = []
 
-  // Roles from consultations
+  // Roles from consultations (matching CV_v4.md)
   entries.push({
     id: 'interim-head-2025',
     type: 'role',
     title: 'Interim Head, Population Health & Data Analysis',
     meta: 'NHS Norfolk & Waveney ICB',
-    date: '2024 – 2025',
-    sortYear: 2024,
+    date: 'May – Nov 2025',
+    sortYear: 2025,
     consultationId: 'interim-head-2025',
   })
 
   entries.push({
     id: 'deputy-head-2024',
     type: 'role',
-    title: 'Senior Data Analyst — Medicines Optimisation',
+    title: 'Deputy Head, Population Health & Data Analysis',
     meta: 'NHS Norfolk & Waveney ICB',
-    date: '2021 – 2024',
-    sortYear: 2021,
+    date: 'Jul 2024 – Present',
+    sortYear: 2024,
     consultationId: 'deputy-head-2024',
   })
 
   entries.push({
     id: 'high-cost-drugs-2022',
     type: 'role',
-    title: 'Prescribing Data Pharmacist',
-    meta: 'NHS Norwich CCG',
-    date: '2018 – 2021',
-    sortYear: 2018,
+    title: 'High-Cost Drugs & Interface Pharmacist',
+    meta: 'NHS Norfolk & Waveney ICB',
+    date: 'May 2022 – Jul 2024',
+    sortYear: 2022,
+    consultationId: 'high-cost-drugs-2022',
+  })
+
+  entries.push({
+    id: 'pharmacy-manager-2017',
+    type: 'role',
+    title: 'Pharmacy Manager',
+    meta: 'Tesco PLC',
+    date: 'Nov 2017 – May 2022',
+    sortYear: 2017,
     consultationId: 'pharmacy-manager-2017',
   })
 
-  entries.push({
-    id: 'community-pharmacist-2016',
-    type: 'role',
-    title: 'Community Pharmacist',
-    meta: 'Boots UK',
-    date: '2016 – 2018',
-    sortYear: 2016,
-    consultationId: 'duty-pharmacist-2016',
-  })
-
-  // Projects
-  entries.push({
-    id: 'inv-budget',
-    type: 'project',
-    title: '£220M Prescribing Budget Oversight',
-    meta: 'Lead analyst & budget owner',
-    date: '2024',
-    sortYear: 2024,
-  })
-
-  entries.push({
-    id: 'inv-sql-transform',
-    type: 'project',
-    title: 'SQL Analytics Transformation',
-    meta: 'Legacy migration project lead',
-    date: '2025',
-    sortYear: 2025,
-  })
-
-  // Certifications
-  entries.push({
-    id: 'cert-powerbi',
-    type: 'cert',
-    title: 'Power BI Data Analyst Associate',
-    meta: 'Microsoft Certified',
-    date: '2023',
-    sortYear: 2023,
-  })
-
-  entries.push({
-    id: 'cert-diploma',
-    type: 'cert',
-    title: 'Clinical Pharmacy Diploma',
-    meta: 'Professional development',
-    date: '2019',
-    sortYear: 2019,
-  })
-
+  // Certifications (matching CV_v4.md)
   entries.push({
     id: 'doc-gphc',
     type: 'cert',
@@ -114,7 +77,16 @@ function buildTimeline(): ActivityEntry[] {
     sortYear: 2016,
   })
 
-  // Education
+  entries.push({
+    id: 'cert-mary-seacole',
+    type: 'cert',
+    title: 'NHS Leadership Academy — Mary Seacole Programme',
+    meta: 'NHS leadership qualification',
+    date: '2018',
+    sortYear: 2018,
+  })
+
+  // Education (matching CV_v4.md)
   const mpharm = documents.find((d) => d.id === 'doc-mpharm')
   if (mpharm) {
     entries.push({
@@ -126,6 +98,15 @@ function buildTimeline(): ActivityEntry[] {
       sortYear: 2011,
     })
   }
+
+  entries.push({
+    id: 'edu-alevels',
+    type: 'edu',
+    title: 'A-Levels: Mathematics (A*), Chemistry (B), Politics (C)',
+    meta: 'Highworth Grammar School',
+    date: '2009 – 2011',
+    sortYear: 2009,
+  })
 
   return entries.sort((a, b) => {
     if (b.sortYear !== a.sortYear) return b.sortYear - a.sortYear
