@@ -54,7 +54,7 @@ function SkillRow({ skill, onClick, onHighlight }: SkillRowProps) {
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
-        padding: '8px 10px',
+        padding: '10px 12px',
         minHeight: '44px',
         background: 'var(--bg-dashboard)',
         borderRadius: 'var(--radius-sm)',
@@ -75,8 +75,8 @@ function SkillRow({ skill, onClick, onHighlight }: SkillRowProps) {
     >
       <div
         style={{
-          width: '26px',
-          height: '26px',
+          width: '30px',
+          height: '30px',
           borderRadius: '6px',
           background: 'var(--accent-light)',
           color: 'var(--accent)',
@@ -86,12 +86,12 @@ function SkillRow({ skill, onClick, onHighlight }: SkillRowProps) {
           flexShrink: 0,
         }}
       >
-        {IconComponent && <IconComponent size={13} />}
+        {IconComponent && <IconComponent size={15} />}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontSize: '12.5px',
+            fontSize: '14px',
             fontWeight: 600,
             color: 'var(--text-primary)',
             lineHeight: 1.3,
@@ -101,7 +101,7 @@ function SkillRow({ skill, onClick, onHighlight }: SkillRowProps) {
         </div>
         <div
           style={{
-            fontSize: '10.5px',
+            fontSize: '12px',
             color: 'var(--text-tertiary)',
             fontFamily: '"Geist Mono", monospace',
           }}
@@ -111,9 +111,9 @@ function SkillRow({ skill, onClick, onHighlight }: SkillRowProps) {
       </div>
       <div
         style={{
-          fontSize: '10px',
+          fontSize: '11px',
           fontWeight: 500,
-          padding: '2px 7px',
+          padding: '3px 8px',
           borderRadius: '20px',
           background: 'var(--success-light)',
           color: 'var(--success)',
@@ -165,7 +165,7 @@ function CategorySection({
       >
         <span
           style={{
-            fontSize: '10px',
+            fontSize: '11px',
             fontWeight: 600,
             textTransform: 'uppercase',
             letterSpacing: '0.06em',
@@ -184,7 +184,7 @@ function CategorySection({
         />
         <span
           style={{
-            fontSize: '10px',
+            fontSize: '11px',
             color: 'var(--text-tertiary)',
             fontFamily: '"Geist Mono", monospace',
             whiteSpace: 'nowrap',
@@ -193,7 +193,7 @@ function CategorySection({
           {categorySkills.length} items
         </span>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {visibleSkills.map((skill) => (
           <SkillRow
             key={skill.id}
@@ -216,7 +216,7 @@ function CategorySection({
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            fontSize: '11px',
+            fontSize: '12px',
             fontWeight: 500,
             color: 'var(--accent)',
             fontFamily: 'inherit',

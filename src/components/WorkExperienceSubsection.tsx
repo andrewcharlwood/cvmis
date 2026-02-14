@@ -53,7 +53,7 @@ function RoleItem({ consultation, isExpanded, onToggle, onViewFull, onHighlight 
         style={{
           display: 'flex',
           gap: '10px',
-          padding: '10px 12px',
+          padding: '12px 14px',
           cursor: 'pointer',
           minHeight: '44px',
           alignItems: 'flex-start',
@@ -75,8 +75,8 @@ function RoleItem({ consultation, isExpanded, onToggle, onViewFull, onHighlight 
         <div
           aria-hidden="true"
           style={{
-            width: '8px',
-            height: '8px',
+            width: '9px',
+            height: '9px',
             borderRadius: '50%',
             background: '#0D6E6E',
             flexShrink: 0,
@@ -88,7 +88,7 @@ function RoleItem({ consultation, isExpanded, onToggle, onViewFull, onHighlight 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontSize: '12.5px',
+              fontSize: '14px',
               fontWeight: 600,
               color: 'var(--text-primary)',
               lineHeight: 1.3,
@@ -98,7 +98,7 @@ function RoleItem({ consultation, isExpanded, onToggle, onViewFull, onHighlight 
           </div>
           <div
             style={{
-              fontSize: '11px',
+              fontSize: '12px',
               color: 'var(--text-secondary)',
               marginTop: '2px',
             }}
@@ -107,7 +107,7 @@ function RoleItem({ consultation, isExpanded, onToggle, onViewFull, onHighlight 
           </div>
           <div
             style={{
-              fontSize: '10px',
+              fontSize: '11px',
               fontFamily: 'var(--font-mono)',
               color: 'var(--text-tertiary)',
               marginTop: '3px',
@@ -168,7 +168,7 @@ function RoleItem({ consultation, isExpanded, onToggle, onViewFull, onHighlight 
                   <li
                     key={i}
                     style={{
-                      fontSize: '11.5px',
+                      fontSize: '13px',
                       color: 'var(--text-primary)',
                       lineHeight: 1.5,
                       paddingLeft: '12px',
@@ -206,9 +206,9 @@ function RoleItem({ consultation, isExpanded, onToggle, onViewFull, onHighlight 
                   <span
                     key={entry.code}
                     style={{
-                      fontSize: '10px',
+                      fontSize: '11px',
                       fontFamily: 'var(--font-mono)',
-                      padding: '2px 6px',
+                      padding: '3px 8px',
                       borderRadius: '4px',
                       background: 'var(--accent-light)',
                       color: 'var(--accent)',
@@ -230,7 +230,7 @@ function RoleItem({ consultation, isExpanded, onToggle, onViewFull, onHighlight 
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px',
-                  fontSize: '11px',
+                  fontSize: '12px',
                   fontWeight: 500,
                   color: 'var(--accent)',
                   background: 'transparent',
@@ -279,7 +279,7 @@ export function WorkExperienceSubsection({ onNodeHighlight }: WorkExperienceSubs
   return (
     <div>
       <CardHeader dotColor="teal" title="WORK EXPERIENCE" rightText={`${consultations.length} roles`} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {consultations.map((c) => (
           <RoleItem
             key={c.id}
