@@ -124,15 +124,15 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   }, [startLoginSequence, addTimeout])
 
   const buttonBg = buttonPressed
-    ? '#004494'
+    ? '#085858'
     : buttonHovered && typingComplete
-      ? '#004D9F'
-      : '#005EB8'
+      ? '#0A8080'
+      : '#0D6E6E'
 
   return (
     <div
       className="fixed inset-0 flex items-center justify-center z-50"
-      style={{ backgroundColor: '#1E293B' }}
+      style={{ backgroundColor: '#1A2B2A' }}
       role="dialog"
       aria-label="Clinical system login"
       aria-modal="true"
@@ -159,13 +159,13 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
             style={{
               padding: '10px',
               borderRadius: '8px',
-              backgroundColor: 'rgba(0, 94, 184, 0.07)',
+              backgroundColor: 'rgba(13, 110, 110, 0.08)',
               marginBottom: '10px',
             }}
           >
             <Shield
               size={26}
-              style={{ color: '#005EB8' }}
+              style={{ color: '#0D6E6E' }}
               strokeWidth={2.5}
             />
           </div>
@@ -216,7 +216,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                 fontFamily: "'Geist Mono', 'Fira Code', monospace",
                 fontSize: '13px',
                 backgroundColor: activeField === 'username' ? '#FFFFFF' : '#FAFAFA',
-                border: activeField === 'username' ? '1px solid #005EB8' : '1px solid #E5E7EB',
+                border: activeField === 'username' ? '1px solid #0D6E6E' : '1px solid #E5E7EB',
                 borderRadius: '4px',
                 color: '#111827',
                 minHeight: '38px',
@@ -228,7 +228,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               <span>{username}</span>
               {activeField === 'username' && (
                 <span
-                  style={{ opacity: showCursor ? 1 : 0, color: '#005EB8' }}
+                  style={{ opacity: showCursor ? 1 : 0, color: '#0D6E6E' }}
                   aria-hidden="true"
                 >
                   |
@@ -258,7 +258,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                 fontFamily: "'Geist Mono', 'Fira Code', monospace",
                 fontSize: '13px',
                 backgroundColor: activeField === 'password' ? '#FFFFFF' : '#FAFAFA',
-                border: activeField === 'password' ? '1px solid #005EB8' : '1px solid #E5E7EB',
+                border: activeField === 'password' ? '1px solid #0D6E6E' : '1px solid #E5E7EB',
                 borderRadius: '4px',
                 color: '#111827',
                 letterSpacing: '0.15em',
@@ -271,7 +271,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               <span>{'\u2022'.repeat(passwordDots)}</span>
               {activeField === 'password' && (
                 <span
-                  style={{ opacity: showCursor ? 1 : 0, color: '#005EB8' }}
+                  style={{ opacity: showCursor ? 1 : 0, color: '#0D6E6E' }}
                   aria-hidden="true"
                 >
                   |
@@ -287,7 +287,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
             disabled={!typingComplete}
             onMouseEnter={() => setButtonHovered(true)}
             onMouseLeave={() => setButtonHovered(false)}
-            className="focus-visible:ring-2 focus-visible:ring-[#005EB8]/40 focus-visible:ring-offset-2 focus:outline-none"
+            className="focus-visible:ring-2 focus-visible:ring-[#0D6E6E]/40 focus-visible:ring-offset-2 focus:outline-none"
             style={{
               width: '100%',
               padding: '10px 16px',

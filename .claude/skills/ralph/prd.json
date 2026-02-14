@@ -454,8 +454,8 @@
                                                        "Typecheck passes"
                                                    ],
                             "priority":  25,
-                            "passes":  false,
-                            "notes":  ""
+                            "passes":  true,
+                            "notes":  "Completed. SR-only description with role-skill mappings, hidden focusable buttons for keyboard nav (Tab/Enter/Space), focus ring on SVG nodes, prefers-reduced-motion runs simulation synchronously to static positions."
                         },
                         {
                             "id":  "US-026",
@@ -471,8 +471,8 @@
                                                        "Verify in browser using dev-browser skill"
                                                    ],
                             "priority":  26,
-                            "passes":  false,
-                            "notes":  ""
+                            "passes":  true,
+                            "notes":  "Completed. D3 hover: connected nodes stay full opacity, non-connected fade to 0.15, links brighten to teal. Click: role→onRoleClick, skill→onSkillClick. Wired into CareerActivityTile replacing placeholder, connected to detail panel."
                         },
                         {
                             "id":  "US-027",
@@ -488,8 +488,8 @@
                                                        "Verify in browser using dev-browser skill"
                                                    ],
                             "priority":  27,
-                            "passes":  false,
-                            "notes":  ""
+                            "passes":  true,
+                            "notes":  "Completed. Replaced #005EB8→#0D6E6E, #004D9F→#0A8080, #004494→#085858, background #1E293B→#1A2B2A, shield rgba updated."
                         },
                         {
                             "id":  "US-028",

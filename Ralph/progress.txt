@@ -730,3 +730,58 @@
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing error + 2 warnings), build ✓
 **Visual review:** Skipped — component not yet wired into CareerActivityTile (US-026). D3 simulation verified via successful build.
 
+### Iteration 24 — US-025: Add accessibility to CareerConstellation
+**Status:** Complete
+**Changes:**
+- Updated `src/components/CareerConstellation.tsx` with four accessibility features:
+  - **Screen-reader description**: `buildScreenReaderDescription()` generates a hidden `<p>` (sr-only via clip rect) describing all 5 roles, their organizations, year ranges, and associated skills from `roleSkillMappings`
+  - **Keyboard navigation**: Hidden `<button>` elements overlaid on the SVG container, one per role node. Tab navigates through roles, Enter/Space triggers `onRoleClick`. Each button has descriptive `aria-label` (role name, org, year range)
+  - **Focus indicators**: SVG `.focus-ring` circle (ROLE_RADIUS + 4px) rendered behind each role node. Transparent by default, becomes teal `#0D6E6E` stroke when the corresponding hidden button receives focus (tracked via `focusedNodeId` state + `useEffect` on D3 selection)
+  - **prefers-reduced-motion**: When enabled, simulation runs 300 ticks synchronously (`simulation.stop()` + loop), then renders final positions immediately — no animation frames. Uses the established module-scope `matchMedia` check pattern
+- Imported `roleSkillMappings` from constellation data for SR description
+- Added `useCallback` for `handleNodeKeyDown` to prevent re-renders
+**Learnings:**
+- D3 focus indicators work via a dual approach: hidden HTML buttons for actual keyboard focus, plus D3-drawn SVG circles that respond to React state changes — avoids fighting D3's imperative model with React's declarative focus management
+- Running `simulation.tick()` in a loop (300 iterations) is sufficient to reach stable positions for this graph size (5 roles + 21 skills)
+- The `.focus-ring` circle must be appended before the main circle in the SVG group to render behind it (SVG painting order = DOM order)
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing error + 2 warnings), build ✓
+**Visual review:** Skipped — not yet wired into CareerActivityTile (US-026).
+
+### Iteration 25 — US-026: Add hover and click interactions to CareerConstellation
+**Status:** Complete
+**Changes:**
+- Updated `src/components/CareerConstellation.tsx` with three interaction features:
+  - **Hover highlighting**: Built adjacency map from `constellationLinks`. On `mouseenter`, non-connected nodes fade to 0.15 opacity. Connected links brighten to teal (`#0D6E6E`), thicken to 2px, increase opacity to 0.7. Non-connected links dim to 0.1 opacity. Role hover also scales connected skill nodes up (+3px radius) via D3 transition (150ms).
+  - **Hover reset**: On `mouseleave`, all nodes reset to full opacity, skill circles return to `SKILL_RADIUS`, links return to default stroke/opacity/width.
+  - **Click handlers**: Click on any node calls `callbacksRef.current.onRoleClick(id)` or `onSkillClick(id)` via the existing callbacksRef pattern (avoids stale closures).
+  - Added `.node-circle` and `.node-label` classes to circles/text for targeted D3 selections during hover
+- Updated `src/components/tiles/CareerActivityTile.tsx`:
+  - Replaced placeholder `<div>` with actual `<CareerConstellation>` component
+  - Added `handleRoleClick(roleId)` → finds consultation by ID → `openPanel({ type: 'career-role', consultation })`
+  - Added `handleSkillClick(skillId)` → finds skill by ID → `openPanel({ type: 'skill', skill })`
+  - Refactored `handleItemClick` to delegate to `handleRoleClick` for consistency
+  - Imported `skills` from `@/data/skills` and `CareerConstellation` from `../CareerConstellation`
+**Learnings:**
+- D3 hover uses `mouseenter`/`mouseleave` (not `mouseover`/`mouseout`) to avoid bubbling issues with nested SVG groups
+- The adjacency map uses source/target strings from `constellationLinks` (pre-simulation), not SimNode objects — link data gets resolved by D3 after forceLink runs, so during hover the source/target may be either string or SimNode objects. The click/hover handlers check both forms.
+- The `callbacksRef` pattern established in US-023 works perfectly for D3 click events — no stale closures
+- Pre-existing lint issues: `_sectionId` error + 2 context warnings — all unrelated
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing error + 2 warnings), build ✓
+**Visual review:** Skipped — no browser tools available.
+
+### Iteration 26 — US-027: Restyle LoginScreen with teal accents
+**Status:** Complete
+**Changes:**
+- Updated `src/components/LoginScreen.tsx`:
+  - Replaced all `#005EB8` (NHS Blue) with `#0D6E6E` (teal accent): shield icon color, active field borders, cursor color, button default bg, focus ring
+  - Replaced `#004D9F` (hover) with `#0A8080` (teal hover)
+  - Replaced `#004494` (pressed) with `#085858` (teal pressed)
+  - Background color: `#1E293B` → `#1A2B2A` (warmer, cohesive with dashboard palette)
+  - Shield icon container: `rgba(0, 94, 184, 0.07)` → `rgba(13, 110, 110, 0.08)` (teal-tinted)
+**Learnings:**
+- LoginScreen had 6 instances of `#005EB8` — all replaced for consistency
+- The background change from `#1E293B` (slate) to `#1A2B2A` (dark teal-green) creates visual cohesion with the teal accent palette
+- Button states follow the teal gradient: default #0D6E6E → hover #0A8080 → pressed #085858 (progressively darker)
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing error + 2 warnings), build ✓
+**Visual review:** Skipped — no browser tools available.
+
