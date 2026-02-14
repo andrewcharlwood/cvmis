@@ -2,7 +2,9 @@ import React, { useState, useCallback } from 'react'
 import { Card, CardHeader } from '../Card'
 import { documents } from '@/data/documents'
 import { consultations } from '@/data/consultations'
+import { skills } from '@/data/skills'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
+import CareerConstellation from '../CareerConstellation'
 
 type ActivityType = 'role' | 'project' | 'cert' | 'edu'
 
@@ -265,39 +267,44 @@ export const CareerActivityTile: React.FC = () => {
   const timeline = buildTimeline()
   const { openPanel } = useDetailPanel()
 
-  const handleItemClick = useCallback(
-    (entry: ActivityEntry) => {
-      if (entry.type === 'role' && entry.consultationId) {
-        const consultation = consultations.find((c) => c.id === entry.consultationId)
-        if (consultation) {
-          openPanel({ type: 'career-role', consultation })
-        }
+  const handleRoleClick = useCallback(
+    (roleId: string) => {
+      const consultation = consultations.find((c) => c.id === roleId)
+      if (consultation) {
+        openPanel({ type: 'career-role', consultation })
       }
     },
     [openPanel],
+  )
+
+  const handleSkillClick = useCallback(
+    (skillId: string) => {
+      const skill = skills.find((s) => s.id === skillId)
+      if (skill) {
+        openPanel({ type: 'skill', skill })
+      }
+    },
+    [openPanel],
+  )
+
+  const handleItemClick = useCallback(
+    (entry: ActivityEntry) => {
+      if (entry.type === 'role' && entry.consultationId) {
+        handleRoleClick(entry.consultationId)
+      }
+    },
+    [handleRoleClick],
   )
 
   return (
     <Card full tileId="career-activity">
       <CardHeader dotColor="teal" title="CAREER ACTIVITY" rightText="Full timeline" />
 
-      {/* Placeholder for CareerConstellation component (to be added later) */}
-      <div
-        style={{
-          minHeight: '200px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'var(--bg-dashboard)',
-          borderRadius: 'var(--radius-sm)',
-          border: '1px dashed var(--border-light)',
-          marginBottom: '20px',
-          color: 'var(--text-tertiary)',
-          fontSize: '12px',
-          fontStyle: 'italic',
-        }}
-      >
-        Career Constellation visualization (to be implemented)
+      <div style={{ marginBottom: '20px' }}>
+        <CareerConstellation
+          onRoleClick={handleRoleClick}
+          onSkillClick={handleSkillClick}
+        />
       </div>
 
       <div className="activity-grid">

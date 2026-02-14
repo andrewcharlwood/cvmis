@@ -194,6 +194,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
     nodeSelection.filter(d => d.type === 'role')
       .append('circle')
+      .attr('class', 'node-circle')
       .attr('r', ROLE_RADIUS)
       .attr('fill', d => d.orgColor ?? '#0D6E6E')
       .attr('stroke', '#FFFFFF')
@@ -201,6 +202,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
     nodeSelection.filter(d => d.type === 'role')
       .append('text')
+      .attr('class', 'node-label')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
       .attr('fill', '#FFFFFF')
@@ -213,6 +215,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     // Skill nodes
     nodeSelection.filter(d => d.type === 'skill')
       .append('circle')
+      .attr('class', 'node-circle')
       .attr('r', SKILL_RADIUS)
       .attr('fill', d => domainColorMap[d.domain ?? 'technical'] ?? '#0D6E6E')
       .attr('stroke', '#FFFFFF')
@@ -221,6 +224,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
     nodeSelection.filter(d => d.type === 'skill')
       .append('text')
+      .attr('class', 'node-label')
       .attr('text-anchor', 'middle')
       .attr('dy', SKILL_RADIUS + 12)
       .attr('fill', '#5B7A78')
@@ -228,6 +232,88 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .attr('font-family', 'var(--font-geist-mono)')
       .attr('pointer-events', 'none')
       .text(d => d.shortLabel ?? d.label)
+
+    // Build adjacency lookup for hover interactions
+    const connectedMap = new Map<string, Set<string>>()
+    constellationLinks.forEach(l => {
+      if (!connectedMap.has(l.source)) connectedMap.set(l.source, new Set())
+      if (!connectedMap.has(l.target)) connectedMap.set(l.target, new Set())
+      connectedMap.get(l.source)!.add(l.target)
+      connectedMap.get(l.target)!.add(l.source)
+    })
+
+    const HOVER_TRANSITION = '150ms'
+
+    // Hover interactions
+    nodeSelection.on('mouseenter', function(_event, d) {
+      const connected = connectedMap.get(d.id) ?? new Set()
+
+      // Dim non-connected nodes
+      nodeSelection
+        .style('transition', `opacity ${HOVER_TRANSITION}`)
+        .style('opacity', n => {
+          if (n.id === d.id) return '1'
+          if (connected.has(n.id)) return '1'
+          return '0.15'
+        })
+
+      // Scale up connected skill nodes when hovering a role
+      if (d.type === 'role') {
+        nodeSelection.filter(n => n.type === 'skill' && connected.has(n.id))
+          .select('.node-circle')
+          .transition().duration(150)
+          .attr('r', SKILL_RADIUS + 3)
+      }
+
+      // Brighten connected links, dim others
+      linkSelection
+        .style('transition', `stroke-opacity ${HOVER_TRANSITION}, stroke ${HOVER_TRANSITION}`)
+        .attr('stroke', l => {
+          const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
+          const tgt = typeof l.target === 'string' ? l.target : (l.target as SimNode).id
+          if (src === d.id || tgt === d.id) return '#0D6E6E'
+          return '#D4E0DE'
+        })
+        .attr('stroke-opacity', l => {
+          const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
+          const tgt = typeof l.target === 'string' ? l.target : (l.target as SimNode).id
+          if (src === d.id || tgt === d.id) return 0.7
+          return 0.1
+        })
+        .attr('stroke-width', l => {
+          const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
+          const tgt = typeof l.target === 'string' ? l.target : (l.target as SimNode).id
+          if (src === d.id || tgt === d.id) return 2
+          return 1
+        })
+    })
+
+    nodeSelection.on('mouseleave', function() {
+      // Reset all nodes
+      nodeSelection
+        .style('opacity', '1')
+
+      // Reset skill node sizes
+      nodeSelection.filter(n => n.type === 'skill')
+        .select('.node-circle')
+        .transition().duration(150)
+        .attr('r', SKILL_RADIUS)
+
+      // Reset all links
+      linkSelection
+        .attr('stroke', '#D4E0DE')
+        .attr('stroke-width', 1)
+        .attr('stroke-opacity', 0.3)
+    })
+
+    // Click interactions
+    nodeSelection.on('click', function(_event, d) {
+      if (d.type === 'role') {
+        callbacksRef.current.onRoleClick(d.id)
+      } else {
+        callbacksRef.current.onSkillClick(d.id)
+      }
+    })
 
     // Force simulation
     const simulation = d3.forceSimulation<SimNode>(nodes)
