@@ -15,7 +15,7 @@ function SectionTitle({ children }: SectionTitleProps) {
         display: 'flex',
         alignItems: 'center',
         gap: '6px',
-        fontSize: '10px',
+        fontSize: '11px',
         fontWeight: 600,
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
@@ -62,9 +62,9 @@ function TagPill({ tag }: TagPillProps) {
     <span
       style={{
         display: 'inline-flex',
-        fontSize: '10.5px',
+        fontSize: '12px',
         fontWeight: 500,
-        padding: '3px 8px',
+        padding: '4px 10px',
         borderRadius: '4px',
         lineHeight: 1.3,
         ...styles[tag.colorVariant],
@@ -101,9 +101,9 @@ function AlertFlag({ alert }: AlertFlagProps) {
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
-        fontSize: '11px',
+        fontSize: '13px',
         fontWeight: 700,
-        padding: '7px 10px',
+        padding: '8px 12px',
         borderRadius: 'var(--radius-sm)',
         letterSpacing: '0.02em',
         ...styles[alert.severity],
@@ -111,15 +111,15 @@ function AlertFlag({ alert }: AlertFlagProps) {
     >
       <div
         style={{
-          width: '16px',
-          height: '16px',
+          width: '18px',
+          height: '18px',
           flexShrink: 0,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <Icon size={14} strokeWidth={2.5} />
+        <Icon size={16} strokeWidth={2.5} />
       </div>
       <span>{alert.message}</span>
     </div>
@@ -135,7 +135,7 @@ export default function Sidebar() {
         background: 'var(--sidebar-bg)',
         borderRight: '1px solid var(--border)',
         overflowY: 'auto',
-        padding: '20px 16px',
+        padding: '24px 20px',
         display: 'flex',
         flexDirection: 'column',
         gap: '2px',
@@ -147,21 +147,21 @@ export default function Sidebar() {
         style={{
           borderBottom: '2px solid var(--accent)',
           paddingBottom: '16px',
-          marginBottom: '6px',
+          marginBottom: '10px',
         }}
       >
         {/* Avatar */}
         <div
           style={{
-            width: '52px',
-            height: '52px',
+            width: '60px',
+            height: '60px',
             borderRadius: '50%',
             background: 'linear-gradient(135deg, var(--accent), #0A8080)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: '#FFFFFF',
-            fontSize: '18px',
+            fontSize: '20px',
             fontWeight: 700,
             boxShadow: '0 2px 8px rgba(13,110,110,0.25)',
             marginBottom: '12px',
@@ -173,7 +173,7 @@ export default function Sidebar() {
         {/* Name */}
         <div
           style={{
-            fontSize: '15px',
+            fontSize: '17px',
             fontWeight: 700,
             color: 'var(--text-primary)',
             letterSpacing: '-0.01em',
@@ -185,7 +185,7 @@ export default function Sidebar() {
         {/* Title */}
         <div
           style={{
-            fontSize: '11.5px',
+            fontSize: '13px',
             fontFamily: 'Geist Mono, monospace',
             fontWeight: 400,
             color: 'var(--text-secondary)',
@@ -202,7 +202,7 @@ export default function Sidebar() {
             alignItems: 'center',
             gap: '5px',
             marginTop: '8px',
-            fontSize: '11px',
+            fontSize: '12px',
             fontWeight: 500,
             color: 'var(--success)',
             background: 'var(--success-light)',
@@ -213,8 +213,8 @@ export default function Sidebar() {
         >
           <span
             style={{
-              width: '6px',
-              height: '6px',
+              width: '7px',
+              height: '7px',
               borderRadius: '50%',
               background: 'var(--success)',
               animation: 'pulse 2s infinite',
@@ -229,7 +229,7 @@ export default function Sidebar() {
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr',
-            gap: '6px',
+            gap: '8px',
             marginTop: '12px',
           }}
         >
@@ -239,8 +239,8 @@ export default function Sidebar() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              fontSize: '11.5px',
-              padding: '2px 0',
+              fontSize: '13px',
+              padding: '4px 0',
             }}
           >
             <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
@@ -251,7 +251,7 @@ export default function Sidebar() {
                 color: 'var(--text-primary)',
                 fontWeight: 500,
                 fontFamily: 'Geist Mono, monospace',
-                fontSize: '11px',
+                fontSize: '12px',
                 letterSpacing: '0.12em',
               }}
             >
@@ -265,8 +265,8 @@ export default function Sidebar() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              fontSize: '11.5px',
-              padding: '2px 0',
+              fontSize: '13px',
+              padding: '4px 0',
             }}
           >
             <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
@@ -289,8 +289,8 @@ export default function Sidebar() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              fontSize: '11.5px',
-              padding: '2px 0',
+              fontSize: '13px',
+              padding: '4px 0',
             }}
           >
             <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
@@ -313,8 +313,8 @@ export default function Sidebar() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              fontSize: '11.5px',
-              padding: '2px 0',
+              fontSize: '13px',
+              padding: '4px 0',
             }}
           >
             <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
@@ -345,8 +345,8 @@ export default function Sidebar() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              fontSize: '11.5px',
-              padding: '2px 0',
+              fontSize: '13px',
+              padding: '4px 0',
             }}
           >
             <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
@@ -377,8 +377,8 @@ export default function Sidebar() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              fontSize: '11.5px',
-              padding: '2px 0',
+              fontSize: '13px',
+              padding: '4px 0',
             }}
           >
             <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
@@ -398,7 +398,7 @@ export default function Sidebar() {
       </div>
 
       {/* Tags Section */}
-      <div style={{ padding: '14px 0 6px' }}>
+      <div style={{ padding: '16px 0 8px' }}>
         <SectionTitle>Tags</SectionTitle>
         <div
           style={{
@@ -414,7 +414,7 @@ export default function Sidebar() {
       </div>
 
       {/* Alerts / Highlights Section */}
-      <div style={{ padding: '14px 0 6px' }}>
+      <div style={{ padding: '16px 0 8px' }}>
         <SectionTitle>Alerts / Highlights</SectionTitle>
         <div
           style={{
