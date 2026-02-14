@@ -20,6 +20,8 @@ export function Card({ children, full, className, tileId }: CardProps) {
     boxShadow: isHovered ? 'var(--shadow-md)' : 'var(--shadow-sm)',
     transition: 'box-shadow 0.2s, border-color 0.2s',
     gridColumn: full ? '1 / -1' : undefined,
+    minWidth: 0,
+    overflow: 'hidden',
   }
 
   return (

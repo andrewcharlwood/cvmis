@@ -93,7 +93,6 @@ export function PatientSummaryTile() {
 
   const kpiGridStyles: React.CSSProperties = {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
     gap: '12px',
   }
 
@@ -113,7 +112,7 @@ export function PatientSummaryTile() {
       {/* Latest Results subsection */}
       <div style={{ marginTop: '24px' }}>
         <CardHeader dotColor="teal" title="LATEST RESULTS" rightText="Updated May 2025" />
-        <div style={kpiGridStyles}>
+        <div className="grid-cols-1 xs:grid-cols-2" style={kpiGridStyles}>
           {kpis.map((kpi) => (
             <MetricCard key={kpi.id} kpi={kpi} />
           ))}

@@ -392,12 +392,18 @@ export function DashboardLayout() {
 
               {/* Two-column experience/skills grid */}
               <div className="pathway-columns" style={{ marginTop: '24px' }}>
-                <WorkExperienceSubsection onNodeHighlight={handleNodeHighlight} />
-                <RepeatMedicationsSubsection onNodeHighlight={handleNodeHighlight} />
+                <div data-tile-id="section-experience">
+                  <WorkExperienceSubsection onNodeHighlight={handleNodeHighlight} />
+                </div>
+                <div data-tile-id="section-skills">
+                  <RepeatMedicationsSubsection onNodeHighlight={handleNodeHighlight} />
+                </div>
               </div>
 
               {/* Education subsection */}
-              <EducationSubsection />
+              <div data-tile-id="section-education">
+                <EducationSubsection />
+              </div>
             </ParentSection>
           </div>
         </motion.main>

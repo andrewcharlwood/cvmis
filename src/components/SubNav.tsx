@@ -11,10 +11,10 @@ interface SubNavProps {
 
 const sections: NavSection[] = [
   { id: 'overview', label: 'Overview', tileId: 'patient-summary' },
-  { id: 'skills', label: 'Skills', tileId: 'core-skills' },
-  { id: 'experience', label: 'Experience', tileId: 'career-activity' },
+  { id: 'skills', label: 'Skills', tileId: 'section-skills' },
+  { id: 'experience', label: 'Experience', tileId: 'section-experience' },
   { id: 'projects', label: 'Projects', tileId: 'projects' },
-  { id: 'education', label: 'Education', tileId: 'education' },
+  { id: 'education', label: 'Education', tileId: 'section-education' },
 ]
 
 export function SubNav({ activeSection, onSectionClick }: SubNavProps) {
@@ -31,7 +31,7 @@ export function SubNav({ activeSection, onSectionClick }: SubNavProps) {
   return (
     <nav
       aria-label="Section navigation"
-      className="subnav-scroll"
+      className="subnav-scroll md:justify-center"
       style={{
         position: 'sticky',
         top: 'var(--topbar-height)',
@@ -41,7 +41,6 @@ export function SubNav({ activeSection, onSectionClick }: SubNavProps) {
         borderBottom: '1px solid var(--border-light)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
         gap: '24px',
         overflowX: 'auto',
         overflowY: 'hidden',
