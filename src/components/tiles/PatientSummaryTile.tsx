@@ -32,7 +32,7 @@ function MetricCard({ kpi }: MetricCardProps) {
   const buttonStyles: React.CSSProperties = {
     width: '100%',
     textAlign: 'left',
-    padding: '16px',
+    padding: '20px',
     background: 'var(--surface)',
     border: '1px solid var(--border-light)',
     borderRadius: 'var(--radius-sm)',
@@ -41,7 +41,7 @@ function MetricCard({ kpi }: MetricCardProps) {
   }
 
   const valueStyles: React.CSSProperties = {
-    fontSize: '28px',
+    fontSize: '34px',
     fontWeight: 700,
     letterSpacing: '-0.02em',
     lineHeight: 1.2,
@@ -49,14 +49,14 @@ function MetricCard({ kpi }: MetricCardProps) {
   }
 
   const labelStyles: React.CSSProperties = {
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 500,
     color: 'var(--text-primary)',
     marginTop: '4px',
   }
 
   const subStyles: React.CSSProperties = {
-    fontSize: '10px',
+    fontSize: '12px',
     color: 'var(--text-tertiary)',
     fontFamily: 'var(--font-geist-mono)',
     marginTop: '2px',
@@ -86,14 +86,14 @@ function MetricCard({ kpi }: MetricCardProps) {
 
 export function PatientSummaryTile() {
   const profileTextStyles: React.CSSProperties = {
-    fontSize: '13px',
-    lineHeight: '1.6',
+    fontSize: '15px',
+    lineHeight: '1.65',
     color: 'var(--text-primary)',
   }
 
   const kpiGridStyles: React.CSSProperties = {
     display: 'grid',
-    gap: '12px',
+    gap: '16px',
   }
 
   return (
@@ -110,7 +110,7 @@ export function PatientSummaryTile() {
       </div>
 
       {/* Latest Results subsection */}
-      <div style={{ marginTop: '24px' }}>
+      <div style={{ marginTop: '28px' }}>
         <CardHeader dotColor="teal" title="LATEST RESULTS" rightText="Updated May 2025" />
         <div className="grid-cols-1 xs:grid-cols-2" style={kpiGridStyles}>
           {kpis.map((kpi) => (

@@ -84,7 +84,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Sidebar width is already updated via CSS var in US-019. This story handles all internal sizing. The sidebar has many repeated patterns (detail rows) — ensure consistency across all rows."
     },
     {
@@ -103,7 +103,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "The profile text is the largest body copy block in the dashboard — it must feel effortlessly readable. KPI values should be the most visually prominent numbers on the page."
     },
     {
