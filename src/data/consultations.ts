@@ -109,25 +109,4 @@ export const consultations: Consultation[] = [
       { code: 'LEA002', description: 'Leadership: Staff development to technician registration' },
     ],
   },
-  {
-    id: 'duty-pharmacist-2016',
-    date: '01 Aug 2016',
-    organization: 'Tesco PLC',
-    orgColor: '#00897B',
-    role: 'Duty Pharmacy Manager',
-    duration: 'Aug 2016 — Nov 2017',
-    isCurrent: false,
-    history: 'Commenced professional career as registered pharmacist following GPhC registration. Developed foundational skills in pharmacy operations, patient care, and team management within a high-volume community pharmacy setting.',
-    examination: [
-      'Progressed from newly registered pharmacist to Pharmacy Manager role',
-      'Developed clinical and operational competencies in community pharmacy',
-    ],
-    plan: [
-      'GPhC registration obtained, beginning professional practice',
-      'Foundation established for progression to management role',
-    ],
-    codedEntries: [
-      { code: 'REG001', description: 'Registration: GPhC pharmacist qualification' },
-    ],
-  },
 ]

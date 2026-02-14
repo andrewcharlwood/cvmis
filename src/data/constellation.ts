@@ -11,14 +11,6 @@ export interface RoleSkillMapping {
 
 export const roleSkillMappings: RoleSkillMapping[] = [
   {
-    roleId: 'duty-pharmacist-2016',
-    skillIds: [
-      'medicines-optimisation',
-      'team-development',
-      'excel',
-    ],
-  },
-  {
     roleId: 'pharmacy-manager-2017',
     skillIds: [
       'medicines-optimisation',
@@ -86,17 +78,7 @@ export const roleSkillMappings: RoleSkillMapping[] = [
  * Includes both role nodes and skill nodes.
  */
 export const constellationNodes: ConstellationNode[] = [
-  // Role nodes (6 roles)
-  {
-    id: 'duty-pharmacist-2016',
-    type: 'role',
-    label: 'Duty Pharmacy Manager',
-    shortLabel: 'Duty Mgr',
-    organization: 'Tesco PLC',
-    startYear: 2016,
-    endYear: 2017,
-    orgColor: '#00897B',
-  },
+  // Role nodes (4 roles)
   {
     id: 'pharmacy-manager-2017',
     type: 'role',
@@ -292,11 +274,6 @@ export const constellationNodes: ConstellationNode[] = [
  * Strength values (0-1) indicate how central that skill was to the role.
  */
 export const constellationLinks: ConstellationLink[] = [
-  // Duty Pharmacist 2016 → Skills (foundation role)
-  { source: 'duty-pharmacist-2016', target: 'medicines-optimisation', strength: 0.9 },
-  { source: 'duty-pharmacist-2016', target: 'team-development', strength: 0.6 },
-  { source: 'duty-pharmacist-2016', target: 'excel', strength: 0.5 },
-
   // Pharmacy Manager 2017 → Skills (broad operational role)
   { source: 'pharmacy-manager-2017', target: 'medicines-optimisation', strength: 0.9 },
   { source: 'pharmacy-manager-2017', target: 'team-development', strength: 0.8 },
