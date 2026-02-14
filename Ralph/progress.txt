@@ -25,6 +25,9 @@
 - Types are properly defined in pmr.ts — Consultation, Medication, Problem, Investigation, Document, Patient, ViewId
 - New types needed: Tag, Alert, KPI, SkillMedication (Task 2)
 
+### Lucide Icons Typing
+- Use `LucideIcon` type from `lucide-react` for icon maps, NOT `React.ComponentType<{ size: number }>` — the latter causes TS errors with ForwardRefExoticComponent
+
 ### Known Dependencies
 - React 18.3.1, TypeScript, Vite
 - Tailwind CSS for utility classes
@@ -634,4 +637,96 @@
 - Pre-existing lint error (`_sectionId` in DashboardLayout:64) is unrelated to this work
 **Quality checks:** typecheck ✓, lint ✓ (1 pre-existing error + 2 warnings), build ✓
 **Visual review:** Skipped — no browser tools available.
+
+### Iteration 20 — US-021: Create SkillsAllDetail renderer for detail panel
+**Status:** Complete
+**Changes:**
+- Created `src/components/detail/SkillsAllDetail.tsx` — narrow panel renderer for full categorised skill list:
+  - Groups all 21 skills by Technical / Healthcare Domain / Strategic & Leadership
+  - Category headers match CoreSkillsTile style: 10px uppercase label + divider line + item count (Geist Mono)
+  - Each skill row: icon container (26px, accent-light), name + frequency/years (Geist Mono), mini proficiency bar (40px wide, color-coded), percentage, chevron
+  - Skill rows clickable → `openPanel({ type: 'skill', skill })` to switch panel to individual SkillDetail
+  - If opened with category filter (from "View all" button), scrolls to and highlights that category (accent-colored header + bottom border)
+  - Hover: border color shift + shadow deepens (matching CoreSkillsTile rows)
+  - Keyboard: Enter/Space triggers skill detail, role="button", tabIndex={0}, descriptive aria-label
+- Updated `src/components/DetailPanel.tsx`:
+  - Added import for SkillsAllDetail
+  - Added `content.type === 'skills-all'` rendering branch with category prop pass-through
+  - Narrowed placeholder fallback to exclude 'skills-all' type
+**Learnings:**
+- Reused the SkillRow pattern from CoreSkillsTile but added a mini proficiency bar instead of status badge — provides more info density in the "view all" context
+- The `useRef<Record<string, HTMLDivElement | null>>` pattern with callback ref works well for multiple dynamic refs
+- Category highlight uses both accent-colored text and a 2px bottom border to visually distinguish the filtered category
+- Pre-existing lint error (`_sectionId` in DashboardLayout:64) continues to be unrelated
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing error + 2 warnings), build ✓
+**Visual review:** Skipped — no browser tools available.
+
+### Iteration 21 — US-022: Create EducationDetail renderer for detail panel
+**Status:** Complete
+**Changes:**
+- Created `src/components/detail/EducationDetail.tsx` — narrow panel renderer for education entries:
+  - Header: type-specific icon (GraduationCap/Award/BookOpen/FlaskConical) + title + institution (purple accent) + duration + classification badge (purple-light bg)
+  - Research Project section: renders `extra.researchDescription` for MPharm entry
+  - OSCE Performance section: renders score in success-colored badge with description
+  - Extracurricular Activities section: bullet list from `extra.extracurriculars`
+  - Programme Overview section: renders `extra.programmeDetail` for Mary Seacole
+  - Notes section: italic secondary text from `document.notes`
+  - All sections use shared `sectionHeaderStyle` (12px uppercase, secondary color, 0.05em tracking)
+- Updated `src/components/DetailPanel.tsx`:
+  - Added import for EducationDetail
+  - Added `content.type === 'education'` rendering branch
+  - Narrowed placeholder fallback to exclude 'education' type
+**Learnings:**
+- Icon type for lucide-react must use `LucideIcon` type, not `React.ComponentType<{ size: number }>` — the latter causes type incompatibility with ForwardRefExoticComponent
+- The `educationExtras` data matches documents by `documentId` field — currently only MPharm and Mary Seacole have extras
+- Purple color (#7C3AED) is used consistently for education across the app (dot colors in CardHeader, CareerActivity, and now EducationDetail institution text and classification badge)
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing error + 2 warnings), build ✓
+**Visual review:** Skipped — no browser tools available.
+
+### Iteration 22 — US-023: Install D3 and scaffold CareerConstellation component
+**Status:** Complete
+**Changes:**
+- Installed `d3` and `@types/d3` npm packages (70 packages added)
+- Created `src/components/CareerConstellation.tsx` — scaffolded component with:
+  - Props: `onRoleClick(id)` and `onSkillClick(id)` stored in callbacksRef for future D3 event binding
+  - Responsive SVG container using ResizeObserver: 400px desktop, 300px tablet (<1024px), 250px mobile (<768px)
+  - viewBox matches actual dimensions for responsive scaling
+  - Radial gradient background: `#F0F5F4` (--bg-dashboard) center → `#FFFFFF` (--surface) edge, rx=6
+  - Placeholder text showing node/link counts from constellation data (Geist Mono, tertiary color)
+  - Container with border-radius and overflow hidden
+  - SVG has `role="img"` and `aria-label` for accessibility
+  - Imperative SVG drawing via useEffect on svgRef (matches ECG pattern for D3 compatibility)
+**Learnings:**
+- `callbacksRef` pattern stores click handlers in a ref for D3 imperative code — avoids stale closures when D3 attaches event listeners in US-024/026
+- ResizeObserver provides cleaner responsive behavior than CSS media queries for SVG — container width determines height tier
+- The SVG namespace `http://www.w3.org/2000/svg` is required for createElement in imperative SVG building
+- D3 is installed but not yet imported — US-024 will use `d3.forceSimulation` etc. on the svgRef
+- Pre-existing lint error (`_sectionId` in DashboardLayout:64) continues to be unrelated
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing error + 2 warnings), build ✓
+**Visual review:** Skipped — component not yet integrated into CareerActivityTile (will be wired in US-026).
+
+### Iteration 23 — US-024: Build D3 force-directed graph rendering in CareerConstellation
+**Status:** Complete
+**Changes:**
+- Rewrote `src/components/CareerConstellation.tsx` to use D3 force simulation:
+  - Replaced imperative SVG createElement with D3 selections (`d3.select`, `.selectAll`, `.join`)
+  - D3 force simulation with: `forceManyBody(-200)`, `forceLink(distance 80, strength from data * 0.5)`, `forceX` chronological (roles positioned left-to-right by `startYear` via `d3.scaleLinear`), `forceY` centered at `height/2`, `forceCollide` (30 for roles, 14 for skills)
+  - Role nodes: 24px radius circles filled with `orgColor`, 2px white stroke, 8px white `shortLabel` text centered
+  - Skill nodes: 10px radius circles, color-coded by domain (clinical=#059669 green, technical=#0D6E6E teal, leadership=#D97706 amber), 1.5px white stroke, opacity 0.85
+  - Skill labels: 9px Geist Mono text below each skill node (using `shortLabel`)
+  - Links: 1px `#D4E0DE` lines at opacity 0.3
+  - Node positions constrained within SVG bounds on each tick
+  - Layered rendering: links group below nodes group
+  - `simulationRef` stores active simulation, stopped on cleanup or dimension change
+  - Preserved existing ResizeObserver responsive height (400/300/250px)
+  - Preserved radial gradient background, `role="img"`, `aria-label`
+- Removed unused `ConstellationLink` type import (caught by typecheck)
+**Learnings:**
+- D3 `forceLink.strength()` receives the link object — cast to `SimLink` to access `.strength` field
+- Role `forceX` uses strong pull (0.8) to maintain chronological layout; skill `forceX` uses weak pull (0.05) to let links drive position
+- `forceCollide` radius should be slightly larger for skills than their visual radius to prevent label overlap
+- The `SimNode` interface extending `ConstellationNode` with `x/y/vx/vy/fx/fy` satisfies D3's `SimulationNodeDatum` needs
+- Pre-existing lint issues: `_sectionId` error + 2 context warnings — all unrelated
+**Quality checks:** typecheck ✓, lint ✓ (1 pre-existing error + 2 warnings), build ✓
+**Visual review:** Skipped — component not yet wired into CareerActivityTile (US-026). D3 simulation verified via successful build.
 

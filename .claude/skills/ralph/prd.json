@@ -382,8 +382,8 @@
                                                        "Verify in browser using dev-browser skill"
                                                    ],
                             "priority":  21,
-                            "passes":  false,
-                            "notes":  ""
+                            "passes":  true,
+                            "notes":  "Completed. Full categorised skill list with category headers matching CoreSkillsTile style, proficiency mini-bars, click-to-skill-detail navigation, and category scroll/highlight from filter."
                         },
                         {
                             "id":  "US-022",
@@ -401,8 +401,8 @@
                                                        "Verify in browser using dev-browser skill"
                                                    ],
                             "priority":  22,
-                            "passes":  false,
-                            "notes":  ""
+                            "passes":  true,
+                            "notes":  "Completed. Renders title + icon + institution + dates + classification badge. Shows research description, OSCE score, extracurriculars (MPharm), programme detail (Mary Seacole), and notes."
                         },
                         {
                             "id":  "US-023",
@@ -420,8 +420,8 @@
                                                        "Verify in browser using dev-browser skill"
                                                    ],
                             "priority":  23,
-                            "passes":  false,
-                            "notes":  ""
+                            "passes":  true,
+                            "notes":  "Completed. D3 + @types/d3 installed. CareerConstellation scaffold with responsive SVG container (400/300/250px), radial gradient bg, ResizeObserver, callbacks ref for future D3 wiring."
                         },
                         {
                             "id":  "US-024",
@@ -438,8 +438,8 @@
                                                        "Verify in browser using dev-browser skill"
                                                    ],
                             "priority":  24,
-                            "passes":  false,
-                            "notes":  ""
+                            "passes":  true,
+                            "notes":  "Completed. D3 force simulation with forceManyBody(-200), forceLink(dist 80, strength from data), forceX chronological, forceY centered, forceCollide. Role nodes 24px with orgColor + white labels, skill nodes 10px color-coded by domain, links 1px opacity 0.3."
                         },
                         {
                             "id":  "US-025",
