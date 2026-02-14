@@ -1,6 +1,5 @@
 import React from 'react'
 import { Card, CardHeader } from '../Card'
-import { personalStatement } from '@/data/profile'
 
 export function PatientSummaryTile() {
   // Key statistics from CV_v4.md
@@ -47,6 +46,21 @@ export function PatientSummaryTile() {
     color: 'var(--text-primary)',
   }
 
+  // Split profile text into structured sections with bold key phrases
+  const renderProfileWithHierarchy = () => {
+    return (
+      <div style={profileTextStyles}>
+        <strong>Healthcare leader</strong> combining clinical pharmacy expertise with proficiency in{' '}
+        <strong>Python, SQL, and data analytics</strong>, self-taught over the past decade through a drive to find root causes in data and build the most efficient solutions to complex problems. Currently{' '}
+        <strong>leading population health analytics for NHS Norfolk & Waveney ICB</strong>, serving a population of 1.2 million. Experienced in working with messy, real-world prescribing data at scale to deliver actionable insights—from{' '}
+        <strong>financial scenario modelling</strong> and <strong>pharmaceutical rebate negotiation</strong> to{' '}
+        <strong>algorithm design</strong> and <strong>population-level pathway development</strong>. Proven track record of identifying and prioritising efficiency programmes worth{' '}
+        <strong>£14.6M+</strong> through automated, data-driven analysis. Skilled at translating complex clinical, financial, and analytical requirements into clear recommendations for{' '}
+        <strong>executive stakeholders</strong>.
+      </div>
+    )
+  }
+
   return (
     <Card full tileId="patient-summary">
       <CardHeader dotColor="teal" title="PATIENT SUMMARY" />
@@ -61,8 +75,8 @@ export function PatientSummaryTile() {
         ))}
       </div>
 
-      {/* Profile text with improved readability */}
-      <div style={profileTextStyles}>{personalStatement}</div>
+      {/* Profile text with visual hierarchy through bold key phrases */}
+      {renderProfileWithHierarchy()}
     </Card>
   )
 }
