@@ -9,6 +9,7 @@ import { ConsultationDetail } from './detail/ConsultationDetail'
 import { SkillDetail } from './detail/SkillDetail'
 import { SkillsAllDetail } from './detail/SkillsAllDetail'
 import { EducationDetail } from './detail/EducationDetail'
+import { ProjectDetail } from './detail/ProjectDetail'
 
 // Width mapping from content type
 const widthMap: Record<DetailPanelContent['type'], 'narrow' | 'wide'> = {
@@ -221,29 +222,7 @@ export function DetailPanel() {
           {content.type === 'skill' && <SkillDetail skill={content.skill} />}
           {content.type === 'skills-all' && <SkillsAllDetail category={content.category} />}
           {content.type === 'education' && <EducationDetail document={content.document} />}
-
-          {/* Other content types - placeholder for future stories */}
-          {content.type !== 'kpi' &&
-            content.type !== 'consultation' &&
-            content.type !== 'career-role' &&
-            content.type !== 'skill' &&
-            content.type !== 'skills-all' &&
-            content.type !== 'education' && (
-              <div
-                style={{
-                  fontFamily: 'var(--font-ui)',
-                  color: 'var(--text-secondary)',
-                  fontSize: '14px',
-                }}
-              >
-                <p>
-                  Detail panel for: <strong>{content.type}</strong>
-                </p>
-                <p style={{ marginTop: '8px', fontSize: '12px' }}>
-                  Content renderers will be implemented in subsequent user stories.
-                </p>
-              </div>
-            )}
+          {content.type === 'project' && <ProjectDetail investigation={content.investigation} />}
         </div>
       </div>
     </>

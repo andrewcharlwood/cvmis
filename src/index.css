@@ -139,25 +139,6 @@
   --backdrop-blur: 4px;
   --backdrop-bg: rgba(26,43,42,0.15);
 
-  /* Legacy PMR tokens — kept for backward compat during transition (cleaned up in Task 21) */
-  --pmr-content: #F0F5F4;
-  --pmr-card: #FFFFFF;
-  --pmr-sidebar: #F7FAFA;
-  --pmr-banner: #334155;
-  --pmr-nhs-blue: #005EB8;
-  --pmr-green: #22C55E;
-  --pmr-amber: #F59E0B;
-  --pmr-red: #EF4444;
-  --pmr-text-primary: #1A2B2A;
-  --pmr-text-secondary: #5B7A78;
-  --pmr-border: #D4E0DE;
-  --pmr-border-dark: #D1D5DB;
-  --pmr-selected: #EFF6FF;
-  --pmr-alert-bg: #FEF3C7;
-  --pmr-alert-border: #F59E0B;
-  --pmr-alert-text: #92400E;
-  --pmr-radius: 8px;
-  --pmr-radius-login: 12px;
 }
 
 * {
@@ -192,11 +173,6 @@ body {
   }
   .font-geist-mono {
     font-family: var(--font-geist-mono);
-  }
-  .pmr-theme {
-    background-color: var(--bg-dashboard);
-    color: var(--text-primary);
-    font-family: var(--font-ui);
   }
 }
 
@@ -435,4 +411,15 @@ textarea:focus-visible {
     animation: none;
     border-top-color: #0D6E6E;
   }
+
+  /* Instant SubNav transitions */
+  .subnav-scroll button {
+    transition: none !important;
+  }
+
+  /* Instant smooth scroll override */
+  html {
+    scroll-behavior: auto;
+  }
+
 }

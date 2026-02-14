@@ -370,7 +370,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                     height: '6px',
                     borderRadius: '50%',
                     backgroundColor: connectionState === 'connected' ? '#059669' : '#DC2626',
-                    transition: 'background-color 300ms ease',
+                    transition: prefersReducedMotion ? 'none' : 'background-color 300ms ease',
                     flexShrink: 0,
                   }}
                 />
@@ -379,7 +379,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                     fontFamily: "var(--font-geist-mono, 'Geist Mono', monospace)",
                     fontSize: '10px',
                     color: connectionState === 'connected' ? '#059669' : '#8DA8A5',
-                    transition: 'color 300ms ease',
+                    transition: prefersReducedMotion ? 'none' : 'color 300ms ease',
                   }}
                 >
                   {connectionState === 'connected'
