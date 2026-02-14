@@ -581,8 +581,8 @@
                                                        "Typecheck passes"
                                                    ],
                             "priority":  32,
-                            "passes":  false,
-                            "notes":  ""
+                            "passes":  true,
+                            "notes":  "Completed. Reduced motion overrides for SubNav, connection status, smooth scroll. Created ProjectDetail renderer. Removed unused files (useBreakpoint.ts, profile.ts), legacy PMR CSS variables, placeholder fallback. Build/typecheck/lint all clean."
                         }
                     ]
 }

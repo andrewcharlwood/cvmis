@@ -4,11 +4,11 @@
 
 ### Project Structure
 - Components in `src/components/`, tiles in `src/components/tiles/`
-- Old views still in `src/components/views/` (to be removed in Task 21)
-- Data files in `src/data/` — consultations.ts, medications.ts, problems.ts, investigations.ts, documents.ts, patient.ts + new files: profile.ts, tags.ts, alerts.ts, kpis.ts, skills.ts
+- Detail renderers in `src/components/detail/` — KPIDetail, ConsultationDetail, SkillDetail, SkillsAllDetail, EducationDetail, ProjectDetail
+- Data files in `src/data/` — consultations.ts, medications.ts, problems.ts, investigations.ts, documents.ts, patient.ts, tags.ts, alerts.ts, kpis.ts, skills.ts, educationExtras.ts, constellation.ts
 - Types in `src/types/pmr.ts` (PMR interfaces) and `src/types/index.ts` (Phase type)
-- Hooks in `src/hooks/` — useScrollCondensation.ts, useBreakpoint.ts
-- Contexts in `src/contexts/` — AccessibilityContext.tsx (has 1 pre-existing ESLint warning — expected)
+- Hooks in `src/hooks/` — useActiveSection.ts, useFocusTrap.ts
+- Contexts in `src/contexts/` — AccessibilityContext.tsx (has 1 pre-existing ESLint warning — expected), DetailPanelContext.tsx (has 1 pre-existing ESLint warning — expected)
 - Lib in `src/lib/` — search.ts (fuse.js integration)
 - Path alias: `@/` maps to `./src/`
 
@@ -843,4 +843,23 @@
   - `scrollbarWidth: 'none'` (Firefox) + `::-webkit-scrollbar { display: none }` (Chrome/Safari) together hide scrollbars cross-browser
   - WCAG touch target minimum is 44x44px — check all `role="button"`, `<button>`, and clickable elements
   - SubNav at 375px has ~345px available (375 - 2*16px padding) — 5 short labels with 24px gaps fit without scroll, but the scroll fallback is good insurance
+
+## 2026-02-14 — US-032
+- **What was implemented:** Reduced motion audit, final cleanup, and visual review
+- **Files changed:**
+  - `src/index.css` — Added prefers-reduced-motion overrides for SubNav button transitions and smooth scroll behavior. Removed 18 unused `--pmr-*` legacy CSS variables and `.pmr-theme` utility class.
+  - `src/components/LoginScreen.tsx` — Connection status dot and text transitions now respect `prefersReducedMotion` (instant when enabled).
+  - `src/components/detail/ProjectDetail.tsx` — Created missing ProjectDetail renderer (project name, year, status badge, methodology, tech stack tags, results bullets, external link button).
+  - `src/components/DetailPanel.tsx` — Wired ProjectDetail for `content.type === 'project'`. Removed placeholder fallback (all content types now have renderers).
+  - Deleted `src/hooks/useBreakpoint.ts` (unused)
+  - Deleted `src/data/profile.ts` (unused — PatientSummaryTile has profile text hardcoded)
+- **Learnings for future iterations:**
+  - ProjectDetail was missing despite US-019 being marked as passed — always verify file existence, not just PRD status
+  - `profile.ts` was created but never imported — PatientSummaryTile hardcodes the profile text instead
+  - `useBreakpoint.ts` was orphaned after its consumers were deleted in US-001
+  - Legacy `--pmr-*` CSS variables were all superseded by the new design token system and safe to remove
+  - `pmr-scrollbar` class is still actively used (Sidebar, DashboardLayout, CommandPalette) — do not remove
+  - SubNav inline transitions need CSS `!important` override in prefers-reduced-motion since they're set via inline styles
+  - The `html { scroll-behavior: smooth }` also needs a reduced-motion override to `auto`
+---
 
