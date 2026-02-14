@@ -12,9 +12,10 @@ interface RoleItemProps {
   isExpanded: boolean
   onToggle: () => void
   onViewFull: () => void
+  onHighlight?: (id: string | null) => void
 }
 
-function RoleItem({ consultation, isExpanded, onToggle, onViewFull }: RoleItemProps) {
+function RoleItem({ consultation, isExpanded, onToggle, onViewFull, onHighlight }: RoleItemProps) {
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -38,6 +39,8 @@ function RoleItem({ consultation, isExpanded, onToggle, onViewFull }: RoleItemPr
         transition: 'border-color 0.15s, box-shadow 0.15s',
         overflow: 'hidden',
       }}
+      onMouseEnter={() => onHighlight?.(consultation.id)}
+      onMouseLeave={() => onHighlight?.(null)}
     >
       {/* Clickable header */}
       <div
@@ -254,7 +257,11 @@ function RoleItem({ consultation, isExpanded, onToggle, onViewFull }: RoleItemPr
   )
 }
 
-export function WorkExperienceSubsection() {
+interface WorkExperienceSubsectionProps {
+  onNodeHighlight?: (id: string | null) => void
+}
+
+export function WorkExperienceSubsection({ onNodeHighlight }: WorkExperienceSubsectionProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const { openPanel } = useDetailPanel()
 
@@ -280,6 +287,7 @@ export function WorkExperienceSubsection() {
             isExpanded={expandedId === c.id}
             onToggle={() => handleToggle(c.id)}
             onViewFull={() => handleViewFull(c)}
+            onHighlight={onNodeHighlight}
           />
         ))}
       </div>

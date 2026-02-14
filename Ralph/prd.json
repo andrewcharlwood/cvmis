@@ -213,7 +213,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "notes": "CareerConstellation already has hover logic that dims non-connected nodes. The new prop should trigger the same visual effect but from an external source. Use the existing adjacency map and opacity/stroke manipulation."
     },
     {

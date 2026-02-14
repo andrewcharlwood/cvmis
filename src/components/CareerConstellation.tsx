@@ -6,6 +6,7 @@ import type { ConstellationNode } from '@/types/pmr'
 interface CareerConstellationProps {
   onRoleClick: (id: string) => void
   onSkillClick: (id: string) => void
+  highlightedNodeId?: string | null
 }
 
 const DESKTOP_HEIGHT = 400
@@ -70,10 +71,12 @@ function buildScreenReaderDescription(): string {
 const CareerConstellation: React.FC<CareerConstellationProps> = ({
   onRoleClick,
   onSkillClick,
+  highlightedNodeId,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const simulationRef = useRef<d3.Simulation<SimNode, SimLink> | null>(null)
+  const connectedMapRef = useRef<Map<string, Set<string>>>(new Map())
   const [dimensions, setDimensions] = useState({ width: 800, height: DESKTOP_HEIGHT })
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null)
 
@@ -241,6 +244,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       connectedMap.get(l.source)!.add(l.target)
       connectedMap.get(l.target)!.add(l.source)
     })
+    connectedMapRef.current = connectedMap
 
     const HOVER_TRANSITION = '150ms'
 
@@ -396,6 +400,64 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         .attr('stroke', '#0D6E6E')
     }
   }, [focusedNodeId])
+
+  // External highlight from hovering experience/skill entries
+  useEffect(() => {
+    if (!svgRef.current) return
+    const svg = d3.select(svgRef.current)
+    const nodeSelection = svg.selectAll<SVGGElement, SimNode>('g.node')
+    const linkSelection = svg.selectAll<SVGLineElement, SimLink>('g.links line')
+
+    if (!highlightedNodeId) {
+      // Reset all
+      nodeSelection.style('opacity', '1')
+      nodeSelection.filter(d => d.type === 'skill')
+        .select('.node-circle')
+        .attr('r', SKILL_RADIUS)
+      linkSelection
+        .attr('stroke', '#B0C4C0')
+        .attr('stroke-width', 1.5)
+        .attr('stroke-opacity', 0.45)
+      return
+    }
+
+    const connected = connectedMapRef.current.get(highlightedNodeId) ?? new Set()
+
+    // Dim non-connected nodes
+    nodeSelection.style('opacity', d => {
+      if (d.id === highlightedNodeId || connected.has(d.id)) return '1'
+      return '0.15'
+    })
+
+    // Scale up connected skill nodes
+    const highlightedNode = constellationNodes.find(n => n.id === highlightedNodeId)
+    if (highlightedNode?.type === 'role') {
+      nodeSelection.filter(d => d.type === 'skill' && connected.has(d.id))
+        .select('.node-circle')
+        .attr('r', SKILL_RADIUS + 4)
+    }
+
+    // Brighten connected links
+    linkSelection
+      .attr('stroke', l => {
+        const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
+        const tgt = typeof l.target === 'string' ? l.target : (l.target as SimNode).id
+        if (src === highlightedNodeId || tgt === highlightedNodeId) return '#0D6E6E'
+        return '#B0C4C0'
+      })
+      .attr('stroke-opacity', l => {
+        const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
+        const tgt = typeof l.target === 'string' ? l.target : (l.target as SimNode).id
+        if (src === highlightedNodeId || tgt === highlightedNodeId) return 0.7
+        return 0.1
+      })
+      .attr('stroke-width', l => {
+        const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
+        const tgt = typeof l.target === 'string' ? l.target : (l.target as SimNode).id
+        if (src === highlightedNodeId || tgt === highlightedNodeId) return 2.5
+        return 1.5
+      })
+  }, [highlightedNodeId])
 
   return (
     <div

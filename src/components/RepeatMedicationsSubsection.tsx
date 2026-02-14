@@ -30,9 +30,10 @@ const categoryConfig: { id: SkillCategory; label: string }[] = [
 interface SkillRowProps {
   skill: SkillMedication
   onClick: () => void
+  onHighlight?: (id: string | null) => void
 }
 
-function SkillRow({ skill, onClick }: SkillRowProps) {
+function SkillRow({ skill, onClick, onHighlight }: SkillRowProps) {
   const IconComponent = iconMap[skill.icon]
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -64,10 +65,12 @@ function SkillRow({ skill, onClick }: SkillRowProps) {
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = 'var(--accent-border)'
         e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+        onHighlight?.(skill.id)
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = 'var(--border-light)'
         e.currentTarget.style.boxShadow = 'none'
+        onHighlight?.(null)
       }}
     >
       <div
@@ -135,6 +138,7 @@ interface CategorySectionProps {
   onSkillClick: (skill: SkillMedication) => void
   onViewAll: (category: SkillCategory) => void
   isFirst: boolean
+  onNodeHighlight?: (id: string | null) => void
 }
 
 function CategorySection({
@@ -144,6 +148,7 @@ function CategorySection({
   onSkillClick,
   onViewAll,
   isFirst,
+  onNodeHighlight,
 }: CategorySectionProps) {
   const visibleSkills = categorySkills.slice(0, SKILLS_PER_CATEGORY)
   const remainingCount = categorySkills.length - SKILLS_PER_CATEGORY
@@ -194,6 +199,7 @@ function CategorySection({
             key={skill.id}
             skill={skill}
             onClick={() => onSkillClick(skill)}
+            onHighlight={onNodeHighlight}
           />
         ))}
       </div>
@@ -232,7 +238,11 @@ function CategorySection({
   )
 }
 
-export function RepeatMedicationsSubsection() {
+interface RepeatMedicationsSubsectionProps {
+  onNodeHighlight?: (id: string | null) => void
+}
+
+export function RepeatMedicationsSubsection({ onNodeHighlight }: RepeatMedicationsSubsectionProps) {
   const { openPanel } = useDetailPanel()
 
   const groupedSkills = categoryConfig.map(({ id, label }) => ({
@@ -267,6 +277,7 @@ export function RepeatMedicationsSubsection() {
           onSkillClick={handleSkillClick}
           onViewAll={handleViewAll}
           isFirst={index === 0}
+          onNodeHighlight={onNodeHighlight}
         />
       ))}
     </div>

@@ -234,6 +234,7 @@ function LastConsultationSubsection() {
 
 export function DashboardLayout() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+  const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null)
   const activeSection = useActiveSection()
   const { openPanel } = useDetailPanel()
 
@@ -270,6 +271,10 @@ export function DashboardLayout() {
     },
     [openPanel],
   )
+
+  const handleNodeHighlight = useCallback((id: string | null) => {
+    setHighlightedNodeId(id)
+  }, [])
 
   // Global Ctrl+K listener to open command palette
   useEffect(() => {
@@ -379,6 +384,7 @@ export function DashboardLayout() {
               <CareerConstellation
                 onRoleClick={handleRoleClick}
                 onSkillClick={handleSkillClick}
+                highlightedNodeId={highlightedNodeId}
               />
 
               {/* Last Consultation subsection */}
@@ -386,8 +392,8 @@ export function DashboardLayout() {
 
               {/* Two-column experience/skills grid */}
               <div className="pathway-columns" style={{ marginTop: '24px' }}>
-                <WorkExperienceSubsection />
-                <RepeatMedicationsSubsection />
+                <WorkExperienceSubsection onNodeHighlight={handleNodeHighlight} />
+                <RepeatMedicationsSubsection onNodeHighlight={handleNodeHighlight} />
               </div>
 
               {/* Education subsection */}

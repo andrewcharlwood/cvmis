@@ -1001,3 +1001,17 @@
   - Hover reset values must exactly match the initial link styling — always update both together
   - Skill label offset (dy) should increase proportionally with radius: 14+14=28 (was 10+12=22)
 ---
+
+## 2026-02-14 - US-012
+- Added cross-component hover-highlighting between work experience/skills entries and the constellation graph
+- DashboardLayout: added `highlightedNodeId` state + `handleNodeHighlight` callback, wired to CareerConstellation, WorkExperienceSubsection, and RepeatMedicationsSubsection
+- CareerConstellation: new `highlightedNodeId` prop + `connectedMapRef` to store adjacency map + useEffect that applies same dim/highlight logic as internal hover when external ID changes
+- WorkExperienceSubsection: added `onNodeHighlight` prop, triggers on mouseenter/mouseleave of each RoleItem container (passes consultation.id)
+- RepeatMedicationsSubsection: added `onNodeHighlight` prop chain through CategorySection → SkillRow, integrated with existing hover handlers (passes skill.id)
+- Browser verified: hovering "Interim Head" work entry highlights corresponding role node + connected skills in graph; hovering "Python" skill entry highlights Python node + connected role nodes
+- Files changed: src/components/CareerConstellation.tsx, src/components/DashboardLayout.tsx, src/components/WorkExperienceSubsection.tsx, src/components/RepeatMedicationsSubsection.tsx
+- **Learnings for future iterations:**
+  - The `connectedMapRef` pattern stores the D3 adjacency map in a React ref so a separate useEffect (responding to prop changes) can read it without depending on the main D3 initialization useEffect
+  - External highlight useEffect must reset styles when highlightedNodeId becomes null — use the same baseline values as the hover mouseleave handler
+  - The onNodeHighlight callbacks integrate cleanly with existing mouseenter/mouseleave handlers in SkillRow (just append the highlight call)
+---
