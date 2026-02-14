@@ -1029,3 +1029,76 @@
   - Dynamically iterating over data arrays (consultations, investigations, skills) is more maintainable than hardcoded entries — data changes propagate automatically
   - The `expand` palette action type is still in the union but no longer used by any items — keeping the handler in DashboardLayout is harmless
 ---
+
+## Iteration 14 — US-014: Responsive verification and fixes (2026-02-14)
+
+### Status: PASSED ✅
+
+### Changes
+- **Card.tsx**: Added `minWidth: 0` and `overflow: 'hidden'` to base styles — fixes CSS Grid items defaulting to `min-width: auto` which prevented shrinking below intrinsic content width, causing 912px-wide articles at 375px viewport
+- **ParentSection.tsx**: Replaced fixed `fontSize: '2.4rem'` with responsive Tailwind classes: `text-[1.5rem] sm:text-[1.8rem] md:text-[2rem] lg:text-[2.4rem]` — scales parent section headers appropriately across breakpoints
+- **PatientSummaryTile.tsx**: Made KPI grid responsive — replaced hardcoded `gridTemplateColumns: '1fr 1fr'` with `grid-cols-1 xs:grid-cols-2` so KPIs stack single-column below 480px
+- **SubNav.tsx**: Fixed two issues:
+  1. Changed `justifyContent: 'center'` to left-aligned by default with `md:justify-center` — prevents first nav item being pushed off-screen at mobile widths
+  2. Updated stale tileIds (`core-skills`, `career-activity`, `education`) to match restructured dashboard anchors (`section-skills`, `section-experience`, `section-education`)
+- **DashboardLayout.tsx**: Added `data-tile-id` wrapper divs around WorkExperienceSubsection, RepeatMedicationsSubsection, and EducationSubsection so SubNav can scroll to these sections within Patient Pathway
+
+### Verification (Playwright at 4 breakpoints)
+- **375px (mobile)**: Single column, all articles 343px, no overflow, constellation SVG 301×250, pathway columns stacked, KPI grid single-column, SubNav starts from left edge
+- **768px (tablet)**: Two-column grid (352px each), full-width tiles 720px, pathway columns side-by-side (331px), KPI 2-column, sidebar hidden, no overflow
+- **1024px (desktop)**: Sidebar visible at 272px, two-column grid (340px each), full-width tiles 696px, pathway columns 2-column (319px), constellation SVG 678px
+- **1920px (wide)**: Two-column grid (788px each), full-width tiles 1592px, pathway columns 767px each, constellation SVG 1550px, well-balanced layout
+- **No horizontal scrollbar at any breakpoint** (`scrollWidth === clientWidth` confirmed at all 4 widths)
+
+### Learnings
+- CSS Grid items default to `min-width: auto` — always add `minWidth: 0` + `overflow: hidden` to grid item components to prevent content blowout
+- SubNav tileIds must be updated whenever dashboard sections are restructured — stale IDs cause scroll-to-section to silently fail
+- The `justifyContent: 'center'` on a scrollable flex container pushes the first items off-screen at narrow viewports — use media-query-based centering instead
+---
+
+## Iteration 15 — US-015: Explore parent header typography options
+**Status**: PASS
+**Commit**: (this iteration)
+
+### What was done
+Visual exploration of parent section header typography. Tested 14 combinations in Playwright by dynamically applying styles to the h2 elements and taking screenshots.
+
+### Options tested
+
+| # | Font | Weight | Size | Case | Tracking | Verdict |
+|---|------|--------|------|------|----------|---------|
+| 00 | Elvaro | 700 | 2.4rem | Title | normal | Baseline — solid but generic bold |
+| 01 | Elvaro | 500 | 2.4rem | Title | normal | Nearly identical to 700 |
+| 02 | Elvaro | 300 | 2.4rem | Title | normal | Lighter, more elegant |
+| 03 | Elvaro | 600 | 2.2rem | Title | -0.02em | **SELECTED** — compact, refined, premium |
+| 04 | Elvaro | 400 | 2.6rem | Title | -0.03em | Light + large, premium but lacks authority |
+| 05 | Elvaro | 900 | 2.4rem | Title | normal | ~Same as 700 (font caps out) |
+| 06 | Elvaro | 600 | 1.4rem | Upper | 0.08em | Too similar to sub-headers |
+| 07 | Elvaro | 500 | 1.8rem | Upper | 0.05em | Strong clinical feel, runner-up |
+| 08 | Blumir | 500 | 2.4rem | Title | -0.01em | Distinct geometric character |
+| 09 | Blumir | 300 | 2.8rem | Title | -0.02em | Elegant but lacks authority |
+| 10 | Blumir | 700 | 2.4rem | Title | -0.02em | Bold, assertive geometric |
+| 11 | Blumir | 100 | 3rem | Title | -0.01em | Too thin/delicate |
+| 12 | Blumir | 500 | 1.6rem | Upper | 0.06em | Blurs with sub-headers |
+| 13 | Elvaro | 600 | 2.4rem | Title | -0.02em | Teal color — competes with KPI accents |
+| 14 | Blumir | 400 | 2.6rem | Title | -0.03em | Clean, refined, distinct from body |
+
+### Selection: Option 3 — Elvaro Grotesque 600, 2.2rem, title case, -0.02em
+
+**Rationale:**
+- Font consistency (Elvaro throughout) — one typeface used well > two fonts competing
+- 600 weight with -0.02em tracking feels deliberately chosen, not default
+- Slightly smaller than baseline (2.2rem vs 2.4rem) is more data-dense/clinical
+- Title case preserves warmth and readability vs uppercase
+- Clear hierarchy: parent headers (2.2rem/600) > sub-headers (12px/600 uppercase) > body (13px/400)
+- Tight tracking gives premium, considered quality
+
+**Runner-up:** Option 7 (Elvaro 500, 1.8rem, uppercase, 0.05em) — strongest clinical identity but more austere
+
+### Key observations
+- Elvaro weights 500/700/900 render nearly identically — the font has limited visual weight range
+- Blumir's geometric character creates nice font contrast but mixing two typefaces adds complexity without clear benefit
+- Uppercase headers need careful sizing to not blur with the 12px uppercase sub-headers (LATEST RESULTS, etc.)
+- Teal-colored headers compete with KPI accent values — parent headers should stay in text-primary
+- Tight negative tracking (-0.02em to -0.03em) consistently improves the premium feel at heading sizes
+---

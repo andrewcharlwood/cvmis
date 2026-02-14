@@ -250,7 +250,7 @@
         "Verify in browser using dev-browser skill at 375px, 768px, 1024px, and 1920px widths"
       ],
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "notes": "Use Playwright to resize browser and take snapshots at each breakpoint. Fix any overflow, wrapping, or spacing issues found."
     },
     {
@@ -269,8 +269,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": "This story is about visual exploration. Try different combinations and screenshot them. The chosen option will be applied in the next story. Layout must already be in place (US-005 through US-009) so fonts can be judged in context. Use the bencium-innovative-ux-designer skill approach for design evaluation."
+      "passes": true,
+      "notes": "Explored 14 options across Elvaro (300-900) and Blumir (100-700), title case vs uppercase, sizes 1.4-3rem, various tracking. Selected: Elvaro Grotesque 600, 2.2rem, title case, -0.02em tracking. Rationale: font consistency, tight tracking feels premium, slightly reduced size is more data-dense/clinical, clear hierarchy above sub-headers."
     },
     {
       "id": "US-016",
