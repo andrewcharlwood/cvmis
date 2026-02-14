@@ -285,8 +285,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": "Depends on US-015 having selected a font treatment. Apply it consistently to ParentSection.tsx."
+      "passes": true,
+      "notes": "Applied Elvaro Grotesque 600, -0.02em tracking with responsive scale: 1.375rem (mobile) → 1.6rem (sm) → 1.8rem (md) → 2.2rem (lg). Both headers identical. Verified at 375px (22px) and 1024px+ (35.2px)."
     },
     {
       "id": "US-017",

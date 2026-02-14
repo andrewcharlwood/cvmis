@@ -12,9 +12,10 @@ export function ParentSection({ title, children, className, tileId }: ParentSect
   return (
     <Card full className={className} tileId={tileId}>
       <h2
-        className="text-[1.5rem] sm:text-[1.8rem] md:text-[2rem] lg:text-[2.4rem]"
+        className="text-[1.375rem] sm:text-[1.6rem] md:text-[1.8rem] lg:text-[2.2rem]"
         style={{
-          fontWeight: 700,
+          fontWeight: 600,
+          letterSpacing: '-0.02em',
           color: 'var(--text-primary)',
           lineHeight: 1.1,
           margin: 0,

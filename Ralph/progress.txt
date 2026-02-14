@@ -1102,3 +1102,25 @@ Visual exploration of parent section header typography. Tested 14 combinations i
 - Teal-colored headers compete with KPI accent values — parent headers should stay in text-primary
 - Tight negative tracking (-0.02em to -0.03em) consistently improves the premium feel at heading sizes
 ---
+
+## Iteration 16 — US-016: Apply chosen parent header typography
+**Status**: PASS
+**Commit**: (this iteration)
+
+### What was done
+Applied the selected typography from US-015 to ParentSection.tsx:
+- **Font**: Elvaro Grotesque (unchanged — consistent with body)
+- **Weight**: 600 (down from 700)
+- **Letter-spacing**: -0.02em (tight tracking)
+- **Responsive scale**: `1.375rem` → `1.6rem` (sm) → `1.8rem` (md) → `2.2rem` (lg)
+  - Previous: `1.5rem` → `1.8rem` → `2rem` → `2.4rem`
+
+### Changes
+- **ParentSection.tsx**: Updated h2 className responsive sizes and inline style (fontWeight 700→600, added letterSpacing -0.02em)
+
+### Verification
+- **Desktop (1024px+)**: 35.2px / 600 weight / -0.704px tracking — refined, premium feel
+- **Mobile (375px)**: 22px / 600 weight — proportional, readable
+- Both "Patient Summary" and "Patient Pathway" headers identical
+- Clear hierarchy: parent headers (2.2rem/600) > sub-headers (12px/600 uppercase) > body (13px/400)
+---
