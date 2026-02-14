@@ -40,7 +40,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
           textDecoration: 'none',
           zIndex: 101,
           borderRadius: '0 0 4px 0',
-          fontSize: '13px',
+          fontSize: '14px',
           fontWeight: 600,
         }}
         onFocus={(e) => {
@@ -55,14 +55,14 @@ export function TopBar({ onSearchClick }: TopBarProps) {
       {/* Brand */}
       <div className="flex items-center gap-2 shrink-0">
         <Home
-          size={18}
+          size={20}
           style={{ color: 'var(--accent)' }}
           aria-hidden="true"
         />
         <span
           className="font-ui hidden sm:inline"
           style={{
-            fontSize: '13px',
+            fontSize: '15px',
             fontWeight: 600,
             color: 'var(--text-primary)',
           }}
@@ -72,7 +72,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
         <span
           className="font-ui sm:hidden"
           style={{
-            fontSize: '13px',
+            fontSize: '15px',
             fontWeight: 600,
             color: 'var(--text-primary)',
           }}
@@ -82,7 +82,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
         <span
           className="hidden md:inline"
           style={{
-            fontSize: '11px',
+            fontSize: '12px',
             fontWeight: 400,
             color: 'var(--text-tertiary)',
             marginLeft: '2px',
@@ -100,7 +100,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
         style={{
           maxWidth: '560px',
           minWidth: '400px',
-          height: '42px',
+          height: '46px',
           border: '1.5px solid var(--border)',
           borderRadius: 'var(--radius-card)',
           padding: '0 14px',
@@ -126,14 +126,14 @@ export function TopBar({ onSearchClick }: TopBarProps) {
         aria-label="Search records, experience, skills. Press Control plus K"
       >
         <Search
-          size={16}
+          size={17}
           style={{ color: 'var(--text-tertiary)', flexShrink: 0 }}
           aria-hidden="true"
         />
         <span
           className="flex-1 text-left"
           style={{
-            fontSize: '13px',
+            fontSize: '14px',
             color: 'var(--text-tertiary)',
             fontFamily: 'var(--font-ui)',
           }}
@@ -143,7 +143,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
         <kbd
           className="font-geist"
           style={{
-            fontSize: '10px',
+            fontSize: '11px',
             color: 'var(--text-tertiary)',
             background: 'var(--bg-dashboard)',
             border: '1px solid var(--border)',
@@ -164,7 +164,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
         <span
           className="hidden sm:inline"
           style={{
-            fontSize: '12px',
+            fontSize: '13px',
             color: 'var(--text-secondary)',
             fontFamily: 'var(--font-ui)',
           }}
@@ -174,7 +174,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
         <span
           className="font-geist hidden xs:inline"
           style={{
-            fontSize: '11px',
+            fontSize: '12px',
             color: 'var(--text-tertiary)',
             background: 'var(--accent-light)',
             padding: '3px 10px',
@@ -187,7 +187,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
         <span
           className="font-geist xs:hidden"
           style={{
-            fontSize: '11px',
+            fontSize: '12px',
             color: 'var(--text-tertiary)',
             background: 'var(--accent-light)',
             padding: '3px 8px',

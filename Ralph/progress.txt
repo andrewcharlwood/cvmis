@@ -58,6 +58,28 @@
 
 ---
 
+## 2026-02-14 — US-019
+- Updated --sidebar-width 272px→304px, --topbar-height 48px→56px, --subnav-height 36px→42px in index.css
+- Updated .dashboard-grid gap from 12px→14px (mobile), 16px→20px (tablet/desktop)
+- Updated Card.tsx: padding 20px→24px, CardHeader title fontSize 12px→13px, rightText fontSize 10px→11px, dot 8px→9px, marginBottom 16px→18px
+- Files changed: src/index.css, src/components/Card.tsx
+- **Learnings for future iterations:**
+  - CSS vars (--sidebar-width, --topbar-height, --subnav-height) propagate automatically to TopBar, Sidebar, DashboardLayout — no additional changes needed
+  - Card padding and CardHeader sizing affect every tile in the dashboard since all tiles use these components
+  - Dashboard grid gap is defined in 3 media query blocks in index.css: base (mobile), 768px (tablet), 1024px (desktop)
+---
+
+## 2026-02-14 — US-020
+- Scaled TopBar: brand text 13px→15px, 'Remote' label 11px→12px, search text 13px→14px, search height 42px→46px, Ctrl+K kbd 10px→11px, A.RECRUITER 12px→13px, session badge 11px→12px, skip-link 13px→14px, Home icon 18→20, Search icon 16→17
+- Scaled SubNav: tab fontSize 13px→14px, minHeight 36px→42px
+- Files changed: src/components/TopBar.tsx, src/components/SubNav.tsx
+- **Learnings for future iterations:**
+  - TopBar has two brand spans: one for desktop (sm:inline) and one for mobile (sm:hidden) — both need fontSize updates
+  - TopBar session badge also has two spans: one for xs+ (xs:inline) and one for mobile (xs:hidden) — both need updating
+  - SubNav height is controlled by both the CSS var (--subnav-height) and the button minHeight — both should match
+  - SubNav uses sticky positioning with top: var(--topbar-height), so it automatically adjusts when topbar height changes
+---
+
 ## 2026-02-14 — US-018
 - Changed initial Phase state from 'boot' to 'pmr' in src/App.tsx (line 47)
 - Boot/ECG/login phases remain in code — only the default state changed

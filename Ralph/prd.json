@@ -34,7 +34,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "These are foundational tokens — many components reference --sidebar-width, --topbar-height, --subnav-height via CSS vars, so changes propagate automatically. Card.tsx changes affect every card and subsection header in the dashboard."
     },
     {
@@ -58,7 +58,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "TopBar and SubNav heights are controlled by CSS vars updated in US-019. This story just scales the internal text and elements. The search bar min/max widths may also need slight adjustment — use judgement."
     },
     {

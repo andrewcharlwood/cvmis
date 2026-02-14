@@ -58,7 +58,7 @@ export function SubNav({ activeSection, onSectionClick }: SubNavProps) {
             aria-current={isActive ? 'true' : undefined}
             style={{
               position: 'relative',
-              fontSize: '13px',
+              fontSize: '14px',
               fontWeight: 500,
               color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
               background: 'none',
@@ -68,7 +68,7 @@ export function SubNav({ activeSection, onSectionClick }: SubNavProps) {
               transition: 'color 200ms ease-out',
               fontFamily: 'var(--font-ui)',
               flexShrink: 0,
-              minHeight: '36px',
+              minHeight: '42px',
               display: 'flex',
               alignItems: 'center',
             }}
