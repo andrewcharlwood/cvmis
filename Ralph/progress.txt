@@ -983,3 +983,21 @@
   - The `.activity-grid` CSS was orphaned when CareerActivityTile was removed — always check for CSS classes that were only used by deleted components
   - Only 2 tile files remain in src/components/tiles/: PatientSummaryTile.tsx and ProjectsTile.tsx
 ---
+
+## 2026-02-14 - US-011
+- Improved constellation graph visual clarity with larger nodes, thicker links, and better contrast
+- Role node radius: 24→30, skill node radius: 10→14, collide radius: 30→36
+- Role label font: 8→10px, skill label font: 9→11px, skill label color darkened (#5B7A78→#4A6B69)
+- Link stroke: 1→1.5px, opacity: 0.3→0.45, color: #D4E0DE→#B0C4C0 (darker, more visible)
+- Background gradient: center #F0F5F4→#EDF2F1 (slightly darker), edge #FFFFFF→#F7FAF9 (warmer)
+- Force simulation: charge -200→-120, link distance 80→65, link strength 0.5→0.6, Y strength 0.3→0.4, skill X pull 0.05→0.08, padding 80→60
+- Hover highlight link width: 2→2.5px, skill scale-up: +3→+4px
+- All existing interactions preserved (hover dim/highlight, click, keyboard nav)
+- Responsive height tiers unchanged (400/300/250px)
+- Files changed: src/components/CareerConstellation.tsx
+- **Learnings for future iterations:**
+  - Reducing charge repulsion (-200→-120) combined with shorter link distance (80→65) makes nodes cluster more tightly, filling the container better
+  - The `#B0C4C0` link color at 0.45 opacity provides much better visibility than `#D4E0DE` at 0.3 while still being subtle
+  - Hover reset values must exactly match the initial link styling — always update both together
+  - Skill label offset (dy) should increase proportionally with radius: 14+14=28 (was 10+12=22)
+---

@@ -193,7 +193,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "notes": "The key issue is readability — the current graph is too sparse/faint. Larger nodes, thicker links, and stronger colours will help. The background should provide subtle contrast so the white card surface feels like the graph 'lives somewhere'."
     },
     {

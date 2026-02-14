@@ -12,9 +12,9 @@ const DESKTOP_HEIGHT = 400
 const TABLET_HEIGHT = 300
 const MOBILE_HEIGHT = 250
 
-const ROLE_RADIUS = 24
-const SKILL_RADIUS = 10
-const COLLIDE_RADIUS = 30
+const ROLE_RADIUS = 30
+const SKILL_RADIUS = 14
+const COLLIDE_RADIUS = 36
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -131,8 +131,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .attr('cx', '50%')
       .attr('cy', '50%')
       .attr('r', '60%')
-    gradient.append('stop').attr('offset', '0%').attr('stop-color', '#F0F5F4')
-    gradient.append('stop').attr('offset', '100%').attr('stop-color', '#FFFFFF')
+    gradient.append('stop').attr('offset', '0%').attr('stop-color', '#EDF2F1')
+    gradient.append('stop').attr('offset', '100%').attr('stop-color', '#F7FAF9')
 
     // Background rect
     svg.append('rect')
@@ -160,7 +160,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     const years = simRoleNodes.map(n => n.startYear ?? 2016)
     const minYear = Math.min(...years)
     const maxYear = Math.max(...years)
-    const padding = 80
+    const padding = 60
 
     const xScale = d3.scaleLinear()
       .domain([minYear, maxYear])
@@ -172,9 +172,9 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     const linkSelection = linkGroup.selectAll('line')
       .data(links)
       .join('line')
-      .attr('stroke', '#D4E0DE')
-      .attr('stroke-width', 1)
-      .attr('stroke-opacity', 0.3)
+      .attr('stroke', '#B0C4C0')
+      .attr('stroke-width', 1.5)
+      .attr('stroke-opacity', 0.45)
 
     const nodeSelection = nodeGroup.selectAll<SVGGElement, SimNode>('g')
       .data(nodes)
@@ -206,7 +206,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
       .attr('fill', '#FFFFFF')
-      .attr('font-size', '8')
+      .attr('font-size', '10')
       .attr('font-weight', '600')
       .attr('font-family', 'var(--font-ui)')
       .attr('pointer-events', 'none')
@@ -226,9 +226,9 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .append('text')
       .attr('class', 'node-label')
       .attr('text-anchor', 'middle')
-      .attr('dy', SKILL_RADIUS + 12)
-      .attr('fill', '#5B7A78')
-      .attr('font-size', '9')
+      .attr('dy', SKILL_RADIUS + 14)
+      .attr('fill', '#4A6B69')
+      .attr('font-size', '11')
       .attr('font-family', 'var(--font-geist-mono)')
       .attr('pointer-events', 'none')
       .text(d => d.shortLabel ?? d.label)
@@ -262,7 +262,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         nodeSelection.filter(n => n.type === 'skill' && connected.has(n.id))
           .select('.node-circle')
           .transition().duration(150)
-          .attr('r', SKILL_RADIUS + 3)
+          .attr('r', SKILL_RADIUS + 4)
       }
 
       // Brighten connected links, dim others
@@ -272,7 +272,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
           const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
           const tgt = typeof l.target === 'string' ? l.target : (l.target as SimNode).id
           if (src === d.id || tgt === d.id) return '#0D6E6E'
-          return '#D4E0DE'
+          return '#B0C4C0'
         })
         .attr('stroke-opacity', l => {
           const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
@@ -283,8 +283,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         .attr('stroke-width', l => {
           const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
           const tgt = typeof l.target === 'string' ? l.target : (l.target as SimNode).id
-          if (src === d.id || tgt === d.id) return 2
-          return 1
+          if (src === d.id || tgt === d.id) return 2.5
+          return 1.5
         })
     })
 
@@ -301,9 +301,9 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
       // Reset all links
       linkSelection
-        .attr('stroke', '#D4E0DE')
-        .attr('stroke-width', 1)
-        .attr('stroke-opacity', 0.3)
+        .attr('stroke', '#B0C4C0')
+        .attr('stroke-width', 1.5)
+        .attr('stroke-opacity', 0.45)
     })
 
     // Click interactions
@@ -317,20 +317,20 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
     // Force simulation
     const simulation = d3.forceSimulation<SimNode>(nodes)
-      .force('charge', d3.forceManyBody<SimNode>().strength(-200))
+      .force('charge', d3.forceManyBody<SimNode>().strength(-120))
       .force('link', d3.forceLink<SimNode, SimLink>(links)
         .id(d => d.id)
-        .distance(80)
-        .strength(d => (d as SimLink).strength * 0.5))
+        .distance(65)
+        .strength(d => (d as SimLink).strength * 0.6))
       .force('x', d3.forceX<SimNode>(d => {
         if (d.type === 'role' && d.startYear != null) {
           return xScale(d.startYear)
         }
         return width / 2
-      }).strength(d => d.type === 'role' ? 0.8 : 0.05))
-      .force('y', d3.forceY<SimNode>(height / 2).strength(0.3))
+      }).strength(d => d.type === 'role' ? 0.8 : 0.08))
+      .force('y', d3.forceY<SimNode>(height / 2).strength(0.4))
       .force('collide', d3.forceCollide<SimNode>(d =>
-        d.type === 'role' ? COLLIDE_RADIUS : SKILL_RADIUS + 4
+        d.type === 'role' ? COLLIDE_RADIUS : SKILL_RADIUS + 6
       ))
 
     simulationRef.current = simulation
