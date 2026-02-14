@@ -131,3 +131,37 @@
   - Main content padding uses Tailwind responsive classes on <motion.main> — these are cumulative (p-5 base, md:p-7 overrides, lg:px-8/lg:pt-7 overrides further)
 ---
 
+## 2026-02-14 — US-024
+- Scaled ProjectsTile: ProjectItem fontSize 11.5px→13px, padding 10px/12px→12px/16px
+- Status dot 7px→8px, year label 10px→11px, tech stack tags 9px→10px (padding 2px/6px→3px/8px)
+- Project list gap 8px→10px
+- Scaled EducationSubsection: base fontSize 12px→13px, entry padding 10px/12px→12px/16px
+- Education title 12.5px→14px, institution 11px→12px, detail 10.5px→12px, year 10px→11px
+- Education list gap 10px→12px
+- Files changed: src/components/tiles/ProjectsTile.tsx, src/components/EducationSubsection.tsx
+- **Learnings for future iterations:**
+  - ProjectsTile and EducationSubsection follow the same list-item-in-card pattern — similar inline styles with padding, fontSize, and gap
+  - ProjectItem year label fontSize is a standalone `10px` in a `<span>` — only one occurrence in the file, easy to target
+  - EducationSubsection has a single `fontSize: '12px'` on the button element that acts as the base font for the entry
+  - Education detail items use font-geist (monospace) for the "technical texture" pattern, consistent with KPI sublabels
+---
+
+## 2026-02-14 — US-025
+- Scaled WorkExperienceSubsection: role title 12.5px→14px, organisation 11px→12px, duration 10px→11px
+- Role item header padding 10px/12px→12px/14px, teal dot 8px→9px
+- Expanded content: examination bullet 11.5px→13px, coded entry tags 10px→11px (padding 2px/6px→3px/8px)
+- View full record link 11px→12px, role list gap 8px→10px
+- Scaled RepeatMedicationsSubsection: skill name 12.5px→14px, frequency text 10.5px→12px
+- Skill status badge 10px→11px (padding 2px/7px→3px/8px), skill row padding 8px/10px→10px/12px
+- Skill icon container 26px→30px, icon size 13→15
+- Category section label 10px→11px, item count 10px→11px, view all button 11px→12px
+- Skill row gap 6px→8px
+- Files changed: src/components/WorkExperienceSubsection.tsx, src/components/RepeatMedicationsSubsection.tsx
+- **Learnings for future iterations:**
+  - WorkExperienceSubsection and RepeatMedicationsSubsection sit side-by-side in the two-column Patient Pathway layout
+  - Both components use inline style objects extensively — all sizing changes are mechanical find-and-replace
+  - RepeatMedicationsSubsection has CategorySection as a local component — category label and item count fontSize are in there, not in SkillRow
+  - The category section label fontSize (`10px`) appears once as a unique pattern (with textTransform: 'uppercase') — safe to use replace_all
+  - SkillRow gap is inside CategorySection's visibleSkills container, not on the outer RepeatMedicationsSubsection
+---
+

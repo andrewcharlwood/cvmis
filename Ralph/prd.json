@@ -148,7 +148,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Both are list-style components with similar patterns. ProjectsTile is a standalone card, EducationSubsection is inside Patient Pathway."
     },
     {
@@ -178,7 +178,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "These two components sit side by side in the Patient Pathway two-column layout. Both are dense with inline style objects. The changes are mechanical — find each fontSize/padding and bump it up."
     },
     {
