@@ -61,7 +61,7 @@ export function SkillsAllDetail({ category }: SkillsAllDetailProps) {
             key={group.id}
             ref={(el) => { categoryRefs.current[group.id] = el }}
           >
-            {/* Category header — matches CoreSkillsTile divider style */}
+            {/* Category header — divider style */}
             <div
               style={{
                 display: 'flex',

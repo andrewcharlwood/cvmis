@@ -153,7 +153,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "Education is the bottom-most subsection in Patient Pathway. Include A-Levels: Mathematics (A*), Chemistry (B), Politics (C) — Highworth Grammar School, 2009–2011."
     },
     {
@@ -173,7 +173,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "ProjectsTile may remain as a standalone tile or be absorbed — check if it still makes sense as standalone. If so, keep it. The key outcome is that the deleted tiles have no remaining references."
     },
     {

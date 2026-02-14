@@ -957,3 +957,29 @@
   - CoreSkillsTile.tsx still exists but is no longer imported from DashboardLayout — US-010 will clean it up
   - The RepeatMedicationsSubsection is a near-copy of CoreSkillsTile internals minus the Card wrapper — both files exist until cleanup in US-010
 ---
+
+## 2026-02-14 - US-009
+- Moved Education content from standalone EducationTile into Patient Pathway ParentSection as the bottom-most subsection
+- Created `src/components/EducationSubsection.tsx` — standalone component with purple dot CardHeader "EDUCATION", renders 3 entries (Mary Seacole, MPharm, A-Levels) with hover, click-to-detail panel, inline details
+- Deleted `src/components/tiles/EducationTile.tsx` — content fully moved to EducationSubsection
+- Updated DashboardLayout: replaced EducationTile import/render with EducationSubsection inside Patient Pathway
+- Files changed: src/components/DashboardLayout.tsx (modified), src/components/EducationSubsection.tsx (new), src/components/tiles/EducationTile.tsx (deleted)
+- **Learnings for future iterations:**
+  - Git detected the move as a rename (91% similarity) — the EducationSubsection is nearly identical to EducationTile minus the Card wrapper
+  - Same pattern as WorkExperienceSubsection and RepeatMedicationsSubsection: standalone file, `marginTop: 24px` for spacing from preceding section, uses CardHeader for subsection header
+  - All Patient Pathway subsections now in place: CareerConstellation → LastConsultation → WorkExperience + RepeatMedications (two-column) → Education
+---
+
+## 2026-02-14 - US-010
+- Deleted 3 orphaned tile files: CareerActivityTile.tsx, CoreSkillsTile.tsx, LatestResultsTile.tsx (LastConsultationTile and EducationTile were already deleted in US-007/US-009)
+- Removed unused `.activity-grid` CSS class from index.css (was only used by deleted CareerActivityTile)
+- Updated 2 stale comments referencing deleted tiles (index.css, SkillsAllDetail.tsx)
+- Verified no broken imports remain — grep found zero import references to any deleted tile
+- Verified dashboard grid: PatientSummaryTile (full width) + ProjectsTile (half width) + Patient Pathway ParentSection (full width)
+- Browser verification: no visual gaps, all content renders correctly
+- Files changed: src/components/tiles/CareerActivityTile.tsx (deleted), src/components/tiles/CoreSkillsTile.tsx (deleted), src/components/tiles/LatestResultsTile.tsx (deleted), src/index.css, src/components/detail/SkillsAllDetail.tsx
+- **Learnings for future iterations:**
+  - ProjectsTile remains as a standalone tile — it makes sense outside Patient Pathway since projects are cross-cutting, not career-timeline-specific
+  - The `.activity-grid` CSS was orphaned when CareerActivityTile was removed — always check for CSS classes that were only used by deleted components
+  - Only 2 tile files remain in src/components/tiles/: PatientSummaryTile.tsx and ProjectsTile.tsx
+---

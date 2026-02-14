@@ -286,20 +286,6 @@ html {
 }
 
 
-/* Activity grid responsive — mobile-first (used in CareerActivityTile) */
-.activity-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
-
-/* Tablet and up: 2 columns */
-@media (min-width: 768px) {
-  .activity-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
 /* Pathway two-column layout — mobile-first (used in Patient Pathway) */
 .pathway-columns {
   display: grid;
