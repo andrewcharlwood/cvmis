@@ -863,3 +863,11 @@
   - The `html { scroll-behavior: smooth }` also needs a reduced-motion override to `auto`
 ---
 
+## 2026-02-14 - US-001 (Dashboard Restructure PRD)
+- Changed initial Phase state in App.tsx from 'boot' to 'pmr' to skip boot/login for dev iteration
+- Files changed: src/App.tsx
+- Created Ralph/prd.json for new Dashboard Restructure PRD (17 stories)
+- **Learnings for future iterations:**
+  - Branch `ralph/dashboard-restructure` created fresh from master
+  - All previous codebase patterns still apply
+---

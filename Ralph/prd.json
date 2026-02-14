@@ -1,0 +1,307 @@
+{
+  "project": "Portfolio — Dashboard Restructure & Graph Improvements",
+  "branchName": "ralph/dashboard-restructure",
+  "description": "Restructure the dashboard into two parent sections (Patient Summary, Patient Pathway), improve constellation graph clarity, add hover-highlighting between experience/skills and graph, remove inaccurate CV data, and explore parent header typography.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Skip boot/login sequence for dev iteration",
+      "description": "As a developer, I want to skip the boot/ECG/login animation during this feature branch so I can iterate on the dashboard quickly.",
+      "acceptanceCriteria": [
+        "In src/App.tsx, change the initial Phase state from 'boot' to 'pmr' so the app loads directly to the dashboard",
+        "The boot, ECG, and login phases are still present in code — only the initial state changes",
+        "App loads directly to the dashboard layout on refresh",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Temporary — final story reverts this."
+    },
+    {
+      "id": "US-002",
+      "title": "Remove inaccurate CV data from consultations and constellation",
+      "description": "As Andy, I want only real career entries so the portfolio doesn't contain fabricated content.",
+      "acceptanceCriteria": [
+        "Remove the 'duty-pharmacist-2016' entry from src/data/consultations.ts — this role is not in References/CV_v4.md",
+        "Remove the corresponding role node for duty-pharmacist-2016 from src/data/constellation.ts constellationNodes array",
+        "Remove all links referencing duty-pharmacist-2016 from constellationLinks array",
+        "Remove duty-pharmacist-2016 from roleSkillMappings",
+        "Verify 4 roles remain in consultations.ts: interim-head-2025, deputy-head-2024, high-cost-drugs-2022, pharmacy-manager-2017",
+        "Verify 4 role nodes remain in constellation.ts",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Check References/CV_v4.md for the accurate role list. The CV has 4 roles: Interim Head, Deputy Head, High-Cost Drugs, Pharmacy Manager (Tesco)."
+    },
+    {
+      "id": "US-003",
+      "title": "Fix inaccurate timeline entries in CareerActivityTile",
+      "description": "As Andy, I want the career timeline to only show real certifications and remove fabricated project entries.",
+      "acceptanceCriteria": [
+        "In src/components/tiles/CareerActivityTile.tsx buildTimeline() function, remove the 'Power BI Data Analyst Associate' certification entry — not in CV",
+        "Remove the 'Clinical Pharmacy Diploma' certification entry — not in CV",
+        "Add 'NHS Leadership Academy — Mary Seacole Programme' as a certification entry with date '2018' and meta 'NHS leadership qualification'",
+        "Remove the 'SQL Analytics Transformation' project entry — not a standalone project in the CV",
+        "Remove the 'Budget Oversight' project entry — budget management is a skill, not a project",
+        "Add A-Levels entry: title 'A-Levels: Mathematics (A*), Chemistry (B), Politics (C)', meta 'Highworth Grammar School', date '2009–2011', type 'edu'",
+        "Verify remaining timeline matches CV_v4.md: 4 roles + GPhC Registration + MPharm + Mary Seacole + A-Levels",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Reference CV at References/CV_v4.md. The role entries in the timeline reference consultations by consultationId — since duty-pharmacist-2016 was removed in US-002, also remove any timeline entry referencing it."
+    },
+    {
+      "id": "US-004",
+      "title": "Create ParentSection component for hierarchical layout",
+      "description": "As a developer, I need a parent section wrapper component that visually distinguishes top-level sections from child subsections.",
+      "acceptanceCriteria": [
+        "Create src/components/ParentSection.tsx with props: title (string), children (ReactNode), optional className",
+        "Parent section renders as a Card (using existing Card component) spanning full width",
+        "Header text is large and prominent — at minimum 2.4rem (36px at 1920px) — clearly a top-level section marker, not a small label",
+        "Header uses font-ui (Elvaro Grotesque) at weight 600-700",
+        "Header text color is pmr-text-primary (#1A2B2A)",
+        "No colored dot on parent headers (dots are for subsections only)",
+        "20px (1.333rem) padding below header before children content",
+        "Component accepts children which will be the subsections",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "This is a new component — not modifying Card.tsx. ParentSection wraps Card and adds the large header treatment. Subsection headers continue to use the existing CardHeader style (12px uppercase with colored dot)."
+    },
+    {
+      "id": "US-005",
+      "title": "Restructure Patient Summary as parent section with Latest Results subsection",
+      "description": "As a visitor, I want Patient Summary to contain the profile and Latest Results as a subsection.",
+      "acceptanceCriteria": [
+        "In DashboardLayout.tsx, replace the standalone PatientSummaryTile and LatestResultsTile with a single ParentSection titled 'Patient Summary'",
+        "Inside the ParentSection, render the profile text (from PatientSummaryTile) first",
+        "Remove the 4 headline metric figures (9+ Years, 1.2M, £220M, £14.6M+) that are currently in PatientSummaryTile — these are redundant with the KPIs",
+        "Below the profile text, render Latest Results content as a subsection with its own CardHeader-style header ('LATEST RESULTS' with teal dot)",
+        "KPI flip cards retain their existing click-to-detail behaviour",
+        "The standalone LatestResultsTile import is removed from DashboardLayout",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "The Latest Results subsection should look like a section within the parent card — use a CardHeader for 'LATEST RESULTS' and render the KPI grid below it. The parent ParentSection header 'Patient Summary' should be visually dominant."
+    },
+    {
+      "id": "US-006",
+      "title": "Create Patient Pathway parent section with constellation graph",
+      "description": "As a visitor, I want a 'Patient Pathway' parent section that contains the constellation graph at the top.",
+      "acceptanceCriteria": [
+        "In DashboardLayout.tsx, replace the standalone CareerActivityTile with a ParentSection titled 'Patient Pathway'",
+        "The constellation graph (CareerConstellation component) renders at the top of the Patient Pathway section",
+        "The CareerConstellation receives onRoleClick and onSkillClick handlers (same as current CareerActivityTile)",
+        "The standalone CareerActivityTile import is removed from DashboardLayout",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "This story just sets up the parent section with the graph. The Last Consultation, experience/skills columns, and education are added in subsequent stories."
+    },
+    {
+      "id": "US-007",
+      "title": "Move Last Consultation into Patient Pathway as subsection",
+      "description": "As a visitor, I want the most recent role details to appear within Patient Pathway below the graph.",
+      "acceptanceCriteria": [
+        "Inside the Patient Pathway ParentSection (below the constellation graph), add a 'LAST CONSULTATION' subsection with green dot CardHeader",
+        "Render the last consultation content: date, organisation, type, band, role title, examination bullets — same content as the current LastConsultationTile",
+        "The standalone LastConsultationTile is removed from DashboardLayout grid",
+        "The LastConsultationTile.tsx file can be deleted (content is now inline in the Patient Pathway section)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Reuse the rendering logic from LastConsultationTile — either inline it or extract a shared sub-component. The important thing is it lives inside the Patient Pathway ParentSection now."
+    },
+    {
+      "id": "US-008",
+      "title": "Add two-column experience and skills layout in Patient Pathway",
+      "description": "As a visitor, I want work experience on the left and skills on the right within Patient Pathway.",
+      "acceptanceCriteria": [
+        "Below the Last Consultation subsection in Patient Pathway, add a two-column CSS grid layout",
+        "Left column: subsection header 'WORK EXPERIENCE' (teal dot), lists all 4 roles from consultations.ts with accordion expand (one at a time)",
+        "Right column: subsection header 'REPEAT MEDICATIONS' (amber dot), shows categorised skills with expand — same content as CoreSkillsTile",
+        "Each role entry shows: role title, organisation, date range. Click to expand shows examination bullets and coded entries",
+        "On mobile (below md/768px), columns stack vertically: experience above skills",
+        "Grid gap matches the dashboard grid gap (16px / 1.067rem)",
+        "The standalone CoreSkillsTile is removed from DashboardLayout grid",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "Reuse expansion patterns from existing CareerActivityTile and CoreSkillsTile. The two-column layout is within the Patient Pathway ParentSection card, not separate cards."
+    },
+    {
+      "id": "US-009",
+      "title": "Move Education into Patient Pathway as subsection",
+      "description": "As a visitor, I want education entries at the bottom of Patient Pathway so all career-related info is in one place.",
+      "acceptanceCriteria": [
+        "Below the two-column experience/skills grid in Patient Pathway, add an 'EDUCATION' subsection with purple dot CardHeader",
+        "Render education entries: MPharm, Mary Seacole Programme, A-Levels (same content as EducationTile plus A-Levels added in US-003)",
+        "The standalone EducationTile is removed from DashboardLayout grid",
+        "The EducationTile.tsx file can be deleted (content now in Patient Pathway)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "Education is the bottom-most subsection in Patient Pathway. Include A-Levels: Mathematics (A*), Chemistry (B), Politics (C) — Highworth Grammar School, 2009–2011."
+    },
+    {
+      "id": "US-010",
+      "title": "Clean up removed standalone tiles and verify layout",
+      "description": "As a developer, I need to remove orphaned tile components and verify the dashboard grid has no gaps.",
+      "acceptanceCriteria": [
+        "Delete src/components/tiles/LastConsultationTile.tsx if not already deleted",
+        "Delete src/components/tiles/CoreSkillsTile.tsx if not already deleted",
+        "Delete src/components/tiles/LatestResultsTile.tsx if not already deleted",
+        "Delete src/components/tiles/EducationTile.tsx if not already deleted",
+        "Delete src/components/tiles/CareerActivityTile.tsx if not already deleted",
+        "DashboardLayout grid contains only: PatientSummary ParentSection (full width) + Patient Pathway ParentSection (full width) + ProjectsTile (if it remains)",
+        "No broken imports or unused imports remain",
+        "No visual gaps in the dashboard grid",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "ProjectsTile may remain as a standalone tile or be absorbed — check if it still makes sense as standalone. If so, keep it. The key outcome is that the deleted tiles have no remaining references."
+    },
+    {
+      "id": "US-011",
+      "title": "Improve constellation graph visual clarity",
+      "description": "As a visitor, I want the graph to be clearer with better contrast, larger nodes, and an off-white background.",
+      "acceptanceCriteria": [
+        "Graph container has an off-white background (e.g. #F5F7F6 or similar warm neutral) — can use the existing radial gradient approach but with a more visible base colour",
+        "Link lines use slightly thicker stroke (from 1px to 1.5-2px) and higher contrast colour (darker than current #D4E0DE at 0.3 opacity)",
+        "Role node radius increased from 24px to at least 30px",
+        "Skill node radius increased from 10px to at least 14px",
+        "Skill label font size increased from 9px to 10-11px for readability",
+        "Graph is initially scaled/zoomed so nodes fill the container at a comfortable viewing size — adjust force simulation parameters if needed (reduce charge repulsion, adjust link distance)",
+        "All existing interactions preserved (hover dim/highlight, click, keyboard nav)",
+        "Responsive height tiers still work (400/300/250px)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "The key issue is readability — the current graph is too sparse/faint. Larger nodes, thicker links, and stronger colours will help. The background should provide subtle contrast so the white card surface feels like the graph 'lives somewhere'."
+    },
+    {
+      "id": "US-012",
+      "title": "Add hover-highlighting between experience/skills and constellation graph",
+      "description": "As a visitor, I want to hover over an experience or skill entry and see the corresponding node highlighted in the graph.",
+      "acceptanceCriteria": [
+        "Add a highlightedNodeId state (string | null) to the Patient Pathway parent component",
+        "Pass highlightedNodeId as a prop to CareerConstellation",
+        "CareerConstellation applies its existing hover highlight logic when highlightedNodeId changes (dim non-connected nodes, brighten connected links)",
+        "When hovering a work experience entry, set highlightedNodeId to the corresponding consultation ID (which maps to a role node)",
+        "When hovering a skill entry, set highlightedNodeId to the skill ID",
+        "Highlight clears when mouse leaves the entry (set highlightedNodeId to null)",
+        "On touch devices: tap to highlight, tap elsewhere to clear",
+        "Highlighting feels immediate — no perceptible delay",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "CareerConstellation already has hover logic that dims non-connected nodes. The new prop should trigger the same visual effect but from an external source. Use the existing adjacency map and opacity/stroke manipulation."
+    },
+    {
+      "id": "US-013",
+      "title": "Update command palette data for restructured dashboard",
+      "description": "As a developer, I need the command palette search index to reflect the new section structure.",
+      "acceptanceCriteria": [
+        "In src/lib/search.ts, update buildPaletteData() to reference new tile IDs (patient-summary, patient-pathway instead of old tile IDs)",
+        "Scroll actions target the correct data-tile-id values for the new ParentSection components",
+        "Skills palette items still open detail panels correctly",
+        "Experience items still open detail panels correctly",
+        "Remove any palette entries that reference deleted tiles (LastConsultation standalone, etc.)",
+        "Remove palette entries for deleted certifications (Power BI, Clinical Diploma) and projects (SQL Analytics Transformation, Budget Oversight)",
+        "Add palette entry for Mary Seacole Programme",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "The palette data model uses tileId for scroll targeting — these need to match the new data-tile-id attributes on ParentSection components."
+    },
+    {
+      "id": "US-014",
+      "title": "Responsive verification and fixes",
+      "description": "As a developer, I need to verify the restructured dashboard works at all viewport sizes.",
+      "acceptanceCriteria": [
+        "At 375px (mobile): single column, Patient Summary and Patient Pathway stack vertically, experience/skills columns stack, graph fits container, all text wraps",
+        "At 768px (tablet): single column, comfortable spacing",
+        "At 1024px (desktop): full layout, two-column experience/skills grid visible, sidebar inline",
+        "At 1920px: layout visually balanced, graph nodes and labels readable",
+        "No horizontal scrollbar at any tested width",
+        "Parent section headers scale appropriately across breakpoints",
+        "Fix any issues discovered during verification",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill at 375px, 768px, 1024px, and 1920px widths"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": "Use Playwright to resize browser and take snapshots at each breakpoint. Fix any overflow, wrapping, or spacing issues found."
+    },
+    {
+      "id": "US-015",
+      "title": "Explore parent header typography options",
+      "description": "As a designer, I want to evaluate different font treatments for parent section headers to find the most visually striking option.",
+      "acceptanceCriteria": [
+        "Test Patient Summary and Patient Pathway headers with Elvaro Grotesque at weights 300, 400, 500, 600, 700, 900",
+        "Test headers with Blumir variable font at weights 100, 300, 500, 700",
+        "Test at sizes from 2rem (30px) up to 3.2rem (48px)",
+        "Consider uppercase vs title case vs sentence case for parent headers",
+        "Take screenshots of at least 3 different options for comparison",
+        "Headers must complement the clinical/luxury aesthetic — premium and intentional, not generic",
+        "Select the best option based on visual hierarchy, readability, and design coherence",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": "This story is about visual exploration. Try different combinations and screenshot them. The chosen option will be applied in the next story. Layout must already be in place (US-005 through US-009) so fonts can be judged in context. Use the bencium-innovative-ux-designer skill approach for design evaluation."
+    },
+    {
+      "id": "US-016",
+      "title": "Apply chosen parent header typography",
+      "description": "As a developer, I need to apply the selected font treatment to both parent section headers.",
+      "acceptanceCriteria": [
+        "Apply the chosen font family, weight, size, and case to the ParentSection component header",
+        "Both Patient Summary and Patient Pathway headers use identical treatment",
+        "Font scales appropriately across breakpoints (may need responsive size adjustments)",
+        "Headers create clear visual hierarchy — unmistakably top-level sections",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": "Depends on US-015 having selected a font treatment. Apply it consistently to ParentSection.tsx."
+    },
+    {
+      "id": "US-017",
+      "title": "Re-enable boot/login sequence",
+      "description": "As a user, I want the full boot → ECG → login experience restored for production.",
+      "acceptanceCriteria": [
+        "In src/App.tsx, change the initial Phase state back from 'pmr' to 'boot'",
+        "Boot → ECG → Login → Dashboard sequence works end to end",
+        "No other changes to App.tsx beyond reverting the initial state",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill: app starts at boot, progresses through ECG and login, arrives at restructured dashboard"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": "Reverts the change from US-001. Must be the final story."
+    }
+  ]
+}
