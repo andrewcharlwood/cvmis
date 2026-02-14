@@ -229,7 +229,7 @@
         "Verify in browser using dev-browser skill: app starts at boot, progresses through ECG and login, arrives at the scaled dashboard"
       ],
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "notes": "Simple revert of US-018."
     }
   ]

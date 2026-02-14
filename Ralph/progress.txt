@@ -203,3 +203,15 @@
   - At 768px without sidebar or search bar, the TopBar cleanly shows brand + A.RECRUITER + session badge
 ---
 
+## 2026-02-14 — US-028
+- Reverted initial Phase state from 'pmr' back to 'boot' in src/App.tsx (line 47)
+- Verified full sequence in browser: boot animation → ECG heartbeat → login screen → clicked Log In → dashboard loaded
+- All phases transition correctly, dashboard renders with all scaled components
+- npm run build and typecheck both pass
+- Files changed: src/App.tsx
+- **Learnings for future iterations:**
+  - This is the exact revert of US-018 — single line change on line 47: useState<Phase>('boot')
+  - The full boot→ECG→login sequence takes ~15 seconds before the login button becomes clickable
+  - Canvas2D warnings during ECG are expected (multiple readback operations) — not errors
+---
+
