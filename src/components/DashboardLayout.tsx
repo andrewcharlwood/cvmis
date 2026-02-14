@@ -6,7 +6,6 @@ import Sidebar from './Sidebar'
 import { CommandPalette } from './CommandPalette'
 import { DetailPanel } from './DetailPanel'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
-import { LatestResultsTile } from './tiles/LatestResultsTile'
 import { CoreSkillsTile } from './tiles/CoreSkillsTile'
 import { LastConsultationTile } from './tiles/LastConsultationTile'
 import { CareerActivityTile } from './tiles/CareerActivityTile'
@@ -165,12 +164,10 @@ export function DashboardLayout() {
           }}
         >
           <div className="dashboard-grid">
-            {/* PatientSummaryTile — full width */}
+            {/* PatientSummaryTile — full width (includes Latest Results subsection) */}
             <PatientSummaryTile />
 
-            {/* LatestResultsTile — half width (left) */}
-            <LatestResultsTile />
-            {/* ProjectsTile — half width (right) */}
+            {/* ProjectsTile — half width */}
             <ProjectsTile />
 
             {/* CoreSkillsTile — full width */}
