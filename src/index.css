@@ -122,9 +122,9 @@
   --purple-border: rgba(124,58,237,0.18);
   --border: #D4E0DE;
   --border-light: #E4EDEB;
-  --sidebar-width: 272px;
-  --topbar-height: 48px;
-  --subnav-height: 36px;
+  --sidebar-width: 304px;
+  --topbar-height: 56px;
+  --subnav-height: 42px;
   --radius-card: 8px;
   --radius-sm: 6px;
   --shadow-sm: 0 1px 2px rgba(26,43,42,0.05);
@@ -267,21 +267,21 @@ html {
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 14px;
 }
 
 /* Tablet: 2 columns on wider screens */
 @media (min-width: 768px) {
   .dashboard-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 20px;
   }
 }
 
 /* Desktop: maintain 2 columns with generous gap */
 @media (min-width: 1024px) {
   .dashboard-grid {
-    gap: 16px;
+    gap: 20px;
   }
 }
 

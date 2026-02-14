@@ -16,7 +16,7 @@ export function Card({ children, full, className, tileId }: CardProps) {
       ? '1px solid var(--border)'
       : '1px solid var(--border-light)',
     borderRadius: 'var(--radius)',
-    padding: '20px',
+    padding: '24px',
     boxShadow: isHovered ? 'var(--shadow-md)' : 'var(--shadow-sm)',
     transition: 'box-shadow 0.2s, border-color 0.2s',
     gridColumn: full ? '1 / -1' : undefined,
@@ -56,19 +56,19 @@ export function CardHeader({ dotColor, title, rightText }: CardHeaderProps) {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    marginBottom: '16px',
+    marginBottom: '18px',
   }
 
   const dotStyles: React.CSSProperties = {
-    width: '8px',
-    height: '8px',
+    width: '9px',
+    height: '9px',
     borderRadius: '50%',
     backgroundColor: dotColorMap[dotColor],
     flexShrink: 0,
   }
 
   const titleStyles: React.CSSProperties = {
-    fontSize: '12px',
+    fontSize: '13px',
     fontWeight: 600,
     textTransform: 'uppercase',
     letterSpacing: '0.06em',
@@ -76,7 +76,7 @@ export function CardHeader({ dotColor, title, rightText }: CardHeaderProps) {
   }
 
   const rightTextStyles: React.CSSProperties = {
-    fontSize: '10px',
+    fontSize: '11px',
     fontWeight: 400,
     textTransform: 'none',
     letterSpacing: 'normal',
