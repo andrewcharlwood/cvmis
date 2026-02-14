@@ -193,4 +193,5 @@ export interface EducationExtra {
   extracurriculars?: string[]
   researchDescription?: string
   programmeDetail?: string
+  osceScore?: string
 }

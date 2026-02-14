@@ -9,6 +9,7 @@ export const educationExtras: EducationExtra[] = [
       'Publicity Officer for UEA Alzheimer\'s Society',
     ],
     researchDescription: 'Final year research project investigating cocrystal formation for improved drug delivery properties. Awarded Distinction grade (75.1%).',
+    osceScore: '80%',
   },
   {
     documentId: 'doc-mary-seacole',

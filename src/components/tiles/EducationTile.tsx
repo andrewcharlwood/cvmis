@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Card, CardHeader } from '../Card'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { documents } from '@/data/documents'
+import { educationExtras } from '@/data/educationExtras'
 
 /**
  * Education tile - displays academic qualifications
@@ -19,36 +20,48 @@ export function EducationTile() {
     documents.find((d) => d.id === 'doc-alevels')!,
   ]
 
+  // Look up education extras by document ID
+  const getExtras = (docId: string) =>
+    educationExtras.find((e) => e.documentId === docId)
+
   // Build rich inline content for each entry
-  const getInlineContent = (doc: typeof educationDocuments[0]) => {
+  const getInlineDetails = (doc: (typeof educationDocuments)[0]) => {
+    const extras = getExtras(doc.id)
+
     switch (doc.id) {
       case 'doc-mpharm':
         return {
           title: 'MPharm (Hons) — 2:1',
           institution: 'University of East Anglia',
-          year: '2015',
-          extra: 'Research project: 75.1% (Distinction)',
+          year: '2011–2015',
+          details: [
+            `Research project: Drug delivery & cocrystals, 75.1% (Distinction)`,
+            ...(extras?.osceScore ? [`4th year OSCE: ${extras.osceScore}`] : []),
+          ],
         }
       case 'doc-mary-seacole':
         return {
           title: 'NHS Leadership Academy — Mary Seacole Programme',
           institution: 'NHS Leadership Academy',
           year: '2018',
-          extra: 'Programme score: 78%',
+          details: [
+            `Programme score: 78%`,
+            ...(extras?.programmeDetail ? [extras.programmeDetail] : []),
+          ],
         }
       case 'doc-alevels':
         return {
           title: 'A-Levels',
           institution: 'Highworth Grammar School',
           year: '2009–2011',
-          extra: 'Mathematics A* · Chemistry B · Politics C',
+          details: ['Mathematics (A*) · Chemistry (B) · Politics (C)'],
         }
       default:
         return {
           title: doc.title,
           institution: doc.institution,
           year: doc.date,
-          extra: doc.classification,
+          details: doc.classification ? [doc.classification] : [],
         }
     }
   }
@@ -59,7 +72,7 @@ export function EducationTile() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {educationDocuments.map((doc, index) => {
-          const content = getInlineContent(doc)
+          const content = getInlineDetails(doc)
           const isHovered = hoveredIndex === index
 
           return (
@@ -110,20 +123,31 @@ export function EducationTile() {
                 style={{
                   color: 'var(--text-secondary)',
                   fontSize: '11px',
-                  marginBottom: '4px',
+                  marginBottom: content.details.length > 0 ? '6px' : '0',
                 }}
               >
                 {content.institution}
               </div>
-              {content.extra && (
+              {content.details.length > 0 && (
                 <div
                   style={{
-                    color: 'var(--text-tertiary)',
-                    fontSize: '10.5px',
-                    fontFamily: 'var(--font-geist-mono)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
                   }}
                 >
-                  {content.extra}
+                  {content.details.map((detail, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        color: 'var(--text-tertiary)',
+                        fontSize: '10.5px',
+                        fontFamily: 'var(--font-geist-mono)',
+                      }}
+                    >
+                      {detail}
+                    </div>
+                  ))}
                 </div>
               )}
             </button>
