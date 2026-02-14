@@ -80,7 +80,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
           HMC
         </span>
         <span
-          className="hidden md:inline"
+          className="hidden lg:inline"
           style={{
             fontSize: '12px',
             fontWeight: 400,
@@ -96,7 +96,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
       <button
         type="button"
         onClick={onSearchClick}
-        className="hidden md:flex items-center gap-2 cursor-pointer font-ui"
+        className="hidden lg:flex items-center gap-2 cursor-pointer font-ui"
         style={{
           maxWidth: '560px',
           minWidth: '400px',
