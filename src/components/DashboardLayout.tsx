@@ -61,9 +61,9 @@ export function DashboardLayout() {
     setCommandPaletteOpen(false)
   }, [])
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSectionClick = useCallback((_sectionId: string) => {
-    // Section click is already handled in SubNav component
-    // This is just a placeholder for any additional logic needed
+    // SubNav handles scrolling internally
   }, [])
 
   // Global Ctrl+K listener to open command palette

@@ -16,9 +16,10 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   const [isExiting, setIsExiting] = useState(false)
   const [typingComplete, setTypingComplete] = useState(false)
   const [buttonHovered, setButtonHovered] = useState(false)
+  const [connectionState, setConnectionState] = useState<'connecting' | 'connected'>('connecting')
   const { requestFocusAfterLogin } = useAccessibility()
 
-  const fullUsername = 'A.CHARLWOOD'
+  const fullUsername = 'a.recruiter'
   const passwordLength = 8
 
   const prefersReducedMotion = typeof window !== 'undefined'
@@ -38,8 +39,10 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
     return id
   }, [])
 
+  const canLogin = typingComplete && connectionState === 'connected'
+
   const handleLogin = useCallback(() => {
-    if (!typingComplete || isExiting) return
+    if (!canLogin || isExiting) return
     setButtonPressed(true)
     addTimeout(() => {
       setIsExiting(true)
@@ -48,7 +51,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
         onComplete()
       }, prefersReducedMotion ? 0 : 200)
     }, 100)
-  }, [typingComplete, isExiting, onComplete, requestFocusAfterLogin, prefersReducedMotion, addTimeout])
+  }, [canLogin, isExiting, onComplete, requestFocusAfterLogin, prefersReducedMotion, addTimeout])
 
   const startLoginSequence = useCallback(() => {
     if (prefersReducedMotion) {
@@ -93,18 +96,23 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
     }, 80)
   }, [prefersReducedMotion, addTimeout])
 
-  // Focus the login button when typing completes for keyboard accessibility
+  // Focus the login button when login becomes available for keyboard accessibility
   useEffect(() => {
-    if (typingComplete && loginButtonRef.current) {
+    if (canLogin && loginButtonRef.current) {
       loginButtonRef.current.focus()
     }
-  }, [typingComplete])
+  }, [canLogin])
 
   useEffect(() => {
     // Cursor blink: 530ms interval
     cursorIntervalRef.current = setInterval(() => {
       setShowCursor(prev => !prev)
     }, 530)
+
+    // Connection status: transitions to connected after ~2000ms
+    const connectionTimeout = addTimeout(() => {
+      setConnectionState('connected')
+    }, 2000)
 
     // Delay start slightly for card entrance animation
     const startTimeout = addTimeout(() => {
@@ -119,13 +127,14 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       if (usernameIntervalRef.current) clearInterval(usernameIntervalRef.current)
       if (passwordIntervalRef.current) clearInterval(passwordIntervalRef.current)
       clearTimeout(startTimeout)
+      clearTimeout(connectionTimeout)
       pendingTimeouts.forEach(id => clearTimeout(id))
     }
   }, [startLoginSequence, addTimeout])
 
   const buttonBg = buttonPressed
     ? '#085858'
-    : buttonHovered && typingComplete
+    : buttonHovered && canLogin
       ? '#0A8080'
       : '#0D6E6E'
 
@@ -284,7 +293,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
           <button
             ref={loginButtonRef}
             onClick={handleLogin}
-            disabled={!typingComplete}
+            disabled={!canLogin}
             onMouseEnter={() => setButtonHovered(true)}
             onMouseLeave={() => setButtonHovered(false)}
             className="focus-visible:ring-2 focus-visible:ring-[#0D6E6E]/40 focus-visible:ring-offset-2 focus:outline-none"
@@ -298,13 +307,47 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               backgroundColor: buttonBg,
               border: 'none',
               borderRadius: '4px',
-              cursor: typingComplete ? 'pointer' : 'default',
-              opacity: typingComplete ? 1 : 0.6,
+              cursor: canLogin ? 'pointer' : 'default',
+              opacity: canLogin ? 1 : 0.6,
               transition: 'background-color 150ms, opacity 300ms',
             }}
           >
             Log In
           </button>
+
+          {/* Connection Status Indicator */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              marginTop: '4px',
+            }}
+          >
+            <span
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                backgroundColor: connectionState === 'connected' ? '#059669' : '#DC2626',
+                transition: 'background-color 300ms ease',
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontFamily: "var(--font-geist-mono, 'Geist Mono', monospace)",
+                fontSize: '10px',
+                color: connectionState === 'connected' ? '#059669' : '#8DA8A5',
+                transition: 'color 300ms ease',
+              }}
+            >
+              {connectionState === 'connected'
+                ? 'Secure connection established'
+                : 'Awaiting secure connection...'}
+            </span>
+          </div>
         </div>
 
         {/* Footer */}
