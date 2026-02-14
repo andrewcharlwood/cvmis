@@ -62,7 +62,7 @@ export function EducationSubsection() {
     <div style={{ marginTop: '24px' }}>
       <CardHeader dotColor="purple" title="EDUCATION" />
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {educationDocuments.map((doc, index) => {
           const content = getInlineDetails(doc)
           const isHovered = hoveredIndex === index
@@ -74,11 +74,11 @@ export function EducationSubsection() {
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
               style={{
-                padding: '10px 12px',
+                padding: '12px 16px',
                 background: 'var(--surface)',
                 border: `1px solid ${isHovered ? 'var(--accent)' : 'var(--border-light)'}`,
                 borderRadius: 'var(--radius-sm)',
-                fontSize: '12px',
+                fontSize: '13px',
                 color: 'var(--text-primary)',
                 cursor: 'pointer',
                 textAlign: 'left',
@@ -97,13 +97,13 @@ export function EducationSubsection() {
                   marginBottom: '4px',
                 }}
               >
-                <span style={{ fontWeight: 600, fontSize: '12.5px' }}>
+                <span style={{ fontWeight: 600, fontSize: '14px' }}>
                   {content.title}
                 </span>
                 <span
                   style={{
                     fontFamily: 'var(--font-geist-mono)',
-                    fontSize: '10px',
+                    fontSize: '11px',
                     color: 'var(--text-tertiary)',
                     whiteSpace: 'nowrap',
                   }}
@@ -114,7 +114,7 @@ export function EducationSubsection() {
               <div
                 style={{
                   color: 'var(--text-secondary)',
-                  fontSize: '11px',
+                  fontSize: '12px',
                   marginBottom: content.details.length > 0 ? '6px' : '0',
                 }}
               >
@@ -133,7 +133,7 @@ export function EducationSubsection() {
                       key={i}
                       style={{
                         color: 'var(--text-tertiary)',
-                        fontSize: '10.5px',
+                        fontSize: '12px',
                         fontFamily: 'var(--font-geist-mono)',
                       }}
                     >

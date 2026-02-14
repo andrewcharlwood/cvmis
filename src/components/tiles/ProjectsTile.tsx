@@ -41,9 +41,9 @@ function ProjectItem({ project, onClick }: ProjectItemProps) {
         background: 'var(--surface)',
         border: '1px solid var(--border-light)',
         borderRadius: 'var(--radius-sm)',
-        padding: '10px 12px',
+        padding: '12px 16px',
         minHeight: '44px',
-        fontSize: '11.5px',
+        fontSize: '13px',
         color: 'var(--text-primary)',
         transition: 'border-color 0.15s, box-shadow 0.15s',
         cursor: 'pointer',
@@ -68,8 +68,8 @@ function ProjectItem({ project, onClick }: ProjectItemProps) {
       >
         <div
           style={{
-            width: '7px',
-            height: '7px',
+            width: '8px',
+            height: '8px',
             borderRadius: '50%',
             backgroundColor: dotColor,
             flexShrink: 0,
@@ -81,7 +81,7 @@ function ProjectItem({ project, onClick }: ProjectItemProps) {
         <span style={{ flex: 1, fontWeight: 500 }}>{project.name}</span>
         <span
           style={{
-            fontSize: '10px',
+            fontSize: '11px',
             fontFamily: 'var(--font-geist-mono)',
             color: 'var(--text-tertiary)',
             flexShrink: 0,
@@ -104,9 +104,9 @@ function ProjectItem({ project, onClick }: ProjectItemProps) {
             <span
               key={tech}
               style={{
-                fontSize: '9px',
+                fontSize: '10px',
                 fontFamily: 'var(--font-geist-mono)',
-                padding: '2px 6px',
+                padding: '3px 8px',
                 borderRadius: '3px',
                 background: 'var(--amber-light)',
                 color: '#92400E',
@@ -129,7 +129,7 @@ export function ProjectsTile() {
     <Card tileId="projects">
       <CardHeader dotColor="amber" title="ACTIVE PROJECTS" />
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {investigations.map((project) => (
           <ProjectItem
             key={project.id}
