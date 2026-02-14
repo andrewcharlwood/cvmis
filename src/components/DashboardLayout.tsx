@@ -8,7 +8,7 @@ import { CommandPalette } from './CommandPalette'
 import { DetailPanel } from './DetailPanel'
 import { CardHeader } from './Card'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
-import { EducationTile } from './tiles/EducationTile'
+import { EducationSubsection } from './EducationSubsection'
 import { ProjectsTile } from './tiles/ProjectsTile'
 import { ParentSection } from './ParentSection'
 import CareerConstellation from './CareerConstellation'
@@ -389,10 +389,10 @@ export function DashboardLayout() {
                 <WorkExperienceSubsection />
                 <RepeatMedicationsSubsection />
               </div>
-            </ParentSection>
 
-            {/* EducationTile — full width */}
-            <EducationTile />
+              {/* Education subsection */}
+              <EducationSubsection />
+            </ParentSection>
           </div>
         </motion.main>
       </div>

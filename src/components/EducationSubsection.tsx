@@ -1,30 +1,22 @@
 import { useState } from 'react'
-import { Card, CardHeader } from '../Card'
+import { CardHeader } from './Card'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { documents } from '@/data/documents'
 import { educationExtras } from '@/data/educationExtras'
 
-/**
- * Education tile - displays academic qualifications
- * Full-width card below Career Activity
- * Each entry is clickable to open detail panel
- */
-export function EducationTile() {
+export function EducationSubsection() {
   const { openPanel } = useDetailPanel()
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
-  // Filter to main education entries in reverse chronological order
   const educationDocuments = [
     documents.find((d) => d.id === 'doc-mary-seacole')!,
     documents.find((d) => d.id === 'doc-mpharm')!,
     documents.find((d) => d.id === 'doc-alevels')!,
   ]
 
-  // Look up education extras by document ID
   const getExtras = (docId: string) =>
     educationExtras.find((e) => e.documentId === docId)
 
-  // Build rich inline content for each entry
   const getInlineDetails = (doc: (typeof educationDocuments)[0]) => {
     const extras = getExtras(doc.id)
 
@@ -67,7 +59,7 @@ export function EducationTile() {
   }
 
   return (
-    <Card full tileId="education">
+    <div style={{ marginTop: '24px' }}>
       <CardHeader dotColor="purple" title="EDUCATION" />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -154,6 +146,6 @@ export function EducationTile() {
           )
         })}
       </div>
-    </Card>
+    </div>
   )
 }
