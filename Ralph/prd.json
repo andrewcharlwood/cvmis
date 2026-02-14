@@ -195,7 +195,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "This is a judgement call — the agent should look at the dashboard after all previous scaling and decide if headings need adjustment. They may be fine as-is, or may need a small bump. Use dev-browser to compare."
     },
     {
