@@ -86,7 +86,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "The Latest Results subsection should look like a section within the parent card — use a CardHeader for 'LATEST RESULTS' and render the KPI grid below it. The parent ParentSection header 'Patient Summary' should be visually dominant."
     },
     {
@@ -102,7 +102,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "This story just sets up the parent section with the graph. The Last Consultation, experience/skills columns, and education are added in subsequent stories."
     },
     {
@@ -118,7 +118,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Reuse the rendering logic from LastConsultationTile — either inline it or extract a shared sub-component. The important thing is it lives inside the Patient Pathway ParentSection now."
     },
     {
@@ -137,7 +137,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "Reuse expansion patterns from existing CareerActivityTile and CoreSkillsTile. The two-column layout is within the Patient Pathway ParentSection card, not separate cards."
     },
     {

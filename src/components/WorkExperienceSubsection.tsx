@@ -1,0 +1,288 @@
+import React, { useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronRight } from 'lucide-react'
+import { CardHeader } from './Card'
+import { consultations } from '@/data/consultations'
+import { useDetailPanel } from '@/contexts/DetailPanelContext'
+
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+interface RoleItemProps {
+  consultation: typeof consultations[0]
+  isExpanded: boolean
+  onToggle: () => void
+  onViewFull: () => void
+}
+
+function RoleItem({ consultation, isExpanded, onToggle, onViewFull }: RoleItemProps) {
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        onToggle()
+      }
+      if (e.key === 'Escape' && isExpanded) {
+        e.preventDefault()
+        onToggle()
+      }
+    },
+    [onToggle, isExpanded],
+  )
+
+  return (
+    <div
+      style={{
+        background: 'var(--bg-dashboard)',
+        borderRadius: 'var(--radius-sm)',
+        border: `1px solid ${isExpanded ? 'var(--accent-border)' : 'var(--border-light)'}`,
+        transition: 'border-color 0.15s, box-shadow 0.15s',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Clickable header */}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={onToggle}
+        onKeyDown={handleKeyDown}
+        aria-expanded={isExpanded}
+        aria-label={`${consultation.role} at ${consultation.organization}, ${consultation.duration}. Click to ${isExpanded ? 'collapse' : 'expand'} details.`}
+        style={{
+          display: 'flex',
+          gap: '10px',
+          padding: '10px 12px',
+          cursor: 'pointer',
+          minHeight: '44px',
+          alignItems: 'flex-start',
+        }}
+        onMouseEnter={(e) => {
+          if (!isExpanded) {
+            e.currentTarget.parentElement!.style.borderColor = 'var(--accent-border)'
+            e.currentTarget.parentElement!.style.boxShadow = 'var(--shadow-md)'
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isExpanded) {
+            e.currentTarget.parentElement!.style.borderColor = 'var(--border-light)'
+            e.currentTarget.parentElement!.style.boxShadow = 'none'
+          }
+        }}
+      >
+        {/* Teal dot */}
+        <div
+          aria-hidden="true"
+          style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: '#0D6E6E',
+            flexShrink: 0,
+            marginTop: '4px',
+          }}
+        />
+
+        {/* Text content */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: '12.5px',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              lineHeight: 1.3,
+            }}
+          >
+            {consultation.role}
+          </div>
+          <div
+            style={{
+              fontSize: '11px',
+              color: 'var(--text-secondary)',
+              marginTop: '2px',
+            }}
+          >
+            {consultation.organization}
+          </div>
+          <div
+            style={{
+              fontSize: '10px',
+              fontFamily: 'var(--font-mono)',
+              color: 'var(--text-tertiary)',
+              marginTop: '3px',
+            }}
+          >
+            {consultation.duration}
+          </div>
+        </div>
+
+        {/* Chevron */}
+        <ChevronRight
+          size={14}
+          style={{
+            color: 'var(--text-tertiary)',
+            flexShrink: 0,
+            marginTop: '2px',
+            transform: isExpanded ? 'rotate(90deg)' : 'none',
+            transition: 'transform 0.15s ease-out',
+          }}
+        />
+      </div>
+
+      {/* Expandable detail content */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0 }}
+            animate={{ height: 'auto' }}
+            exit={{ height: 0 }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : { duration: 0.2, ease: 'easeOut' }
+            }
+            style={{ overflow: 'hidden' }}
+          >
+            <div
+              style={{
+                padding: '0 12px 12px 30px',
+                borderTop: '1px solid var(--border-light)',
+                paddingTop: '12px',
+                borderLeft: '2px solid var(--accent)',
+                marginLeft: '12px',
+              }}
+            >
+              {/* Examination bullets */}
+              <ul
+                style={{
+                  listStyle: 'none',
+                  padding: 0,
+                  margin: '0 0 10px 0',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '5px',
+                }}
+              >
+                {consultation.examination.map((bullet, i) => (
+                  <li
+                    key={i}
+                    style={{
+                      fontSize: '11.5px',
+                      color: 'var(--text-primary)',
+                      lineHeight: 1.5,
+                      paddingLeft: '12px',
+                      position: 'relative',
+                    }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: '6px',
+                        width: '4px',
+                        height: '4px',
+                        borderRadius: '50%',
+                        background: 'var(--accent)',
+                        opacity: 0.5,
+                      }}
+                    />
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+
+              {/* Coded entries */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '6px',
+                  marginBottom: '10px',
+                }}
+              >
+                {consultation.codedEntries.map((entry) => (
+                  <span
+                    key={entry.code}
+                    style={{
+                      fontSize: '10px',
+                      fontFamily: 'var(--font-mono)',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      background: 'var(--accent-light)',
+                      color: 'var(--accent)',
+                      border: '1px solid var(--accent-border)',
+                    }}
+                  >
+                    {entry.code}: {entry.description}
+                  </span>
+                ))}
+              </div>
+
+              {/* View full record link */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onViewFull()
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  color: 'var(--accent)',
+                  background: 'transparent',
+                  border: 'none',
+                  padding: '4px 0',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--accent-hover)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--accent)'
+                }}
+              >
+                View full record
+                <ChevronRight size={12} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+export function WorkExperienceSubsection() {
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const { openPanel } = useDetailPanel()
+
+  const handleToggle = useCallback((id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id))
+  }, [])
+
+  const handleViewFull = useCallback(
+    (consultation: typeof consultations[0]) => {
+      openPanel({ type: 'career-role', consultation })
+    },
+    [openPanel],
+  )
+
+  return (
+    <div>
+      <CardHeader dotColor="teal" title="WORK EXPERIENCE" rightText={`${consultations.length} roles`} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {consultations.map((c) => (
+          <RoleItem
+            key={c.id}
+            consultation={c}
+            isExpanded={expandedId === c.id}
+            onToggle={() => handleToggle(c.id)}
+            onViewFull={() => handleViewFull(c)}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}

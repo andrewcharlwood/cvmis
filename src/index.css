@@ -300,6 +300,20 @@ html {
   }
 }
 
+/* Pathway two-column layout — mobile-first (used in Patient Pathway) */
+.pathway-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+/* Desktop: 2 columns */
+@media (min-width: 768px) {
+  .pathway-columns {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 /* ===== COMMAND PALETTE ANIMATIONS ===== */
 @keyframes palette-overlay-in {
   from { opacity: 0; }

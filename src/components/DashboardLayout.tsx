@@ -8,11 +8,12 @@ import { CommandPalette } from './CommandPalette'
 import { DetailPanel } from './DetailPanel'
 import { CardHeader } from './Card'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
-import { CoreSkillsTile } from './tiles/CoreSkillsTile'
 import { EducationTile } from './tiles/EducationTile'
 import { ProjectsTile } from './tiles/ProjectsTile'
 import { ParentSection } from './ParentSection'
 import CareerConstellation from './CareerConstellation'
+import { WorkExperienceSubsection } from './WorkExperienceSubsection'
+import { RepeatMedicationsSubsection } from './RepeatMedicationsSubsection'
 import { useActiveSection } from '@/hooks/useActiveSection'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { consultations } from '@/data/consultations'
@@ -373,9 +374,6 @@ export function DashboardLayout() {
             {/* ProjectsTile — half width */}
             <ProjectsTile />
 
-            {/* CoreSkillsTile — full width */}
-            <CoreSkillsTile />
-
             {/* Patient Pathway — parent section with constellation graph + subsections */}
             <ParentSection title="Patient Pathway" tileId="patient-pathway">
               <CareerConstellation
@@ -385,6 +383,12 @@ export function DashboardLayout() {
 
               {/* Last Consultation subsection */}
               <LastConsultationSubsection />
+
+              {/* Two-column experience/skills grid */}
+              <div className="pathway-columns" style={{ marginTop: '24px' }}>
+                <WorkExperienceSubsection />
+                <RepeatMedicationsSubsection />
+              </div>
             </ParentSection>
 
             {/* EducationTile — full width */}

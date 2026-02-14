@@ -905,3 +905,55 @@
   - All 4 role entries now correctly reference their matching consultation IDs: interim-head-2025, deputy-head-2024, high-cost-drugs-2022, pharmacy-manager-2017
   - Timeline now has 8 entries: 4 roles + GPhC cert + Mary Seacole cert + MPharm edu + A-Levels edu
 ---
+
+## 2026-02-14 - US-005
+- Restructured PatientSummaryTile to use ParentSection wrapper with "Patient Summary" as large h2 header
+- Merged LatestResultsTile content (MetricCard components, KPI grid) into PatientSummaryTile as a subsection with CardHeader "LATEST RESULTS"
+- Removed the 4 headline metric figures (9+ Years, 1.2M, £220M, £14.6M+) strip from PatientSummaryTile
+- Removed standalone LatestResultsTile import and rendering from DashboardLayout
+- Files changed: src/components/tiles/PatientSummaryTile.tsx, src/components/DashboardLayout.tsx
+- **Learnings for future iterations:**
+  - The MetricCard component from LatestResultsTile was moved wholesale into PatientSummaryTile — it uses useDetailPanel for KPI click-to-detail, so the import chain followed
+  - ParentSection wraps Card with full prop, so the tileId passes through ParentSection → Card → data-tile-id attribute for command palette scroll targeting
+  - The LatestResultsTile.tsx file still exists but is no longer imported — US-010 will clean it up
+---
+
+## 2026-02-14 - US-006
+- Replaced standalone CareerActivityTile with ParentSection titled "Patient Pathway" containing CareerConstellation graph
+- Moved onRoleClick/onSkillClick handlers from CareerActivityTile into DashboardLayout (using consultations + skills data imports)
+- Removed CareerActivityTile import from DashboardLayout
+- CareerActivityTile.tsx still exists but is no longer imported — the timeline entries will be handled in US-007/US-008
+- Files changed: src/components/DashboardLayout.tsx
+- **Learnings for future iterations:**
+  - The CareerActivityTile contained both the constellation graph AND the timeline activity grid — US-006 only moves the graph into the parent section
+  - The onRoleClick/onSkillClick handlers were duplicated from CareerActivityTile into DashboardLayout since they need to be passed down to CareerConstellation. The same pattern (find consultation/skill by ID, openPanel) is used.
+  - ParentSection with tileId="patient-pathway" provides scroll targeting for command palette — US-013 will update palette data to use this new tileId
+---
+
+## 2026-02-14 - US-007
+- Moved Last Consultation content from standalone tile into Patient Pathway ParentSection as a subsection
+- Created `LastConsultationSubsection` component within DashboardLayout.tsx — renders green dot CardHeader + date/org/type/band fields + role title + examination bullets + "View full record" button
+- Deleted `src/components/tiles/LastConsultationTile.tsx` — content fully inlined
+- Removed LastConsultationTile import from DashboardLayout
+- Files changed: src/components/DashboardLayout.tsx (modified), src/components/tiles/LastConsultationTile.tsx (deleted)
+- **Learnings for future iterations:**
+  - The LastConsultationSubsection is defined as a standalone function component in DashboardLayout.tsx (not inside the export) — this keeps it clean and avoids nesting component definitions
+  - `marginTop: 24px` on the subsection wrapper creates visual separation from the constellation graph above
+  - The subsection uses `useDetailPanel` independently — it doesn't need to receive openPanel as a prop from DashboardLayout
+  - All the same rendering logic from LastConsultationTile was preserved: formatDate, getEmploymentType, getBand, field labels, bullet dots, hover states, keyboard handlers, aria labels
+  - Added `aria-hidden="true"` to bullet dots (decorative) which was missing in the original LastConsultationTile
+---
+
+## 2026-02-14 - US-008
+- Added two-column work experience and skills layout inside Patient Pathway ParentSection, below Last Consultation subsection
+- Created `src/components/WorkExperienceSubsection.tsx` — lists all 4 roles from consultations.ts with accordion expand (teal dot CardHeader "WORK EXPERIENCE"). Each role shows title, org, date range; expands to show examination bullets, coded entries, and "View full record" link
+- Created `src/components/RepeatMedicationsSubsection.tsx` — categorised skills with expand (amber dot CardHeader "REPEAT MEDICATIONS"). Same content as CoreSkillsTile: 3 categories (Technical, Healthcare Domain, Strategic & Leadership), 4 skills per category with "View all" buttons, click to open detail panel
+- Added `.pathway-columns` CSS class in index.css — 1 column default, 2 columns at 768px, 16px gap
+- Removed standalone CoreSkillsTile from DashboardLayout grid
+- Files changed: src/components/DashboardLayout.tsx, src/index.css, src/components/WorkExperienceSubsection.tsx (new), src/components/RepeatMedicationsSubsection.tsx (new)
+- **Learnings for future iterations:**
+  - WorkExperienceSubsection and RepeatMedicationsSubsection are standalone components (not defined inside DashboardLayout) to keep the file manageable — same pattern as LastConsultationSubsection but in separate files due to size
+  - The two-column grid uses `.pathway-columns` (not `.activity-grid`) to avoid conflicting with the CareerActivityTile's existing responsive grid
+  - CoreSkillsTile.tsx still exists but is no longer imported from DashboardLayout — US-010 will clean it up
+  - The RepeatMedicationsSubsection is a near-copy of CoreSkillsTile internals minus the Card wrapper — both files exist until cleanup in US-010
+---
