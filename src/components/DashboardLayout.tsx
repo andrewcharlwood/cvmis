@@ -1,13 +1,14 @@
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import { ChevronRight } from 'lucide-react'
 import { TopBar } from './TopBar'
 import { SubNav } from './SubNav'
 import Sidebar from './Sidebar'
 import { CommandPalette } from './CommandPalette'
 import { DetailPanel } from './DetailPanel'
+import { CardHeader } from './Card'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
 import { CoreSkillsTile } from './tiles/CoreSkillsTile'
-import { LastConsultationTile } from './tiles/LastConsultationTile'
 import { EducationTile } from './tiles/EducationTile'
 import { ProjectsTile } from './tiles/ProjectsTile'
 import { ParentSection } from './ParentSection'
@@ -50,6 +51,184 @@ const contentVariants = {
       ? { duration: 0 }
       : { duration: 0.3, delay: 0.15 },
   },
+}
+
+function LastConsultationSubsection() {
+  const { openPanel } = useDetailPanel()
+  const consultation = consultations[0]
+
+  const handleOpenPanel = () => {
+    openPanel({ type: 'consultation', consultation })
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleOpenPanel()
+    }
+  }
+
+  const formatDate = (dateStr: string): string => {
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+  }
+
+  const getEmploymentType = (): string => {
+    if (consultation.organization.includes('ICB')) {
+      return 'Permanent · Full-time'
+    }
+    return 'Permanent'
+  }
+
+  const getBand = (): string => {
+    if (consultation.role.includes('Head')) {
+      return '8a'
+    }
+    return '—'
+  }
+
+  const fieldLabelStyle: React.CSSProperties = {
+    fontSize: '10px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
+    color: 'var(--text-tertiary)',
+    marginBottom: '3px',
+  }
+
+  const fieldValueStyle: React.CSSProperties = {
+    fontSize: '11.5px',
+    fontWeight: 600,
+    color: 'var(--text-primary)',
+  }
+
+  return (
+    <div style={{ marginTop: '24px' }}>
+      <CardHeader dotColor="green" title="LAST CONSULTATION" rightText="Most recent role" />
+
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={handleOpenPanel}
+        onKeyDown={handleKeyDown}
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '16px',
+          marginBottom: '14px',
+          paddingBottom: '14px',
+          borderBottom: '1px solid var(--border-light)',
+          cursor: 'pointer',
+          borderRadius: 'var(--radius-sm)',
+          padding: '8px',
+          margin: '-8px -8px 14px -8px',
+          transition: 'background-color 150ms ease-out',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(10,128,128,0.04)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent'
+        }}
+        aria-label={`View full details for ${consultation.role}`}
+      >
+        <div>
+          <div style={fieldLabelStyle}>Date</div>
+          <div style={fieldValueStyle}>{formatDate(consultation.date)}</div>
+        </div>
+        <div>
+          <div style={fieldLabelStyle}>Organisation</div>
+          <div style={fieldValueStyle}>{consultation.organization}</div>
+        </div>
+        <div>
+          <div style={fieldLabelStyle}>Type</div>
+          <div style={fieldValueStyle}>{getEmploymentType()}</div>
+        </div>
+        <div>
+          <div style={fieldLabelStyle}>Band</div>
+          <div style={fieldValueStyle}>{getBand()}</div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          fontSize: '13.5px',
+          fontWeight: 600,
+          color: 'var(--accent)',
+          marginBottom: '12px',
+        }}
+      >
+        {consultation.role}
+      </div>
+
+      <ul
+        style={{
+          listStyle: 'none',
+          padding: 0,
+          margin: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '7px',
+          marginBottom: '16px',
+        }}
+      >
+        {consultation.examination.map((bullet, index) => (
+          <li
+            key={index}
+            style={{
+              fontSize: '12.5px',
+              color: 'var(--text-primary)',
+              paddingLeft: '16px',
+              lineHeight: '1.5',
+              position: 'relative',
+            }}
+          >
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                left: '0',
+                top: '7px',
+                width: '5px',
+                height: '5px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--accent)',
+                opacity: 0.5,
+              }}
+            />
+            {bullet}
+          </li>
+        ))}
+      </ul>
+
+      <button
+        onClick={handleOpenPanel}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          fontSize: '12px',
+          fontWeight: 500,
+          color: 'var(--accent)',
+          background: 'transparent',
+          border: 'none',
+          padding: '6px 0',
+          minHeight: '44px',
+          cursor: 'pointer',
+          transition: 'color 150ms ease-out',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = 'var(--accent-hover)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = 'var(--accent)'
+        }}
+        aria-label="View full consultation record"
+      >
+        <span>View full record</span>
+        <ChevronRight size={14} strokeWidth={2.5} />
+      </button>
+    </div>
+  )
 }
 
 export function DashboardLayout() {
@@ -197,15 +376,15 @@ export function DashboardLayout() {
             {/* CoreSkillsTile — full width */}
             <CoreSkillsTile />
 
-            {/* LastConsultationTile — full width */}
-            <LastConsultationTile />
-
-            {/* Patient Pathway — parent section with constellation graph */}
+            {/* Patient Pathway — parent section with constellation graph + subsections */}
             <ParentSection title="Patient Pathway" tileId="patient-pathway">
               <CareerConstellation
                 onRoleClick={handleRoleClick}
                 onSkillClick={handleSkillClick}
               />
+
+              {/* Last Consultation subsection */}
+              <LastConsultationSubsection />
             </ParentSection>
 
             {/* EducationTile — full width */}
