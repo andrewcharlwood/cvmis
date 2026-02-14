@@ -13,6 +13,7 @@ import { CareerActivityTile } from './tiles/CareerActivityTile'
 import { EducationTile } from './tiles/EducationTile'
 import { ProjectsTile } from './tiles/ProjectsTile'
 import { useActiveSection } from '@/hooks/useActiveSection'
+import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import type { PaletteAction } from '@/lib/search'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -52,6 +53,7 @@ const contentVariants = {
 export function DashboardLayout() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   const activeSection = useActiveSection()
+  const { openPanel } = useDetailPanel()
 
   const handleSearchClick = () => {
     setCommandPaletteOpen(true)
@@ -110,8 +112,12 @@ export function DashboardLayout() {
         window.open('/References/CV_v4.md', '_blank')
         break
       }
+      case 'panel': {
+        openPanel(action.panelContent)
+        break
+      }
     }
-  }, [])
+  }, [openPanel])
 
   return (
     <div

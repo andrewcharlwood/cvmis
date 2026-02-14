@@ -7,6 +7,8 @@ import { problems } from '@/data/problems'
 import { investigations } from '@/data/investigations'
 import { documents } from '@/data/documents'
 import { skills } from '@/data/skills'
+import { kpis } from '@/data/kpis'
+import type { DetailPanelContent } from '@/types/pmr'
 
 export type PaletteSection = 'Experience' | 'Core Skills' | 'Active Projects' | 'Achievements' | 'Education' | 'Quick Actions'
 
@@ -15,6 +17,7 @@ export type PaletteAction =
   | { type: 'expand'; tileId: string; itemId: string }
   | { type: 'link'; url: string }
   | { type: 'download' }
+  | { type: 'panel'; panelContent: DetailPanelContent }
 
 export type IconColorVariant = 'teal' | 'green' | 'amber' | 'purple'
 
@@ -74,25 +77,17 @@ export function buildPaletteData(): PaletteItem[] {
     })
   })
 
-  // Core Skills — from skills.ts, matching concept format with proficiency %
-  const skillDescriptions: Record<string, string> = {
-    'Data Analysis': 'Primary expertise \u00b7 NHS population data',
-    'Python': 'Data pipelines, automation, analytics',
-    'SQL': 'Advanced queries, database migration',
-    'Power BI': 'Dashboard design & deployment',
-    'JavaScript / TypeScript': 'Web development & tooling',
-  }
-
+  // Core Skills — all ~21 skills from skills.ts, opening detail panel on select
   skills.forEach((skill) => {
     items.push({
       id: `skill-${skill.id}`,
       title: `${skill.name} \u2014 ${skill.proficiency}%`,
-      subtitle: skillDescriptions[skill.name] ?? `${skill.frequency} \u00b7 Since ${skill.startYear}`,
+      subtitle: `${skill.frequency} \u00b7 Since ${skill.startYear} \u00b7 ${skill.category}`,
       section: 'Core Skills',
       iconVariant: 'green',
       iconType: 'skill',
-      keywords: `${skill.name.toLowerCase()} ${skill.proficiency} ${skill.frequency.toLowerCase()}`,
-      action: { type: 'expand', tileId: 'core-skills', itemId: skill.id },
+      keywords: `${skill.name.toLowerCase()} ${skill.proficiency} ${skill.frequency.toLowerCase()} ${skill.category.toLowerCase()}`,
+      action: { type: 'panel', panelContent: { type: 'skill', skill } },
     })
   })
 
@@ -119,6 +114,7 @@ export function buildPaletteData(): PaletteItem[] {
   ]
 
   projectEntries.forEach((entry) => {
+    const investigation = investigations.find(inv => inv.id === entry.investigationId)
     items.push({
       id: `proj-${entry.investigationId}`,
       title: entry.name,
@@ -127,35 +123,42 @@ export function buildPaletteData(): PaletteItem[] {
       iconVariant: 'amber',
       iconType: 'project',
       keywords: entry.keywords,
-      action: { type: 'expand', tileId: 'projects', itemId: entry.investigationId },
+      action: investigation
+        ? { type: 'panel', panelContent: { type: 'project', investigation } }
+        : { type: 'scroll', tileId: 'projects' },
     })
   })
 
-  // Achievements — matching concept HTML entries
-  const achievementEntries: Array<{ title: string; sub: string; keywords: string }> = [
+  // Achievements — open corresponding KPI detail panel
+  const achievementEntries: Array<{ title: string; sub: string; keywords: string; kpiId: string }> = [
     {
       title: '\u00a314.6M Efficiency Savings Identified',
       sub: 'Data-driven prescribing interventions',
       keywords: '14.6m efficiency savings identified data-driven prescribing interventions money cost',
+      kpiId: 'savings',
     },
     {
       title: '\u00a3220M Budget Oversight',
       sub: 'Full analytical accountability to ICB board',
       keywords: '220m budget oversight analytical accountability icb board',
+      kpiId: 'budget',
     },
     {
       title: 'Power BI Dashboards for 200+ Users',
       sub: 'Clinicians & commissioners across ICB',
       keywords: 'power bi dashboards 200 users clinicians commissioners',
+      kpiId: 'years',
     },
     {
-      title: 'Team of 12 Led',
-      sub: 'Cross-functional data & population health',
-      keywords: 'team 12 led cross-functional data population health leadership management',
+      title: '1.2M Population Served',
+      sub: 'Norfolk & Waveney Integrated Care System',
+      keywords: '1.2m population served norfolk waveney ics integrated care system',
+      kpiId: 'population',
     },
   ]
 
   achievementEntries.forEach((entry, i) => {
+    const kpi = kpis.find(k => k.id === entry.kpiId)
     items.push({
       id: `ach-${i}`,
       title: entry.title,
@@ -164,7 +167,9 @@ export function buildPaletteData(): PaletteItem[] {
       iconVariant: 'amber',
       iconType: 'achievement',
       keywords: entry.keywords,
-      action: { type: 'scroll', tileId: 'latest-results' },
+      action: kpi
+        ? { type: 'panel', panelContent: { type: 'kpi', kpi } }
+        : { type: 'scroll', tileId: 'latest-results' },
     })
   })
 
