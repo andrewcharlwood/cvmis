@@ -18,6 +18,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   const [typingComplete, setTypingComplete] = useState(false)
   const [buttonHovered, setButtonHovered] = useState(false)
   const [connectionState, setConnectionState] = useState<'connecting' | 'connected'>('connecting')
+  const [dotCount, setDotCount] = useState(0)
   const { requestFocusAfterLogin } = useAccessibility()
 
   const fullUsername = 'a.recruiter'
@@ -32,6 +33,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   const passwordIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const cursorIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const timeoutRefs = useRef<ReturnType<typeof setTimeout>[]>([])
+  const dotIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const loginButtonRef = useRef<HTMLButtonElement>(null)
 
   const addTimeout = useCallback((fn: () => void, delay: number) => {
@@ -107,16 +109,34 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
     }
   }, [canLogin])
 
+  // Connection transitions to green 500ms after typing completes
+  useEffect(() => {
+    if (!typingComplete) return
+    const timeout = addTimeout(() => {
+      setConnectionState('connected')
+    }, prefersReducedMotion ? 0 : 500)
+    return () => clearTimeout(timeout)
+  }, [typingComplete, addTimeout, prefersReducedMotion])
+
+  // Animated trailing dots while connecting
+  useEffect(() => {
+    if (connectionState === 'connected' || prefersReducedMotion) {
+      if (dotIntervalRef.current) clearInterval(dotIntervalRef.current)
+      return
+    }
+    dotIntervalRef.current = setInterval(() => {
+      setDotCount(prev => (prev + 1) % 4)
+    }, 500)
+    return () => {
+      if (dotIntervalRef.current) clearInterval(dotIntervalRef.current)
+    }
+  }, [connectionState, prefersReducedMotion])
+
   useEffect(() => {
     // Cursor blink: 530ms interval
     cursorIntervalRef.current = setInterval(() => {
       setShowCursor(prev => !prev)
     }, 530)
-
-    // Connection status: transitions to connected after ~2000ms
-    const connectionTimeout = addTimeout(() => {
-      setConnectionState('connected')
-    }, 2000)
 
     // Delay start to allow card entrance + logo animation to complete
     // Reduced motion: logo shows instantly, so use original 400ms delay
@@ -132,8 +152,8 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       if (cursorIntervalRef.current) clearInterval(cursorIntervalRef.current)
       if (usernameIntervalRef.current) clearInterval(usernameIntervalRef.current)
       if (passwordIntervalRef.current) clearInterval(passwordIntervalRef.current)
+      if (dotIntervalRef.current) clearInterval(dotIntervalRef.current)
       clearTimeout(startTimeout)
-      clearTimeout(connectionTimeout)
       pendingTimeouts.forEach(id => clearTimeout(id))
     }
   }, [startLoginSequence, addTimeout, prefersReducedMotion])
@@ -365,25 +385,28 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               >
                 <span
                   style={{
-                    width: '6px',
-                    height: '6px',
+                    width: '10px',
+                    height: '10px',
                     borderRadius: '50%',
                     backgroundColor: connectionState === 'connected' ? '#059669' : '#DC2626',
-                    transition: prefersReducedMotion ? 'none' : 'background-color 300ms ease',
+                    boxShadow: connectionState === 'connected'
+                      ? '0 0 6px 1px rgba(5,150,105,0.4)'
+                      : '0 0 6px 1px rgba(220,38,38,0.4)',
+                    transition: prefersReducedMotion ? 'none' : 'background-color 300ms ease, box-shadow 300ms ease',
                     flexShrink: 0,
                   }}
                 />
                 <span
                   style={{
                     fontFamily: "var(--font-geist-mono, 'Geist Mono', monospace)",
-                    fontSize: '10px',
-                    color: connectionState === 'connected' ? '#059669' : '#8DA8A5',
+                    fontSize: '12px',
+                    color: connectionState === 'connected' ? '#059669' : '#DC2626',
                     transition: prefersReducedMotion ? 'none' : 'color 300ms ease',
                   }}
                 >
                   {connectionState === 'connected'
-                    ? 'Secure connection established'
-                    : 'Awaiting secure connection...'}
+                    ? 'Secure connection established, awaiting login'
+                    : `Awaiting secure connection${'.'.repeat(dotCount)}`}
                 </span>
               </div>
             </div>
