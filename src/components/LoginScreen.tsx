@@ -239,7 +239,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
             >
               <div style={{ marginBottom: '10px' }}>
                 <CvmisLogo
-                  cssHeight="clamp(48px, 4vw, 64px)"
+                  cssHeight="clamp(80px, 8vw, 120px)"
                   animated={true}
                 />
               </div>

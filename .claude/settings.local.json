@@ -29,7 +29,9 @@
       "Bash(npx -y serve -l 3333 .)",
       "Bash(npx serve:*)",
       "Bash(timeout /t 3 /nobreak)",
-      "Bash(jq:*)"
+      "Bash(jq:*)",
+      "Bash(git stash:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }
