@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 
 interface CvmisLogoProps {
-  size: number
+  size?: number
+  cssHeight?: string
   animated?: boolean
   className?: string
 }
 
-export function CvmisLogo({ size, animated = false, className }: CvmisLogoProps) {
+export function CvmisLogo({ size, cssHeight, animated = false, className }: CvmisLogoProps) {
   const prefersReducedMotion = useReducedMotion()
   const [animationPhase, setAnimationPhase] = useState<'rise' | 'fan' | 'done'>(
     animated && !prefersReducedMotion ? 'rise' : 'done'
@@ -34,11 +35,11 @@ export function CvmisLogo({ size, animated = false, className }: CvmisLogoProps)
   return (
     <svg
       viewBox="0 0 600 506"
-      height={size}
+      height={cssHeight ? undefined : size}
       className={className}
       role="img"
       aria-label="CVMIS logo"
-      style={{ overflow: 'visible' }}
+      style={{ overflow: 'visible', ...(cssHeight ? { height: cssHeight, width: 'auto' } : {}) }}
     >
       <g transform="translate(0,506) scale(0.05,-0.05)" stroke="none">
         {/* Capsule: Rx (Pharmacy) - Left — teal, tilts left in fan */}

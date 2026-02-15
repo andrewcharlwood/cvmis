@@ -50,16 +50,70 @@
 - cvmis-logo.svg — source SVG with 3 capsule groups
 - LogoReveal/frame 1-5.jpg — animation reference frames
 
-### LoginScreen.tsx Key Lines
+### CvmisLogo Component
+- `size` prop: numeric, sets SVG height attribute directly
+- `cssHeight` prop: string, sets height via CSS style (use for clamp/responsive values)
+- `animated` prop: boolean, enables framer-motion reveal animation (1000ms total)
+- Logo animation: 500ms rise (green capsule) + 500ms fan-out (all three) = 1000ms total
+
+### LoginScreen.tsx Key Lines (post US-004)
 - Line 20: connectionState useState
 - Line 43: canLogin derived state
 - Line 60-101: startLoginSequence (typing animation)
-- Line 110-137: useEffect with connectionTimeout (2000ms) and startLoginSequence delay (400ms)
-- Line 145-415: JSX render (card, form, button, status indicator)
-- Line 213-218: Shield icon (to be replaced)
-- Line 229: "CareerRecord PMR" title
-- Line 240: "Clinical Information System" subtitle
-- Line 367-388: Connection status indicator (6px dot, 10px text)
+- Line 110-139: useEffect with connectionTimeout (2000ms) and startLoginSequence delay (1500ms / 400ms reduced motion)
+- Line 145-409: JSX render (card, form, button, status indicator)
+- Line 208-211: CvmisLogo with cssHeight="clamp(48px, 4vw, 64px)" animated=true
+- Line 221: "CVMIS" title
+- Line 232: "CV Management Information System" subtitle
+- Line 350-382: Connection status indicator (6px dot, 10px text)
 
+---
+
+## 2026-02-15 - US-004
+- Rebranded login from "CareerRecord PMR" to "CVMIS" with subtitle "CV Management Information System"
+- Replaced Shield icon with CvmisLogo component (animated=true, responsive cssHeight)
+- Added `cssHeight` prop to CvmisLogo for CSS clamp-based responsive sizing: clamp(48px, 4vw, 64px)
+- Increased startLoginSequence delay from 400ms to 1500ms to let logo animation complete before typing begins
+- prefers-reduced-motion: keeps original 400ms delay since logo renders instantly
+- Fixed lint warning: added prefersReducedMotion to useEffect dependency array
+- Files changed: src/components/LoginScreen.tsx, src/components/CvmisLogo.tsx
+- **Learnings for future iterations:**
+  - CvmisLogo `size` prop is numeric (SVG height attribute) — use `cssHeight` string prop for CSS clamp values
+  - Logo animation is 1000ms total (500ms rise + 500ms fan-out) — typing delay must account for this
+  - The committed LoginScreen from US-003 still had Shield icon — US-003 only committed responsive sizing, not branding changes
+---
+
+## 2026-02-15 - US-003
+- Responsive card: width clamp(320px,28vw,480px), maxWidth calc(100vw-32px), padding clamp(24px,2.5vw,40px)
+- Replaced hardcoded colors with CSS variables: --surface, --bg-dashboard, --accent, --text-secondary, --text-tertiary
+- Input fields: #E4EDEB default border, var(--accent) focus border, var(--bg-dashboard) inactive bg
+- Font sizes: labels clamp(12px,1vw,14px), inputs clamp(13px,1.1vw,15px), button clamp(14px,1.1vw,16px)
+- Card shadow: 0 1px 2px rgba(26,43,42,0.05) matching project shadow tokens
+- Files changed: src/components/LoginScreen.tsx
+- **Learnings for future iterations:**
+  - No --border-card CSS variable exists in index.css — use #E4EDEB directly
+  - LoginScreen uses inline styles throughout, not Tailwind classes (except for focus-visible ring on button)
+  - The card used className="bg-white" which needed to be replaced with inline style for consistency
+---
+
+## 2026-02-15 - US-002
+- Created CvmisLogo.tsx component with inlined SVG paths from cvmis-logo.svg
+- Three capsule groups: capsule-rx (teal #0b7979), capsule-terminal (amber #d97706), capsule-data (green #059669)
+- Props: size (height px), animated (boolean, default false), className (optional)
+- Framer Motion animation: Phase 1 (rise 500ms) — green data capsule scales from 0, Phase 2 (fan-out 500ms) — all three appear
+- prefers-reduced-motion: skips animation, renders final state immediately
+- Files changed: src/components/CvmisLogo.tsx (new)
+- **Learnings for future iterations:**
+  - The SVG uses viewBox="0 0 600 506" with internal g transform scale(0.05,-0.05) — keep this coordinate system intact
+  - framer-motion's useReducedMotion() hook is the simplest way to handle reduced motion
+  - transform-origin in SVG needs px units when using framer-motion on g elements
+---
+
+## 2026-02-15 - US-001
+- Changed initial Phase state from 'boot' to 'login' in App.tsx line 47
+- Files changed: src/App.tsx
+- **Learnings for future iterations:**
+  - Phase state is a simple string union type on line 47 of App.tsx
+  - US-010 will revert this exact change back to 'boot'
 ---
 

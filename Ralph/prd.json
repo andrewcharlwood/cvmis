@@ -14,7 +14,7 @@
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "Temporary — final story reverts this. Phase state is on line 47 of App.tsx."
     },
     {
@@ -34,7 +34,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "The SVG uses a transform with scale(0.05, -0.05) and translate — you'll need to simplify the viewBox and transforms for React. The three <g> IDs are capsule-rx, capsule-terminal, capsule-data. Framer Motion is already installed (11.15.0). Look at LogoReveal/frame 1-5.jpg for the animation sequence. The fan-out in frames 4-5 shows: teal Rx tilts left, amber terminal stays center, green data tilts right."
     },
     {
@@ -56,7 +56,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "LoginScreen.tsx currently uses inline styles with hardcoded colors (#E5E7EB borders, #64748B text, etc). Replace these with the dashboard CSS custom properties defined in index.css (--surface, --accent, --border, --text-primary, --text-secondary, --text-tertiary). Font family vars: var(--font-ui) for labels/buttons, var(--font-geist-mono) for input monospace."
     },
     {
@@ -76,7 +76,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "The Shield icon is at LoginScreen.tsx lines 213-218. The logo animation is ~1000ms (500ms rise + 500ms fan-out). Increase the startLoginSequence delay from 400ms to ~1500ms (400ms card entrance + 1000ms logo + 100ms pause). CvmisLogo component from US-002."
     },
     {

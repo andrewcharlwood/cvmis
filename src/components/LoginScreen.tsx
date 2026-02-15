@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { Shield } from 'lucide-react'
+import { CvmisLogo } from './CvmisLogo'
 import { useAccessibility } from '../contexts/AccessibilityContext'
 
 interface LoginScreenProps {
@@ -118,10 +118,12 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       setConnectionState('connected')
     }, 2000)
 
-    // Delay start slightly for card entrance animation
+    // Delay start to allow card entrance + logo animation to complete
+    // Reduced motion: logo shows instantly, so use original 400ms delay
+    // Full motion: 400ms card entrance + 1000ms logo animation + 100ms pause = 1500ms
     const startTimeout = addTimeout(() => {
       startLoginSequence()
-    }, 400)
+    }, prefersReducedMotion ? 400 : 1500)
 
     // Capture ref value for cleanup
     const pendingTimeouts = timeoutRefs.current
@@ -134,7 +136,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       clearTimeout(connectionTimeout)
       pendingTimeouts.forEach(id => clearTimeout(id))
     }
-  }, [startLoginSequence, addTimeout])
+  }, [startLoginSequence, addTimeout, prefersReducedMotion])
 
   const buttonBg = buttonPressed
     ? '#085858'
@@ -204,18 +206,10 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               className="flex flex-col items-center"
               style={{ marginBottom: '28px' }}
             >
-              <div
-                style={{
-                  padding: '10px',
-                  borderRadius: '8px',
-                  backgroundColor: 'rgba(13, 110, 110, 0.08)',
-                  marginBottom: '10px',
-                }}
-              >
-                <Shield
-                  size={26}
-                  style={{ color: '#0D6E6E' }}
-                  strokeWidth={2.5}
+              <div style={{ marginBottom: '10px' }}>
+                <CvmisLogo
+                  cssHeight="clamp(48px, 4vw, 64px)"
+                  animated={true}
                 />
               </div>
               <span
@@ -227,7 +221,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                   letterSpacing: '0.01em',
                 }}
               >
-                CareerRecord PMR
+                CVMIS
               </span>
               <span
                 style={{
@@ -238,7 +232,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                   marginTop: '2px',
                 }}
               >
-                Clinical Information System
+                CV Management Information System
               </span>
             </div>
 
