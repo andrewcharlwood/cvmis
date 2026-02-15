@@ -61,17 +61,75 @@
 - `animated` prop: boolean, enables framer-motion reveal animation (1000ms total)
 - Logo animation: 500ms rise (green capsule) + 500ms fan-out (all three) = 1000ms total
 
-### LoginScreen.tsx Key Lines (post US-004)
+### LoginScreen.tsx Key Lines (post US-007)
 - Line 20: connectionState useState
+- Line 21: dotCount useState (for animated trailing dots)
 - Line 43: canLogin derived state
 - Line 60-101: startLoginSequence (typing animation)
-- Line 110-139: useEffect with connectionTimeout (2000ms) and startLoginSequence delay (1500ms / 400ms reduced motion)
-- Line 145-409: JSX render (card, form, button, status indicator)
-- Line 208-211: CvmisLogo with cssHeight="clamp(48px, 4vw, 64px)" animated=true
-- Line 221: "CVMIS" title
-- Line 232: "CV Management Information System" subtitle
-- Line 350-382: Connection status indicator (6px dot, 10px text)
+- Line 110-115: useEffect — connection transitions to green 500ms after typingComplete
+- Line 118-126: useEffect — animated dot cycling (500ms interval) while connecting
+- Line 128-150: useEffect — cursor blink + startLoginSequence delay (no more connectionTimeout)
+- Line 370-405: Connection status indicator (10px LED dot with glow, 12px text)
 
+---
+
+## 2026-02-15 - US-010
+- Reverted initial Phase state from 'login' back to 'boot' in App.tsx line 47
+- Full flow verified: boot → ECG → login (with blur, logo, typing, connection indicator, pulse) → dissolve → dashboard
+- Files changed: src/App.tsx
+- **Learnings for future iterations:**
+  - Simple one-line revert as planned in US-001
+  - The full boot→ECG→login sequence takes ~20 seconds before login screen appears
+---
+
+## 2026-02-15 - US-009
+- Changed outer overlay container from plain `<div>` to `<motion.div>` for animated exit
+- On isExiting: overlay animates backgroundColor to transparent, backdropFilter from blur(20px) to blur(0px) over 600ms
+- Card exit animation extended from 200ms to 400ms for smoother dissolve feel
+- onComplete callback fires after 600ms dissolve (previously 200ms card exit)
+- After dissolve completes, overlay removed from DOM and dashboard becomes interactive
+- prefers-reduced-motion: instant transition (0ms for all timers)
+- Files changed: src/components/LoginScreen.tsx
+- Verified in browser: clicked login → spinner → card fades + overlay blur dissolves → dashboard revealed
+- **Learnings for future iterations:**
+  - framer-motion can animate backdropFilter and backgroundColor on a motion.div via the animate prop
+  - The onComplete timeout (600ms) must match the overlay dissolve duration, not the card fade duration
+  - Card fade (400ms) finishes before overlay dissolve (600ms), creating a layered reveal effect
+  - WebkitBackdropFilter needs to be animated alongside backdropFilter for Safari
+---
+
+## 2026-02-15 - US-008
+- Added @keyframes login-pulse in index.css: scale 1→1.03→1 over 3s cycle (1.5s animation built into keyframe percentages with 1.5s pause)
+- Added .login-pulse-active class that applies the animation infinitely
+- Hover removes animation via CSS rule (.login-pulse-active:hover { animation: none })
+- Button gets login-pulse-active class when canLogin && !buttonPressed
+- prefers-reduced-motion: .login-pulse-active { animation: none } in reduced motion media query
+- Button opacity 0.6→1.0 transition preserved (existing behavior)
+- Button still receives keyboard focus when enabled (existing behavior)
+- Files changed: src/index.css, src/components/LoginScreen.tsx
+- Verified in browser: button has login-pulse animation running (3s ease-in-out infinite), class applied correctly
+- **Learnings for future iterations:**
+  - Used keyframe percentages (0%,60%,100% at scale(1), 30% at scale(1.03)) to build pause into a single animation rather than animation-delay
+  - CSS handles hover removal — no need for buttonHovered state in the class condition
+  - buttonPressed removes the class entirely (not just pauses), which is cleaner
+---
+
+## 2026-02-15 - US-007
+- Reworked connection status indicator: LED dot 6px→10px with glow box-shadow, text 10px→12px
+- Removed independent 2000ms connectionTimeout timer
+- Added useEffect that transitions to green 500ms after typingComplete becomes true
+- Added animated trailing dots cycling '.', '..', '...' every 500ms while connecting
+- Initial state: red LED + red text "Awaiting secure connection" with animated dots
+- Connected state: green LED + green text "Secure connection established, awaiting login"
+- 300ms smooth transition for color and box-shadow between states
+- prefers-reduced-motion: no dot cycling, instant state changes
+- Files changed: src/components/LoginScreen.tsx
+- Verified in browser: red indicator with cycling dots visible during typing, transitions to green after typing completes
+- **Learnings for future iterations:**
+  - dotCount state cycles 0→1→2→3→0 (4 states: no dots, '.', '..', '...') via modulo arithmetic
+  - Connection transition is now tied to typingComplete state, not an arbitrary timer
+  - The dot interval cleanup needs to happen in both the dedicated useEffect and the main cleanup
+  - LED glow uses rgba with 0.4 alpha for subtle effect matching project shadow conventions
 ---
 
 ## 2026-02-15 - US-006

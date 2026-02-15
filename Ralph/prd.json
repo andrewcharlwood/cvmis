@@ -136,7 +136,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "The connectionTimeout is set on line 117 of LoginScreen.tsx (2000ms independent timer). Remove it and add a useEffect that watches typingComplete — when true, setTimeout 500ms then setConnectionState('connected'). The dot animation can use a simple interval cycling dotCount 0→1→2→0. The LED glow box-shadow: '0 0 6px 1px rgba(220,38,38,0.4)' for red, '0 0 6px 1px rgba(5,150,105,0.4)' for green."
     },
     {
@@ -155,7 +155,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "The canLogin variable is on line 43 of LoginScreen.tsx. Add a CSS class 'login-pulse-active' that applies the animation, and conditionally apply it when canLogin && !buttonPressed && !buttonHovered. The @keyframes could use: 0%,100% { transform: scale(1) } 50% { transform: scale(1.03) } with animation: login-pulse 1.5s ease-in-out infinite and a wrapper that adds 1.5s gaps (or use 0%,35%,65%,100% keyframe percentages to build in the pause)."
     },
     {
@@ -175,7 +175,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "Currently LoginScreen has isExiting state that scales card to 1.03 and fades to opacity 0 (line 163). Extend this to also animate the overlay container. The overlay is the outer div with 'fixed inset-0' — animate its backdrop-filter and background-color. Use framer-motion animate for coordinated exit. The onComplete callback should fire after the full dissolve, not after the card fade."
     },
     {
@@ -193,7 +193,7 @@
         "Verify in browser using dev-browser skill: app starts at boot, progresses through ECG, login with blur background and logo animation, arrives at dashboard"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "Simple revert of US-001. Phase state is on line 47 of App.tsx."
     }
   ]

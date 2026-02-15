@@ -2,6 +2,10 @@
 
 You are an autonomous coding agent working on a software project.
 
+## CRITICAL: One Story Per Iteration
+
+You MUST complete exactly ONE user story and then STOP. Do NOT start a second story. After committing and updating progress, your job is done — output your summary and stop.
+
 ## Your Task
 
 1. Read the PRD at `prd.json` (in the same directory as this file)
@@ -14,6 +18,7 @@ You are an autonomous coding agent working on a software project.
 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Story Title]`
 9. Update the PRD to set `passes: true` for the completed story
 10. Append your progress to `progress.txt`
+11. **STOP.** Output a short summary and end your response. Do NOT pick up the next story.
 
 ## Progress Report Format
 
@@ -89,16 +94,7 @@ If no browser tools are available, note in your progress report that manual brow
 
 ## Stop Condition
 
-After completing a user story, check if ALL stories have `passes: true`.
+After completing ONE user story, check if ALL stories now have `passes: true`.
 
-If ALL stories are complete and passing, reply with:
-<promise>COMPLETE</promise>
-
-If there are still stories with `passes: false`, end your response normally (another iteration will pick up the next story).
-
-## Important
-
-- Work on ONE story per iteration
-- Commit frequently
-- Keep CI green
-- Read the Codebase Patterns section in progress.txt before starting
+- If ALL stories are complete: reply with `<promise>COMPLETE</promise>` and stop.
+- If stories remain: output a short summary of what you did and **STOP immediately**. Do NOT continue to the next story. The outer loop will spawn a fresh iteration for it.

@@ -146,9 +146,9 @@ for i in $(seq 1 $MAX_ITERATIONS); do
   ELAPSED_SEC=$((ELAPSED % 60))
   printf "  \033[0;90mFinished: $(date +%H:%M:%S) (elapsed: ${ELAPSED_MIN}m${ELAPSED_SEC}s)\033[0m\n"
 
-  # Check for completion signal in raw log and text log
-  if grep -q "<promise>COMPLETE</promise>" "$RAW_LOG" 2>/dev/null || \
-     grep -q "<promise>COMPLETE</promise>" "$TEXT_LOG" 2>/dev/null; then
+  # Check for completion signal in text log ONLY (not raw log — raw log contains
+  # the CLAUDE.md prompt which has the literal <promise>COMPLETE</promise> instruction)
+  if grep -q "<promise>COMPLETE</promise>" "$TEXT_LOG" 2>/dev/null; then
     echo ""
     printf "\033[0;32mRalph completed all tasks!\033[0m\n"
     echo "Completed at iteration $i of $MAX_ITERATIONS"
