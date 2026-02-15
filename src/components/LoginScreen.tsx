@@ -3,6 +3,9 @@ import { motion } from 'framer-motion'
 import { CvmisLogo } from './CvmisLogo'
 import { useAccessibility } from '../contexts/AccessibilityContext'
 
+// ── Login screen timing & visual constants ──────────────────────────
+const BACKDROP_BLUR_PX = 10
+
 interface LoginScreenProps {
   onComplete: () => void
 }
@@ -171,8 +174,8 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       style={{
         zIndex: 110,
         backgroundColor: 'rgba(240, 245, 244, 0.7)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        backdropFilter: `blur(${BACKDROP_BLUR_PX}px)`,
+        WebkitBackdropFilter: `blur(${BACKDROP_BLUR_PX}px)`,
       }}
       animate={isExiting ? {
         backgroundColor: 'rgba(240, 245, 244, 0)',

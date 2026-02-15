@@ -133,3 +133,14 @@
   - Tailwind's `z-50` = z-index 50, which was below the TopBar — switched to inline style for precise control
   - The login card doesn't need its own z-index since it's a child of the overlay and inherits stacking context
 ---
+
+## 2026-02-15 - US-007: Reduce backdrop blur intensity by ~50%
+- Added `BACKDROP_BLUR_PX = 10` constant at top of LoginScreen.tsx
+- Replaced hardcoded `blur(20px)` in initial style with template literal using constant
+- Exit animation still targets `blur(0px)` — Framer Motion interpolates from current 10px to 0px
+- Files changed: `src/components/LoginScreen.tsx`
+- **Learnings for future iterations:**
+  - The `BACKDROP_BLUR_PX` constant is in the "Login screen timing & visual constants" block at top of LoginScreen.tsx
+  - Framer Motion's `animate` prop interpolates from the element's current computed style, so the exit blur animation doesn't need the starting value explicitly
+  - Only the initial style needs the constant; the exit target (`blur(0px)`) is always 0
+---

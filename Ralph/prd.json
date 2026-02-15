@@ -113,7 +113,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "The blur is in two places in LoginScreen.tsx: the initial style (backdropFilter: blur(20px)) and the exit animation (animates from blur(20px) to blur(0px)). Extract the blur value to a constant like BACKDROP_BLUR_PX = 10, then reference it in both places."
     },
     {
