@@ -69,6 +69,18 @@
 
 ---
 
+## 2026-02-15 - US-005
+- Replaced Home icon with CvmisLogo (size={24}, static/no animation) in TopBar.tsx
+- Removed Home from lucide-react import (Search still used)
+- Imported CvmisLogo component
+- Files changed: src/components/TopBar.tsx
+- Verified in browser: logo renders correctly with teal/amber/green capsule colors, fits TopBar height
+- **Learnings for future iterations:**
+  - TopBar uses inline styles throughout, consistent with LoginScreen pattern
+  - Search is the only remaining lucide-react icon in TopBar.tsx
+  - CvmisLogo default `animated=false` means no animation prop needed for static usage
+---
+
 ## 2026-02-15 - US-004
 - Rebranded login from "CareerRecord PMR" to "CVMIS" with subtitle "CV Management Information System"
 - Replaced Shield icon with CvmisLogo component (animated=true, responsive cssHeight)

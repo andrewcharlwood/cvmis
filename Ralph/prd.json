@@ -94,7 +94,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "TopBar.tsx line 57-61 has the Home icon. Simple swap — CvmisLogo with animated=false (the default). If Home is the only lucide icon used in the import, clean up the import. Check: Search is also imported from lucide-react on line 2."
     },
     {
