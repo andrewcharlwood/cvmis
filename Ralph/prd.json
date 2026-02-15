@@ -81,7 +81,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Use framer-motion's useTransform or a progress-based approach to derive blend opacity from fan animation progress. The pill elements are <g> groups inside the SVG. Apply mixBlendMode: 'multiply' as a style and animate the group's opacity using the timing constants from US-002. The blend should only be visible during/after the fan phase, not during the rise phase."
     },
     {

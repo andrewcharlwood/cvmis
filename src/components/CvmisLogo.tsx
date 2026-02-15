@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 
 interface CvmisLogoProps {
@@ -53,18 +53,27 @@ export function CvmisLogo({ size, cssHeight, animated = false, className }: Cvmi
   const [phase, setPhase] = useState<'rising' | 'fanning' | 'done'>(
     animated && !prefersReducedMotion ? 'rising' : 'done'
   )
+  const [blendActive, setBlendActive] = useState(!animated || !!prefersReducedMotion)
+
+  // Blend starts at OVERLAY_BLEND_START_PROGRESS through the fan animation
+  const blendStartMs = useMemo(
+    () => FAN_DELAY_AFTER_RISE_MS + FAN_DURATION_S * 1000 * OVERLAY_BLEND_START_PROGRESS,
+    []
+  )
 
   useEffect(() => {
     if (!animated || prefersReducedMotion) return
 
     const fanTimer = setTimeout(() => setPhase('fanning'), FAN_DELAY_AFTER_RISE_MS)
     const doneTimer = setTimeout(() => setPhase('done'), TOTAL_ANIMATION_MS)
+    const blendTimer = setTimeout(() => setBlendActive(true), blendStartMs)
 
     return () => {
       clearTimeout(fanTimer)
       clearTimeout(doneTimer)
+      clearTimeout(blendTimer)
     }
-  }, [animated, prefersReducedMotion])
+  }, [animated, prefersReducedMotion, blendStartMs])
 
   const skip = !animated || prefersReducedMotion
   const isFanned = phase === 'fanning' || phase === 'done'
@@ -147,6 +156,32 @@ export function CvmisLogo({ size, cssHeight, animated = false, className }: Cvmi
               strokeWidth="10"
               strokeLinecap="round"
             />
+          </g>
+        </g>
+
+        {/* Blend overlays — multiply-blend copies of fanning pills for overlap darkening */}
+        <g
+          style={{
+            transform: leftTransform,
+            transition: skip ? 'none' : `${fanTransition}, opacity ${OVERLAP_BLEND_TRANSITION_DURATION_S}s ease-out`,
+            mixBlendMode: 'multiply',
+            opacity: blendActive ? OVERLAP_BLEND_MAX_OPACITY : 0,
+          }}
+        >
+          <g transform="translate(250, 50)">
+            <rect width="100" height="225" rx="50" fill="#0E7A7D" />
+          </g>
+        </g>
+        <g
+          style={{
+            transform: rightTransform,
+            transition: skip ? 'none' : `${fanTransitionDelayed}, opacity ${OVERLAP_BLEND_TRANSITION_DURATION_S}s ease-out`,
+            mixBlendMode: 'multiply',
+            opacity: blendActive ? OVERLAP_BLEND_MAX_OPACITY : 0,
+          }}
+        >
+          <g transform="translate(250, 50)">
+            <rect width="100" height="225" rx="50" fill="#109E6C" />
           </g>
         </g>
       </motion.g>

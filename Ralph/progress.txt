@@ -109,3 +109,17 @@
   - Title and subtitle are `<span>` elements inside the `.flex.flex-col.items-center` branding container
   - Weight hierarchy (600 title, 400 subtitle) provides sufficient visual differentiation without needing size contrast as large
 ---
+
+## 2026-02-15 - US-005: Add overlap blend effect on fanning capsules
+- Added `blendActive` state to CvmisLogo, triggered by timer at `blendStartMs` (50% through fan animation)
+- Added two blend overlay `<g>` elements after the main pills: copies of left/right pill shapes with `mixBlendMode: 'multiply'` and opacity transitioning from 0 to 0.2
+- Blend overlays share the same `transform` and `transition` as their corresponding original pills, plus an opacity transition using `OVERLAP_BLEND_TRANSITION_DURATION_S`
+- Reduced motion: `blendActive` starts `true`, `transition: 'none'` — final blend state shown immediately
+- Browser-verified: blend darkening visible at pill overlap areas, opacity confirmed at 0.2
+- Files changed: `src/components/CvmisLogo.tsx`
+- **Learnings for future iterations:**
+  - `mix-blend-mode` is not CSS-animatable — use overlay elements with animated opacity instead of trying to transition the blend mode
+  - Blend overlay approach: duplicate the pill shapes (rect only, no icons) as separate `<g>` elements with `mixBlendMode: 'multiply'` and low opacity
+  - The `useMemo` for `blendStartMs` avoids recalculation — all timing constants are module-level so this is stable
+  - Combined CSS transition strings work in SVG `<g>` style: `transform 0.6s cubic-bezier(...), opacity 0.3s ease-out`
+---
