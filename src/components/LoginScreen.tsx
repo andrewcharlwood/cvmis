@@ -237,9 +237,9 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               className="flex flex-col items-center"
               style={{ marginBottom: '28px' }}
             >
-              <div style={{ marginBottom: '10px' }}>
+              <div style={{ marginBottom: '12px' }}>
                 <CvmisLogo
-                  cssHeight="clamp(80px, 8vw, 120px)"
+                  cssHeight="clamp(160px, 18vw, 280px)"
                   animated={true}
                 />
               </div>
