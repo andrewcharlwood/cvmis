@@ -53,7 +53,7 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "The pipeline returns a Tensor — use .tolist() or .data to extract the raw float array. Mean-pool across the token dimension (dim 1) to get a single 384-d vector per input. Process items sequentially to avoid OOM in Node. The output file will be ~200KB for ~40 items with 384 floats each."
     },
     {

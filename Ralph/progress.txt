@@ -9,6 +9,7 @@
 - Project uses `"type": "module"` in package.json
 - Palette item IDs: `exp-{consultation.id}`, `skill-{skill.id}`, `proj-{investigation.id}`, `ach-{0-3}`, `edu-{0-3}`, `action-{0-3}`
 - `buildEmbeddingTexts()` in `src/lib/search.ts` returns `Array<{ id: string, text: string }>` with IDs matching PaletteItem IDs — use this for both embedding generation and chat context
+- `src/data/embeddings.json` is an array of `{ id: string, embedding: number[] }` — 42 items, 384-d vectors, IDs match PaletteItem IDs. Vite imports JSON natively.
 
 ---
 
@@ -44,4 +45,20 @@
   - Achievement items are similarly hardcoded with ids `ach-0` through `ach-3`, each linked to a KPI id
   - Quick action items are `action-0` through `action-3`
   - `documents.ts` is imported but wasn't previously used in `search.ts` — now used for education embedding text
+---
+
+## 2026-02-15 - US-003
+- Updated `scripts/generate-embeddings.ts` to import `buildEmbeddingTexts()` and generate full embeddings
+- Script embeds all 42 palette items sequentially using `Xenova/all-MiniLM-L6-v2`
+- Outputs `src/data/embeddings.json` as `Array<{ id: string, embedding: number[] }>`
+- Each embedding is a 384-dimensional float array
+- File is ~453KB (42 items × 384 floats with pretty-printed JSON)
+- `npm run generate-embeddings` regenerates the file successfully
+- Typecheck and lint pass
+- Files changed: `scripts/generate-embeddings.ts`, `src/data/embeddings.json`
+- **Learnings for future iterations:**
+  - `import.meta.dirname` works in tsx/Node ESM scripts — use it instead of `__dirname` (which isn't available in ESM)
+  - `@/` path alias works in `npx tsx` scripts because tsx resolves tsconfig paths automatically
+  - The embeddings file is ~450KB with pretty-print; could be reduced with compact JSON but readability is preferred for now
+  - Processing 42 items takes ~10-15 seconds on first run (model cached after first download)
 ---
