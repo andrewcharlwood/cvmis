@@ -5,7 +5,10 @@ export interface ChatMessage {
   content: string
 }
 
-const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash'
+export const GEMINI_MODEL = 'gemini-3-flash-preview'
+export const GEMINI_DISPLAY_NAME = 'Gemini 3 Flash'
+
+const GEMINI_API_BASE = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}`
 
 function getApiKey(): string | undefined {
   return import.meta.env.VITE_GEMINI_API_KEY as string | undefined
@@ -19,20 +22,23 @@ function buildSystemPrompt(): string {
   const texts = buildEmbeddingTexts()
   const cvContent = texts.map((t) => `- ${t.text}`).join('\n')
 
-  return `You are an AI assistant embedded in Andy Charlwood's professional portfolio website. Your role is to answer questions about Andy's professional experience, skills, projects, and qualifications accurately and concisely.
+  return `You are an AI assistant on Andy Charlwood's portfolio website. Answer questions about his experience, skills, projects, and qualifications.
 
-Here is Andy's complete professional profile:
+## Andy's Professional Profile
 
 ${cvContent}
 
-Instructions:
-- Answer questions based ONLY on the information above. Do not invent roles, dates, or achievements.
-- Be concise — 2-4 sentences for most answers.
-- Be professional but friendly in tone.
-- If asked something not covered by the profile data, say you don't have that information.
-- At the end of your response, on a new line, include relevant portfolio item IDs in this format: [ITEMS: id1, id2, id3]
-- Only include item IDs that are directly relevant to your answer. The available IDs are the ones listed above (e.g., exp-*, skill-*, proj-*, ach-*, edu-*, action-*).
-- If no items are particularly relevant, omit the [ITEMS: ...] line entirely.`
+## Rules
+1. Use ONLY the profile above. Never invent roles, dates, or achievements.
+2. Be concise (2-4 sentences). Be professional but friendly.
+3. If the information isn't in the profile, say so.
+
+## Item References
+After your answer, on a NEW line, list relevant portfolio item IDs:
+[ITEMS: id1, id2, id3]
+- IDs match the profile entries above (exp-*, skill-*, proj-*, ach-*, edu-*, action-*).
+- Only include IDs directly relevant to your answer.
+- If no items are relevant, omit the [ITEMS: ...] line entirely.`
 }
 
 function buildRequestBody(

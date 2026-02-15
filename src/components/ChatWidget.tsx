@@ -6,6 +6,7 @@ import {
   isGeminiAvailable,
   parseItemIds,
   stripItemsSuffix,
+  GEMINI_DISPLAY_NAME,
   type ChatMessage,
 } from '@/lib/gemini'
 import { buildPaletteData } from '@/lib/search'
@@ -246,15 +247,26 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
                   flexShrink: 0,
                 }}
               >
-                <span
-                  style={{
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    color: 'var(--text-primary)',
-                  }}
-                >
-                  Ask about Andy
-                </span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                  <span
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      color: 'var(--text-primary)',
+                    }}
+                  >
+                    Ask about Andy
+                  </span>
+                  <span
+                    className="font-geist"
+                    style={{
+                      fontSize: '11px',
+                      color: 'var(--text-tertiary)',
+                    }}
+                  >
+                    {GEMINI_DISPLAY_NAME}
+                  </span>
+                </div>
                 <button
                   onClick={() => setIsOpen(false)}
                   aria-label="Close chat"
