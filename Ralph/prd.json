@@ -72,7 +72,7 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Use pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2') which auto-downloads and caches the ONNX model. The module-level pattern (let pipelineInstance = null) avoids React re-render issues. embedQuery should mean-pool the tensor output the same way as the build script. Wrap initModel() in a try/catch that silently swallows errors."
     },
     {

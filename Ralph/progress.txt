@@ -10,6 +10,8 @@
 - Palette item IDs: `exp-{consultation.id}`, `skill-{skill.id}`, `proj-{investigation.id}`, `ach-{0-3}`, `edu-{0-3}`, `action-{0-3}`
 - `buildEmbeddingTexts()` in `src/lib/search.ts` returns `Array<{ id: string, text: string }>` with IDs matching PaletteItem IDs — use this for both embedding generation and chat context
 - `src/data/embeddings.json` is an array of `{ id: string, embedding: number[] }` — 42 items, 384-d vectors, IDs match PaletteItem IDs. Vite imports JSON natively.
+- `src/lib/embedding-model.ts` exports `initModel()`, `embedQuery(text)`, `isModelReady()` — check `isModelReady()` before calling `embedQuery()`
+- `initModel()` is called fire-and-forget in `App.tsx` on mount — model loads during boot/ECG/login phases
 
 ---
 
@@ -61,4 +63,20 @@
   - `@/` path alias works in `npx tsx` scripts because tsx resolves tsconfig paths automatically
   - The embeddings file is ~450KB with pretty-print; could be reduced with compact JSON but readability is preferred for now
   - Processing 42 items takes ~10-15 seconds on first run (model cached after first download)
+---
+
+## 2026-02-15 - US-004
+- Created `src/lib/embedding-model.ts` with three exports: `initModel()`, `embedQuery()`, `isModelReady()`
+- Module-level `let extractor` pattern avoids React re-render issues
+- `initModel()` uses `loading` guard to prevent duplicate pipeline loads
+- `embedQuery()` uses same `pooling: 'mean'` and `normalize: true` as the build script
+- `initModel()` called fire-and-forget in `App.tsx` `useEffect([], [])` — runs during boot phase
+- Silent failure: try/catch swallows errors, `isModelReady()` stays false
+- Typecheck, lint, and build all pass
+- Files changed: `src/lib/embedding-model.ts` (new), `src/App.tsx`
+- **Learnings for future iterations:**
+  - `FeatureExtractionPipeline` type is exported from `@xenova/transformers` and can be used for the module-level variable
+  - The `loading` boolean guard prevents race conditions if `initModel()` is called multiple times (e.g., React strict mode double-mount)
+  - `initModel()` is intentionally not awaited — it's fire-and-forget so it doesn't block the boot animation
+  - Consumers should check `isModelReady()` before calling `embedQuery()` — it throws if model isn't loaded
 ---
