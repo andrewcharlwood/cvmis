@@ -10,26 +10,26 @@ interface CvmisLogoProps {
 
 // ── Animation timing constants ──────────────────────────────────────
 // Rise phase: all pills rise together from below
-const RISE_DURATION_MS = 500           // duration of the upward rise (ms)
+const RISE_DURATION_MS = 2500           // duration of the upward rise (ms)
 const RISE_DURATION_S = RISE_DURATION_MS / 1000
 const RISE_OPACITY_DURATION_S = 0.25   // opacity fade-in during rise (s)
 const RISE_EASING: [number, number, number, number] = [0.33, 1, 0.68, 1]
 const RISE_START_Y = 350               // initial Y offset (viewBox units)
 
 // Fan phase: left and right pills fan outward
-const FAN_DELAY_AFTER_RISE_MS = 500    // delay before fan begins (ms from mount)
-const FAN_DURATION_S = 0.6             // duration of fan-out (s)
+const FAN_DELAY_AFTER_RISE_MS = RISE_DURATION_MS - 100    // delay before fan begins (ms from mount)
+const FAN_DURATION_S = 1            // duration of fan-out (s)
 const FAN_EASING = 'cubic-bezier(0.34, 1.56, 0.64, 1)'
-const FAN_ROTATION_DEG = 50            // rotation angle for fanned pills (±degrees)
-const FAN_HORIZONTAL_PX = 16           // horizontal offset for fanned pills (±px)
-const FAN_RIGHT_STAGGER_S = 0.03       // stagger delay for right pill (s)
+const FAN_ROTATION_DEG = 55            // rotation angle for fanned pills (±degrees)
+const FAN_HORIZONTAL_PX = 10           // horizontal offset for fanned pills (±px)
+const FAN_RIGHT_STAGGER_S = 0.0       // stagger delay for right pill (s)
 
 // Total animation = rise delay + fan duration
 const TOTAL_ANIMATION_MS = FAN_DELAY_AFTER_RISE_MS + FAN_DURATION_S * 1000
 
 // Overlap blend: multiply blend on fanning capsules (used by US-005)
-export const OVERLAY_BLEND_START_PROGRESS = 0.5  // fan progress at which blend fades in
-export const OVERLAP_BLEND_MAX_OPACITY = 0.2     // max blend opacity (20%)
+export const OVERLAY_BLEND_START_PROGRESS = 0.2  // fan progress at which blend fades in
+export const OVERLAP_BLEND_MAX_OPACITY = 0.3     // max blend opacity (20%)
 export const OVERLAP_BLEND_TRANSITION_DURATION_S = FAN_DURATION_S * (1 - OVERLAY_BLEND_START_PROGRESS)
 
 // Pivot point: bottom-center of the pill stack (in viewBox coords)
@@ -96,6 +96,11 @@ export function CvmisLogo({ size, cssHeight, animated = false, className }: Cvmi
         ...(cssHeight ? { height: cssHeight, width: 'auto' } : {}),
       }}
     >
+      <defs>
+        <clipPath id="center-pill-clip">
+          <rect x="250" y="50" width="100" height="225" rx="50" />
+        </clipPath>
+      </defs>
       {/* Rise group — all pills rise together from below */}
       <motion.g
         initial={skip ? false : { y: RISE_START_Y, opacity: 0 }}
@@ -159,29 +164,33 @@ export function CvmisLogo({ size, cssHeight, animated = false, className }: Cvmi
           </g>
         </g>
 
-        {/* Blend overlays — multiply-blend copies of fanning pills for overlap darkening */}
-        <g
-          style={{
-            transform: leftTransform,
-            transition: skip ? 'none' : `${fanTransition}, opacity ${OVERLAP_BLEND_TRANSITION_DURATION_S}s ease-out`,
-            mixBlendMode: 'multiply',
-            opacity: blendActive ? OVERLAP_BLEND_MAX_OPACITY : 0,
-          }}
-        >
-          <g transform="translate(250, 50)">
-            <rect width="100" height="225" rx="50" fill="#0E7A7D" />
+        {/* Blend overlays — multiply-blend copies of fanning pills, clipped to center pill overlap */}
+        <g clipPath="url(#center-pill-clip)">
+          <g
+            style={{
+              transform: leftTransform,
+              transition: skip ? 'none' : `${fanTransition}, opacity ${OVERLAP_BLEND_TRANSITION_DURATION_S}s ease-out`,
+              mixBlendMode: 'multiply',
+              opacity: blendActive ? OVERLAP_BLEND_MAX_OPACITY : 0,
+            }}
+          >
+            <g transform="translate(250, 50)">
+              <rect width="100" height="225" rx="50" fill="#0E7A7D" />
+            </g>
           </g>
         </g>
-        <g
-          style={{
-            transform: rightTransform,
-            transition: skip ? 'none' : `${fanTransitionDelayed}, opacity ${OVERLAP_BLEND_TRANSITION_DURATION_S}s ease-out`,
-            mixBlendMode: 'multiply',
-            opacity: blendActive ? OVERLAP_BLEND_MAX_OPACITY : 0,
-          }}
-        >
-          <g transform="translate(250, 50)">
-            <rect width="100" height="225" rx="50" fill="#109E6C" />
+        <g clipPath="url(#center-pill-clip)">
+          <g
+            style={{
+              transform: rightTransform,
+              transition: skip ? 'none' : `${fanTransitionDelayed}, opacity ${OVERLAP_BLEND_TRANSITION_DURATION_S}s ease-out`,
+              mixBlendMode: 'multiply',
+              opacity: blendActive ? OVERLAP_BLEND_MAX_OPACITY : 0,
+            }}
+          >
+            <g transform="translate(250, 50)">
+              <rect width="100" height="225" rx="50" fill="#109E6C" />
+            </g>
           </g>
         </g>
       </motion.g>

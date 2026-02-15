@@ -1,0 +1,200 @@
+{
+  "project": "Portfolio — Login Screen Rework",
+  "branchName": "ralph/login-screen-rework",
+  "description": "Rework the login screen: responsive sizing, dashboard style alignment, CVMIS rebrand, animated capsule logo, live blurred dashboard background, connection status indicator UX, button pulse, and dissolve transition.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Skip to login phase for dev iteration",
+      "description": "As a developer, I want to skip boot/ECG and land directly on the login screen so I can iterate on login changes quickly.",
+      "acceptanceCriteria": [
+        "In src/App.tsx, change the initial Phase state from 'boot' to 'login'",
+        "The boot, ECG, and login phases remain in code — only the initial state changes",
+        "App loads directly to the login screen on refresh",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Temporary — final story reverts this. Phase state is on line 47 of App.tsx."
+    },
+    {
+      "id": "US-002",
+      "title": "Create CvmisLogo React SVG component",
+      "description": "As a developer, I need a reusable CvmisLogo component that renders the CVMIS capsule logo from cvmis-logo.svg, supporting both static and animated modes.",
+      "acceptanceCriteria": [
+        "Create src/components/CvmisLogo.tsx as a React component",
+        "Component accepts props: size (number, controls height in px), animated (boolean, default false), className (optional string)",
+        "SVG paths are inlined from cvmis-logo.svg — three <g> groups: capsule-rx (teal #0b7979), capsule-terminal (amber #d97706), capsule-data (green #059669)",
+        "The SVG viewBox is preserved so the logo scales correctly at any size",
+        "When animated=false, all three capsules render in their final fanned-out positions (matching the original SVG layout)",
+        "When animated=true, the component plays a two-phase reveal using framer-motion: Phase 1 (Rise ~500ms): green data capsule scales from 0 to 1 and translates upward into center position, other capsules hidden. Phase 2 (Fan-out ~500ms): all three capsules appear and rotate/translate to their final fanned-out positions with staggered easing",
+        "Animation reference: LogoReveal/frame 1-5.jpg — frame 1-3 show green capsule rising, frame 4-5 show all three fanning out",
+        "Each capsule group uses transform-origin at its base/bottom so fan-out looks like cards spreading from a hand",
+        "prefers-reduced-motion: skip animation, render final state immediately",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "The SVG uses a transform with scale(0.05, -0.05) and translate — you'll need to simplify the viewBox and transforms for React. The three <g> IDs are capsule-rx, capsule-terminal, capsule-data. Framer Motion is already installed (11.15.0). Look at LogoReveal/frame 1-5.jpg for the animation sequence. The fan-out in frames 4-5 shows: teal Rx tilts left, amber terminal stays center, green data tilts right."
+    },
+    {
+      "id": "US-003",
+      "title": "Responsive login card sizing and dashboard style alignment",
+      "description": "As a visitor on a 1440p or 4K display, I want the login card to be proportionate to my screen and styled consistently with the GP dashboard.",
+      "acceptanceCriteria": [
+        "Login card width changes from fixed 320px to responsive: clamp(320px, 28vw, 480px)",
+        "Card padding scales from fixed 32px to clamp(24px, 2.5vw, 40px)",
+        "Input field font size scales proportionally (minimum 13px, up to 15px on large viewports)",
+        "Button font size scales proportionally (minimum 14px, up to 16px)",
+        "Label font size scales proportionally (minimum 12px, up to 14px)",
+        "Card uses dashboard color tokens via CSS variables: background var(--surface), border color var(--border-card) or #E4EDEB, text colors var(--text-primary) and var(--text-secondary)",
+        "Input fields use var(--accent) (#0D6E6E) for focus border, #E4EDEB for default border, var(--bg-dashboard) for inactive background",
+        "Card shadow uses the project shadow tokens: 0 1px 2px rgba(26,43,42,0.05) resting, 0 2px 8px rgba(26,43,42,0.08) elevated",
+        "Card border radius remains 12px",
+        "Card still looks good on mobile (≤480px) — should not exceed viewport width minus 32px margin",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "LoginScreen.tsx currently uses inline styles with hardcoded colors (#E5E7EB borders, #64748B text, etc). Replace these with the dashboard CSS custom properties defined in index.css (--surface, --accent, --border, --text-primary, --text-secondary, --text-tertiary). Font family vars: var(--font-ui) for labels/buttons, var(--font-geist-mono) for input monospace."
+    },
+    {
+      "id": "US-004",
+      "title": "Rebrand to CVMIS and integrate animated logo",
+      "description": "As the portfolio owner, I want the login to say CVMIS with the capsule logo replacing the Shield icon.",
+      "acceptanceCriteria": [
+        "Title text changed from 'CareerRecord PMR' to 'CVMIS'",
+        "Subtitle changed from 'Clinical Information System' to 'CV Management Information System'",
+        "The Shield icon import and its teal background container are removed from the branding section",
+        "CvmisLogo component is imported and rendered in the branding section with animated=true",
+        "Logo height is proportional to the responsive card size (roughly 48-64px depending on viewport, use clamp)",
+        "Logo animation completes before the typing animation starts — adjust the startLoginSequence delay (currently 400ms) to account for logo animation duration (~1000ms total)",
+        "Footer text 'Secure clinical system login' remains unchanged",
+        "prefers-reduced-motion: logo shows instantly in final state, typing starts after original 400ms delay",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "The Shield icon is at LoginScreen.tsx lines 213-218. The logo animation is ~1000ms (500ms rise + 500ms fan-out). Increase the startLoginSequence delay from 400ms to ~1500ms (400ms card entrance + 1000ms logo + 100ms pause). CvmisLogo component from US-002."
+    },
+    {
+      "id": "US-005",
+      "title": "Replace Home icon with CVMIS logo on TopBar",
+      "description": "As a visitor on the dashboard, I want to see the CVMIS brand logo in the top-left corner instead of the generic Home icon.",
+      "acceptanceCriteria": [
+        "In src/components/TopBar.tsx, remove the Home import from lucide-react",
+        "Import CvmisLogo from ./CvmisLogo",
+        "Replace the <Home> element with <CvmisLogo size={24} /> (static, no animation)",
+        "Logo colors match SVG source: teal #0b7979, amber #d97706, green #059669",
+        "Logo maintains aspect ratio and fits within the TopBar height",
+        "The 'Headhunt Medical Center' brand text and all other TopBar elements remain unchanged",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "TopBar.tsx line 57-61 has the Home icon. Simple swap — CvmisLogo with animated=false (the default). If Home is the only lucide icon used in the import, clean up the import. Check: Search is also imported from lucide-react on line 2."
+    },
+    {
+      "id": "US-006",
+      "title": "Render live dashboard behind login with blur overlay",
+      "description": "As a visitor, I want to see the GP dashboard blurred behind the login card, creating visual continuity.",
+      "acceptanceCriteria": [
+        "In App.tsx, during the 'login' phase, render DashboardLayout underneath the login overlay (both visible simultaneously)",
+        "DashboardLayout is wrapped in DetailPanelProvider (as it is in the 'pmr' phase)",
+        "DashboardLayout renders at scroll position 0 (showing patient summary header area)",
+        "LoginScreen becomes an overlay: fixed position, full viewport, semi-transparent background rgba(240, 245, 244, 0.7) with backdrop-filter: blur(20px)",
+        "Dashboard content is non-interactive while login overlay is present (the overlay captures all pointer events)",
+        "The login card remains centered on top of the blurred overlay",
+        "backdrop-filter blur is constant from the moment login appears (no ease-in)",
+        "prefers-reduced-motion: blur still applies (static visual treatment), only entrance animations are skipped",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Currently App.tsx renders phases exclusively (only one at a time). Change so that login phase renders: <DetailPanelProvider><DashboardLayout /></DetailPanelProvider> + <LoginScreen overlay on top>. LoginScreen.tsx already has 'fixed inset-0 z-50' — just change its backgroundColor from solid #1A2B2A to the semi-transparent value with backdrop-filter. Consider adding will-change: backdrop-filter for performance."
+    },
+    {
+      "id": "US-007",
+      "title": "Connection status indicator with animated dots and typing-linked timing",
+      "description": "As a visitor, I want to see a clear red-to-green status transition tied to the typing sequence, not an arbitrary timer.",
+      "acceptanceCriteria": [
+        "Status indicator LED dot size increased from 6px to 10px",
+        "LED dot has a subtle glow effect: box-shadow 0 0 6px 1px in the LED color (red or green)",
+        "Status text size increased from 10px to 12px",
+        "Initial state: RED LED + 'Awaiting secure connection' in red (#DC2626) with animated trailing dots",
+        "The trailing dots animate: dots cycle through '.', '..', '...' repeating every ~1.5 seconds",
+        "Remove the existing independent 2000ms connectionTimeout timer",
+        "Instead, connection transitions to green exactly 500ms after typingComplete becomes true",
+        "Green state: GREEN LED (#059669) + 'Secure connection established, awaiting login' in green",
+        "Transition between red and green states has a smooth 300ms color/shadow transition",
+        "prefers-reduced-motion: no dot cycling animation, state changes happen instantly",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "The connectionTimeout is set on line 117 of LoginScreen.tsx (2000ms independent timer). Remove it and add a useEffect that watches typingComplete — when true, setTimeout 500ms then setConnectionState('connected'). The dot animation can use a simple interval cycling dotCount 0→1→2→0. The LED glow box-shadow: '0 0 6px 1px rgba(220,38,38,0.4)' for red, '0 0 6px 1px rgba(5,150,105,0.4)' for green."
+    },
+    {
+      "id": "US-008",
+      "title": "Login button pulse animation on activation",
+      "description": "As a visitor, I want the login button to pulse subtly when it becomes clickable so I know to click it.",
+      "acceptanceCriteria": [
+        "Add a CSS @keyframes animation 'login-pulse' in index.css: scale 1 → 1.03 → 1, ease-in-out, duration 1.5s",
+        "When canLogin becomes true (button enabled), apply the pulse animation repeating every 3 seconds (1.5s animation + 1.5s pause via animation-delay or longer duration with keyframe percentages)",
+        "Pulse animation stops when button is hovered (animation: none on hover)",
+        "Pulse animation stops immediately on click (remove animation class on buttonPressed)",
+        "Button opacity transitions from 0.6 to 1.0 when enabled (existing behavior, preserve)",
+        "prefers-reduced-motion: no pulse animation, button just becomes enabled with opacity 1",
+        "Button still receives keyboard focus when it becomes enabled (existing behavior)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "The canLogin variable is on line 43 of LoginScreen.tsx. Add a CSS class 'login-pulse-active' that applies the animation, and conditionally apply it when canLogin && !buttonPressed && !buttonHovered. The @keyframes could use: 0%,100% { transform: scale(1) } 50% { transform: scale(1.03) } with animation: login-pulse 1.5s ease-in-out infinite and a wrapper that adds 1.5s gaps (or use 0%,35%,65%,100% keyframe percentages to build in the pause)."
+    },
+    {
+      "id": "US-009",
+      "title": "Login dissolve transition to reveal dashboard",
+      "description": "As a visitor, I want the login card and blur overlay to dissolve smoothly on login, revealing the dashboard underneath.",
+      "acceptanceCriteria": [
+        "On login click: existing pressed state + loading spinner behavior is preserved",
+        "After loading spinner phase, the login card fades out (opacity 0) with slight scale up (1.03)",
+        "Simultaneously, the overlay backdrop-filter blur animates from 20px to 0px",
+        "Overlay background opacity fades from 0.7 to 0",
+        "Total dissolve duration: ~600ms from card exit to fully revealed dashboard",
+        "After dissolve completes, the login overlay is removed from DOM and dashboard becomes interactive",
+        "In App.tsx, transition from login to pmr phase after the overlay dissolve completes (use a callback from LoginScreen)",
+        "prefers-reduced-motion: instant transition, no dissolve animation",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "Currently LoginScreen has isExiting state that scales card to 1.03 and fades to opacity 0 (line 163). Extend this to also animate the overlay container. The overlay is the outer div with 'fixed inset-0' — animate its backdrop-filter and background-color. Use framer-motion animate for coordinated exit. The onComplete callback should fire after the full dissolve, not after the card fade."
+    },
+    {
+      "id": "US-010",
+      "title": "Re-enable boot sequence",
+      "description": "As a user, I want the full boot → ECG → login → dashboard experience restored.",
+      "acceptanceCriteria": [
+        "In src/App.tsx, change the initial Phase state back from 'login' to 'boot'",
+        "Boot → ECG → Login → Dashboard sequence works end to end",
+        "Login screen shows blurred dashboard behind it",
+        "Logo animation plays, typing animation follows, connection indicator transitions, button pulses",
+        "Clicking login dissolves the overlay to reveal the dashboard",
+        "No other changes to App.tsx beyond reverting the initial state",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill: app starts at boot, progresses through ECG, login with blur background and logo animation, arrives at dashboard"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "Simple revert of US-001. Phase state is on line 47 of App.tsx."
+    }
+  ]
+}
