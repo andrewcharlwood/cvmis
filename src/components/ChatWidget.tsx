@@ -16,6 +16,12 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
 const MAX_HISTORY = 10
 
+const SUGGESTED_QUESTIONS = [
+  "What's his NHS experience?",
+  'Tell me about his data skills',
+  'What projects has he built?',
+]
+
 const buttonVariants = {
   hidden: prefersReducedMotion
     ? { opacity: 1, y: 0 }
@@ -79,8 +85,8 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
     }
   }, [isOpen])
 
-  const handleSubmit = useCallback(async () => {
-    const trimmed = inputValue.trim()
+  const handleSubmit = useCallback(async (overrideText?: string) => {
+    const trimmed = (overrideText ?? inputValue).trim()
     if (!trimmed || isStreaming) return
 
     const userMessage: ChatMessage = { role: 'user', content: trimmed }
@@ -303,16 +309,64 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
                 )}
 
                 {geminiAvailable && messages.length === 0 && (
-                  <div
-                    style={{
-                      textAlign: 'center',
-                      padding: '32px 16px',
-                      color: 'var(--text-tertiary)',
-                      fontSize: '13px',
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    Ask me anything about Andy's experience, skills, or projects.
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {/* Welcome bubble — styled as assistant message */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                      <div
+                        style={{
+                          maxWidth: '85%',
+                          padding: '10px 14px',
+                          borderRadius: '12px 12px 12px 4px',
+                          fontSize: '13px',
+                          lineHeight: 1.5,
+                          background: 'var(--bg-dashboard)',
+                          color: 'var(--text-primary)',
+                          border: '1px solid var(--border-light)',
+                          whiteSpace: 'pre-wrap',
+                        }}
+                      >
+                        Hey! I'm here to help you learn more about Andy. What would you like to know?
+                      </div>
+                    </div>
+
+                    {/* Suggested question chips */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '8px',
+                        paddingLeft: '4px',
+                      }}
+                    >
+                      {SUGGESTED_QUESTIONS.map((question) => (
+                        <button
+                          key={question}
+                          onClick={() => handleSubmit(question)}
+                          style={{
+                            padding: '6px 14px',
+                            borderRadius: '9999px',
+                            border: '1px solid var(--accent-border)',
+                            background: 'transparent',
+                            color: 'var(--text-secondary)',
+                            fontSize: '12.5px',
+                            fontFamily: 'inherit',
+                            cursor: 'pointer',
+                            transition: 'background-color 150ms ease-out, color 150ms ease-out',
+                            whiteSpace: 'nowrap',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'var(--accent-light)'
+                            e.currentTarget.style.color = 'var(--accent)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                            e.currentTarget.style.color = 'var(--text-secondary)'
+                          }}
+                        >
+                          {question}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
@@ -515,7 +569,7 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
                     }}
                   />
                   <button
-                    onClick={handleSubmit}
+                    onClick={() => handleSubmit()}
                     disabled={!inputValue.trim() || isStreaming}
                     aria-label="Send message"
                     style={{
