@@ -151,13 +151,14 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       aria-modal="true"
     >
       <motion.div
-        className="bg-white"
         style={{
-          width: '320px',
-          padding: '32px',
+          width: 'clamp(320px, 28vw, 480px)',
+          maxWidth: 'calc(100vw - 32px)',
+          padding: 'clamp(24px, 2.5vw, 40px)',
           borderRadius: '12px',
-          border: '1px solid #E5E7EB',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)',
+          border: '1px solid #E4EDEB',
+          boxShadow: '0 1px 2px rgba(26,43,42,0.05)',
+          backgroundColor: 'var(--surface, #FFFFFF)',
         }}
         initial={{ opacity: 0, scale: 0.98 }}
         animate={isExiting ? { scale: 1.03, opacity: 0 } : { scale: 1, opacity: 1 }}
@@ -179,7 +180,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               style={{
                 width: '32px',
                 height: '32px',
-                border: '3px solid #E5E7EB',
+                border: '3px solid #E4EDEB',
                 borderTopColor: '#0D6E6E',
                 borderRadius: '50%',
               }}
@@ -222,7 +223,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                   fontFamily: "var(--font-ui)",
                   fontSize: '13px',
                   fontWeight: 600,
-                  color: '#64748B',
+                  color: 'var(--text-secondary, #5B7A78)',
                   letterSpacing: '0.01em',
                 }}
               >
@@ -233,7 +234,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                   fontFamily: "var(--font-ui)",
                   fontSize: '11px',
                   fontWeight: 400,
-                  color: '#94A3B8',
+                  color: 'var(--text-tertiary, #8DA8A5)',
                   marginTop: '2px',
                 }}
               >
@@ -249,9 +250,9 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                   style={{
                     display: 'block',
                     fontFamily: "var(--font-ui)",
-                    fontSize: '12px',
+                    fontSize: 'clamp(12px, 1vw, 14px)',
                     fontWeight: 500,
-                    color: '#64748B',
+                    color: 'var(--text-secondary, #5B7A78)',
                     marginBottom: '6px',
                   }}
                 >
@@ -262,9 +263,9 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                     width: '100%',
                     padding: '9px 11px',
                     fontFamily: "'Geist Mono', 'Fira Code', monospace",
-                    fontSize: '13px',
-                    backgroundColor: activeField === 'username' ? '#FFFFFF' : '#FAFAFA',
-                    border: activeField === 'username' ? '1px solid #0D6E6E' : '1px solid #E5E7EB',
+                    fontSize: 'clamp(13px, 1.1vw, 15px)',
+                    backgroundColor: activeField === 'username' ? 'var(--surface, #FFFFFF)' : 'var(--bg-dashboard, #F0F5F4)',
+                    border: activeField === 'username' ? '1px solid var(--accent, #0D6E6E)' : '1px solid #E4EDEB',
                     borderRadius: '4px',
                     color: '#111827',
                     minHeight: '38px',
@@ -291,9 +292,9 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                   style={{
                     display: 'block',
                     fontFamily: "var(--font-ui)",
-                    fontSize: '12px',
+                    fontSize: 'clamp(12px, 1vw, 14px)',
                     fontWeight: 500,
-                    color: '#64748B',
+                    color: 'var(--text-secondary, #5B7A78)',
                     marginBottom: '6px',
                   }}
                 >
@@ -304,9 +305,9 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                     width: '100%',
                     padding: '9px 11px',
                     fontFamily: "'Geist Mono', 'Fira Code', monospace",
-                    fontSize: '13px',
-                    backgroundColor: activeField === 'password' ? '#FFFFFF' : '#FAFAFA',
-                    border: activeField === 'password' ? '1px solid #0D6E6E' : '1px solid #E5E7EB',
+                    fontSize: 'clamp(13px, 1.1vw, 15px)',
+                    backgroundColor: activeField === 'password' ? 'var(--surface, #FFFFFF)' : 'var(--bg-dashboard, #F0F5F4)',
+                    border: activeField === 'password' ? '1px solid var(--accent, #0D6E6E)' : '1px solid #E4EDEB',
                     borderRadius: '4px',
                     color: '#111827',
                     letterSpacing: '0.15em',
@@ -340,7 +341,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                   width: '100%',
                   padding: '10px 16px',
                   fontFamily: "var(--font-ui)",
-                  fontSize: '14px',
+                  fontSize: 'clamp(14px, 1.1vw, 16px)',
                   fontWeight: 600,
                   color: '#FFFFFF',
                   backgroundColor: buttonBg,
@@ -394,14 +395,14 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               style={{
                 marginTop: '22px',
                 paddingTop: '18px',
-                borderTop: '1px solid #E5E7EB',
+                borderTop: '1px solid #E4EDEB',
               }}
             >
               <p
                 style={{
                   fontFamily: "var(--font-ui)",
                   fontSize: '11px',
-                  color: '#94A3B8',
+                  color: 'var(--text-tertiary, #8DA8A5)',
                   textAlign: 'center',
                 }}
               >
