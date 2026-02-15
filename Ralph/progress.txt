@@ -190,3 +190,13 @@
   - The label fontWeight 600 matches the dashboard's `CardHeader` convention (seen in `Card.tsx`)
   - The connection indicator gap of 8px matches the standard icon-text gap used in dashboard card headers
 ---
+
+## 2026-02-15 - US-011: Re-enable boot sequence
+- Changed initial Phase state from `'login'` back to `'boot'` in `src/App.tsx` line 47
+- Reverts the dev shortcut from US-001, restoring the full boot → ECG → login → dashboard flow
+- Typecheck and lint pass cleanly
+- Files changed: `src/App.tsx`
+- **Learnings for future iterations:**
+  - This is a simple one-line revert — the phase state controls the entire UI flow
+  - All 11 stories in this PRD are now complete
+---
