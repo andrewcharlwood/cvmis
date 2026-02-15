@@ -175,7 +175,7 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "Gemini REST streaming endpoint: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=API_KEY. The response is SSE (server-sent events) — parse each 'data:' line as JSON and extract candidates[0].content.parts[0].text. The system prompt with CV context will be ~2-3K tokens — well within Gemini Flash limits. For the palette item IDs, instruct the model to end its response with a line like [ITEMS: id1, id2, id3] which can be parsed client-side."
     },
     {

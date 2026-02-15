@@ -19,6 +19,12 @@
 - `prefersReducedMotion` pattern: read `window.matchMedia` at module level, use in framer-motion variants to skip animation
 - ChatWidget stores messages as `Array<{ role: 'user' | 'assistant', content: string }>` — same shape as LLM message format, ready for Gemini integration
 - ChatWidget `isOpen` state controls both panel visibility and button icon (MessageCircle ↔ X) — panel rendering handled by AnimatePresence
+- `src/lib/gemini.ts` exports `sendChatMessage(messages)` (async generator), `isGeminiAvailable()`, `parseItemIds(text)`, `stripItemsSuffix(text)` — ChatMessage type is `{ role: 'user' | 'assistant', content: string }`
+- Gemini API uses SSE streaming: POST to `:streamGenerateContent?alt=sse&key=KEY`, parse `data:` lines as JSON, extract `candidates[0].content.parts[0].text`
+- System prompt built from `buildEmbeddingTexts()` — instructs model to end responses with `[ITEMS: id1, id2, id3]` for portfolio item linking
+- `isGeminiAvailable()` checks `import.meta.env.VITE_GEMINI_API_KEY` — when missing, chat panel shows "unavailable" message but button remains visible
+- Assistant messages store item IDs as `<!--ITEMS:id1,id2-->` HTML comment suffix for US-010 to parse — `getDisplayText()` strips this before rendering
+- Conversation history capped at 10 messages (`MAX_HISTORY`), metadata stripped before sending to API
 
 ---
 
@@ -164,4 +170,33 @@
   - `textarea` with `rows={1}` and `maxHeight: 80px` gives auto-growing feel; `resize: none` prevents manual resize
   - The `ChatMessage` interface (`{ role, content }`) is ready to be extended for US-009 Gemini integration — same shape as typical LLM message format
   - `onFocus/onBlur` border color transitions on the textarea give a polished input interaction
+---
+
+## 2026-02-15 - US-009
+- Created `src/lib/gemini.ts` — Gemini Flash streaming integration module
+  - `sendChatMessage(messages)` async generator that streams SSE tokens from Gemini 2.0 Flash
+  - `isGeminiAvailable()` checks for `VITE_GEMINI_API_KEY` env var
+  - `parseItemIds(text)` extracts `[ITEMS: id1, id2]` from response text
+  - `stripItemsSuffix(text)` removes the `[ITEMS: ...]` line for clean display
+  - System prompt built from `buildEmbeddingTexts()` output — full CV context (~42 items)
+  - Model instructed to answer concisely and append relevant palette item IDs
+- Rewired `ChatWidget.tsx` to use real Gemini API instead of placeholder responses
+  - Streaming: tokens progressively appear in assistant message bubble
+  - Typing indicator (Loader2 spinner + "Thinking...") shown while waiting for first token
+  - Input disabled during streaming, send button grayed out
+  - Error handling: API failures show "Sorry, I couldn't process that. Please try again."
+  - Missing API key: panel shows "Chat is currently unavailable", input area hidden
+  - Conversation history capped at 10 messages before sending to API
+  - Assistant messages store parsed item IDs as `<!--ITEMS:id1,id2-->` HTML comment (for US-010)
+  - Messages sent to API have metadata stripped to keep context clean
+- Typecheck, lint (0 errors), and build all pass
+- Files changed: `src/lib/gemini.ts` (new), `src/components/ChatWidget.tsx`
+- **Learnings for future iterations:**
+  - Gemini SSE format: `data:` prefix per line, JSON body with `candidates[0].content.parts[0].text`
+  - `system_instruction` field in Gemini request body sets the system prompt (not a message in `contents`)
+  - Gemini role mapping: `'assistant'` → `'model'` in the API's `contents` array
+  - Buffer-based SSE parsing handles chunk boundaries: split on `\n`, keep last incomplete line in buffer
+  - `buildEmbeddingTexts()` is a great source for structured CV context — natural language paragraphs per item
+  - The `<!--ITEMS:-->` HTML comment pattern is invisible when rendered but parseable by US-010 for item card display
+  - `useCallback` on `handleSubmit` with `[inputValue, isStreaming, messages]` deps is needed because it reads all three
 ---

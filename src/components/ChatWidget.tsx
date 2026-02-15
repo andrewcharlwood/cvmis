@@ -1,13 +1,17 @@
-import { useState, useRef, useEffect, type KeyboardEvent } from 'react'
+import { useState, useRef, useEffect, useCallback, type KeyboardEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageCircle, X, Send } from 'lucide-react'
+import { MessageCircle, X, Send, Loader2 } from 'lucide-react'
+import {
+  sendChatMessage,
+  isGeminiAvailable,
+  parseItemIds,
+  stripItemsSuffix,
+  type ChatMessage,
+} from '@/lib/gemini'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-interface ChatMessage {
-  role: 'user' | 'assistant'
-  content: string
-}
+const MAX_HISTORY = 10
 
 const buttonVariants = {
   hidden: prefersReducedMotion
@@ -38,14 +42,15 @@ const panelVariants = {
     : { opacity: 0, scale: 0.95, transition: { duration: 0.15, ease: 'easeIn' } },
 }
 
-const PLACEHOLDER_RESPONSE = 'AI chat coming soon — this is a preview of the chat interface.'
-
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
+  const [isStreaming, setIsStreaming] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  const geminiAvailable = isGeminiAvailable()
 
   // Auto-scroll to latest message
   useEffect(() => {
@@ -59,23 +64,78 @@ export function ChatWidget() {
     }
   }, [isOpen])
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(async () => {
     const trimmed = inputValue.trim()
-    if (!trimmed) return
+    if (!trimmed || isStreaming) return
 
-    setMessages((prev) => [
-      ...prev,
-      { role: 'user', content: trimmed },
-      { role: 'assistant', content: PLACEHOLDER_RESPONSE },
-    ])
+    const userMessage: ChatMessage = { role: 'user', content: trimmed }
+    const updatedMessages = [...messages, userMessage]
+
+    // Cap history to last MAX_HISTORY messages, strip internal metadata
+    const historyForApi = updatedMessages.slice(-MAX_HISTORY).map((msg) => ({
+      ...msg,
+      content: msg.content.replace(/\n?<!--ITEMS:[^>]*-->/, '').trim(),
+    }))
+
+    setMessages(updatedMessages)
     setInputValue('')
-  }
+    setIsStreaming(true)
+
+    // Add empty assistant message that will be streamed into
+    const assistantMessage: ChatMessage = { role: 'assistant', content: '' }
+    setMessages((prev) => [...prev, assistantMessage])
+
+    try {
+      const stream = sendChatMessage(historyForApi)
+      let accumulated = ''
+
+      for await (const chunk of stream) {
+        accumulated += chunk
+        // Update the last (assistant) message with accumulated text
+        setMessages((prev) => {
+          const updated = [...prev]
+          updated[updated.length - 1] = { role: 'assistant', content: accumulated }
+          return updated
+        })
+      }
+
+      // Final cleanup: strip [ITEMS: ...] suffix from display text (keep raw for parsing)
+      // We store the clean display text but parse items from the raw accumulated text
+      const cleanText = stripItemsSuffix(accumulated)
+      const itemIds = parseItemIds(accumulated)
+      const finalContent = itemIds.length > 0
+        ? `${cleanText}\n<!--ITEMS:${itemIds.join(',')}-->`
+        : cleanText
+
+      setMessages((prev) => {
+        const updated = [...prev]
+        updated[updated.length - 1] = { role: 'assistant', content: finalContent }
+        return updated
+      })
+    } catch {
+      setMessages((prev) => {
+        const updated = [...prev]
+        updated[updated.length - 1] = {
+          role: 'assistant',
+          content: "Sorry, I couldn't process that. Please try again.",
+        }
+        return updated
+      })
+    } finally {
+      setIsStreaming(false)
+    }
+  }, [inputValue, isStreaming, messages])
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSubmit()
     }
+  }
+
+  // Extract display text from message content (strip hidden item metadata)
+  const getDisplayText = (content: string) => {
+    return content.replace(/\n?<!--ITEMS:[^>]*-->/, '').trim()
   }
 
   return (
@@ -105,7 +165,6 @@ export function ChatWidget() {
               transformOrigin: 'bottom right',
             }}
           >
-            {/* Use inline style for sm-width via CSS class override */}
             <style>{`
               @media (min-width: 640px) {
                 [data-chat-panel] { width: 380px; max-height: 480px; }
@@ -183,7 +242,21 @@ export function ChatWidget() {
                 }}
                 className="pmr-scrollbar"
               >
-                {messages.length === 0 && (
+                {!geminiAvailable && (
+                  <div
+                    style={{
+                      textAlign: 'center',
+                      padding: '32px 16px',
+                      color: 'var(--text-tertiary)',
+                      fontSize: '13px',
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    Chat is currently unavailable.
+                  </div>
+                )}
+
+                {geminiAvailable && messages.length === 0 && (
                   <div
                     style={{
                       textAlign: 'center',
@@ -221,78 +294,112 @@ export function ChatWidget() {
                         border: msg.role === 'user'
                           ? '1px solid var(--accent-border)'
                           : '1px solid var(--border-light)',
+                        whiteSpace: 'pre-wrap',
                       }}
                     >
-                      {msg.content}
+                      {getDisplayText(msg.content)}
                     </div>
                   </div>
                 ))}
+
+                {/* Typing indicator */}
+                {isStreaming && messages.length > 0 && messages[messages.length - 1].content === '' && (
+                  <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                    <div
+                      style={{
+                        padding: '10px 14px',
+                        borderRadius: '12px 12px 12px 4px',
+                        background: 'var(--bg-dashboard)',
+                        border: '1px solid var(--border-light)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        color: 'var(--text-tertiary)',
+                        fontSize: '13px',
+                      }}
+                    >
+                      <Loader2
+                        size={14}
+                        strokeWidth={2}
+                        style={{
+                          animation: 'spin 1s linear infinite',
+                        }}
+                      />
+                      <span>Thinking...</span>
+                    </div>
+                  </div>
+                )}
+
                 <div ref={messagesEndRef} />
               </div>
 
               {/* Input area */}
-              <div
-                style={{
-                  padding: '12px 16px',
-                  borderTop: '1px solid var(--border-light)',
-                  display: 'flex',
-                  alignItems: 'flex-end',
-                  gap: '8px',
-                  flexShrink: 0,
-                }}
-              >
-                <textarea
-                  ref={inputRef}
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ask me anything..."
-                  rows={1}
+              {geminiAvailable && (
+                <div
                   style={{
-                    flex: 1,
-                    resize: 'none',
-                    border: '1px solid var(--border-light)',
-                    borderRadius: '8px',
-                    padding: '10px 12px',
-                    fontSize: '13px',
-                    lineHeight: 1.5,
-                    color: 'var(--text-primary)',
-                    background: 'var(--surface)',
-                    outline: 'none',
-                    fontFamily: 'inherit',
-                    maxHeight: '80px',
-                    overflowY: 'auto',
-                    transition: 'border-color 150ms ease-out',
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--accent)'
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--border-light)'
-                  }}
-                />
-                <button
-                  onClick={handleSubmit}
-                  disabled={!inputValue.trim()}
-                  aria-label="Send message"
-                  style={{
+                    padding: '12px 16px',
+                    borderTop: '1px solid var(--border-light)',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: inputValue.trim() ? 'var(--accent)' : 'var(--border-light)',
-                    color: inputValue.trim() ? '#FFFFFF' : 'var(--text-tertiary)',
-                    cursor: inputValue.trim() ? 'pointer' : 'default',
+                    alignItems: 'flex-end',
+                    gap: '8px',
                     flexShrink: 0,
-                    transition: 'background-color 150ms ease-out, color 150ms ease-out',
                   }}
                 >
-                  <Send size={16} strokeWidth={2} />
-                </button>
-              </div>
+                  <textarea
+                    ref={inputRef}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask me anything..."
+                    rows={1}
+                    disabled={isStreaming}
+                    style={{
+                      flex: 1,
+                      resize: 'none',
+                      border: '1px solid var(--border-light)',
+                      borderRadius: '8px',
+                      padding: '10px 12px',
+                      fontSize: '13px',
+                      lineHeight: 1.5,
+                      color: 'var(--text-primary)',
+                      background: 'var(--surface)',
+                      outline: 'none',
+                      fontFamily: 'inherit',
+                      maxHeight: '80px',
+                      overflowY: 'auto',
+                      transition: 'border-color 150ms ease-out',
+                      opacity: isStreaming ? 0.6 : 1,
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--accent)'
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border-light)'
+                    }}
+                  />
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!inputValue.trim() || isStreaming}
+                    aria-label="Send message"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: inputValue.trim() && !isStreaming ? 'var(--accent)' : 'var(--border-light)',
+                      color: inputValue.trim() && !isStreaming ? '#FFFFFF' : 'var(--text-tertiary)',
+                      cursor: inputValue.trim() && !isStreaming ? 'pointer' : 'default',
+                      flexShrink: 0,
+                      transition: 'background-color 150ms ease-out, color 150ms ease-out',
+                    }}
+                  >
+                    <Send size={16} strokeWidth={2} />
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -328,6 +435,14 @@ export function ChatWidget() {
       >
         {isOpen ? <X size={20} strokeWidth={2} /> : <MessageCircle size={20} strokeWidth={2} />}
       </motion.button>
+
+      {/* Spinner keyframes */}
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </>
   )
 }
