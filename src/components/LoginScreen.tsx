@@ -354,7 +354,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                 disabled={!canLogin}
                 onMouseEnter={() => setButtonHovered(true)}
                 onMouseLeave={() => setButtonHovered(false)}
-                className="focus-visible:ring-2 focus-visible:ring-[#0D6E6E]/40 focus-visible:ring-offset-2 focus:outline-none"
+                className={`focus-visible:ring-2 focus-visible:ring-[#0D6E6E]/40 focus-visible:ring-offset-2 focus:outline-none${canLogin && !buttonPressed ? ' login-pulse-active' : ''}`}
                 style={{
                   width: '100%',
                   padding: '10px 16px',
