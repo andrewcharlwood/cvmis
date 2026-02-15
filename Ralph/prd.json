@@ -36,7 +36,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "This function will be used by both the build script (to generate embeddings) and potentially by the chat widget (for context). Import the raw data files (consultations, skills, kpis, investigations, documents) to access the full data beyond what buildPaletteData() surfaces. The id must match the PaletteItem id so embeddings can be correlated."
     },
     {

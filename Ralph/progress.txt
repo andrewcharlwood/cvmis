@@ -7,6 +7,8 @@
 - Scripts live in `scripts/` and run via `npx tsx` (tsx is not a project dep, npx fetches it)
 - tsconfig `include` only covers `src/` — scripts are type-checked by tsx at runtime, not by `tsc --noEmit`
 - Project uses `"type": "module"` in package.json
+- Palette item IDs: `exp-{consultation.id}`, `skill-{skill.id}`, `proj-{investigation.id}`, `ach-{0-3}`, `edu-{0-3}`, `action-{0-3}`
+- `buildEmbeddingTexts()` in `src/lib/search.ts` returns `Array<{ id: string, text: string }>` with IDs matching PaletteItem IDs — use this for both embedding generation and chat context
 
 ---
 
@@ -22,4 +24,24 @@
   - First run takes a few seconds for model download; subsequent runs are near-instant from cache
   - The pipeline's `pooling: 'mean'` and `normalize: true` options handle mean-pooling and L2 normalization in one step — no manual tensor manipulation needed
   - `output.data` is a `Float32Array`; wrap in `Array.from()` for a plain number array
+---
+
+## 2026-02-15 - US-002
+- Added `buildEmbeddingTexts()` function to `src/lib/search.ts`
+- Imports all raw data files (consultations, skills, kpis, investigations, documents)
+- Generates natural-language paragraphs for each palette item type:
+  - Consultations: role, org, duration, history narrative, examination bullets, coded entry descriptions
+  - Skills: name, category, frequency, proficiency %, years of experience
+  - Achievements: title, subtitle, full KPI explanation + story context + outcomes
+  - Investigations: name, methodology, tech stack, results
+  - Education: title, type, institution, duration, classification, research detail, notes (from documents.ts)
+  - Quick Actions: title + subtitle
+- IDs match PaletteItem IDs (e.g. `exp-{id}`, `skill-{id}`, `ach-{i}`, `proj-{id}`, `edu-{i}`, `action-{i}`)
+- Typecheck and lint pass
+- Files changed: `src/lib/search.ts`
+- **Learnings for future iterations:**
+  - Education items in `buildPaletteData()` are hardcoded arrays (not iterated from `documents`), with ids `edu-0` through `edu-3`. The mapping to `documents.ts` entries is: edu-0→doc-mary-seacole, edu-1→doc-mpharm, edu-2→doc-alevels, edu-3→doc-gphc
+  - Achievement items are similarly hardcoded with ids `ach-0` through `ach-3`, each linked to a KPI id
+  - Quick action items are `action-0` through `action-3`
+  - `documents.ts` is imported but wasn't previously used in `search.ts` — now used for education embedding text
 ---
