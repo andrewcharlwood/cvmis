@@ -192,8 +192,8 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
             role="dialog"
             aria-label="Chat with AI about Andy"
             className="fixed z-[90] font-ui
-              bottom-0 left-0 right-0 rounded-t-xl
-              sm:bottom-[88px] sm:right-6 sm:left-auto sm:rounded-xl"
+              inset-0 rounded-none max-md:z-[101]
+              md:inset-auto md:bottom-[88px] md:right-6 md:rounded-xl"
             style={{
               width: undefined,
               background: 'var(--surface)',
@@ -206,11 +206,18 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
             }}
           >
             <style>{`
-              @media (min-width: 640px) {
+              @media (min-width: 768px) {
                 [data-chat-panel] { width: 380px; max-height: 480px; }
               }
-              @media (max-width: 639px) {
-                [data-chat-panel] { height: 85vh; max-height: 85vh; }
+              @media (max-width: 767px) {
+                [data-chat-panel] {
+                  height: 100dvh;
+                  max-height: 100dvh;
+                  padding-top: env(safe-area-inset-top, 0px);
+                  padding-bottom: env(safe-area-inset-bottom, 0px);
+                  padding-left: env(safe-area-inset-left, 0px);
+                  padding-right: env(safe-area-inset-right, 0px);
+                }
               }
             `}</style>
             <div
@@ -220,7 +227,6 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
                 flexDirection: 'column',
                 width: '100%',
                 height: '100%',
-                maxHeight: '480px',
               }}
             >
               {/* Header */}
@@ -536,18 +542,15 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
         )}
       </AnimatePresence>
 
-      {/* Floating chat button */}
+      {/* Floating chat button — hidden on mobile when panel is open */}
       <motion.button
         initial="hidden"
         animate="visible"
         variants={buttonVariants}
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label={isOpen ? 'Close chat' : 'Open chat'}
-        className="fixed z-[90] cursor-pointer bottom-4 right-4 h-10 w-10 sm:bottom-6 sm:right-6 sm:h-12 sm:w-12"
+        className={`fixed z-[90] cursor-pointer flex items-center justify-center bottom-4 right-4 h-10 w-10 md:bottom-6 md:right-6 md:h-12 md:w-12${isOpen ? ' max-md:!hidden' : ''}`}
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
           borderRadius: '50%',
           border: 'none',
           background: 'var(--accent)',

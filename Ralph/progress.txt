@@ -28,6 +28,9 @@
 - Icon/color mappings (`iconByType`, `iconColorStyles`) live in `src/lib/palette-icons.ts` — shared between CommandPalette and ChatWidget
 - ChatWidget accepts optional `onAction?: (action: PaletteAction) => void` prop — same pattern as CommandPalette's `onAction`
 - `DashboardLayout` passes `handlePaletteAction` to both CommandPalette and ChatWidget for unified action routing
+- TopBar is `z-index: 100` (fixed), nav is `z-index: 99` (sticky) — mobile full-screen overlays need `z-index > 100` to appear above them
+- Inline `style={{ display: 'flex' }}` overrides Tailwind's `hidden` class — use `!important` modifier (`max-md:!hidden`) or move display to Tailwind classes to allow responsive hiding
+- ChatWidget mobile breakpoint is `md` (768px) — below this, panel is full-screen; above, it's 380px anchored bottom-right
 
 ---
 
@@ -225,4 +228,25 @@
   - The `<!--ITEMS:-->` HTML comment regex `<!--ITEMS:([^>]*)-->` works reliably; `[^>]*` captures everything between the colons and closing
   - Item card buttons use `fontFamily: 'inherit'` to pick up the panel's `font-ui` — without this, browser defaults apply
   - The `overflow: 'hidden'` on the message bubble container is needed so the item cards section (with its own border-top) stays visually contained within the bubble's border-radius
+---
+
+## 2026-02-15 - US-011
+- Updated ChatWidget mobile breakpoint from `sm` (640px) to `md` (768px)
+- Changed mobile panel from 85vh bottom-sheet to full-screen overlay using `position: fixed; inset: 0` with `100dvh` height
+- Panel z-index on mobile bumped to 101 (`max-md:z-[101]`) to render above TopBar (z-100) and nav (z-99)
+- Floating chat button hidden on mobile when panel is open via `max-md:!hidden` Tailwind class
+  - Fixed specificity issue: inline `style={{ display: 'flex' }}` was overriding Tailwind's `hidden` — moved flex/centering to Tailwind classes (`flex items-center justify-center`)
+- Safe area insets applied via `env(safe-area-inset-*)` CSS on the `[data-chat-panel]` element for notched devices
+- Input area stays pinned to bottom via existing flex layout (flex-col container + flex-1 message area + flex-shrink-0 input)
+- Desktop behavior unchanged: 380px wide, anchored bottom-right, max-height 480px, floating button visible
+- Panel open/close animations still respect `prefers-reduced-motion`
+- Typecheck, lint (0 errors), and build all pass
+- Browser verified at 375×812 (mobile) and 1280×800 (desktop): full-screen overlay works, button hides/shows correctly, close button works
+- Files changed: `src/components/ChatWidget.tsx`
+- **Learnings for future iterations:**
+  - Inline `style` properties always override CSS classes — to allow Tailwind responsive utilities (like `max-md:hidden`) to work, move conflicting properties (especially `display`) to Tailwind classes instead
+  - Use `!important` modifier (`max-md:!hidden`) when competing with framer-motion's inline styles that can't be easily removed
+  - TopBar (`z-100`) and nav (`z-99`) sit above the chat panel's default `z-90` — mobile full-screen panels need `z-101+` to overlay properly
+  - `100dvh` (dynamic viewport height) is essential for mobile full-screen panels — it accounts for browser chrome (address bar, toolbar) unlike `100vh`
+  - The `[data-chat-panel]` CSS selector in the `<style>` block is the right place for responsive size rules since Tailwind can't conditionally set max-height based on viewport width
 ---

@@ -195,6 +195,82 @@
       "priority": 10,
       "passes": true,
       "notes": "The action routing needs to flow from ChatWidget up to DashboardLayout. Add an onAction prop to ChatWidget (same pattern as CommandPalette). DashboardLayout passes handlePaletteAction to ChatWidget. Export iconByType and iconColorStyles from CommandPalette (or extract to a shared module) so ChatWidget can reuse them."
+    },
+    {
+      "id": "US-011",
+      "title": "Mobile full-screen chat panel",
+      "description": "As a mobile visitor, I want the chat panel to be a full-screen overlay so it's easy to use on small screens.",
+      "acceptanceCriteria": [
+        "Below md breakpoint (768px), chat panel renders as full-screen overlay using position: fixed; inset: 0 with 100dvh height",
+        "Full-screen mode has the existing header with close button (no visual change needed, just full-width)",
+        "Floating chat button is hidden (display: none or opacity: 0) while panel is open on mobile (<768px)",
+        "Above 768px, existing panel behavior is unchanged (380px wide, anchored bottom-right, max-height 480px)",
+        "Panel open/close animation still respects prefers-reduced-motion",
+        "Safe area insets applied via env(safe-area-inset-*) for notched devices",
+        "Input area stays pinned to bottom of screen on mobile",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": "The current ChatWidget already has some mobile handling (bottom-sheet style at <640px). This story changes the breakpoint to 768px (md) and makes it truly full-screen instead of 85vh. Use 100dvh (dynamic viewport height) to account for mobile browser chrome. The floating button visibility can be controlled by combining isOpen state with a CSS media query or a useMediaQuery hook. The <style> block with data-chat-panel attribute is the place to update responsive rules."
+    },
+    {
+      "id": "US-012",
+      "title": "Welcome message with suggested question chips",
+      "description": "As a visitor opening the chat, I see a friendly welcome message and clickable suggested questions so I know what to ask.",
+      "acceptanceCriteria": [
+        "When chat panel is open and conversation is empty, display welcome text: 'Hey! I'm here to help you learn more about Andy. What would you like to know?'",
+        "Welcome text is styled as an AI message bubble (left-aligned, light background, same styling as assistant messages)",
+        "Below the welcome bubble, show 2-3 clickable pill/chip buttons with suggested questions",
+        "Suggested questions: 'What's his NHS experience?', 'Tell me about his data skills', 'What projects has he built?'",
+        "Chips styled with: teal accent border, rounded-full, font-ui 12-13px, hover state (teal background tint)",
+        "Clicking a chip sends that question as a user message (same codepath as typing + Enter)",
+        "Welcome message and chips always visible when conversation is empty (persist across panel open/close)",
+        "Once any message is sent, the welcome/chips area is replaced by the conversation messages",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "Replace the current empty-state text ('Ask me anything about Andy's experience, skills, or projects.') with the new welcome bubble + chips. The chips should call handleSubmit (or equivalent) with the chip text pre-filled — simplest approach is setInputValue(chipText) then immediately trigger submit. Check that the welcome state reappears if the user hasn't sent a message (messages.length === 0). The suggested questions could live in a const array at the top of ChatWidget for easy future editing."
+    },
+    {
+      "id": "US-013",
+      "title": "Self-host ONNX embedding model",
+      "description": "As a developer, I want the ONNX model files served from the same host as the site to eliminate dependency on Hugging Face CDN.",
+      "acceptanceCriteria": [
+        "Model files for Xenova/all-MiniLM-L6-v2 downloaded and placed in public/models/all-MiniLM-L6-v2/onnx/ (matching HF repo structure)",
+        "Required files present: model_quantized.onnx, tokenizer.json, tokenizer_config.json, config.json, and any other files the pipeline expects",
+        "src/lib/embedding-model.ts updated: configure @xenova/transformers env to use local model path (e.g., env.localModelPath or custom model URL pointing to /models/)",
+        "scripts/generate-embeddings.ts also updated to use the same local model path for consistency",
+        "Model files are NOT in .gitignore — they are committed as static assets",
+        "No network requests to huggingface.co in the browser network tab when semantic search is used",
+        "Semantic search still works correctly in the command palette after the change",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "Transformers.js uses env.localModelPath or env.remoteHost to control where models are fetched from. Setting env.localModelPath = '/models/' should make it look for files at /models/Xenova/all-MiniLM-L6-v2/onnx/model_quantized.onnx etc. The Vite public/ directory serves files at the root — so public/models/ becomes /models/ at runtime. For the build script (Node.js), use a file:// path or the local filesystem path instead. Download model files from https://huggingface.co/Xenova/all-MiniLM-L6-v2/tree/main — the quantized ONNX model is ~23MB. Check what files the pipeline actually requests by watching network tab before making this change."
+    },
+    {
+      "id": "US-014",
+      "title": "Update to Gemini 3 Flash Preview with model indicator",
+      "description": "As a developer, I want to use the latest free Gemini model, and as a visitor, I want to see what model powers the chat.",
+      "acceptanceCriteria": [
+        "Extract model name to a single constant (e.g., GEMINI_MODEL = 'gemini-3-flash-preview') used for both the API URL and display",
+        "GEMINI_API_BASE URL updated to use the new model constant",
+        "Review and tighten the system prompt — ensure it's well-structured, concise, and clear for the new model",
+        "Review the [ITEMS: ...] suffix instruction — ensure new model follows the format reliably",
+        "Small model indicator in chat panel header: 'Gemini 3 Flash' in font-geist, 11px, var(--text-tertiary)",
+        "Model indicator positioned right-aligned in the header bar or as a subtle line below the header",
+        "Streaming SSE parsing still works correctly with the new model endpoint",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": "The current API base is 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash'. Change the model segment to 'gemini-3-flash-preview'. The API path structure (v1beta/models/{model}:streamGenerateContent) should be the same. Verify that gemini-3-flash-preview is the correct model ID — check Google AI Studio or the API docs. For the display name, use a human-friendly string like 'Gemini 3 Flash' (not the full model ID). The constant should be defined at the top of gemini.ts and exported for use in ChatWidget."
     }
   ]
 }
