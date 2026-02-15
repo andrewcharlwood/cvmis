@@ -1,0 +1,217 @@
+# Progress Log — Typography & Spacing Scale Rework
+# Branch: ralph/dashboard-restructure
+# Started: 2026-02-14
+
+## Codebase Patterns
+
+### Project Structure
+- Components in `src/components/`, tiles in `src/components/tiles/`
+- Detail renderers in `src/components/detail/`
+- Data files in `src/data/`
+- Types in `src/types/pmr.ts` and `src/types/index.ts`
+- Hooks in `src/hooks/`, Contexts in `src/contexts/`, Lib in `src/lib/`
+- Path alias: `@/` maps to `./src/`
+
+### Phase Management
+- App.tsx controls phase: 'boot' -> 'ecg' -> 'login' -> 'pmr'
+- BootSequence.tsx, ECGAnimation.tsx — LOCKED, do not modify
+- LoginScreen.tsx bridges to dashboard
+
+### Typography
+- Elvaro Grotesque (`font-ui`) — primary UI font
+- Blumir (`font-ui-alt`) — alternative variable font
+- Geist Mono (`font-geist`) — timestamps, data values
+- Fira Code (`font-mono`) — boot/ECG terminal only
+- Do NOT use Inter, Roboto, DM Sans, or system defaults
+
+### Design Tokens (index.css)
+- --sidebar-width: 272px (target: 304px)
+- --topbar-height: 48px (target: 56px)
+- --subnav-height: 36px (target: 42px)
+- Dashboard grid gap: 12/16px (target: 14/20px)
+- Card padding: 20px (target: 24px)
+
+### Known Dependencies
+- React 18.3.1, TypeScript, Vite, Tailwind CSS
+- Framer Motion 11.15.0, Lucide React 0.468.0, fuse.js 7.0.0
+
+### Key Files for This Feature
+- src/index.css — CSS custom properties, grid gap
+- src/components/Card.tsx — Card padding, CardHeader sizing
+- src/components/TopBar.tsx — brand, search, session text
+- src/components/SubNav.tsx — tab text, height
+- src/components/Sidebar.tsx — all sidebar content sizing
+- src/components/tiles/PatientSummaryTile.tsx — profile text, KPI cards
+- src/components/DashboardLayout.tsx — LastConsultationSubsection, main content padding
+- src/components/tiles/ProjectsTile.tsx — project items, tech tags
+- src/components/EducationSubsection.tsx — education entries
+- src/components/WorkExperienceSubsection.tsx — role items, expanded content
+- src/components/RepeatMedicationsSubsection.tsx — skill rows, category sections
+- src/components/ParentSection.tsx — parent heading sizing
+
+### Responsive Breakpoints
+- Sidebar shows at `lg` (1024px) — uses `lg:block` in DashboardLayout.tsx
+- TopBar search bar shows at `lg` (1024px) — uses `lg:flex` in TopBar.tsx
+- TopBar "Remote" label shows at `lg` (1024px) — uses `lg:inline`
+- Brand switches from "HMC" to "Headhunt Medical Center" at `sm` (640px)
+- Session badge switches from time-only to "Active Session · time" at `xs` (480px)
+- SubNav is horizontally scrollable on mobile (overflow-x: auto, scrollbarWidth: none)
+
+### Sizing Context
+- Target display: 2560x1440 (QHD)
+- Current body text: 13px → target: 15px
+- Current labels/metadata: 9-10px → target: 11-12px minimum
+- Current sidebar details: 11-11.5px → target: 13px
+- No text below 11px anywhere in dashboard
+
+---
+
+## 2026-02-14 — US-019
+- Updated --sidebar-width 272px→304px, --topbar-height 48px→56px, --subnav-height 36px→42px in index.css
+- Updated .dashboard-grid gap from 12px→14px (mobile), 16px→20px (tablet/desktop)
+- Updated Card.tsx: padding 20px→24px, CardHeader title fontSize 12px→13px, rightText fontSize 10px→11px, dot 8px→9px, marginBottom 16px→18px
+- Files changed: src/index.css, src/components/Card.tsx
+- **Learnings for future iterations:**
+  - CSS vars (--sidebar-width, --topbar-height, --subnav-height) propagate automatically to TopBar, Sidebar, DashboardLayout — no additional changes needed
+  - Card padding and CardHeader sizing affect every tile in the dashboard since all tiles use these components
+  - Dashboard grid gap is defined in 3 media query blocks in index.css: base (mobile), 768px (tablet), 1024px (desktop)
+---
+
+## 2026-02-14 — US-020
+- Scaled TopBar: brand text 13px→15px, 'Remote' label 11px→12px, search text 13px→14px, search height 42px→46px, Ctrl+K kbd 10px→11px, A.RECRUITER 12px→13px, session badge 11px→12px, skip-link 13px→14px, Home icon 18→20, Search icon 16→17
+- Scaled SubNav: tab fontSize 13px→14px, minHeight 36px→42px
+- Files changed: src/components/TopBar.tsx, src/components/SubNav.tsx
+- **Learnings for future iterations:**
+  - TopBar has two brand spans: one for desktop (sm:inline) and one for mobile (sm:hidden) — both need fontSize updates
+  - TopBar session badge also has two spans: one for xs+ (xs:inline) and one for mobile (xs:hidden) — both need updating
+  - SubNav height is controlled by both the CSS var (--subnav-height) and the button minHeight — both should match
+  - SubNav uses sticky positioning with top: var(--topbar-height), so it automatically adjusts when topbar height changes
+---
+
+## 2026-02-14 — US-018
+- Changed initial Phase state from 'boot' to 'pmr' in src/App.tsx (line 47)
+- Boot/ECG/login phases remain in code — only the default state changed
+- App now loads directly to DashboardLayout on refresh
+- Files changed: src/App.tsx
+- **Learnings for future iterations:**
+  - Phase state is a simple string union on line 47 of App.tsx: `useState<Phase>('boot'|'ecg'|'login'|'pmr')`
+  - US-028 will revert this exact change back to 'boot'
+---
+
+## 2026-02-14 — US-021
+- Scaled all Sidebar internal sizing: padding, avatar, name, title, status badge, detail rows, SectionTitle, TagPill, AlertFlag
+- Sidebar padding 20px/16px → 24px/20px, avatar 52→60px, name 15→17px, title 11.5→13px
+- Status badge 11→12px, dot 6→7px, all detail rows 11.5→13px, GPhC mono 11→12px
+- SectionTitle 10→11px, TagPill 10.5→12px (padding 3px/8px → 4px/10px)
+- AlertFlag 11→13px (padding 7px/10px → 8px/12px), icon 14→16, container 16→18px
+- Detail row padding 2px → 4px, grid gap 6→8px, PersonHeader marginBottom 6→10px
+- Tags/Alerts section padding 14px/6px → 16px/8px
+- Files changed: src/components/Sidebar.tsx
+- **Learnings for future iterations:**
+  - Sidebar has 6 identical detail row blocks (GPhC, Education, Location, Phone, Email, Registered) — use replace_all for fontSize/padding changes
+  - SectionTitle fontSize affects both Tags and Alerts section headers
+  - The sidebar width itself comes from CSS var --sidebar-width (updated in US-019), not from Sidebar.tsx
+  - Tags gap (5px) and alerts gap (6px) were left as-is — they looked proportional already
+---
+
+## 2026-02-14 — US-022
+- Scaled PatientSummaryTile: profile text 13px→15px (lineHeight 1.6→1.65), KPI value 28px→34px, label 12px→14px, sublabel 10px→12px
+- KPI card padding 16px→20px, grid gap 12px→16px, Latest Results marginTop 24px→28px
+- Files changed: src/components/tiles/PatientSummaryTile.tsx
+- **Learnings for future iterations:**
+  - PatientSummaryTile has two main sections: profile text block and KPI grid (Latest Results)
+  - MetricCard is a local component (not exported) — all KPI styling is self-contained in this file
+  - KPI grid uses Tailwind responsive classes (grid-cols-1 xs:grid-cols-2) combined with inline style for gap
+  - The sublabel uses font-geist (monospace) for the "technical texture" pattern
+---
+
+## 2026-02-14 — US-023
+- Scaled LastConsultationSubsection: field label 10px→12px, field value 11.5px→13px, role title 13.5px→15px
+- Examination bullet fontSize 12.5px→14px, bullet dot top offset 7px→8px for new line height
+- View full record button 12px→13px, ChevronRight 14→15
+- Field gap 16px→20px for better spacing between metadata fields
+- Updated main content padding from 'p-4 pb-8 md:p-6 md:pb-10 lg:px-7 lg:pt-6 lg:pb-10' to 'p-5 pb-10 md:p-7 md:pb-12 lg:px-8 lg:pt-7 lg:pb-12'
+- Files changed: src/components/DashboardLayout.tsx
+- **Learnings for future iterations:**
+  - LastConsultationSubsection is defined inline in DashboardLayout.tsx (lines ~57-232), not in a separate file
+  - fieldLabelStyle and fieldValueStyle are shared CSSProperties objects — changing them updates all 4 field columns (Date, Organisation, Type, Band) at once
+  - The bullet dot `top` offset needs to be adjusted when bullet fontSize changes — at 14px text with 1.5 line-height, 8px top centers the 5px dot
+  - Main content padding uses Tailwind responsive classes on <motion.main> — these are cumulative (p-5 base, md:p-7 overrides, lg:px-8/lg:pt-7 overrides further)
+---
+
+## 2026-02-14 — US-024
+- Scaled ProjectsTile: ProjectItem fontSize 11.5px→13px, padding 10px/12px→12px/16px
+- Status dot 7px→8px, year label 10px→11px, tech stack tags 9px→10px (padding 2px/6px→3px/8px)
+- Project list gap 8px→10px
+- Scaled EducationSubsection: base fontSize 12px→13px, entry padding 10px/12px→12px/16px
+- Education title 12.5px→14px, institution 11px→12px, detail 10.5px→12px, year 10px→11px
+- Education list gap 10px→12px
+- Files changed: src/components/tiles/ProjectsTile.tsx, src/components/EducationSubsection.tsx
+- **Learnings for future iterations:**
+  - ProjectsTile and EducationSubsection follow the same list-item-in-card pattern — similar inline styles with padding, fontSize, and gap
+  - ProjectItem year label fontSize is a standalone `10px` in a `<span>` — only one occurrence in the file, easy to target
+  - EducationSubsection has a single `fontSize: '12px'` on the button element that acts as the base font for the entry
+  - Education detail items use font-geist (monospace) for the "technical texture" pattern, consistent with KPI sublabels
+---
+
+## 2026-02-14 — US-025
+- Scaled WorkExperienceSubsection: role title 12.5px→14px, organisation 11px→12px, duration 10px→11px
+- Role item header padding 10px/12px→12px/14px, teal dot 8px→9px
+- Expanded content: examination bullet 11.5px→13px, coded entry tags 10px→11px (padding 2px/6px→3px/8px)
+- View full record link 11px→12px, role list gap 8px→10px
+- Scaled RepeatMedicationsSubsection: skill name 12.5px→14px, frequency text 10.5px→12px
+- Skill status badge 10px→11px (padding 2px/7px→3px/8px), skill row padding 8px/10px→10px/12px
+- Skill icon container 26px→30px, icon size 13→15
+- Category section label 10px→11px, item count 10px→11px, view all button 11px→12px
+- Skill row gap 6px→8px
+- Files changed: src/components/WorkExperienceSubsection.tsx, src/components/RepeatMedicationsSubsection.tsx
+- **Learnings for future iterations:**
+  - WorkExperienceSubsection and RepeatMedicationsSubsection sit side-by-side in the two-column Patient Pathway layout
+  - Both components use inline style objects extensively — all sizing changes are mechanical find-and-replace
+  - RepeatMedicationsSubsection has CategorySection as a local component — category label and item count fontSize are in there, not in SkillRow
+  - The category section label fontSize (`10px`) appears once as a unique pattern (with textTransform: 'uppercase') — safe to use replace_all
+  - SkillRow gap is inside CategorySection's visibleSkills container, not on the outer RepeatMedicationsSubsection
+---
+
+## 2026-02-14 — US-026
+- Evaluated ParentSection heading sizes against scaled body text at 2560x1440
+- Before: lg heading 2.2rem (35.2px), paddingBottom 1.333rem (21.3px) — ratio to 15px body was 2.35:1
+- After: lg heading 2.4rem (38.4px), paddingBottom 1.5rem (24px) — ratio restored to 2.56:1
+- Mobile/tablet breakpoints (1.375rem, 1.6rem, 1.8rem) left unchanged — they scale proportionally at smaller viewports
+- Files changed: src/components/ParentSection.tsx
+- **Learnings for future iterations:**
+  - ParentSection is used by PatientSummaryTile ("Patient Summary") and the Patient Pathway card — only 2 h2 headings in the dashboard
+  - The heading-to-body ratio should stay above 2.4:1 for clear visual hierarchy at QHD resolution
+  - Only the lg breakpoint needed adjustment — smaller breakpoints paired with smaller body text already maintain good proportions
+  - paddingBottom in rem scales with root font size, making it future-proof for further type scale changes
+---
+
+## 2026-02-14 — US-027
+- Visual regression check across 5 breakpoints: 2560x1440, 1920x1080, 1440x900, 768x1024, 375x812
+- No horizontal scrollbar at any tested width
+- Issue found: TopBar search bar (minWidth 400px) and "Remote" label overflowed at 768px tablet width
+- Fix: Changed search bar from `md:flex` to `lg:flex` and "Remote" label from `md:inline` to `lg:inline` in TopBar.tsx
+- All other breakpoints clean — no overflow, truncation, or layout breaks
+- SubNav at 375px hides "Education" tab off-screen but is scrollable (standard mobile pattern)
+- npm run build and typecheck both pass
+- Files changed: src/components/TopBar.tsx
+- **Learnings for future iterations:**
+  - TopBar search bar has minWidth: 400px which is too wide for md (768px) — must use lg (1024px) breakpoint for search bar visibility
+  - The "Remote" label should match the search bar's breakpoint since they compete for the same horizontal space
+  - Sidebar already uses `lg:block` so TopBar search/Remote at `lg` is consistent with the sidebar showing
+  - SubNav has overflow-x: auto with scrollbarWidth: none — horizontal scroll on mobile is by design, not a bug
+  - At 768px without sidebar or search bar, the TopBar cleanly shows brand + A.RECRUITER + session badge
+---
+
+## 2026-02-14 — US-028
+- Reverted initial Phase state from 'pmr' back to 'boot' in src/App.tsx (line 47)
+- Verified full sequence in browser: boot animation → ECG heartbeat → login screen → clicked Log In → dashboard loaded
+- All phases transition correctly, dashboard renders with all scaled components
+- npm run build and typecheck both pass
+- Files changed: src/App.tsx
+- **Learnings for future iterations:**
+  - This is the exact revert of US-018 — single line change on line 47: useState<Phase>('boot')
+  - The full boot→ECG→login sequence takes ~15 seconds before the login button becomes clickable
+  - Canvas2D warnings during ECG are expected (multiple readback operations) — not errors
+---
+
