@@ -41,6 +41,11 @@
 - React 18.3.1, TypeScript, Vite, Tailwind CSS
 - Framer Motion 11.15.0, Lucide React 0.468.0, fuse.js 7.0.0
 
+### Phase Rendering (post US-006)
+- Login phase now renders BOTH DashboardLayout and LoginScreen overlay simultaneously
+- DashboardLayout is wrapped in DetailPanelProvider for both 'login' and 'pmr' phases
+- LoginScreen overlay: `fixed inset-0 z-50` with `rgba(240, 245, 244, 0.7)` + `backdrop-filter: blur(20px)`
+
 ### Key Files for This Feature
 - src/App.tsx — phase management, will need restructuring for blur overlay
 - src/components/LoginScreen.tsx — main login screen (416 lines)
@@ -67,6 +72,20 @@
 - Line 232: "CV Management Information System" subtitle
 - Line 350-382: Connection status indicator (6px dot, 10px text)
 
+---
+
+## 2026-02-15 - US-006
+- Rendered DashboardLayout (wrapped in DetailPanelProvider) behind LoginScreen during login phase in App.tsx
+- Changed LoginScreen overlay from solid #1A2B2A background to semi-transparent rgba(240, 245, 244, 0.7) with backdrop-filter: blur(20px)
+- Dashboard is non-interactive during login (overlay captures pointer events via fixed inset-0 z-50)
+- After login click, phase transitions to 'pmr' and overlay is removed from DOM, dashboard becomes interactive
+- Files changed: src/App.tsx, src/components/LoginScreen.tsx
+- Verified in browser: blur overlay shows dashboard content behind login card, login click transitions to interactive dashboard
+- **Learnings for future iterations:**
+  - App.tsx phase rendering changed from exclusive (one phase at a time) to overlapping (login + pmr render DashboardLayout)
+  - DetailPanelProvider now wraps DashboardLayout for both 'login' and 'pmr' phases — condition is `(phase === 'login' || phase === 'pmr')`
+  - LoginScreen already had `fixed inset-0 z-50` which makes it a full-viewport overlay — just needed background/blur changes
+  - WebkitBackdropFilter needed for Safari compatibility alongside backdropFilter
 ---
 
 ## 2026-02-15 - US-005

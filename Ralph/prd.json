@@ -114,7 +114,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Currently App.tsx renders phases exclusively (only one at a time). Change so that login phase renders: <DetailPanelProvider><DashboardLayout /></DetailPanelProvider> + <LoginScreen overlay on top>. LoginScreen.tsx already has 'fixed inset-0 z-50' — just change its backgroundColor from solid #1A2B2A to the semi-transparent value with backdrop-filter. Consider adding will-change: backdrop-filter for performance."
     },
     {
