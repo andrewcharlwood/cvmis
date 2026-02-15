@@ -25,6 +25,9 @@
 - `isGeminiAvailable()` checks `import.meta.env.VITE_GEMINI_API_KEY` — when missing, chat panel shows "unavailable" message but button remains visible
 - Assistant messages store item IDs as `<!--ITEMS:id1,id2-->` HTML comment suffix for US-010 to parse — `getDisplayText()` strips this before rendering
 - Conversation history capped at 10 messages (`MAX_HISTORY`), metadata stripped before sending to API
+- Icon/color mappings (`iconByType`, `iconColorStyles`) live in `src/lib/palette-icons.ts` — shared between CommandPalette and ChatWidget
+- ChatWidget accepts optional `onAction?: (action: PaletteAction) => void` prop — same pattern as CommandPalette's `onAction`
+- `DashboardLayout` passes `handlePaletteAction` to both CommandPalette and ChatWidget for unified action routing
 
 ---
 
@@ -199,4 +202,27 @@
   - `buildEmbeddingTexts()` is a great source for structured CV context — natural language paragraphs per item
   - The `<!--ITEMS:-->` HTML comment pattern is invisible when rendered but parseable by US-010 for item card display
   - `useCallback` on `handleSubmit` with `[inputValue, isStreaming, messages]` deps is needed because it reads all three
+---
+
+## 2026-02-15 - US-010
+- Extracted `iconByType` and `iconColorStyles` from `CommandPalette.tsx` into shared `src/lib/palette-icons.ts`
+- Updated `CommandPalette.tsx` to import from the shared module (no behavioral change)
+- Added `onAction?: (action: PaletteAction) => void` prop to `ChatWidget` — same pattern as `CommandPalette`
+- `DashboardLayout.tsx` passes `handlePaletteAction` to `ChatWidget` (same handler used by CommandPalette)
+- ChatWidget builds a `paletteMap` (Map<id, PaletteItem>) via `useMemo` for O(1) item lookups
+- Added `getMessageItemIds()` to parse `<!--ITEMS:id1,id2-->` HTML comments from message content
+- Added `getMessageItems()` to resolve parsed IDs to PaletteItem objects via the map
+- Assistant message bubbles now render compact clickable item cards below text when items are referenced:
+  - Cards use same icon/color scheme from CommandPalette (22px icon + title + subtitle)
+  - Cards have hover highlight (`var(--accent-light)`) and trigger `onAction(item.action)` on click
+  - Cards only appear after streaming completes (when `<!--ITEMS:-->` metadata is in final content)
+  - If no items referenced or IDs don't match, no cards shown — just text
+- Typecheck, lint (0 errors), and build all pass
+- Files changed: `src/lib/palette-icons.ts` (new), `src/components/ChatWidget.tsx`, `src/components/CommandPalette.tsx`, `src/components/DashboardLayout.tsx`
+- **Learnings for future iterations:**
+  - Extracting shared constants to `src/lib/` is the right pattern — both `CommandPalette` and `ChatWidget` now use the same icon mappings without duplication
+  - `buildPaletteData()` is pure (no side effects) and idempotent — safe to call in `useMemo` with empty deps
+  - The `<!--ITEMS:-->` HTML comment regex `<!--ITEMS:([^>]*)-->` works reliably; `[^>]*` captures everything between the colons and closing
+  - Item card buttons use `fontFamily: 'inherit'` to pick up the panel's `font-ui` — without this, browser defaults apply
+  - The `overflow: 'hidden'` on the message bubble container is needed so the item cards section (with its own border-top) stays visually contained within the bubble's border-radius
 ---

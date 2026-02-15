@@ -1,20 +1,12 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import {
-  Search,
-  User,
-  Activity,
-  Monitor,
-  Award,
-  GraduationCap,
-  Zap,
-  type LucideIcon,
-} from 'lucide-react'
+import { Search } from 'lucide-react'
 import {
   buildPaletteData,
   buildSearchIndex,
   groupBySection,
 } from '@/lib/search'
-import type { PaletteItem, PaletteAction, IconColorVariant } from '@/lib/search'
+import type { PaletteItem, PaletteAction } from '@/lib/search'
+import { iconByType, iconColorStyles } from '@/lib/palette-icons'
 import { isModelReady, embedQuery } from '@/lib/embedding-model'
 import { semanticSearch, loadEmbeddings } from '@/lib/semantic-search'
 
@@ -24,24 +16,6 @@ interface CommandPaletteProps {
   isOpen: boolean
   onClose: () => void
   onAction?: (action: PaletteAction) => void
-}
-
-// Icon mapping by type
-const iconByType: Record<string, LucideIcon> = {
-  role: User,
-  skill: Activity,
-  project: Monitor,
-  achievement: Award,
-  edu: GraduationCap,
-  action: Zap,
-}
-
-// Color variant → CSS variable mapping for icon containers
-const iconColorStyles: Record<IconColorVariant, { background: string; color: string }> = {
-  teal: { background: 'var(--accent-light)', color: 'var(--accent)' },
-  green: { background: 'var(--success-light)', color: 'var(--success)' },
-  amber: { background: 'var(--amber-light)', color: 'var(--amber)' },
-  purple: { background: 'rgba(124,58,237,0.08)', color: '#7C3AED' },
 }
 
 export function CommandPalette({ isOpen, onClose, onAction }: CommandPaletteProps) {

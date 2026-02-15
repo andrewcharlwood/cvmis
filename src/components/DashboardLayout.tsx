@@ -421,7 +421,7 @@ export function DashboardLayout() {
       <DetailPanel />
 
       {/* Floating chat widget */}
-      <ChatWidget />
+      <ChatWidget onAction={handlePaletteAction} />
     </div>
   )
 }

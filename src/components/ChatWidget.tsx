@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, type KeyboardEvent } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo, type KeyboardEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react'
 import {
@@ -8,6 +8,9 @@ import {
   stripItemsSuffix,
   type ChatMessage,
 } from '@/lib/gemini'
+import { buildPaletteData } from '@/lib/search'
+import type { PaletteItem, PaletteAction } from '@/lib/search'
+import { iconByType, iconColorStyles } from '@/lib/palette-icons'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -42,7 +45,11 @@ const panelVariants = {
     : { opacity: 0, scale: 0.95, transition: { duration: 0.15, ease: 'easeIn' } },
 }
 
-export function ChatWidget() {
+interface ChatWidgetProps {
+  onAction?: (action: PaletteAction) => void
+}
+
+export function ChatWidget({ onAction }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
@@ -51,6 +58,14 @@ export function ChatWidget() {
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
   const geminiAvailable = isGeminiAvailable()
+
+  // Build palette map for looking up items by ID
+  const paletteMap = useMemo(() => {
+    const items = buildPaletteData()
+    const map = new Map<string, PaletteItem>()
+    for (const item of items) map.set(item.id, item)
+    return map
+  }, [])
 
   // Auto-scroll to latest message
   useEffect(() => {
@@ -137,6 +152,31 @@ export function ChatWidget() {
   const getDisplayText = (content: string) => {
     return content.replace(/\n?<!--ITEMS:[^>]*-->/, '').trim()
   }
+
+  // Extract item IDs from the <!--ITEMS:...--> HTML comment in message content
+  const getMessageItemIds = (content: string): string[] => {
+    const match = content.match(/<!--ITEMS:([^>]*)-->/)
+    if (!match) return []
+    return match[1].split(',').map((id) => id.trim()).filter(Boolean)
+  }
+
+  // Resolve item IDs to PaletteItems
+  const getMessageItems = (content: string): PaletteItem[] => {
+    return getMessageItemIds(content)
+      .map((id) => paletteMap.get(id))
+      .filter((item): item is PaletteItem => item !== undefined)
+  }
+
+  // Handle clicking an item card — route through onAction
+  const handleItemClick = useCallback((item: PaletteItem) => {
+    if (onAction) {
+      onAction(item.action)
+    } else {
+      if (item.action.type === 'link') {
+        window.open(item.action.url, '_blank', 'noopener,noreferrer')
+      }
+    }
+  }, [onAction])
 
   return (
     <>
@@ -270,37 +310,128 @@ export function ChatWidget() {
                   </div>
                 )}
 
-                {messages.map((msg, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      display: 'flex',
-                      justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                    }}
-                  >
+                {messages.map((msg, i) => {
+                  const referencedItems = msg.role === 'assistant' ? getMessageItems(msg.content) : []
+
+                  return (
                     <div
+                      key={i}
                       style={{
-                        maxWidth: '85%',
-                        padding: '10px 14px',
-                        borderRadius: msg.role === 'user'
-                          ? '12px 12px 4px 12px'
-                          : '12px 12px 12px 4px',
-                        fontSize: '13px',
-                        lineHeight: 1.5,
-                        background: msg.role === 'user'
-                          ? 'var(--accent-light)'
-                          : 'var(--bg-dashboard)',
-                        color: 'var(--text-primary)',
-                        border: msg.role === 'user'
-                          ? '1px solid var(--accent-border)'
-                          : '1px solid var(--border-light)',
-                        whiteSpace: 'pre-wrap',
+                        display: 'flex',
+                        justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
                       }}
                     >
-                      {getDisplayText(msg.content)}
+                      <div
+                        style={{
+                          maxWidth: '85%',
+                          borderRadius: msg.role === 'user'
+                            ? '12px 12px 4px 12px'
+                            : '12px 12px 12px 4px',
+                          fontSize: '13px',
+                          lineHeight: 1.5,
+                          background: msg.role === 'user'
+                            ? 'var(--accent-light)'
+                            : 'var(--bg-dashboard)',
+                          color: 'var(--text-primary)',
+                          border: msg.role === 'user'
+                            ? '1px solid var(--accent-border)'
+                            : '1px solid var(--border-light)',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <div style={{ padding: '10px 14px', whiteSpace: 'pre-wrap' }}>
+                          {getDisplayText(msg.content)}
+                        </div>
+
+                        {referencedItems.length > 0 && (
+                          <div
+                            style={{
+                              borderTop: '1px solid var(--border-light)',
+                              padding: '6px 8px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '2px',
+                            }}
+                          >
+                            {referencedItems.map((item) => {
+                              const IconComponent = iconByType[item.iconType]
+                              const colorStyle = iconColorStyles[item.iconVariant]
+
+                              return (
+                                <button
+                                  key={item.id}
+                                  onClick={() => handleItemClick(item)}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '6px 8px',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    cursor: 'pointer',
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    transition: 'background-color 100ms ease-out',
+                                    fontSize: '12px',
+                                    fontFamily: 'inherit',
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--accent-light)'
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent'
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      width: '22px',
+                                      height: '22px',
+                                      borderRadius: '5px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      flexShrink: 0,
+                                      background: colorStyle.background,
+                                      color: colorStyle.color,
+                                    }}
+                                  >
+                                    {IconComponent && <IconComponent size={12} />}
+                                  </div>
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div
+                                      style={{
+                                        fontWeight: 500,
+                                        color: 'var(--text-primary)',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                      }}
+                                    >
+                                      {item.title}
+                                    </div>
+                                    <div
+                                      style={{
+                                        fontSize: '11px',
+                                        color: 'var(--text-tertiary)',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        marginTop: '-1px',
+                                      }}
+                                    >
+                                      {item.subtitle}
+                                    </div>
+                                  </div>
+                                </button>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
 
                 {/* Typing indicator */}
                 {isStreaming && messages.length > 0 && messages[messages.length - 1].content === '' && (

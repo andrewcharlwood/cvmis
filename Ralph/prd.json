@@ -193,7 +193,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "The action routing needs to flow from ChatWidget up to DashboardLayout. Add an onAction prop to ChatWidget (same pattern as CommandPalette). DashboardLayout passes handlePaletteAction to ChatWidget. Export iconByType and iconColorStyles from CommandPalette (or extract to a shared module) so ChatWidget can reuse them."
     }
   ]
