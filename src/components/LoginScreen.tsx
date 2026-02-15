@@ -147,7 +147,11 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   return (
     <div
       className="fixed inset-0 flex items-center justify-center z-50"
-      style={{ backgroundColor: '#1A2B2A' }}
+      style={{
+        backgroundColor: 'rgba(240, 245, 244, 0.7)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+      }}
       role="dialog"
       aria-label="Clinical system login"
       aria-modal="true"
