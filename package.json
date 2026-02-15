@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
-    "generate-embeddings": "npx tsx scripts/generate-embeddings.ts"
+    "generate-embeddings": "npx tsx scripts/generate-embeddings.ts",
+    "benchmark": "npx tsx scripts/benchmark.ts"
   },
   "dependencies": {
     "@types/d3": "^7.4.3",

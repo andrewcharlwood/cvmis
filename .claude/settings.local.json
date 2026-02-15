@@ -31,7 +31,8 @@
       "Bash(timeout /t 3 /nobreak)",
       "Bash(jq:*)",
       "Bash(git stash:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "mcp__context7__resolve-library-id"
     ]
   }
 }

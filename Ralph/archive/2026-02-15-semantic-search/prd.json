@@ -1,0 +1,276 @@
+{
+  "project": "Portfolio — Semantic Search & AI Chat",
+  "branchName": "ralph/semantic-search",
+  "description": "Replace Fuse.js command palette search with client-side semantic vector search (ONNX model), then add a Gemini Flash-powered AI chat widget.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Install @xenova/transformers and add generate-embeddings script skeleton",
+      "description": "As a developer, I need the Transformers.js dependency installed and a runnable script scaffold so subsequent stories can generate and use embeddings.",
+      "acceptanceCriteria": [
+        "npm install @xenova/transformers",
+        "Create scripts/generate-embeddings.ts with a main() function that imports the pipeline from @xenova/transformers",
+        "Script loads the all-MiniLM-L6-v2 model and embeds a single test string, logging the vector length to confirm it works",
+        "Add npm script: \"generate-embeddings\": \"npx tsx scripts/generate-embeddings.ts\"",
+        "Running npm run generate-embeddings prints the vector length (384) and exits cleanly",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Use @xenova/transformers (not @huggingface/transformers — the Xenova fork has better Node.js ONNX support). The model ID is 'Xenova/all-MiniLM-L6-v2'. Pipeline type is 'feature-extraction'. tsx is already available via npx for running TypeScript scripts."
+    },
+    {
+      "id": "US-002",
+      "title": "Build rich text representations for each palette item",
+      "description": "As a developer, I want each palette item to have a natural-language paragraph for embedding that captures deep context, not just the title.",
+      "acceptanceCriteria": [
+        "New function buildEmbeddingTexts() in src/lib/search.ts that returns Array<{ id: string, text: string }> for all palette items",
+        "Consultation items include: role, org, duration, history narrative, examination bullets, coded entry descriptions",
+        "Skill items include: name, category, frequency, proficiency percentage, years of experience",
+        "KPI items include: value, label, explanation, story context and outcomes",
+        "Investigation items include: name, methodology, tech stack list, results",
+        "Education items include: title, institution, type, research detail",
+        "Quick Action items include: title and subtitle (short text is fine)",
+        "Achievement items include: title, subtitle, and linked KPI story context if available",
+        "Each text is a readable natural-language paragraph, not a keyword dump",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "This function will be used by both the build script (to generate embeddings) and potentially by the chat widget (for context). Import the raw data files (consultations, skills, kpis, investigations, documents) to access the full data beyond what buildPaletteData() surfaces. The id must match the PaletteItem id so embeddings can be correlated."
+    },
+    {
+      "id": "US-003",
+      "title": "Generate and commit embeddings.json",
+      "description": "As a developer, I want the generate-embeddings script to produce a complete embeddings.json file using the rich text representations.",
+      "acceptanceCriteria": [
+        "scripts/generate-embeddings.ts imports buildEmbeddingTexts() from src/lib/search.ts",
+        "Script embeds each item's text using the all-MiniLM-L6-v2 model via @xenova/transformers pipeline",
+        "Outputs src/data/embeddings.json as an array of { id: string, embedding: number[] }",
+        "Each embedding is a 384-dimensional float array",
+        "Running npm run generate-embeddings regenerates the file successfully",
+        "The JSON file is valid and parseable",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "The pipeline returns a Tensor — use .tolist() or .data to extract the raw float array. Mean-pool across the token dimension (dim 1) to get a single 384-d vector per input. Process items sequentially to avoid OOM in Node. The output file will be ~200KB for ~40 items with 384 floats each."
+    },
+    {
+      "id": "US-004",
+      "title": "Preload ONNX model during boot sequence",
+      "description": "As a visitor, I want the semantic search model to download in the background during the boot/ECG/login phases so it's ready when I reach the dashboard.",
+      "acceptanceCriteria": [
+        "New src/lib/embedding-model.ts module that exports: initModel(), embedQuery(text: string), and isModelReady()",
+        "initModel() loads the all-MiniLM-L6-v2 pipeline from @xenova/transformers and stores it in a module-level variable",
+        "embedQuery() returns a Promise<number[]> (384-d vector) for a given text string",
+        "isModelReady() returns boolean indicating if the model has finished loading",
+        "initModel() is called in App.tsx useEffect on mount (during boot phase) — fire and forget, no await",
+        "If initModel() fails (network error, etc.), isModelReady() remains false — no error thrown or shown",
+        "Model is cached by @xenova/transformers in IndexedDB — subsequent page loads are near-instant",
+        "Boot/ECG/login animations are not affected by model loading",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Use pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2') which auto-downloads and caches the ONNX model. The module-level pattern (let pipelineInstance = null) avoids React re-render issues. embedQuery should mean-pool the tensor output the same way as the build script. Wrap initModel() in a try/catch that silently swallows errors."
+    },
+    {
+      "id": "US-005",
+      "title": "Implement cosine similarity search module",
+      "description": "As a developer, I need a semantic search function that compares a query embedding against pre-computed item embeddings and returns ranked results.",
+      "acceptanceCriteria": [
+        "New src/lib/semantic-search.ts module",
+        "Exports semanticSearch(queryEmbedding: number[], embeddings: Array<{ id: string, embedding: number[] }>, threshold?: number): Array<{ id: string, score: number }>",
+        "Uses cosine similarity: dot(a,b) / (magnitude(a) * magnitude(b))",
+        "Results sorted by score descending",
+        "Optional threshold parameter filters out low-relevance results (default 0.3)",
+        "Exports loadEmbeddings() that imports embeddings.json and returns the parsed array",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Keep the cosine similarity implementation simple — no libraries needed for 384-d vectors over ~40 items. The loadEmbeddings function can use a dynamic import or direct import of the JSON file (Vite handles JSON imports natively)."
+    },
+    {
+      "id": "US-006",
+      "title": "Integrate semantic search into command palette",
+      "description": "As a visitor, I want the command palette to use semantic search when available, falling back to Fuse.js otherwise.",
+      "acceptanceCriteria": [
+        "CommandPalette.tsx checks isModelReady() from embedding-model.ts",
+        "When model is ready and query is non-empty: call embedQuery(query), then semanticSearch() against loaded embeddings, then map result IDs back to PaletteItem objects",
+        "When model is NOT ready: use existing Fuse.js search (current behavior preserved exactly)",
+        "Search is debounced by ~200ms to avoid calling embedQuery on every keystroke",
+        "Results maintain existing groupBySection() grouping and section ordering",
+        "Existing keyboard navigation, action routing, and UI unchanged",
+        "Typecheck passes",
+        "Verify in browser: search 'data analysis' surfaces analytics-related roles/skills not just items with 'data' in title"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "The debounce is important — embedQuery takes ~20-50ms per call. Use a useRef + setTimeout pattern or a simple debounce hook. The mapping from semantic search results (id + score) back to PaletteItems should use a Map for O(1) lookup. Keep the Fuse.js imports and buildSearchIndex — they're the fallback path."
+    },
+    {
+      "id": "US-007",
+      "title": "Chat widget — floating button component",
+      "description": "As a visitor, I see a floating chat button at the bottom-right of the dashboard that I can click to open a chat panel.",
+      "acceptanceCriteria": [
+        "New src/components/ChatWidget.tsx component",
+        "Renders a 48px circular button, fixed position, bottom: 24px, right: 24px",
+        "Uses teal accent background (var(--accent)), white MessageCircle icon from lucide-react",
+        "Shadow: var(--shadow-md). Hover: var(--shadow-lg) + scale(1.05) transition",
+        "Button has a subtle entrance animation: fade + translateY(8px) → translateY(0), delayed ~1s after mount",
+        "Respects prefers-reduced-motion (no animation, just visible)",
+        "z-index above dashboard content but below command palette overlay (z-index 90)",
+        "onClick toggles an isOpen state (panel rendering comes in next story)",
+        "Mounted in DashboardLayout.tsx",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Use framer-motion for the entrance animation to match the rest of the app's motion patterns. The button should use font-ui for any text. On mobile (<640px), button is 40px and positioned bottom: 16px, right: 16px. The VITE_GEMINI_API_KEY env var check can wait until the Gemini integration story — for now just render the button unconditionally."
+    },
+    {
+      "id": "US-008",
+      "title": "Chat widget — panel UI with message display",
+      "description": "As a visitor, I want a chat panel that opens above the floating button where I can type questions and see responses.",
+      "acceptanceCriteria": [
+        "Chat panel renders when isOpen is true, positioned above the floating button (bottom: 88px, right: 24px)",
+        "Panel dimensions: 380px wide, max-height 480px, with overflow-y auto for messages",
+        "Header: title text ('Ask about Andy'), close button (X icon)",
+        "Message area: user messages right-aligned in teal-tinted bubbles, assistant messages left-aligned in light gray bubbles",
+        "Input area at bottom: text field with placeholder 'Ask me anything...', send button (Send icon)",
+        "Enter key submits message, Shift+Enter for newline",
+        "Panel entrance animation: scale(0.95) + opacity(0) → scale(1) + opacity(1), 200ms ease-out",
+        "Panel exit animation: reverse of entrance",
+        "Respects prefers-reduced-motion",
+        "Responsive: on mobile (<640px), panel is full-width (left: 0, right: 0, bottom: 0) with rounded top corners only",
+        "Messages are stored in component state as Array<{ role: 'user' | 'assistant', content: string }>",
+        "Submitting a message adds it to state and shows it in the UI (no API call yet — assistant response is a placeholder)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Use the design system tokens: var(--surface) for panel bg, var(--border-light) for borders, var(--text-primary) for text, var(--accent) for user bubble bg at 10% opacity, font-ui for body text, font-geist for timestamps. The placeholder assistant response can be a static string like 'AI chat coming soon — this is a preview of the chat interface.' This lets us verify the full UI before wiring up Gemini."
+    },
+    {
+      "id": "US-009",
+      "title": "Chat widget — Gemini Flash integration",
+      "description": "As a visitor, I can ask natural language questions and get intelligent, streamed answers about Andy's experience.",
+      "acceptanceCriteria": [
+        "New src/lib/gemini.ts module that exports sendChatMessage(messages: ChatMessage[], cvContext: string): AsyncGenerator<string>",
+        "Calls Google Gemini Flash API (gemini-2.0-flash) using the REST API with fetch (no SDK needed)",
+        "API key sourced from import.meta.env.VITE_GEMINI_API_KEY",
+        "System prompt includes structured CV context built from buildEmbeddingTexts() output",
+        "System prompt instructs the model to answer questions about Andy's professional experience accurately and concisely",
+        "System prompt instructs the model to include relevant palette item IDs in its response as a JSON array at the end",
+        "Responses are streamed using the Gemini streaming endpoint",
+        "ChatWidget.tsx wires up real messages: on submit, calls sendChatMessage and streams tokens into the assistant message bubble",
+        "Loading state shown (typing indicator) while waiting for first token",
+        "If VITE_GEMINI_API_KEY is not set, chat button is still visible but panel shows 'Chat is currently unavailable' message",
+        "If API call fails, show error message in chat: 'Sorry, I couldn't process that. Please try again.'",
+        "Conversation history (last 10 messages) passed to API for multi-turn context",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "Gemini REST streaming endpoint: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=API_KEY. The response is SSE (server-sent events) — parse each 'data:' line as JSON and extract candidates[0].content.parts[0].text. The system prompt with CV context will be ~2-3K tokens — well within Gemini Flash limits. For the palette item IDs, instruct the model to end its response with a line like [ITEMS: id1, id2, id3] which can be parsed client-side."
+    },
+    {
+      "id": "US-010",
+      "title": "Chat widget — clickable portfolio item cards in responses",
+      "description": "As a visitor, I want AI chat responses to include clickable portfolio items so I can drill into relevant sections.",
+      "acceptanceCriteria": [
+        "After parsing the assistant response, extract referenced palette item IDs from the [ITEMS: ...] suffix",
+        "Render matched items as compact clickable cards below the answer text in the assistant bubble",
+        "Cards reuse icon/color mapping from CommandPalette (iconByType, iconColorStyles)",
+        "Cards show item title and subtitle in a compact horizontal layout",
+        "Clicking a card triggers the same action routing as command palette via handlePaletteAction in DashboardLayout",
+        "If no items are referenced or IDs don't match, no cards are shown (just the text answer)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "The action routing needs to flow from ChatWidget up to DashboardLayout. Add an onAction prop to ChatWidget (same pattern as CommandPalette). DashboardLayout passes handlePaletteAction to ChatWidget. Export iconByType and iconColorStyles from CommandPalette (or extract to a shared module) so ChatWidget can reuse them."
+    },
+    {
+      "id": "US-011",
+      "title": "Mobile full-screen chat panel",
+      "description": "As a mobile visitor, I want the chat panel to be a full-screen overlay so it's easy to use on small screens.",
+      "acceptanceCriteria": [
+        "Below md breakpoint (768px), chat panel renders as full-screen overlay using position: fixed; inset: 0 with 100dvh height",
+        "Full-screen mode has the existing header with close button (no visual change needed, just full-width)",
+        "Floating chat button is hidden (display: none or opacity: 0) while panel is open on mobile (<768px)",
+        "Above 768px, existing panel behavior is unchanged (380px wide, anchored bottom-right, max-height 480px)",
+        "Panel open/close animation still respects prefers-reduced-motion",
+        "Safe area insets applied via env(safe-area-inset-*) for notched devices",
+        "Input area stays pinned to bottom of screen on mobile",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": "The current ChatWidget already has some mobile handling (bottom-sheet style at <640px). This story changes the breakpoint to 768px (md) and makes it truly full-screen instead of 85vh. Use 100dvh (dynamic viewport height) to account for mobile browser chrome. The floating button visibility can be controlled by combining isOpen state with a CSS media query or a useMediaQuery hook. The <style> block with data-chat-panel attribute is the place to update responsive rules."
+    },
+    {
+      "id": "US-012",
+      "title": "Welcome message with suggested question chips",
+      "description": "As a visitor opening the chat, I see a friendly welcome message and clickable suggested questions so I know what to ask.",
+      "acceptanceCriteria": [
+        "When chat panel is open and conversation is empty, display welcome text: 'Hey! I'm here to help you learn more about Andy. What would you like to know?'",
+        "Welcome text is styled as an AI message bubble (left-aligned, light background, same styling as assistant messages)",
+        "Below the welcome bubble, show 2-3 clickable pill/chip buttons with suggested questions",
+        "Suggested questions: 'What's his NHS experience?', 'Tell me about his data skills', 'What projects has he built?'",
+        "Chips styled with: teal accent border, rounded-full, font-ui 12-13px, hover state (teal background tint)",
+        "Clicking a chip sends that question as a user message (same codepath as typing + Enter)",
+        "Welcome message and chips always visible when conversation is empty (persist across panel open/close)",
+        "Once any message is sent, the welcome/chips area is replaced by the conversation messages",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": "Replace the current empty-state text ('Ask me anything about Andy's experience, skills, or projects.') with the new welcome bubble + chips. The chips should call handleSubmit (or equivalent) with the chip text pre-filled — simplest approach is setInputValue(chipText) then immediately trigger submit. Check that the welcome state reappears if the user hasn't sent a message (messages.length === 0). The suggested questions could live in a const array at the top of ChatWidget for easy future editing."
+    },
+    {
+      "id": "US-013",
+      "title": "Self-host ONNX embedding model",
+      "description": "As a developer, I want the ONNX model files served from the same host as the site to eliminate dependency on Hugging Face CDN.",
+      "acceptanceCriteria": [
+        "Model files for Xenova/all-MiniLM-L6-v2 downloaded and placed in public/models/all-MiniLM-L6-v2/onnx/ (matching HF repo structure)",
+        "Required files present: model_quantized.onnx, tokenizer.json, tokenizer_config.json, config.json, and any other files the pipeline expects",
+        "src/lib/embedding-model.ts updated: configure @xenova/transformers env to use local model path (e.g., env.localModelPath or custom model URL pointing to /models/)",
+        "scripts/generate-embeddings.ts also updated to use the same local model path for consistency",
+        "Model files are NOT in .gitignore — they are committed as static assets",
+        "No network requests to huggingface.co in the browser network tab when semantic search is used",
+        "Semantic search still works correctly in the command palette after the change",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": "Transformers.js uses env.localModelPath or env.remoteHost to control where models are fetched from. Setting env.localModelPath = '/models/' should make it look for files at /models/Xenova/all-MiniLM-L6-v2/onnx/model_quantized.onnx etc. The Vite public/ directory serves files at the root — so public/models/ becomes /models/ at runtime. For the build script (Node.js), use a file:// path or the local filesystem path instead. Download model files from https://huggingface.co/Xenova/all-MiniLM-L6-v2/tree/main — the quantized ONNX model is ~23MB. Check what files the pipeline actually requests by watching network tab before making this change."
+    },
+    {
+      "id": "US-014",
+      "title": "Update to Gemini 3 Flash Preview with model indicator",
+      "description": "As a developer, I want to use the latest free Gemini model, and as a visitor, I want to see what model powers the chat.",
+      "acceptanceCriteria": [
+        "Extract model name to a single constant (e.g., GEMINI_MODEL = 'gemini-3-flash-preview') used for both the API URL and display",
+        "GEMINI_API_BASE URL updated to use the new model constant",
+        "Review and tighten the system prompt — ensure it's well-structured, concise, and clear for the new model",
+        "Review the [ITEMS: ...] suffix instruction — ensure new model follows the format reliably",
+        "Small model indicator in chat panel header: 'Gemini 3 Flash' in font-geist, 11px, var(--text-tertiary)",
+        "Model indicator positioned right-aligned in the header bar or as a subtle line below the header",
+        "Streaming SSE parsing still works correctly with the new model endpoint",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": "The current API base is 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash'. Change the model segment to 'gemini-3-flash-preview'. The API path structure (v1beta/models/{model}:streamGenerateContent) should be the same. Verify that gemini-3-flash-preview is the correct model ID — check Google AI Studio or the API docs. For the display name, use a human-friendly string like 'Gemini 3 Flash' (not the full model ID). The constant should be defined at the top of gemini.ts and exported for use in ChatWidget."
+    }
+  ]
+}
