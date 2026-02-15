@@ -34,6 +34,7 @@
 - ChatWidget mobile breakpoint is `md` (768px) — below this, panel is full-screen; above, it's 380px anchored bottom-right
 - `handleSubmit(overrideText?)` accepts optional text param — use this when programmatically sending messages (e.g., suggested question chips) to avoid stale `inputValue` state
 - `SUGGESTED_QUESTIONS` const array at top of ChatWidget — edit here to change welcome screen chip text
+- System prompt prefixes each CV entry with `[item-id]` so the model can directly reference IDs in its `[ITEMS: ...]` suffix — more reliable than expecting pattern inference
 
 ---
 
@@ -295,4 +296,19 @@
   - Browser Cache API can retain stale entries from previous HF CDN loads — setting `useBrowserCache = false` forces fresh fetches from the configured local path
   - For Node.js scripts, use an absolute filesystem path for `localModelPath` (not a URL)
   - The quantized ONNX model (`model_quantized.onnx`) is ~22MB — acceptable for a static asset since it's cached after first load
+---
+
+## 2026-02-15 - US-014
+- Reviewed and tightened system prompt in `src/lib/gemini.ts` for Gemini 3 Flash Preview
+- Prefixed each CV entry with its item ID (`[exp-nhs-nwicb] ...`) so the model can directly map entries to IDs for the ITEMS suffix
+- Replaced numbered rules with cleaner bullet-point format, added rule against fabricating URLs/contacts
+- Provided concrete example in ITEMS instruction (`[ITEMS: exp-nhs-nwicb, skill-python]`) instead of generic placeholders
+- Verified model constant (`GEMINI_MODEL = 'gemini-3-flash-preview'`), display name, API URL, and header indicator were already in place from previous iteration
+- Confirmed `gemini-3-flash-preview` is the correct model ID via Google AI docs
+- Typecheck (0 errors), lint (0 new warnings), and production build all pass
+- Files changed: `src/lib/gemini.ts`
+- **Learnings for future iterations:**
+  - Prefixing CV data with `[item-id]` in the system prompt makes ID references more reliable — model can directly see and copy IDs rather than inferring from patterns
+  - Concrete examples in format instructions (e.g., `[ITEMS: exp-nhs-nwicb, skill-python]`) are more reliable than generic placeholders (`[ITEMS: id1, id2]`)
+  - The `GEMINI_MODEL` and `GEMINI_DISPLAY_NAME` constants in `gemini.ts` are already exported and used by `ChatWidget.tsx` — single source of truth for model identity
 ---

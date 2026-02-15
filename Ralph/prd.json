@@ -269,7 +269,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "notes": "The current API base is 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash'. Change the model segment to 'gemini-3-flash-preview'. The API path structure (v1beta/models/{model}:streamGenerateContent) should be the same. Verify that gemini-3-flash-preview is the correct model ID — check Google AI Studio or the API docs. For the display name, use a human-friendly string like 'Gemini 3 Flash' (not the full model ID). The constant should be defined at the top of gemini.ts and exported for use in ChatWidget."
     }
   ]
