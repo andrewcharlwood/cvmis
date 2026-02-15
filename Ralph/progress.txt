@@ -144,3 +144,15 @@
   - Framer Motion's `animate` prop interpolates from the element's current computed style, so the exit blur animation doesn't need the starting value explicitly
   - Only the initial style needs the constant; the exit target (`blur(0px)`) is always 0
 ---
+
+## 2026-02-15 - US-008: Align login card border radius and shadow with dashboard design system
+- Changed card borderRadius from `12px` to `var(--radius-card, 8px)`
+- Changed card boxShadow from `shadow-sm` (`0 1px 2px rgba(26,43,42,0.05)`) to `var(--shadow-lg, 0 8px 32px rgba(26,43,42,0.12))`
+- Changed username input, password input, and button borderRadius from `4px` to `var(--radius-sm, 6px)`
+- All values use CSS custom property references with fallbacks
+- Files changed: `src/components/LoginScreen.tsx`
+- **Learnings for future iterations:**
+  - CSS tokens `--radius-card`, `--radius-sm`, `--shadow-sm`, `--shadow-md`, `--shadow-lg` are all defined in `index.css` `:root` — use `var()` references with fallback values
+  - The button has 18-space indentation vs 20-space for inputs — `replace_all` may not catch all instances if matching on indentation
+  - The spinner (`borderRadius: '50%'`) and status indicator dot should NOT be changed — they're circles, not card elements
+---

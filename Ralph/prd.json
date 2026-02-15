@@ -129,7 +129,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "Check index.css for whether --radius-card and --radius-sm exist as CSS custom properties. If not, use the hardcoded values (8px and 6px) directly. The card shadow is currently set via inline style — update to the shadow-lg value. The login card borderRadius is in the card's inline style object."
     },
     {
