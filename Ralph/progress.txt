@@ -15,6 +15,8 @@
 - `src/lib/semantic-search.ts` exports `semanticSearch(queryEmbedding, embeddings, threshold?)` and `loadEmbeddings()` — embeddings are normalized so cosine similarity is dot(a,b)/(mag(a)*mag(b))
 - CommandPalette uses `semanticResults` state + debounced `useEffect` for async semantic search, falling back to Fuse.js when `isModelReady()` returns false or on any error
 - `loadEmbeddings()` and `paletteMap` (Map<id, PaletteItem>) are precomputed via `useMemo` — no re-computation on each search
+- ChatWidget is mounted in DashboardLayout alongside CommandPalette and DetailPanel — z-index 90 (below command palette z-1000)
+- `prefersReducedMotion` pattern: read `window.matchMedia` at module level, use in framer-motion variants to skip animation
 
 ---
 
@@ -113,4 +115,23 @@
   - `isModelReady()` is a synchronous check — call it before setting up the debounce timeout to avoid unnecessary delays when model isn't loaded
   - The ONNX model takes several seconds to load in the browser (downloads ~23MB first time, then cached in IndexedDB), so initial searches will always use Fuse.js fallback
   - `loadEmbeddings()` is cheap (just returns the already-imported JSON) — safe to call in `useMemo` without performance concern
+---
+
+## 2026-02-15 - US-007
+- Created `src/components/ChatWidget.tsx` — floating chat button with toggle state
+- 48px circular button (40px on mobile <640px), fixed bottom-right, teal accent background, white MessageCircle icon
+- Entrance animation: fade + translateY(8px→0), 1s delay after mount, via framer-motion variants
+- Respects `prefers-reduced-motion` — skips animation, shows immediately
+- Hover: shadow-md → shadow-lg + scale(1.05), 150ms transition
+- z-index 90 (below command palette z-1000)
+- onClick toggles `isOpen` state, swaps icon between MessageCircle and X
+- Mounted in `DashboardLayout.tsx` alongside CommandPalette and DetailPanel
+- Typecheck, lint (0 errors), and build all pass
+- Browser verified: button visible at bottom-right, toggle works (Open chat ↔ Close chat)
+- Files changed: `src/components/ChatWidget.tsx` (new), `src/components/DashboardLayout.tsx`
+- **Learnings for future iterations:**
+  - Responsive sizing via Tailwind classes (`h-10 w-10 sm:h-12 sm:w-12`) works well with inline style for non-Tailwind properties (boxShadow, border-radius)
+  - `AnimatePresence` is already imported and ready for the panel animation in US-008
+  - The `isOpen` state lives in ChatWidget — US-008 will add the panel UI inside the same component
+  - Hover effects use `onMouseEnter/Leave` with direct style mutation (same pattern as other dashboard components)
 ---

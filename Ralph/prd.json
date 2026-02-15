@@ -128,7 +128,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Use framer-motion for the entrance animation to match the rest of the app's motion patterns. The button should use font-ui for any text. On mobile (<640px), button is 40px and positioned bottom: 16px, right: 16px. The VITE_GEMINI_API_KEY env var check can wait until the Gemini integration story — for now just render the button unconditionally."
     },
     {

@@ -14,6 +14,7 @@ import { ParentSection } from './ParentSection'
 import CareerConstellation from './CareerConstellation'
 import { WorkExperienceSubsection } from './WorkExperienceSubsection'
 import { RepeatMedicationsSubsection } from './RepeatMedicationsSubsection'
+import { ChatWidget } from './ChatWidget'
 import { useActiveSection } from '@/hooks/useActiveSection'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { consultations } from '@/data/consultations'
@@ -418,6 +419,9 @@ export function DashboardLayout() {
 
       {/* Detail panel */}
       <DetailPanel />
+
+      {/* Floating chat widget */}
+      <ChatWidget />
     </div>
   )
 }
