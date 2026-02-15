@@ -13,6 +13,8 @@
 - `src/lib/embedding-model.ts` exports `initModel()`, `embedQuery(text)`, `isModelReady()` — check `isModelReady()` before calling `embedQuery()`
 - `initModel()` is called fire-and-forget in `App.tsx` on mount — model loads during boot/ECG/login phases
 - `src/lib/semantic-search.ts` exports `semanticSearch(queryEmbedding, embeddings, threshold?)` and `loadEmbeddings()` — embeddings are normalized so cosine similarity is dot(a,b)/(mag(a)*mag(b))
+- CommandPalette uses `semanticResults` state + debounced `useEffect` for async semantic search, falling back to Fuse.js when `isModelReady()` returns false or on any error
+- `loadEmbeddings()` and `paletteMap` (Map<id, PaletteItem>) are precomputed via `useMemo` — no re-computation on each search
 
 ---
 
@@ -92,4 +94,23 @@
   - Vite handles JSON imports natively — `import data from '@/data/embeddings.json'` just works, no dynamic import needed
   - Since embeddings are already L2-normalized (from pipeline's `normalize: true`), cosine similarity simplifies to just the dot product. However, the full formula is kept for correctness in case non-normalized vectors are ever used
   - With only ~42 items and 384-d vectors, brute-force cosine similarity is fast enough — no need for approximate nearest neighbor libraries
+---
+
+## 2026-02-15 - US-006
+- Integrated semantic search into CommandPalette with Fuse.js fallback
+- When `isModelReady()` is true: debounces query by 200ms, calls `embedQuery()`, runs `semanticSearch()` against preloaded embeddings, maps result IDs back to PaletteItems via O(1) Map lookup
+- When model is NOT ready: uses existing Fuse.js search (behavior preserved exactly)
+- Results maintain `groupBySection()` grouping and section ordering
+- Existing keyboard navigation, action routing, and UI unchanged
+- Semantic results state is cleared when palette opens/closes and when query is empty
+- Error handling: any failure in embedQuery/semanticSearch silently falls back to Fuse.js
+- Typecheck, lint, and build all pass
+- Browser verified: Fuse.js fallback works correctly; ONNX model loads asynchronously during boot and activates semantic search when ready
+- Files changed: `src/components/CommandPalette.tsx`
+- **Learnings for future iterations:**
+  - Semantic search is async so it can't live in a `useMemo` — use `useState` + debounced `useEffect` pattern instead
+  - The `useRef + setTimeout` debounce pattern works well here: set `debounceRef.current = setTimeout(...)`, clear it in the cleanup function, and in early-return paths
+  - `isModelReady()` is a synchronous check — call it before setting up the debounce timeout to avoid unnecessary delays when model isn't loaded
+  - The ONNX model takes several seconds to load in the browser (downloads ~23MB first time, then cached in IndexedDB), so initial searches will always use Fuse.js fallback
+  - `loadEmbeddings()` is cheap (just returns the already-imported JSON) — safe to call in `useMemo` without performance concern
 ---

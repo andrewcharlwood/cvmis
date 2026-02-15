@@ -107,7 +107,7 @@
         "Verify in browser: search 'data analysis' surfaces analytics-related roles/skills not just items with 'data' in title"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "The debounce is important — embedQuery takes ~20-50ms per call. Use a useRef + setTimeout pattern or a simple debounce hook. The mapping from semantic search results (id + score) back to PaletteItems should use a Map for O(1) lookup. Keep the Fuse.js imports and buildSearchIndex — they're the fallback path."
     },
     {

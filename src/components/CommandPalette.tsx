@@ -15,6 +15,8 @@ import {
   groupBySection,
 } from '@/lib/search'
 import type { PaletteItem, PaletteAction, IconColorVariant } from '@/lib/search'
+import { isModelReady, embedQuery } from '@/lib/embedding-model'
+import { semanticSearch, loadEmbeddings } from '@/lib/semantic-search'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -53,13 +55,62 @@ export function CommandPalette({ isOpen, onClose, onAction }: CommandPaletteProp
   const paletteData = useMemo(() => buildPaletteData(), [])
   const searchIndex = useMemo(() => buildSearchIndex(paletteData), [paletteData])
 
-  // Compute visible items based on query
+  // Preload embeddings and build lookup map
+  const embeddings = useMemo(() => loadEmbeddings(), [])
+  const paletteMap = useMemo(() => {
+    const map = new Map<string, PaletteItem>()
+    for (const item of paletteData) map.set(item.id, item)
+    return map
+  }, [paletteData])
+
+  // Semantic search results (async, debounced)
+  const [semanticResults, setSemanticResults] = useState<PaletteItem[] | null>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+
+  useEffect(() => {
+    const trimmed = query.trim()
+
+    // Clear semantic results when query is empty
+    if (!trimmed) {
+      setSemanticResults(null)
+      return
+    }
+
+    // Only use semantic search when model is ready
+    if (!isModelReady()) {
+      setSemanticResults(null)
+      return
+    }
+
+    // Debounce ~200ms
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const queryVec = await embedQuery(trimmed)
+        const results = semanticSearch(queryVec, embeddings)
+        const items = results
+          .map(r => paletteMap.get(r.id))
+          .filter((item): item is PaletteItem => item !== undefined)
+        setSemanticResults(items)
+      } catch {
+        // Fall back to Fuse.js on any error
+        setSemanticResults(null)
+      }
+    }, 200)
+
+    return () => clearTimeout(debounceRef.current)
+  }, [query, embeddings, paletteMap])
+
+  // Compute visible items: semantic search when available, Fuse.js fallback
   const visibleItems = useMemo(() => {
     if (!query.trim()) {
       return paletteData
     }
+    if (semanticResults !== null) {
+      return semanticResults
+    }
     return searchIndex.search(query).map(result => result.item)
-  }, [query, paletteData, searchIndex])
+  }, [query, paletteData, searchIndex, semanticResults])
 
   // Group visible items by section
   const groupedResults = useMemo(() => groupBySection(visibleItems), [visibleItems])
@@ -80,6 +131,7 @@ export function CommandPalette({ isOpen, onClose, onAction }: CommandPaletteProp
     if (isOpen) {
       setQuery('')
       setSelectedIndex(-1)
+      setSemanticResults(null)
       // Focus input on next frame
       requestAnimationFrame(() => {
         inputRef.current?.focus()
