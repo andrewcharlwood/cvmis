@@ -8,6 +8,30 @@ interface CvmisLogoProps {
   className?: string
 }
 
+// ── Animation timing constants ──────────────────────────────────────
+// Rise phase: all pills rise together from below
+const RISE_DURATION_MS = 500           // duration of the upward rise (ms)
+const RISE_DURATION_S = RISE_DURATION_MS / 1000
+const RISE_OPACITY_DURATION_S = 0.25   // opacity fade-in during rise (s)
+const RISE_EASING: [number, number, number, number] = [0.33, 1, 0.68, 1]
+const RISE_START_Y = 350               // initial Y offset (viewBox units)
+
+// Fan phase: left and right pills fan outward
+const FAN_DELAY_AFTER_RISE_MS = 500    // delay before fan begins (ms from mount)
+const FAN_DURATION_S = 0.6             // duration of fan-out (s)
+const FAN_EASING = 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+const FAN_ROTATION_DEG = 50            // rotation angle for fanned pills (±degrees)
+const FAN_HORIZONTAL_PX = 16           // horizontal offset for fanned pills (±px)
+const FAN_RIGHT_STAGGER_S = 0.03       // stagger delay for right pill (s)
+
+// Total animation = rise delay + fan duration
+const TOTAL_ANIMATION_MS = FAN_DELAY_AFTER_RISE_MS + FAN_DURATION_S * 1000
+
+// Overlap blend: multiply blend on fanning capsules (used by US-005)
+export const OVERLAY_BLEND_START_PROGRESS = 0.5  // fan progress at which blend fades in
+export const OVERLAP_BLEND_MAX_OPACITY = 0.2     // max blend opacity (20%)
+export const OVERLAP_BLEND_TRANSITION_DURATION_S = FAN_DURATION_S * (1 - OVERLAY_BLEND_START_PROGRESS)
+
 // Pivot point: bottom-center of the pill stack (in viewBox coords)
 const PX = 300
 const PY = 275
@@ -23,7 +47,6 @@ function fanTransform(rotation: number, dx: number): string {
 }
 
 const IDENTITY_TRANSFORM = fanTransform(0, 0)
-const FAN_EASING = 'cubic-bezier(0.34, 1.56, 0.64, 1)'
 
 export function CvmisLogo({ size, cssHeight, animated = false, className }: CvmisLogoProps) {
   const prefersReducedMotion = useReducedMotion()
@@ -34,8 +57,8 @@ export function CvmisLogo({ size, cssHeight, animated = false, className }: Cvmi
   useEffect(() => {
     if (!animated || prefersReducedMotion) return
 
-    const fanTimer = setTimeout(() => setPhase('fanning'), 500)
-    const doneTimer = setTimeout(() => setPhase('done'), 1000)
+    const fanTimer = setTimeout(() => setPhase('fanning'), FAN_DELAY_AFTER_RISE_MS)
+    const doneTimer = setTimeout(() => setPhase('done'), TOTAL_ANIMATION_MS)
 
     return () => {
       clearTimeout(fanTimer)
@@ -47,10 +70,10 @@ export function CvmisLogo({ size, cssHeight, animated = false, className }: Cvmi
   const isFanned = phase === 'fanning' || phase === 'done'
   const fanTarget = isFanned || skip
 
-  const leftTransform = fanTarget ? fanTransform(-50, -16) : IDENTITY_TRANSFORM
-  const rightTransform = fanTarget ? fanTransform(50, 16) : IDENTITY_TRANSFORM
-  const fanTransition = skip ? 'none' : `transform 0.6s ${FAN_EASING}`
-  const fanTransitionDelayed = skip ? 'none' : `transform 0.6s ${FAN_EASING} 0.03s`
+  const leftTransform = fanTarget ? fanTransform(-FAN_ROTATION_DEG, -FAN_HORIZONTAL_PX) : IDENTITY_TRANSFORM
+  const rightTransform = fanTarget ? fanTransform(FAN_ROTATION_DEG, FAN_HORIZONTAL_PX) : IDENTITY_TRANSFORM
+  const fanTransition = skip ? 'none' : `transform ${FAN_DURATION_S}s ${FAN_EASING}`
+  const fanTransitionDelayed = skip ? 'none' : `transform ${FAN_DURATION_S}s ${FAN_EASING} ${FAN_RIGHT_STAGGER_S}s`
 
   return (
     <svg
@@ -66,11 +89,11 @@ export function CvmisLogo({ size, cssHeight, animated = false, className }: Cvmi
     >
       {/* Rise group — all pills rise together from below */}
       <motion.g
-        initial={skip ? false : { y: 350, opacity: 0 }}
+        initial={skip ? false : { y: RISE_START_Y, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{
-          y: { duration: 0.5, ease: [0.33, 1, 0.68, 1] },
-          opacity: { duration: 0.25 },
+          y: { duration: RISE_DURATION_S, ease: RISE_EASING },
+          opacity: { duration: RISE_OPACITY_DURATION_S },
         }}
       >
         {/* Rx pill — teal, fans left (bottom layer) */}
