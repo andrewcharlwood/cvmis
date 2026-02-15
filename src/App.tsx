@@ -44,7 +44,7 @@ function SkipButton({ onSkip }: { onSkip: () => void }) {
 }
 
 function App() {
-  const [phase, setPhase] = useState<Phase>('boot')
+  const [phase, setPhase] = useState<Phase>('login')
   const cursorPositionRef = useRef<{ x: number; y: number } | null>(null)
 
   const skipToLogin = () => setPhase('login')
