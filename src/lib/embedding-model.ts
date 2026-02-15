@@ -1,4 +1,9 @@
-import { pipeline, type FeatureExtractionPipeline } from '@xenova/transformers'
+import { env, pipeline, type FeatureExtractionPipeline } from '@xenova/transformers'
+
+// Serve model files from /models/ (Vite serves public/ at root)
+env.localModelPath = '/models/'
+env.allowRemoteModels = false
+env.useBrowserCache = false
 
 let extractor: FeatureExtractionPipeline | null = null
 let loading = false

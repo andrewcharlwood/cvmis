@@ -232,7 +232,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "notes": "Replace the current empty-state text ('Ask me anything about Andy's experience, skills, or projects.') with the new welcome bubble + chips. The chips should call handleSubmit (or equivalent) with the chip text pre-filled — simplest approach is setInputValue(chipText) then immediately trigger submit. Check that the welcome state reappears if the user hasn't sent a message (messages.length === 0). The suggested questions could live in a const array at the top of ChatWidget for easy future editing."
     },
     {
@@ -250,7 +250,7 @@
         "Typecheck passes"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": "Transformers.js uses env.localModelPath or env.remoteHost to control where models are fetched from. Setting env.localModelPath = '/models/' should make it look for files at /models/Xenova/all-MiniLM-L6-v2/onnx/model_quantized.onnx etc. The Vite public/ directory serves files at the root — so public/models/ becomes /models/ at runtime. For the build script (Node.js), use a file:// path or the local filesystem path instead. Download model files from https://huggingface.co/Xenova/all-MiniLM-L6-v2/tree/main — the quantized ONNX model is ~23MB. Check what files the pipeline actually requests by watching network tab before making this change."
     },
     {

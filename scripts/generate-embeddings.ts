@@ -1,7 +1,11 @@
 import { writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { pipeline } from '@xenova/transformers'
+import { env, pipeline } from '@xenova/transformers'
 import { buildEmbeddingTexts } from '@/lib/search'
+
+// Use local model files from public/models/ (same files the browser uses)
+env.localModelPath = resolve(import.meta.dirname, '..', 'public', 'models')
+env.allowRemoteModels = false
 
 async function main() {
   const items = buildEmbeddingTexts()

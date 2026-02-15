@@ -12,6 +12,7 @@
 - `src/data/embeddings.json` is an array of `{ id: string, embedding: number[] }` — 42 items, 384-d vectors, IDs match PaletteItem IDs. Vite imports JSON natively.
 - `src/lib/embedding-model.ts` exports `initModel()`, `embedQuery(text)`, `isModelReady()` — check `isModelReady()` before calling `embedQuery()`
 - `initModel()` is called fire-and-forget in `App.tsx` on mount — model loads during boot/ECG/login phases
+- ONNX model files self-hosted in `public/models/Xenova/all-MiniLM-L6-v2/` — `env.localModelPath = '/models/'`, `env.allowRemoteModels = false`, `env.useBrowserCache = false` eliminates HF CDN dependency
 - `src/lib/semantic-search.ts` exports `semanticSearch(queryEmbedding, embeddings, threshold?)` and `loadEmbeddings()` — embeddings are normalized so cosine similarity is dot(a,b)/(mag(a)*mag(b))
 - CommandPalette uses `semanticResults` state + debounced `useEffect` for async semantic search, falling back to Fuse.js when `isModelReady()` returns false or on any error
 - `loadEmbeddings()` and `paletteMap` (Map<id, PaletteItem>) are precomputed via `useMemo` — no re-computation on each search
@@ -31,6 +32,8 @@
 - TopBar is `z-index: 100` (fixed), nav is `z-index: 99` (sticky) — mobile full-screen overlays need `z-index > 100` to appear above them
 - Inline `style={{ display: 'flex' }}` overrides Tailwind's `hidden` class — use `!important` modifier (`max-md:!hidden`) or move display to Tailwind classes to allow responsive hiding
 - ChatWidget mobile breakpoint is `md` (768px) — below this, panel is full-screen; above, it's 380px anchored bottom-right
+- `handleSubmit(overrideText?)` accepts optional text param — use this when programmatically sending messages (e.g., suggested question chips) to avoid stale `inputValue` state
+- `SUGGESTED_QUESTIONS` const array at top of ChatWidget — edit here to change welcome screen chip text
 
 ---
 
@@ -249,4 +252,47 @@
   - TopBar (`z-100`) and nav (`z-99`) sit above the chat panel's default `z-90` — mobile full-screen panels need `z-101+` to overlay properly
   - `100dvh` (dynamic viewport height) is essential for mobile full-screen panels — it accounts for browser chrome (address bar, toolbar) unlike `100vh`
   - The `[data-chat-panel]` CSS selector in the `<style>` block is the right place for responsive size rules since Tailwind can't conditionally set max-height based on viewport width
+---
+
+## 2026-02-15 - US-012
+- Replaced empty-state centered text with welcome bubble + suggested question chips
+- Welcome bubble styled as assistant message (left-aligned, `var(--bg-dashboard)` bg, `var(--border-light)` border)
+- Added `SUGGESTED_QUESTIONS` const array at module top for easy future editing
+- Three chips: "What's his NHS experience?", "Tell me about his data skills", "What projects has he built?"
+- Chips styled: rounded-full, teal accent border, teal hover tint, `font-ui` 12.5px
+- Clicking a chip calls `handleSubmit(questionText)` — same codepath as typing + Enter
+- Refactored `handleSubmit` to accept optional `overrideText` parameter (avoids stale state issue with `setInputValue` + immediate submit)
+- Wrapped send button `onClick` in arrow function to prevent passing MouseEvent as text argument
+- Welcome/chips visible when `messages.length === 0`, replaced by conversation once any message is sent
+- Typecheck passes (0 errors), lint passes (0 new errors/warnings)
+- Browser verified: welcome bubble displays correctly, chips render, clicking chip sends message and replaces welcome state
+- Files changed: `src/components/ChatWidget.tsx`
+- **Learnings for future iterations:**
+  - When refactoring a callback to accept optional parameters, wrap `onClick={handler}` as `onClick={() => handler()}` to prevent React from passing the SyntheticEvent as the first argument
+  - `SUGGESTED_QUESTIONS` as a module-level const is the simplest approach — easily editable, no data file needed for 3 items
+  - The `handleSubmit(overrideText?)` pattern avoids the stale-state problem: `setInputValue(text)` followed by immediate `handleSubmit()` would read the old `inputValue` since React batches state updates
+---
+
+## 2026-02-15 - US-013
+- Downloaded all-MiniLM-L6-v2 model files to `public/models/Xenova/all-MiniLM-L6-v2/`:
+  - `config.json`, `tokenizer.json`, `tokenizer_config.json`, `onnx/model_quantized.onnx` (~22MB)
+- Updated `src/lib/embedding-model.ts`:
+  - `env.localModelPath = '/models/'` — Vite serves `public/` at root
+  - `env.allowRemoteModels = false` — prevents any HF CDN fallback
+  - `env.useBrowserCache = false` — prevents stale Cache API entries from interfering
+- Updated `scripts/generate-embeddings.ts`:
+  - `env.localModelPath = resolve(import.meta.dirname, '..', 'public', 'models')` — absolute path for Node.js
+  - `env.allowRemoteModels = false`
+- Model files committed as static assets (not in .gitignore)
+- Browser verified: all 4 model files fetched from `localhost:5173/models/` with 200 OK, zero `huggingface.co` requests
+- Semantic search verified working: "data analysis" returns multi-category results (Core Skills, Active Projects, Achievements)
+- Build script (`npm run generate-embeddings`) still works with local model files
+- Typecheck passes (0 errors), lint passes (0 new errors/warnings)
+- Files changed: `src/lib/embedding-model.ts`, `scripts/generate-embeddings.ts`, `public/models/Xenova/all-MiniLM-L6-v2/` (new directory with 4 files)
+- **Learnings for future iterations:**
+  - `@xenova/transformers` env configuration: `env.localModelPath` sets the base path, `env.allowRemoteModels = false` prevents CDN fallback, `env.useBrowserCache = false` bypasses Browser Cache API
+  - The library constructs paths as `{localModelPath}/{modelId}/{filename}` — so `/models/` + `Xenova/all-MiniLM-L6-v2` + `/onnx/model_quantized.onnx`
+  - Browser Cache API can retain stale entries from previous HF CDN loads — setting `useBrowserCache = false` forces fresh fetches from the configured local path
+  - For Node.js scripts, use an absolute filesystem path for `localModelPath` (not a URL)
+  - The quantized ONNX model (`model_quantized.onnx`) is ~22MB — acceptable for a static asset since it's cached after first load
 ---
