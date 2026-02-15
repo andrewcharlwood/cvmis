@@ -17,6 +17,8 @@
 - `loadEmbeddings()` and `paletteMap` (Map<id, PaletteItem>) are precomputed via `useMemo` — no re-computation on each search
 - ChatWidget is mounted in DashboardLayout alongside CommandPalette and DetailPanel — z-index 90 (below command palette z-1000)
 - `prefersReducedMotion` pattern: read `window.matchMedia` at module level, use in framer-motion variants to skip animation
+- ChatWidget stores messages as `Array<{ role: 'user' | 'assistant', content: string }>` — same shape as LLM message format, ready for Gemini integration
+- ChatWidget `isOpen` state controls both panel visibility and button icon (MessageCircle ↔ X) — panel rendering handled by AnimatePresence
 
 ---
 
@@ -134,4 +136,32 @@
   - `AnimatePresence` is already imported and ready for the panel animation in US-008
   - The `isOpen` state lives in ChatWidget — US-008 will add the panel UI inside the same component
   - Hover effects use `onMouseEnter/Leave` with direct style mutation (same pattern as other dashboard components)
+---
+
+## 2026-02-15 - US-008
+- Built chat panel UI inside `ChatWidget.tsx` with header, message area, and input
+- Panel opens above the floating button with scale+opacity entrance/exit animation via framer-motion `AnimatePresence`
+- Messages stored as `Array<{ role: 'user' | 'assistant', content: string }>` in component state
+- User messages right-aligned in teal-tinted bubbles (`var(--accent-light)` bg, `var(--accent-border)` border)
+- Assistant messages left-aligned in light gray bubbles (`var(--bg-dashboard)` bg, `var(--border-light)` border)
+- Message corner radii differ: user bubbles have small bottom-right radius, assistant bubbles small bottom-left (conversational feel)
+- Input area: textarea with Enter to submit, Shift+Enter for newline. Send button enabled/disabled based on input content
+- Empty state shows placeholder text when no messages yet
+- Auto-scrolls to latest message via `useRef` + `scrollIntoView`
+- Auto-focuses input when panel opens (200ms delay for animation)
+- Responsive: on mobile (<640px), panel is full-width bottom sheet with rounded top corners; on desktop, 380px wide positioned above the button
+- Panel entrance: scale(0.95)+opacity(0) → scale(1)+opacity(1), 200ms. Exit: reverse, 150ms
+- Respects `prefers-reduced-motion` — skips all animation
+- Close button in header triggers `setIsOpen(false)` (same as floating button toggle)
+- Submitting appends both user message and placeholder assistant response to state
+- Typecheck, lint (0 errors), and build all pass
+- Browser verified: panel opens/closes correctly, messages display, input works, Enter submits, close button works
+- Files changed: `src/components/ChatWidget.tsx`
+- **Learnings for future iterations:**
+  - `AnimatePresence` with `key` prop on the panel div is needed for exit animations to work
+  - Panel uses `transformOrigin: 'bottom right'` for natural scale animation from the button corner
+  - CSS-in-JS `<style>` tag with `data-chat-panel` attribute handles responsive width/height (Tailwind can't express max-height conditionally based on viewport width easily)
+  - `textarea` with `rows={1}` and `maxHeight: 80px` gives auto-growing feel; `resize: none` prevents manual resize
+  - The `ChatMessage` interface (`{ role, content }`) is ready to be extended for US-009 Gemini integration — same shape as typical LLM message format
+  - `onFocus/onBlur` border color transitions on the textarea give a polished input interaction
 ---

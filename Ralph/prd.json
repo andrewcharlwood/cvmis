@@ -152,7 +152,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "Use the design system tokens: var(--surface) for panel bg, var(--border-light) for borders, var(--text-primary) for text, var(--accent) for user bubble bg at 10% opacity, font-ui for body text, font-geist for timestamps. The placeholder assistant response can be a static string like 'AI chat coming soon — this is a preview of the chat interface.' This lets us verify the full UI before wiring up Gemini."
     },
     {
