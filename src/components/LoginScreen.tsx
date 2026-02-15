@@ -246,7 +246,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               <span
                 style={{
                   fontFamily: "var(--font-ui)",
-                  fontSize: '13px',
+                  fontSize: 'clamp(16px, 1.4vw, 20px)',
                   fontWeight: 600,
                   color: 'var(--text-secondary, #5B7A78)',
                   letterSpacing: '0.01em',
@@ -257,10 +257,10 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               <span
                 style={{
                   fontFamily: "var(--font-ui)",
-                  fontSize: '11px',
+                  fontSize: 'clamp(12px, 1vw, 14px)',
                   fontWeight: 400,
                   color: 'var(--text-tertiary, #8DA8A5)',
-                  marginTop: '2px',
+                  marginTop: '3px',
                 }}
               >
                 CV Management Information System

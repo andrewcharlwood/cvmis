@@ -83,3 +83,29 @@
   - TOTAL_ANIMATION_MS is computed from FAN_DELAY_AFTER_RISE_MS + FAN_DURATION_S * 1000, so changing rise or fan timing automatically updates the done-timer
   - FAN_EASING was already a named constant before this story; it was left in place and grouped with the new fan constants
 ---
+
+## 2026-02-15 - US-003: Scale logo and branding block to ~50% of login card height
+- Scaled CvmisLogo `cssHeight` prop from `clamp(80px, 8vw, 120px)` to `clamp(160px, 18vw, 280px)`
+- Adjusted logo wrapper marginBottom from 10px to 12px for spacing balance
+- Browser-verified: desktop ratio 51.3% (target 50% ±10%), mobile (375px) ratio 41.1% — both within tolerance
+- No overflow or clipping on mobile viewport
+- Files changed: `src/components/LoginScreen.tsx`
+- **Learnings for future iterations:**
+  - The CvmisLogo `cssHeight` prop maps directly to a CSS `height` style on the SVG — `clamp()` values work well for responsive scaling
+  - At 375px viewport, `18vw = 67.5px` which triggers the clamp minimum of 160px — the logo remains a comfortable size on small screens
+  - The branding block ratio can be measured by comparing `brandingBlock.getBoundingClientRect().height + marginBottom` against `card.innerHeight - padding`
+  - The branding block container has class `flex flex-col items-center` — use this selector for programmatic measurement
+---
+
+## 2026-02-15 - US-004: Increase branding text to match dashboard typography scale
+- Increased CVMIS title fontSize from `13px` to `clamp(16px, 1.4vw, 20px)` — renders 20px on desktop
+- Increased subtitle fontSize from `11px` to `clamp(12px, 1vw, 14px)` — renders 14px on desktop
+- Increased subtitle marginTop from `2px` to `3px` for better spacing with larger text
+- Both remain in font-ui (Elvaro Grotesque) with weight 600 (title) and 400 (subtitle)
+- Browser-verified: text is visually balanced with the larger logo and login form
+- Files changed: `src/components/LoginScreen.tsx`
+- **Learnings for future iterations:**
+  - The branding text clamp values use the same responsive pattern as the logo `cssHeight` — mid-values around 1-1.5vw work well for text
+  - Title and subtitle are `<span>` elements inside the `.flex.flex-col.items-center` branding container
+  - Weight hierarchy (600 title, 400 subtitle) provides sufficient visual differentiation without needing size contrast as large
+---

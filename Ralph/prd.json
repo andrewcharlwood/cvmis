@@ -45,7 +45,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "CvmisLogo accepts cssHeight prop (string) for CSS clamp values. The branding block is in LoginScreen.tsx — the logo, title, and subtitle are in a flex column container. Adjust the cssHeight prop on the CvmisLogo component and check the ratio visually."
     },
     {
@@ -61,7 +61,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "The title and subtitle are in LoginScreen.tsx in the branding section. Look for the CVMIS text and its fontSize style. Use clamp() for responsive sizing consistent with the card's responsive approach."
     },
     {
