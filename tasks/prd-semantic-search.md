@@ -25,24 +25,36 @@ The portfolio's command palette currently uses Fuse.js for fuzzy string matching
 
 **Acceptance Criteria:**
 - [ ] Node script `scripts/generate-embeddings.ts` reads all palette data from `src/lib/search.ts`
-- [ ] Calls OpenAI `text-embedding-3-small` API with a rich text representation of each item (title + subtitle + keywords + any extended context from data files)
+- [ ] Uses the same ONNX model (`all-MiniLM-L6-v2` via `@xenova/transformers`) as the browser runtime to generate embeddings
+- [ ] Builds a rich text representation of each item (title + subtitle + keywords + extended context from data files)
 - [ ] Outputs `src/data/embeddings.json` — array of `{ id: string, embedding: number[] }`
 - [ ] Script is runnable via `npm run generate-embeddings`
-- [ ] Script requires `OPENAI_API_KEY` env var; fails gracefully with clear error if missing
+- [ ] No external API key required — model runs locally via Node.js
 - [ ] Embeddings file is committed to repo (static asset, not generated per-build)
 - [ ] Typecheck passes
 
-#### US-002: Client-side cosine similarity search
+#### US-002: Preload ONNX model during boot sequence
+**Description:** As a visitor, I want the semantic search model to be ready by the time I reach the dashboard, without slowing down the initial experience.
+
+**Acceptance Criteria:**
+- [ ] Model download (`all-MiniLM-L6-v2` via `@xenova/transformers`) begins when `App.tsx` mounts (during `'boot'` phase)
+- [ ] Download runs in background — does not block or affect boot/ECG/login animations
+- [ ] Model is cached in browser (IndexedDB) — second visit loads from cache instantly
+- [ ] A global ready state (React context or module-level promise) signals when model is available
+- [ ] If model fails to load (network error, etc.), the app continues normally — no error shown to user
+- [ ] Typecheck passes
+
+#### US-003: Client-side cosine similarity search
 **Description:** As a visitor, I want the command palette to understand what I mean, not just match strings.
 
 **Acceptance Criteria:**
 - [ ] New `src/lib/semantic-search.ts` module with cosine similarity function
 - [ ] Loads `embeddings.json` and provides a `semanticSearch(query: string, items: PaletteItem[])` function
-- [ ] Query embedding is computed client-side using a lightweight approach (see Technical Considerations)
+- [ ] Query embedding computed in-browser using `all-MiniLM-L6-v2` ONNX model via `@xenova/transformers`
 - [ ] Returns ranked `PaletteItem[]` with similarity scores
 - [ ] Typecheck passes
 
-#### US-003: Integrate semantic search into command palette
+#### US-004: Integrate semantic search into command palette
 **Description:** As a visitor, I want the command palette to use semantic search with Fuse.js as a fallback.
 
 **Acceptance Criteria:**
@@ -53,7 +65,7 @@ The portfolio's command palette currently uses Fuse.js for fuzzy string matching
 - [ ] Typecheck passes
 - [ ] Verify in browser: search "data analysis" surfaces analytics-related roles/skills, not just items with "data" in the title
 
-#### US-004: Enrich embedding content with deep context
+#### US-005: Enrich embedding content with deep context
 **Description:** As a developer, I want embeddings to capture rich context beyond just titles, so semantic search is truly useful.
 
 **Acceptance Criteria:**
@@ -69,7 +81,7 @@ The portfolio's command palette currently uses Fuse.js for fuzzy string matching
 
 ### Phase 2: AI Chat Widget
 
-#### US-005: Chat widget UI — floating button
+#### US-006: Chat widget UI — floating button
 **Description:** As a visitor, I see a floating chat button at the bottom-right of the dashboard that opens a chat panel.
 
 **Acceptance Criteria:**
@@ -82,7 +94,7 @@ The portfolio's command palette currently uses Fuse.js for fuzzy string matching
 - [ ] Typecheck passes
 - [ ] Verify in browser using dev server
 
-#### US-006: Chat panel UI
+#### US-007: Chat panel UI
 **Description:** As a visitor, I want a chat panel that feels like a support chat — compact, positioned above the floating button.
 
 **Acceptance Criteria:**
@@ -99,7 +111,7 @@ The portfolio's command palette currently uses Fuse.js for fuzzy string matching
 - [ ] Typecheck passes
 - [ ] Verify in browser using dev server
 
-#### US-007: Gemini Flash integration
+#### US-008: Gemini Flash integration
 **Description:** As a visitor, I can ask natural language questions and get intelligent answers about Andy's experience.
 
 **Acceptance Criteria:**
@@ -112,7 +124,7 @@ The portfolio's command palette currently uses Fuse.js for fuzzy string matching
 - [ ] Loading state shown while waiting for response
 - [ ] Typecheck passes
 
-#### US-008: Chat context and conversation history
+#### US-009: Chat context and conversation history
 **Description:** As a visitor, I want multi-turn conversation so I can ask follow-up questions.
 
 **Acceptance Criteria:**
@@ -125,20 +137,21 @@ The portfolio's command palette currently uses Fuse.js for fuzzy string matching
 ## Functional Requirements
 
 ### Phase 1
-- FR-1: Build script generates OpenAI `text-embedding-3-small` embeddings for all palette items
+- FR-1: Build script generates embeddings using `all-MiniLM-L6-v2` ONNX model (same model used at runtime)
 - FR-2: Embeddings stored as committed static JSON (`src/data/embeddings.json`)
 - FR-3: Client-side cosine similarity ranks items by semantic relevance
 - FR-4: Command palette uses semantic search as primary, Fuse.js as fallback
-- FR-5: Query embedding must be computed without a runtime API call (see Technical Considerations)
+- FR-5: ONNX model preloaded during boot sequence (before dashboard renders)
+- FR-6: Query embedding computed in-browser — no runtime API calls
 
 ### Phase 2
-- FR-6: Floating chat button rendered in DashboardLayout, bottom-right, above content
-- FR-7: Chat panel opens/closes on button click with animation
-- FR-8: User messages sent to Gemini Flash API with CV context as system prompt
-- FR-9: Gemini responses parsed into answer text + relevant item IDs
-- FR-10: Relevant items rendered as clickable cards using existing palette item styling and action routing
-- FR-11: Streaming responses displayed progressively
-- FR-12: Conversation state managed per-session (cleared on page reload)
+- FR-7: Floating chat button rendered in DashboardLayout, bottom-right, above content
+- FR-8: Chat panel opens/closes on button click with animation
+- FR-9: User messages sent to Gemini Flash API with CV context as system prompt
+- FR-10: Gemini responses parsed into answer text + relevant item IDs
+- FR-11: Relevant items rendered as clickable cards using existing palette item styling and action routing
+- FR-12: Streaming responses displayed progressively
+- FR-13: Conversation state managed per-session (cleared on page reload)
 
 ## Non-Goals
 
@@ -175,13 +188,25 @@ The portfolio's command palette currently uses Fuse.js for fuzzy string matching
 
 ## Technical Considerations
 
-### Phase 1: Query Embedding Challenge
-The main challenge is computing a query embedding client-side without an API call. Options:
-- **Option A (Recommended):** Pre-compute embeddings for items only. At query time, use a lightweight client-side text similarity approach (e.g., TF-IDF or BM25 on the enriched text) combined with the embedding vectors for re-ranking. This avoids shipping a model to the browser.
-- **Option B:** Use a small ONNX model in the browser (e.g., `all-MiniLM-L6-v2` via Transformers.js). ~23MB download, but gives true semantic matching. Could be lazy-loaded.
-- **Option C:** Call OpenAI embedding API at query time. Adds latency (~200ms) and runtime cost, but simplest implementation.
+### Phase 1: ONNX Model Strategy
 
-**Decision needed at implementation time** — Option B gives the best semantic search quality. Option A is simpler but less semantic. Option C is simplest but has runtime costs.
+**Decision: `all-MiniLM-L6-v2` via `@xenova/transformers` for both build-time and runtime embedding.**
+
+- Same model used everywhere — embeddings live in the same vector space, so cosine similarity works correctly
+- No external API keys required for embedding generation or search
+- Build script runs the model in Node.js to pre-compute item embeddings
+- Browser loads the same model at runtime for query embedding
+
+**Preloading strategy:**
+- Model download (~23MB, ONNX format) begins during the boot sequence phase (`'boot'` in App.tsx)
+- The boot → ECG → login flow takes 8-10s, giving ample time for download + cache
+- Model is cached by the browser (IndexedDB via Transformers.js) — subsequent visits load instantly
+- If model hasn't finished loading when user opens command palette, fall back to Fuse.js silently
+
+**Embedding content:**
+- Each palette item gets a natural-language paragraph for embedding, not just keywords
+- E.g., a consultation becomes: "Senior Data Analyst at Norfolk and Waveney ICB, 2021 to present. Led medicines optimisation analytics, built Power BI dashboards for 200+ clinicians..."
+- Richer text = better semantic matching
 
 ### Phase 2: Gemini Flash
 - Use `gemini-2.0-flash` (or latest) — fast, cheap, good for short-form Q&A
@@ -205,7 +230,6 @@ The main challenge is computing a query embedding client-side without an API cal
 
 ## Open Questions
 
-- **Phase 1 query embedding**: Which approach (A/B/C) gives the best tradeoff of quality vs. bundle size vs. complexity? This should be prototyped early.
-- **Gemini API key exposure**: Is direct client-side exposure acceptable, or should we add a minimal edge function proxy? (User chose direct exposure — revisit if abuse becomes an issue.)
 - **Chat widget on mobile**: Should the chat panel be a full-screen modal on small screens, or a bottom sheet?
 - **Suggested questions**: Should the chat widget show 2-3 starter questions when first opened (e.g., "What's Andy's NHS experience?", "Tell me about his data skills")?
+- **Model CDN**: Transformers.js downloads models from Hugging Face by default. Should we self-host the ONNX model files for reliability, or trust HF's CDN?
