@@ -6,6 +6,7 @@ import { LoginScreen } from './components/LoginScreen'
 import { DashboardLayout } from './components/DashboardLayout'
 import { AccessibilityProvider } from './contexts/AccessibilityContext'
 import { DetailPanelProvider } from './contexts/DetailPanelContext'
+import { initModel } from './lib/embedding-model'
 
 function SkipButton({ onSkip }: { onSkip: () => void }) {
   const [visible, setVisible] = useState(false)
@@ -46,6 +47,10 @@ function SkipButton({ onSkip }: { onSkip: () => void }) {
 function App() {
   const [phase, setPhase] = useState<Phase>('login')
   const cursorPositionRef = useRef<{ x: number; y: number } | null>(null)
+
+  useEffect(() => {
+    initModel()
+  }, [])
 
   const skipToLogin = () => setPhase('login')
 
