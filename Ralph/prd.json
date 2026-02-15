@@ -89,7 +89,7 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Keep the cosine similarity implementation simple — no libraries needed for 384-d vectors over ~40 items. The loadEmbeddings function can use a dynamic import or direct import of the JSON file (Vite handles JSON imports natively)."
     },
     {

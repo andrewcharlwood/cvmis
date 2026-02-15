@@ -12,6 +12,7 @@
 - `src/data/embeddings.json` is an array of `{ id: string, embedding: number[] }` — 42 items, 384-d vectors, IDs match PaletteItem IDs. Vite imports JSON natively.
 - `src/lib/embedding-model.ts` exports `initModel()`, `embedQuery(text)`, `isModelReady()` — check `isModelReady()` before calling `embedQuery()`
 - `initModel()` is called fire-and-forget in `App.tsx` on mount — model loads during boot/ECG/login phases
+- `src/lib/semantic-search.ts` exports `semanticSearch(queryEmbedding, embeddings, threshold?)` and `loadEmbeddings()` — embeddings are normalized so cosine similarity is dot(a,b)/(mag(a)*mag(b))
 
 ---
 
@@ -79,4 +80,16 @@
   - The `loading` boolean guard prevents race conditions if `initModel()` is called multiple times (e.g., React strict mode double-mount)
   - `initModel()` is intentionally not awaited — it's fire-and-forget so it doesn't block the boot animation
   - Consumers should check `isModelReady()` before calling `embedQuery()` — it throws if model isn't loaded
+---
+
+## 2026-02-15 - US-005
+- Created `src/lib/semantic-search.ts` with cosine similarity search and embeddings loader
+- `semanticSearch()` computes cosine similarity, filters by threshold (default 0.3), returns sorted by score descending
+- `loadEmbeddings()` imports `embeddings.json` via Vite's native JSON import and returns typed array
+- Typecheck and lint pass (0 new warnings)
+- Files changed: `src/lib/semantic-search.ts` (new)
+- **Learnings for future iterations:**
+  - Vite handles JSON imports natively — `import data from '@/data/embeddings.json'` just works, no dynamic import needed
+  - Since embeddings are already L2-normalized (from pipeline's `normalize: true`), cosine similarity simplifies to just the dot product. However, the full formula is kept for correctness in case non-normalized vectors are ever used
+  - With only ~42 items and 384-d vectors, brute-force cosine similarity is fast enough — no need for approximate nearest neighbor libraries
 ---
