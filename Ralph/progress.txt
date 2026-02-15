@@ -56,8 +56,8 @@
 - Blend constants (OVERLAY_BLEND_*) are exported for use by other components (US-005)
 
 ### LoginScreen.tsx State (from previous run)
-- Overlay: fixed inset-0 z-50, rgba(240, 245, 244, 0.7) + backdrop-filter: blur(20px)
-- TopBar is zIndex: 100 — currently renders ABOVE the z-50 overlay (bug)
+- Overlay: fixed inset-0 zIndex: 110, rgba(240, 245, 244, 0.7) + backdrop-filter: blur(20px)
+- TopBar is zIndex: 100 — overlay now correctly covers it (fixed in US-006)
 - Card borderRadius: 12px, inputs/button borderRadius: 4px
 - Some colors already tokenized (--surface, --accent, --bg-dashboard) from previous run
 - Some colors still hardcoded (#111827 input text, button bg states, caret color)
@@ -122,4 +122,14 @@
   - Blend overlay approach: duplicate the pill shapes (rect only, no icons) as separate `<g>` elements with `mixBlendMode: 'multiply'` and low opacity
   - The `useMemo` for `blendStartMs` avoids recalculation — all timing constants are module-level so this is stable
   - Combined CSS transition strings work in SVG `<g>` style: `transform 0.6s cubic-bezier(...), opacity 0.3s ease-out`
+---
+
+## 2026-02-15 - US-006: Extend backdrop blur to cover full dashboard including TopBar
+- Changed overlay from Tailwind `z-50` class to inline `zIndex: 110` to sit above TopBar (`zIndex: 100`)
+- Browser-verified: TopBar, sidebar, and all content uniformly blurred; login card remains crisp
+- Files changed: `src/components/LoginScreen.tsx`
+- **Learnings for future iterations:**
+  - TopBar uses inline `zIndex: 100` (not a Tailwind class), so overlay needs inline zIndex > 100
+  - Tailwind's `z-50` = z-index 50, which was below the TopBar — switched to inline style for precise control
+  - The login card doesn't need its own z-index since it's a child of the overlay and inherits stacking context
 ---

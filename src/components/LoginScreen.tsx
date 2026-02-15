@@ -167,8 +167,9 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
 
   return (
     <motion.div
-      className="fixed inset-0 flex items-center justify-center z-50"
+      className="fixed inset-0 flex items-center justify-center"
       style={{
+        zIndex: 110,
         backgroundColor: 'rgba(240, 245, 244, 0.7)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',

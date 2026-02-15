@@ -97,7 +97,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "LoginScreen outer overlay currently has 'fixed inset-0 z-50'. TopBar is zIndex: 100. The overlay needs z-index > 100 to cover it. The login card inside the overlay doesn't need its own z-index since it's a child of the overlay. Check that the dissolve exit animation (isExiting) still works after the z-index change."
     },
     {
