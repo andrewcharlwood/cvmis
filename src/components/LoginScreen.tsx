@@ -163,10 +163,10 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   }, [startLoginSequence, addTimeout, prefersReducedMotion])
 
   const buttonBg = buttonPressed
-    ? '#085858'
+    ? 'var(--accent-pressed, #085858)'
     : buttonHovered && canLogin
-      ? '#0A8080'
-      : '#0D6E6E'
+      ? 'var(--accent-hover, #0A8080)'
+      : 'var(--accent, #0D6E6E)'
 
   return (
     <motion.div
@@ -193,7 +193,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
           maxWidth: 'calc(100vw - 32px)',
           padding: 'clamp(24px, 2.5vw, 40px)',
           borderRadius: 'var(--radius-card, 8px)',
-          border: '1px solid #E4EDEB',
+          border: '1px solid var(--border-light, #E4EDEB)',
           boxShadow: 'var(--shadow-lg, 0 8px 32px rgba(26,43,42,0.12))',
           backgroundColor: 'var(--surface, #FFFFFF)',
         }}
@@ -217,8 +217,8 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               style={{
                 width: '32px',
                 height: '32px',
-                border: '3px solid #E4EDEB',
-                borderTopColor: '#0D6E6E',
+                border: '3px solid var(--border-light, #E4EDEB)',
+                borderTopColor: 'var(--accent, #0D6E6E)',
                 borderRadius: '50%',
               }}
               role="status"
@@ -294,9 +294,9 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                     fontFamily: "'Geist Mono', 'Fira Code', monospace",
                     fontSize: 'clamp(13px, 1.1vw, 15px)',
                     backgroundColor: activeField === 'username' ? 'var(--surface, #FFFFFF)' : 'var(--bg-dashboard, #F0F5F4)',
-                    border: activeField === 'username' ? '1px solid var(--accent, #0D6E6E)' : '1px solid #E4EDEB',
+                    border: activeField === 'username' ? '1px solid var(--accent, #0D6E6E)' : '1px solid var(--border-light, #E4EDEB)',
                     borderRadius: 'var(--radius-sm, 6px)',
-                    color: '#111827',
+                    color: 'var(--text-primary, #1A2B2A)',
                     minHeight: '38px',
                     display: 'flex',
                     alignItems: 'center',
@@ -306,7 +306,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                   <span>{username}</span>
                   {activeField === 'username' && (
                     <span
-                      style={{ opacity: showCursor ? 1 : 0, color: '#0D6E6E' }}
+                      style={{ opacity: showCursor ? 1 : 0, color: 'var(--accent, #0D6E6E)' }}
                       aria-hidden="true"
                     >
                       |
@@ -336,9 +336,9 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                     fontFamily: "'Geist Mono', 'Fira Code', monospace",
                     fontSize: 'clamp(13px, 1.1vw, 15px)',
                     backgroundColor: activeField === 'password' ? 'var(--surface, #FFFFFF)' : 'var(--bg-dashboard, #F0F5F4)',
-                    border: activeField === 'password' ? '1px solid var(--accent, #0D6E6E)' : '1px solid #E4EDEB',
+                    border: activeField === 'password' ? '1px solid var(--accent, #0D6E6E)' : '1px solid var(--border-light, #E4EDEB)',
                     borderRadius: 'var(--radius-sm, 6px)',
-                    color: '#111827',
+                    color: 'var(--text-primary, #1A2B2A)',
                     letterSpacing: '0.15em',
                     minHeight: '38px',
                     display: 'flex',
@@ -349,7 +349,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                   <span>{'\u2022'.repeat(passwordDots)}</span>
                   {activeField === 'password' && (
                     <span
-                      style={{ opacity: showCursor ? 1 : 0, color: '#0D6E6E' }}
+                      style={{ opacity: showCursor ? 1 : 0, color: 'var(--accent, #0D6E6E)' }}
                       aria-hidden="true"
                     >
                       |
@@ -365,7 +365,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                 disabled={!canLogin}
                 onMouseEnter={() => setButtonHovered(true)}
                 onMouseLeave={() => setButtonHovered(false)}
-                className={`focus-visible:ring-2 focus-visible:ring-[#0D6E6E]/40 focus-visible:ring-offset-2 focus:outline-none${canLogin && !buttonPressed ? ' login-pulse-active' : ''}`}
+                className={`focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus:outline-none${canLogin && !buttonPressed ? ' login-pulse-active' : ''}`}
                 style={{
                   width: '100%',
                   padding: '10px 16px',
@@ -399,7 +399,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                     width: '10px',
                     height: '10px',
                     borderRadius: '50%',
-                    backgroundColor: connectionState === 'connected' ? '#059669' : '#DC2626',
+                    backgroundColor: connectionState === 'connected' ? 'var(--success, #059669)' : 'var(--alert, #DC2626)',
                     boxShadow: connectionState === 'connected'
                       ? '0 0 6px 1px rgba(5,150,105,0.4)'
                       : '0 0 6px 1px rgba(220,38,38,0.4)',
@@ -411,7 +411,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                   style={{
                     fontFamily: "var(--font-geist-mono, 'Geist Mono', monospace)",
                     fontSize: '12px',
-                    color: connectionState === 'connected' ? '#059669' : '#DC2626',
+                    color: connectionState === 'connected' ? 'var(--success, #059669)' : 'var(--alert, #DC2626)',
                     transition: prefersReducedMotion ? 'none' : 'color 300ms ease',
                   }}
                 >
@@ -427,7 +427,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               style={{
                 marginTop: '22px',
                 paddingTop: '18px',
-                borderTop: '1px solid #E4EDEB',
+                borderTop: '1px solid var(--border-light, #E4EDEB)',
               }}
             >
               <p
