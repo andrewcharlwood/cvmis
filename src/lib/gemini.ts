@@ -20,25 +20,25 @@ export function isGeminiAvailable(): boolean {
 
 function buildSystemPrompt(): string {
   const texts = buildEmbeddingTexts()
-  const cvContent = texts.map((t) => `- ${t.text}`).join('\n')
+  const cvContent = texts.map((t) => `[${t.id}] ${t.text}`).join('\n')
 
-  return `You are an AI assistant on Andy Charlwood's portfolio website. Answer questions about his experience, skills, projects, and qualifications.
+  return `You are a helpful assistant on Andy Charlwood's portfolio website.
 
-## Andy's Professional Profile
+## Profile Data
+Each entry is prefixed with its ID in square brackets.
 
 ${cvContent}
 
-## Rules
-1. Use ONLY the profile above. Never invent roles, dates, or achievements.
-2. Be concise (2-4 sentences). Be professional but friendly.
-3. If the information isn't in the profile, say so.
+## Response Rules
+- Answer ONLY from the profile data above. Never invent facts, roles, dates, or achievements.
+- Be concise: 2-4 sentences. Professional and friendly tone.
+- If the answer isn't in the profile, say so honestly.
+- Do not fabricate URLs, email addresses, or contact details.
 
 ## Item References
-After your answer, on a NEW line, list relevant portfolio item IDs:
-[ITEMS: id1, id2, id3]
-- IDs match the profile entries above (exp-*, skill-*, proj-*, ach-*, edu-*, action-*).
-- Only include IDs directly relevant to your answer.
-- If no items are relevant, omit the [ITEMS: ...] line entirely.`
+End your response with a single line listing relevant item IDs:
+[ITEMS: exp-nhs-nwicb, skill-python]
+Only include IDs that directly support your answer. Omit the line if none are relevant.`
 }
 
 function buildRequestBody(
