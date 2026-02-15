@@ -51,10 +51,11 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       setIsLoading(true)
       addTimeout(() => {
         setIsExiting(true)
+        // After dissolve completes (~600ms), remove overlay and reveal dashboard
         addTimeout(() => {
           requestFocusAfterLogin()
           onComplete()
-        }, prefersReducedMotion ? 0 : 200)
+        }, prefersReducedMotion ? 0 : 600)
       }, prefersReducedMotion ? 0 : 600)
     }, 100)
   }, [canLogin, isExiting, isLoading, onComplete, requestFocusAfterLogin, prefersReducedMotion, addTimeout])
@@ -165,13 +166,19 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       : '#0D6E6E'
 
   return (
-    <div
+    <motion.div
       className="fixed inset-0 flex items-center justify-center z-50"
       style={{
         backgroundColor: 'rgba(240, 245, 244, 0.7)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
       }}
+      animate={isExiting ? {
+        backgroundColor: 'rgba(240, 245, 244, 0)',
+        backdropFilter: 'blur(0px)',
+        WebkitBackdropFilter: 'blur(0px)',
+      } : {}}
+      transition={isExiting ? { duration: 0.6, ease: 'easeOut' } : {}}
       role="dialog"
       aria-label="Clinical system login"
       aria-modal="true"
@@ -188,7 +195,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
         }}
         initial={{ opacity: 0, scale: 0.98 }}
         animate={isExiting ? { scale: 1.03, opacity: 0 } : { scale: 1, opacity: 1 }}
-        transition={{ duration: 0.2, ease: 'easeOut' }}
+        transition={isExiting ? { duration: 0.4, ease: 'easeOut' } : { duration: 0.2, ease: 'easeOut' }}
       >
         {isLoading ? (
           <div
@@ -433,6 +440,6 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
           </>
         )}
       </motion.div>
-    </div>
+    </motion.div>
   )
 }
