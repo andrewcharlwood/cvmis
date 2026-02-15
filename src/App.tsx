@@ -73,14 +73,14 @@ function App() {
           />
        )}
 
-        {phase === 'login' && (
-          <LoginScreen onComplete={() => setPhase('pmr')} />
-        )}
-
-        {phase === 'pmr' && (
+        {(phase === 'login' || phase === 'pmr') && (
           <DetailPanelProvider>
             <DashboardLayout />
           </DetailPanelProvider>
+        )}
+
+        {phase === 'login' && (
+          <LoginScreen onComplete={() => setPhase('pmr')} />
         )}
 
         {(phase === 'boot' || phase === 'ecg') && (

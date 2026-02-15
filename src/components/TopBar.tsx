@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Home, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
+import { CvmisLogo } from './CvmisLogo'
 
 interface TopBarProps {
   onSearchClick?: () => void
@@ -54,11 +55,7 @@ export function TopBar({ onSearchClick }: TopBarProps) {
       </a>
       {/* Brand */}
       <div className="flex items-center gap-2 shrink-0">
-        <Home
-          size={20}
-          style={{ color: 'var(--accent)' }}
-          aria-hidden="true"
-        />
+        <CvmisLogo size={24} />
         <span
           className="font-ui hidden sm:inline"
           style={{

@@ -1,0 +1,236 @@
+{
+  "project": "Portfolio — Typography & Spacing Scale Rework",
+  "branchName": "ralph/dashboard-restructure",
+  "description": "Rework the entire type scale, spatial tokens, and layout proportions so the dashboard reads comfortably on a 2560x1440 QHD display. Everything is currently undersized — body text at 13px, labels at 9-10px, sidebar details at 11px. Scale up proportionally with larger type, wider sidebar, taller topbar, and more generous spacing.",
+  "userStories": [
+    {
+      "id": "US-018",
+      "title": "Skip boot/login sequence for dev iteration",
+      "description": "As a developer, I want to skip the boot/ECG/login animation during this feature work so I can iterate on dashboard sizing quickly.",
+      "acceptanceCriteria": [
+        "In src/App.tsx, change the initial Phase state from 'boot' to 'pmr' so the app loads directly to the dashboard",
+        "The boot, ECG, and login phases remain in code — only the initial state changes",
+        "App loads directly to the dashboard layout on refresh",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Temporary — final story reverts this."
+    },
+    {
+      "id": "US-019",
+      "title": "Update global layout tokens and Card/CardHeader component",
+      "description": "As a viewer, I want the foundational layout dimensions and card sizing to be larger so everything downstream inherits better proportions.",
+      "acceptanceCriteria": [
+        "In src/index.css, update --sidebar-width from 272px to 304px",
+        "Update --topbar-height from 48px to 56px",
+        "Update --subnav-height from 36px to 42px",
+        "Update .dashboard-grid gap from 12px (mobile) to 14px, and 16px (tablet/desktop) to 20px",
+        "In src/components/Card.tsx, update Card padding from 20px to 24px",
+        "In Card.tsx CardHeader: title fontSize from 12px to 13px",
+        "CardHeader right text fontSize from 10px to 11px",
+        "CardHeader dot size from 8px to 9px",
+        "CardHeader marginBottom from 16px to 18px",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "These are foundational tokens — many components reference --sidebar-width, --topbar-height, --subnav-height via CSS vars, so changes propagate automatically. Card.tsx changes affect every card and subsection header in the dashboard."
+    },
+    {
+      "id": "US-020",
+      "title": "Scale TopBar and SubNav",
+      "description": "As a viewer, I want the TopBar and SubNav to feel substantial rather than thin strips across the top of the screen.",
+      "acceptanceCriteria": [
+        "In src/components/TopBar.tsx: brand text fontSize from 13px to 15px",
+        "TopBar 'Remote' label fontSize from 11px to 12px",
+        "Search bar text fontSize from 13px to 14px",
+        "Search bar height from 42px to 46px",
+        "Ctrl+K kbd fontSize from 10px to 11px",
+        "Session 'A.RECRUITER' text fontSize from 12px to 13px",
+        "Session badge fontSize from 11px to 12px",
+        "Skip-to-content link fontSize from 13px to 14px",
+        "Home icon size from 18 to 20",
+        "Search icon size from 16 to 17",
+        "In src/components/SubNav.tsx: tab fontSize from 13px to 14px",
+        "SubNav minHeight from 36px to 42px (matching the updated --subnav-height)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "TopBar and SubNav heights are controlled by CSS vars updated in US-019. This story just scales the internal text and elements. The search bar min/max widths may also need slight adjustment — use judgement."
+    },
+    {
+      "id": "US-021",
+      "title": "Scale Sidebar proportions",
+      "description": "As a viewer, I want the sidebar text and spacing to be comfortably readable rather than tiny and cramped.",
+      "acceptanceCriteria": [
+        "In src/components/Sidebar.tsx: sidebar padding from '20px 16px' to '24px 20px'",
+        "Avatar size from 52px to 60px, font size from 18px to 20px",
+        "Name fontSize from 15px to 17px",
+        "Job title fontSize from 11.5px to 13px",
+        "Status badge fontSize from 11px to 12px, dot from 6px to 7px",
+        "All detail row fontSize from 11.5px to 13px (labels and values)",
+        "GPhC mono number fontSize from 11px to 12px",
+        "SectionTitle component fontSize from 10px to 11px",
+        "TagPill fontSize from 10.5px to 12px, padding from '3px 8px' to '4px 10px'",
+        "AlertFlag fontSize from 11px to 13px, padding from '7px 10px' to '8px 12px'",
+        "AlertFlag icon size from 14 to 16, container from 16px to 18px",
+        "Detail row padding from '2px 0' to '4px 0', gap from 6px to 8px",
+        "PersonHeader section marginBottom from 6px to 10px",
+        "Tags and Alerts section padding adjusted proportionally",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Sidebar width is already updated via CSS var in US-019. This story handles all internal sizing. The sidebar has many repeated patterns (detail rows) — ensure consistency across all rows."
+    },
+    {
+      "id": "US-022",
+      "title": "Scale PatientSummaryTile content and KPIs",
+      "description": "As a viewer, I want the Patient Summary to feel like the commanding hero section of the dashboard with comfortable body text and prominent KPIs.",
+      "acceptanceCriteria": [
+        "In src/components/tiles/PatientSummaryTile.tsx: profile text fontSize from 13px to 15px, lineHeight from 1.6 to 1.65",
+        "KPI MetricCard value fontSize from 28px to 34px",
+        "KPI label fontSize from 12px to 14px",
+        "KPI sublabel fontSize from 10px to 12px",
+        "KPI card padding from 16px to 20px",
+        "KPI grid gap from 12px to 16px",
+        "Latest Results section marginTop from 24px to 28px",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "The profile text is the largest body copy block in the dashboard — it must feel effortlessly readable. KPI values should be the most visually prominent numbers on the page."
+    },
+    {
+      "id": "US-023",
+      "title": "Scale LastConsultationSubsection and main content padding",
+      "description": "As a viewer, I want career consultation details and the overall content area to match the new scale.",
+      "acceptanceCriteria": [
+        "In src/components/DashboardLayout.tsx LastConsultationSubsection: field label fontSize from 10px to 12px",
+        "Field value fontSize from 11.5px to 13px",
+        "Role title fontSize from 13.5px to 15px",
+        "Examination bullet fontSize from 12.5px to 14px",
+        "Bullet dot top offset adjusted for new line height",
+        "View full record button fontSize from 12px to 13px, ChevronRight size from 14 to 15",
+        "In DashboardLayout main content area: update className padding from 'p-4 pb-8 md:p-6 md:pb-10 lg:px-7 lg:pt-6 lg:pb-10' to 'p-5 pb-10 md:p-7 md:pb-12 lg:px-8 lg:pt-7 lg:pb-12'",
+        "LastConsultation field gap from 16px to 20px",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "LastConsultationSubsection is defined inline in DashboardLayout.tsx (around lines 57-232). The main content padding classes are on the <motion.main> element around line 369."
+    },
+    {
+      "id": "US-024",
+      "title": "Scale ProjectsTile and EducationSubsection",
+      "description": "As a viewer, I want project entries and education entries to be readable and well-spaced.",
+      "acceptanceCriteria": [
+        "In src/components/tiles/ProjectsTile.tsx: ProjectItem fontSize from 11.5px to 13px",
+        "ProjectItem padding from '10px 12px' to '12px 16px'",
+        "Project year label fontSize from 10px to 11px",
+        "Tech stack tag fontSize from 9px to 10px, padding from '2px 6px' to '3px 8px'",
+        "Project list gap from 8px to 10px",
+        "Status dot from 7px to 8px",
+        "In src/components/EducationSubsection.tsx: base fontSize from 12px to 13px",
+        "Education entry padding from '10px 12px' to '12px 16px'",
+        "Education title fontSize from 12.5px to 14px",
+        "Institution fontSize from 11px to 12px",
+        "Education detail fontSize from 10.5px to 12px",
+        "Year label fontSize from 10px to 11px",
+        "Education list gap from 10px to 12px",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Both are list-style components with similar patterns. ProjectsTile is a standalone card, EducationSubsection is inside Patient Pathway."
+    },
+    {
+      "id": "US-025",
+      "title": "Scale WorkExperienceSubsection and RepeatMedicationsSubsection",
+      "description": "As a viewer, I want work experience roles and skill entries in the two-column layout to be comfortably readable.",
+      "acceptanceCriteria": [
+        "In src/components/WorkExperienceSubsection.tsx: role title fontSize from 12.5px to 14px",
+        "Organisation fontSize from 11px to 12px",
+        "Duration fontSize from 10px to 11px",
+        "Role item header padding from '10px 12px' to '12px 14px'",
+        "Expanded content examination bullet fontSize from 11.5px to 13px",
+        "Coded entry tag fontSize from 10px to 11px, padding from '2px 6px' to '3px 8px'",
+        "View full record link fontSize from 11px to 12px",
+        "Role list gap from 8px to 10px",
+        "Teal dot from 8px to 9px",
+        "In src/components/RepeatMedicationsSubsection.tsx: skill name fontSize from 12.5px to 14px",
+        "Skill frequency text fontSize from 10.5px to 12px",
+        "Skill status badge fontSize from 10px to 11px, padding from '2px 7px' to '3px 8px'",
+        "Skill row padding from '8px 10px' to '10px 12px'",
+        "Skill icon container from 26px to 30px, icon size from 13 to 15",
+        "Category section label fontSize from 10px to 11px",
+        "Category item count fontSize from 10px to 11px",
+        "View all button fontSize from 11px to 12px",
+        "Skill row gap from 6px to 8px",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "These two components sit side by side in the Patient Pathway two-column layout. Both are dense with inline style objects. The changes are mechanical — find each fontSize/padding and bump it up."
+    },
+    {
+      "id": "US-026",
+      "title": "Adjust ParentSection headings for new proportions",
+      "description": "As a viewer, I want the parent section headings to remain visually dominant now that body text is larger.",
+      "acceptanceCriteria": [
+        "In src/components/ParentSection.tsx: evaluate whether heading sizes still create clear hierarchy with the scaled-up body text",
+        "Current responsive scale: 1.375rem (22px) → 1.6rem (25.6px) → 1.8rem (28.8px) → 2.2rem (35.2px)",
+        "If body text at 15px makes the heading feel less dominant, bump desktop heading to 2.4rem (38.4px)",
+        "Heading paddingBottom may need to increase from 1.333rem to 1.5rem to maintain spacing proportion",
+        "Use Playwright to verify the heading-to-body ratio feels right at 2560x1440",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "This is a judgement call — the agent should look at the dashboard after all previous scaling and decide if headings need adjustment. They may be fine as-is, or may need a small bump. Use dev-browser to compare."
+    },
+    {
+      "id": "US-027",
+      "title": "Visual regression check across all breakpoints",
+      "description": "As a developer, I need to verify the scaled dashboard works at all viewport sizes without overflow or layout breaks.",
+      "acceptanceCriteria": [
+        "Use Playwright to verify at 2560x1440 (QHD) — primary target, everything should feel commanding and well-proportioned",
+        "Verify at 1920x1080 (HD) — content should still be comfortable, not oversized",
+        "Verify at 1440x900 — should work without overflow",
+        "Verify at 768px width (tablet) — sidebar hidden, single column, no overflow or truncation",
+        "Verify at 375px width (mobile) — everything stacks, no horizontal scroll",
+        "No horizontal scrollbar at any tested width",
+        "Fix any overflow, wrapping, truncation, or spacing issues discovered during verification",
+        "npm run build succeeds without errors",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "Use Playwright browser_resize to test each breakpoint. Take screenshots at each size. Fix any issues found — this may involve adding responsive overrides or adjusting min-widths."
+    },
+    {
+      "id": "US-028",
+      "title": "Re-enable boot/login sequence",
+      "description": "As a user, I want the full boot → ECG → login experience restored for production.",
+      "acceptanceCriteria": [
+        "In src/App.tsx, change the initial Phase state back from 'pmr' to 'boot'",
+        "Boot → ECG → Login → Dashboard sequence works end to end",
+        "No other changes to App.tsx beyond reverting the initial state",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill: app starts at boot, progresses through ECG and login, arrives at the scaled dashboard"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": "Simple revert of US-018."
+    }
+  ]
+}
