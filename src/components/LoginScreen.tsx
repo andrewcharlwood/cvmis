@@ -280,7 +280,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                     display: 'block',
                     fontFamily: "var(--font-ui)",
                     fontSize: 'clamp(12px, 1vw, 14px)',
-                    fontWeight: 500,
+                    fontWeight: 600,
                     color: 'var(--text-secondary, #5B7A78)',
                     marginBottom: '6px',
                   }}
@@ -292,7 +292,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                     width: '100%',
                     padding: '9px 11px',
                     fontFamily: "'Geist Mono', 'Fira Code', monospace",
-                    fontSize: 'clamp(13px, 1.1vw, 15px)',
+                    fontSize: 'clamp(13px, 1.2vw, 15px)',
                     backgroundColor: activeField === 'username' ? 'var(--surface, #FFFFFF)' : 'var(--bg-dashboard, #F0F5F4)',
                     border: activeField === 'username' ? '1px solid var(--accent, #0D6E6E)' : '1px solid var(--border-light, #E4EDEB)',
                     borderRadius: 'var(--radius-sm, 6px)',
@@ -322,7 +322,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                     display: 'block',
                     fontFamily: "var(--font-ui)",
                     fontSize: 'clamp(12px, 1vw, 14px)',
-                    fontWeight: 500,
+                    fontWeight: 600,
                     color: 'var(--text-secondary, #5B7A78)',
                     marginBottom: '6px',
                   }}
@@ -334,7 +334,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                     width: '100%',
                     padding: '9px 11px',
                     fontFamily: "'Geist Mono', 'Fira Code', monospace",
-                    fontSize: 'clamp(13px, 1.1vw, 15px)',
+                    fontSize: 'clamp(13px, 1.2vw, 15px)',
                     backgroundColor: activeField === 'password' ? 'var(--surface, #FFFFFF)' : 'var(--bg-dashboard, #F0F5F4)',
                     border: activeField === 'password' ? '1px solid var(--accent, #0D6E6E)' : '1px solid var(--border-light, #E4EDEB)',
                     borderRadius: 'var(--radius-sm, 6px)',
@@ -370,7 +370,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                   width: '100%',
                   padding: '10px 16px',
                   fontFamily: "var(--font-ui)",
-                  fontSize: 'clamp(14px, 1.1vw, 16px)',
+                  fontSize: 'clamp(14px, 1.2vw, 16px)',
                   fontWeight: 600,
                   color: '#FFFFFF',
                   backgroundColor: buttonBg,
@@ -390,7 +390,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '6px',
+                  gap: '8px',
                   marginTop: '4px',
                 }}
               >

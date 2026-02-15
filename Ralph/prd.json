@@ -145,7 +145,7 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "Search LoginScreen.tsx for all hex color values (#xxxxxx) and check whether a corresponding CSS custom property exists in index.css. Some colors were already tokenized in the previous login rework (US-003 of previous run) — verify which ones are still hardcoded. The button has multiple color states (default, hover, pressed) — check all three."
     },
     {
@@ -161,7 +161,7 @@
         "Typecheck passes"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "These are small inline style tweaks in LoginScreen.tsx. The labels, inputs, and button already use clamp() for responsive sizing — just adjust the mid-values. The connection indicator gap is in the flex container styling near the bottom of the component."
     },
     {
