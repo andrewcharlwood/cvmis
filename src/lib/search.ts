@@ -1,6 +1,7 @@
 import Fuse from 'fuse.js'
 
 import { consultations } from '@/data/consultations'
+import { documents } from '@/data/documents'
 import { investigations } from '@/data/investigations'
 import { skills } from '@/data/skills'
 import { kpis } from '@/data/kpis'
@@ -239,5 +240,100 @@ export function groupBySection(items: PaletteItem[]): Array<{ section: PaletteSe
   return SECTION_ORDER
     .filter(section => groups.has(section))
     .map(section => ({ section, items: groups.get(section)! }))
+}
+
+// Build rich natural-language text representations for semantic embedding.
+// IDs match PaletteItem IDs so embeddings can be correlated back to palette entries.
+export function buildEmbeddingTexts(): Array<{ id: string; text: string }> {
+  const texts: Array<{ id: string; text: string }> = []
+
+  // Consultations (Experience)
+  consultations.forEach((c) => {
+    const examBullets = c.examination.join('. ')
+    const codedDescriptions = c.codedEntries.map(e => e.description).join('. ')
+    texts.push({
+      id: `exp-${c.id}`,
+      text: `${c.role} at ${c.organization}, ${c.duration}. ${c.history} Key achievements: ${examBullets}. ${codedDescriptions}.`,
+    })
+  })
+
+  // Skills
+  skills.forEach((skill) => {
+    texts.push({
+      id: `skill-${skill.id}`,
+      text: `${skill.name} is a ${skill.category.toLowerCase()} skill used ${skill.frequency.toLowerCase()}, with ${skill.proficiency}% proficiency and ${skill.yearsOfExperience} years of experience since ${skill.startYear}.`,
+    })
+  })
+
+  // KPI-backed Achievements
+  const achievementMap: Array<{ id: string; title: string; subtitle: string; kpiId: string }> = [
+    { id: 'ach-0', title: '£14.6M Efficiency Savings Identified', subtitle: 'Data-driven prescribing interventions', kpiId: 'savings' },
+    { id: 'ach-1', title: '£220M Budget Oversight', subtitle: 'Full analytical accountability to ICB board', kpiId: 'budget' },
+    { id: 'ach-2', title: 'Power BI Dashboards for 200+ Users', subtitle: 'Clinicians & commissioners across ICB', kpiId: 'years' },
+    { id: 'ach-3', title: '1.2M Population Served', subtitle: 'Norfolk & Waveney Integrated Care System', kpiId: 'population' },
+  ]
+
+  achievementMap.forEach((entry) => {
+    const kpi = kpis.find(k => k.id === entry.kpiId)
+    const storyContext = kpi?.story
+      ? ` ${kpi.story.context} ${kpi.story.role} Outcomes: ${kpi.story.outcomes.join('. ')}.`
+      : ''
+    texts.push({
+      id: entry.id,
+      text: `Achievement: ${entry.title}. ${entry.subtitle}. ${kpi?.explanation ?? ''}${storyContext}`,
+    })
+  })
+
+  // Investigations (Active Projects)
+  investigations.forEach((inv) => {
+    const techList = inv.techStack.join(', ')
+    const resultList = inv.results.join('. ')
+    texts.push({
+      id: `proj-${inv.id}`,
+      text: `Project: ${inv.name}. ${inv.methodology} Tech stack: ${techList}. Results: ${resultList}.`,
+    })
+  })
+
+  // Education
+  const educationItems: Array<{ id: string; docId: string; fallbackTitle: string; fallbackSub: string }> = [
+    { id: 'edu-0', docId: 'doc-mary-seacole', fallbackTitle: 'NHS Leadership Academy — Mary Seacole Programme', fallbackSub: 'NHS Leadership Academy · 2018' },
+    { id: 'edu-1', docId: 'doc-mpharm', fallbackTitle: 'MPharm (Hons) — 2:1', fallbackSub: 'University of East Anglia · 2011–2015' },
+    { id: 'edu-2', docId: 'doc-alevels', fallbackTitle: 'A-Levels', fallbackSub: 'Highworth Grammar School · 2009–2011' },
+    { id: 'edu-3', docId: 'doc-gphc', fallbackTitle: 'GPhC Registration', fallbackSub: 'General Pharmaceutical Council · August 2016' },
+  ]
+
+  educationItems.forEach((entry) => {
+    const doc = documents.find(d => d.id === entry.docId)
+    if (doc) {
+      const research = doc.researchDetail ? ` Research: ${doc.researchDetail}.` : ''
+      const classification = doc.classification ? ` Classification: ${doc.classification}.` : ''
+      texts.push({
+        id: entry.id,
+        text: `Education: ${doc.title}. ${doc.type} from ${doc.institution ?? doc.source}, ${doc.duration ?? doc.date}.${classification}${research} ${doc.notes ?? ''}`,
+      })
+    } else {
+      texts.push({
+        id: entry.id,
+        text: `Education: ${entry.fallbackTitle}. ${entry.fallbackSub}.`,
+      })
+    }
+  })
+
+  // Quick Actions
+  const quickActionTexts: Array<{ id: string; title: string; subtitle: string }> = [
+    { id: 'action-0', title: 'Download CV', subtitle: 'Export as PDF' },
+    { id: 'action-1', title: 'Send Email', subtitle: 'andy@charlwood.xyz' },
+    { id: 'action-2', title: 'View LinkedIn', subtitle: 'Professional profile' },
+    { id: 'action-3', title: 'View Projects', subtitle: 'GitHub & portfolio' },
+  ]
+
+  quickActionTexts.forEach((entry) => {
+    texts.push({
+      id: entry.id,
+      text: `${entry.title}. ${entry.subtitle}.`,
+    })
+  })
+
+  return texts
 }
 
