@@ -164,3 +164,19 @@
   - Skill homeX centroid should be explicitly pushed right of the role column, not just inherited from role positions — the +60 offset plus skillSpaceStart ensures skills don't overlap role pills
   - Boundary clamping must account for the full visual footprint including labels: for skills, that's radius + dy offset + text line height below the node center
 ---
+
+## 2026-02-16 - US-010
+- Content audit: cross-referenced consultations.ts and constellation.ts against References/CV_v4.md
+- Verified all 4 role titles, organisation names, date ranges, and orgColor values match exactly
+- Verified all examination/achievement bullets (numbers, percentages, claims) are accurate against CV source
+- Verified constellation.ts role node labels, shortLabels, startYear/endYear, and organization names are consistent with consultations.ts
+- Verified plan arrays contain accurate outcomes matching CV content
+- No discrepancies found — no data file changes required
+- Note: `javascript-typescript` skill node in constellation.ts is an intentional orphan (no role links) — it's in the CV Core Competencies but not attributed to any specific role's achievements
+- Files changed: Ralph/prd.json (marked passes: true), Ralph/progress.txt
+- **Learnings for future iterations:**
+  - consultations.ts has 4 roles matching CV_v4.md exactly: Interim Head (May-Nov 2025), Deputy Head (Jul 2024-Present), High-Cost Drugs (May 2022-Jul 2024), Pharmacy Manager (Nov 2017-May 2022)
+  - constellation.ts role nodes use integer startYear/endYear (null for current roles) while consultations.ts uses formatted duration strings — both are consistent representations of the same dates
+  - The `javascript-typescript` skill node exists but has no constellationLinks entries — it appears in the graph as a disconnected node, which is intentional since JS/TS isn't attributed to any specific role
+  - codedEntries arrays in consultations.ts are portfolio-specific shorthand codes, not from the CV — they're part of the clinical metaphor design
+---

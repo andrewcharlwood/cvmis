@@ -195,7 +195,7 @@
         "Typecheck passes (npm run typecheck)"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "Read src/data/consultations.ts and compare field-by-field against References/CV_v4.md. The CV has 4 roles: Interim Head (May-Nov 2025), Deputy Head (Jul 2024-Present), High-Cost Drugs (May 2022-Jul 2024), Pharmacy Manager (Nov 2017-May 2022). Check that consultations.ts has the same number of entries with matching data. Also verify constellation.ts nodes match — particularly startYear/endYear values and organization names. Fix any mismatches in the data files."
     },
     {
