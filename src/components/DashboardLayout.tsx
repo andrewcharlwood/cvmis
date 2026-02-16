@@ -421,7 +421,7 @@ export function DashboardLayout() {
             {/* PatientSummaryTile — full width (includes Latest Results subsection) */}
             <PatientSummaryTile />
 
-            {/* ProjectsTile — half width */}
+            {/* ProjectsTile — full width */}
             <ProjectsTile />
 
             {/* Patient Pathway — parent section with constellation graph + subsections */}
