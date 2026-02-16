@@ -22,6 +22,7 @@ backpressure:
 hats:
   planner:
     name: "Sidebar Workflow Planner"
+    description: "Plans the sidebar-first refactor and writes actionable implementation steps."
     triggers: ["task.start", "review.changes_requested"]
     publishes: ["plan.ready"]
     instructions: |
@@ -38,6 +39,7 @@ hats:
 
   builder:
     name: "Sidebar Workflow Builder"
+    description: "Implements the sidebar, navigation, and responsive behavior changes."
     triggers: ["plan.ready"]
     publishes: ["build.done"]
     instructions: |
@@ -55,6 +57,7 @@ hats:
 
   reviewer:
     name: "Sidebar Workflow Reviewer"
+    description: "Reviews implementation quality and validates all success criteria."
     triggers: ["build.done"]
     publishes: ["review.approved", "review.changes_requested"]
     instructions: |

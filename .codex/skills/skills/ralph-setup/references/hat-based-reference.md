@@ -20,6 +20,7 @@ event_loop:
 hats:
   hat_name:
     name: "Human-Readable Name"
+    description: "Short purpose of this hat"
     triggers: ["event.that.activates.this.hat"]
     publishes: ["event.this.hat.emits.when.done"]
     instructions: |
@@ -33,6 +34,7 @@ hats:
 
 - **triggers**: List of events that activate this hat. A hat runs when ANY of its trigger events fire.
 - **publishes**: List of events this hat emits when it completes its work.
+- **description**: Required short summary of the hat's purpose.
 - **instructions**: The prompt for this hat. Must be specific to the hat's role.
 - Events flow forward through the pipeline. Avoid circular event chains.
 - The last hat in the pipeline should print LOOP_COMPLETE when the overall task is done.
@@ -54,6 +56,7 @@ event_loop:
 hats:
   planner:
     name: "Planner"
+    description: "Analyses requirements and writes an implementation plan."
     triggers: ["task.start"]
     publishes: ["plan.ready"]
     instructions: |
@@ -71,6 +74,7 @@ hats:
 
   builder:
     name: "Builder"
+    description: "Implements the plan and delivers working code."
     triggers: ["plan.ready"]
     publishes: ["task.done"]
     instructions: |
@@ -102,6 +106,7 @@ event_loop:
 hats:
   planner:
     name: "Planner"
+    description: "Creates/updates implementation plans based on task and review feedback."
     triggers: ["task.start", "review.changes_requested"]
     publishes: ["plan.ready"]
     instructions: |
@@ -115,6 +120,7 @@ hats:
 
   builder:
     name: "Builder"
+    description: "Implements planned changes and prepares them for review."
     triggers: ["plan.ready"]
     publishes: ["build.done"]
     instructions: |
@@ -127,6 +133,7 @@ hats:
 
   reviewer:
     name: "Reviewer"
+    description: "Validates quality and requirements, approving or requesting changes."
     triggers: ["build.done"]
     publishes: ["review.approved", "review.changes_requested"]
     instructions: |
@@ -160,6 +167,7 @@ event_loop:
 hats:
   spec_writer:
     name: "Spec Writer"
+    description: "Writes and updates the technical specification."
     triggers: ["task.start", "verify.gaps_found"]
     publishes: ["spec.ready"]
     instructions: |
@@ -178,6 +186,7 @@ hats:
 
   implementer:
     name: "Implementer"
+    description: "Builds the solution from the specification."
     triggers: ["spec.ready"]
     publishes: ["implementation.done"]
     instructions: |
@@ -190,6 +199,7 @@ hats:
 
   verifier:
     name: "Verifier"
+    description: "Checks implementation against the spec and success criteria."
     triggers: ["implementation.done"]
     publishes: ["verify.passed", "verify.gaps_found"]
     instructions: |
@@ -221,6 +231,7 @@ event_loop:
 hats:
   test_writer:
     name: "Test Writer"
+    description: "Creates failing tests that define expected behaviour."
     triggers: ["task.start", "verify.tests_needed"]
     publishes: ["tests.ready"]
     instructions: |
@@ -237,6 +248,7 @@ hats:
 
   implementer:
     name: "Implementer"
+    description: "Implements code to satisfy tests."
     triggers: ["tests.ready"]
     publishes: ["implementation.done"]
     instructions: |
@@ -250,6 +262,7 @@ hats:
 
   verifier:
     name: "Verifier"
+    description: "Confirms tests, coverage, and requirement completeness."
     triggers: ["implementation.done"]
     publishes: ["verify.passed", "verify.tests_needed"]
     instructions: |
