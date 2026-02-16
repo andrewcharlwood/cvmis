@@ -1,7 +1,7 @@
 {
-  "project": "Portfolio — Semantic Search & AI Chat",
-  "branchName": "ralph/semantic-search",
-  "description": "Replace Fuse.js command palette search with client-side semantic vector search (ONNX model), then add a Gemini Flash-powered AI chat widget.",
+  "project": "Portfolio — LLM CV Knowledge Accuracy",
+  "branchName": "ralph/llm-cv-knowledge",
+  "description": "Migrate from Gemini to OpenRouter (z-ai/glm-5), enrich LLM context with full CV detail, and benchmark accuracy against 10 verifiable questions until 90%+ pass rate.",
   "userStories": [
     {
       "id": "US-001",
@@ -255,22 +255,127 @@
     },
     {
       "id": "US-014",
-      "title": "Update to Gemini 3 Flash Preview with model indicator",
-      "description": "As a developer, I want to use the latest free Gemini model, and as a visitor, I want to see what model powers the chat.",
+      "title": "Migrate production chat from Gemini to OpenRouter",
+      "description": "As a developer, I need to replace the Gemini API integration with OpenRouter so the chat uses z-ai/glm-5.",
       "acceptanceCriteria": [
-        "Extract model name to a single constant (e.g., GEMINI_MODEL = 'gemini-3-flash-preview') used for both the API URL and display",
-        "GEMINI_API_BASE URL updated to use the new model constant",
-        "Review and tighten the system prompt — ensure it's well-structured, concise, and clear for the new model",
-        "Review the [ITEMS: ...] suffix instruction — ensure new model follows the format reliably",
-        "Small model indicator in chat panel header: 'Gemini 3 Flash' in font-geist, 11px, var(--text-tertiary)",
-        "Model indicator positioned right-aligned in the header bar or as a subtle line below the header",
-        "Streaming SSE parsing still works correctly with the new model endpoint",
+        "Rename src/lib/gemini.ts to src/lib/llm.ts",
+        "Update all imports across the codebase (ChatWidget.tsx, search.ts, any other files importing from gemini.ts)",
+        "Replace Gemini API calls with OpenRouter's OpenAI-compatible API (POST https://openrouter.ai/api/v1/chat/completions)",
+        "Model set to z-ai/glm-5 in request body",
+        "API key read from import.meta.env.VITE_OPEN_ROUTER_API_KEY via Authorization: Bearer header",
+        "Include HTTP-Referer and X-Title headers as recommended by OpenRouter docs",
+        "SSE streaming works using OpenRouter's stream: true option (parse choices[0].delta.content from each SSE data line)",
+        "System prompt sent as first message with role: 'system' (OpenAI chat completions format)",
+        "Message history uses role: 'user' | 'assistant' (no 'model' mapping needed — already correct)",
+        "Export updated constant: LLM_DISPLAY_NAME = 'GLM-5' and update ChatWidget model indicator text",
+        "Rename isGeminiAvailable() to isLLMAvailable() and update all call sites",
         "Typecheck passes",
-        "Verify in browser using dev-browser skill"
+        "Verify in browser: chat opens, sends a message, streams a response correctly"
       ],
       "priority": 14,
+<<<<<<< Updated upstream
       "passes": true,
       "notes": "The current API base is 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash'. Change the model segment to 'gemini-3-flash-preview'. The API path structure (v1beta/models/{model}:streamGenerateContent) should be the same. Verify that gemini-3-flash-preview is the correct model ID — check Google AI Studio or the API docs. For the display name, use a human-friendly string like 'Gemini 3 Flash' (not the full model ID). The constant should be defined at the top of gemini.ts and exported for use in ChatWidget."
+=======
+      "passes": false,
+      "notes": "OpenRouter uses the OpenAI-compatible format. Key differences from Gemini: (1) Auth via Bearer token header, not URL param. (2) System prompt is a message with role:'system', not a separate system_instruction field. (3) Streaming SSE data lines contain {choices:[{delta:{content:'...'}}]}, not candidates[0].content.parts[0].text. (4) The [DONE] sentinel is the same. (5) Add headers: 'HTTP-Referer': window.location.origin, 'X-Title': 'Andy Charlwood Portfolio'. The buildSystemPrompt() function and its content stay the same — only the API transport changes. The buildRequestBody() function needs the most changes."
+    },
+    {
+      "id": "US-015",
+      "title": "Migrate benchmark script to OpenRouter",
+      "description": "As a developer, I need the benchmark harness to use OpenRouter so it tests the same model and prompt path as production.",
+      "acceptanceCriteria": [
+        "scripts/benchmark.ts uses OpenRouter API (POST https://openrouter.ai/api/v1/chat/completions) instead of Gemini",
+        "API key read from process.env.VITE_OPEN_ROUTER_API_KEY (loaded from .env file)",
+        "Request body uses OpenAI chat completions format: messages array with system/user roles",
+        "Model set to z-ai/glm-5 in request body",
+        "Auth via Authorization: Bearer header (not URL param)",
+        "Rate limit retry logic updated for OpenRouter error responses (429 status)",
+        "Response parsing updated: extract choices[0].message.content (non-streaming endpoint)",
+        "Scoring calls also use OpenRouter with same model",
+        "Model name in results output updated to z-ai/glm-5",
+        "npm run benchmark runs end-to-end without errors",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": "The benchmark uses the non-streaming endpoint (no stream:true needed). OpenRouter non-streaming response format: { choices: [{ message: { content: '...' } }] }. The buildSystemPrompt() function should be imported from the renamed llm.ts (or duplicated if the import path alias doesn't work in tsx scripts — check if @/ alias resolves). Keep the same retry logic structure but update status code handling for OpenRouter. The scoring prompt and question flow are unchanged — only the API transport layer changes."
+    },
+    {
+      "id": "US-016",
+      "title": "Enrich system prompt with full CV context",
+      "description": "As a portfolio visitor, I want the AI to have comprehensive knowledge of Andy's background so it can answer detailed questions accurately.",
+      "acceptanceCriteria": [
+        "buildSystemPrompt() in llm.ts includes full professional profile narrative from CV_v4.md",
+        "Each role includes full achievement bullets, not just the summary text from buildEmbeddingTexts()",
+        "Clear section headers in the prompt: Professional Profile, Career History (per role with dates/employer), Education, Skills, Projects",
+        "NHS employment (May 2022+) explicitly distinguished from private sector (Tesco PLC)",
+        "Clinical specialties listed under the relevant role (rheumatology, ophthalmology, dermatology, etc.)",
+        "Methodology details included (e.g., how the switching algorithm worked, what dm+d integration involved)",
+        "Education includes specific grades, subjects, research topics, classifications",
+        "Leadership training (Mary Seacole Programme) included with year and result",
+        "No invented or extrapolated content — everything sourced from CV_v4.md and data files",
+        "System prompt remains under 8KB total",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": "The current system prompt uses buildEmbeddingTexts() which gives one paragraph per palette item — good for embeddings but too compressed for detailed Q&A. The enriched prompt should read more like a structured CV with full bullet points. Source content from References/CV_v4.md — read the file to extract all detail. Consider structuring as: ## Profile (personal statement), ## Career History (each role as ### with bullets), ## Education (each qualification), ## Projects (each project with tech and outcomes). Keep it well-structured with markdown headers — LLMs parse this better than flat text."
+    },
+    {
+      "id": "US-017",
+      "title": "Improve system prompt instructions and LLM parameters",
+      "description": "As a portfolio visitor, I want the AI to cite specifics, distinguish between employers, and aggregate across roles when asked.",
+      "acceptanceCriteria": [
+        "Prompt instructs LLM to distinguish NHS employment (ICB, May 2022+) from private sector (Tesco PLC, community pharmacy)",
+        "Prompt instructs LLM to aggregate across roles when asked broad questions (e.g., 'what tools has Andy built?' should list tools from ALL roles)",
+        "Prompt instructs LLM to cite specific metrics, dates, and outcomes when available rather than being vague",
+        "Prompt instructs LLM to answer from the provided context only and say so when information isn't available",
+        "Temperature lowered from 0.7 to 0.3-0.5 for more consistent factual responses",
+        "maxOutputTokens increased from 512 to at least 768 to avoid truncating detailed answers",
+        "The [ITEMS: ...] suffix instruction is preserved and clear",
+        "Typecheck passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": "These are behavioral instructions that go in the Rules section of the system prompt. Keep them concise — LLMs follow shorter, clearer rules better than long paragraphs. Consider: '1. Distinguish NHS employment (May 2022–present, ICB) from private sector (Tesco PLC). 2. When asked about tools/skills across career, aggregate from ALL roles. 3. Cite specific numbers, dates, and outcomes — never say approximate when exact figures are available. 4. If the answer isn't in the context, say so clearly.' Temperature and maxTokens are set in the API request config, not the prompt."
+    },
+    {
+      "id": "US-018",
+      "title": "Enrich embedding texts and regenerate embeddings",
+      "description": "As a portfolio visitor, I want semantic search to surface relevant results even for nuanced queries by having richer embedding texts.",
+      "acceptanceCriteria": [
+        "buildEmbeddingTexts() in search.ts generates richer text per item with full achievement narratives, methodology detail, and clinical specialties",
+        "Role history narratives are included (currently only examination bullets and codedEntries may be used)",
+        "Cross-references included where items relate (e.g., CD monitoring project links to controlled drugs skill)",
+        "Embedding texts remain well-formed natural language (not keyword soup)",
+        "Embeddings regenerated by running npm run generate-embeddings",
+        "Output written to src/data/embeddings.json",
+        "Number of embeddings matches number of palette items (currently 42)",
+        "Typecheck passes"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": "This combines the PRD's US-005 (enrich texts) and US-006 (regenerate embeddings) since they must happen together. Review what buildEmbeddingTexts() currently produces and identify gaps — the benchmark questions highlight what's missing (e.g., clinical specialties, methodology detail, dm+d context, employer classification). After modifying the texts, run npm run generate-embeddings to regenerate. Verify the embedding count matches before and after."
+    },
+    {
+      "id": "US-019",
+      "title": "Run benchmark and validate accuracy",
+      "description": "As a developer, I want to run the benchmark against the enriched prompt and verify the pass threshold is met.",
+      "acceptanceCriteria": [
+        "Run npm run benchmark successfully against OpenRouter with enriched system prompt",
+        "Score 18/20 or higher (90%+ accuracy) on the 10 benchmark questions",
+        "No question scores 0 (no factual errors)",
+        "Results saved to scripts/benchmark-results/ as a timestamped iteration file",
+        "Additionally test 5 general questions manually or via script: 'Tell me about Andy', 'What does Andy do?', 'How can I contact Andy?', 'What is this website?', 'What are Andy's strongest skills?'",
+        "General questions produce sensible, accurate responses without degradation",
+        "If benchmark fails threshold, identify failing questions and make structural improvements to the prompt (not question-specific hacks), then re-run",
+        "Final passing results saved as evidence"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": "This is the iterative loop. In a single Ralph iteration, run the benchmark, review results, and if needed make targeted improvements to the system prompt in llm.ts. Focus on structural fixes: if Q7 (clinical specialties) fails, ensure the system prompt lists specialties under the relevant role — this helps ALL specialty questions, not just Q7. If the benchmark takes too many iterations, focus on getting the most impactful improvements in and document remaining gaps. The anti-benchmaxing rules apply: no hardcoded answers, no question-specific prompt clauses."
+>>>>>>> Stashed changes
     }
   ]
 }
