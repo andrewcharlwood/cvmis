@@ -107,13 +107,13 @@
     {
       "id": "Q10",
       "question": "What leadership training does Andy have?",
-      "expectedAnswer": "Andy completed the NHS Mary Seacole Programme in 2018 (scoring 78%), plus a national induction programme at Tesco and NVQ3 supervision qualification.",
+      "expectedAnswer": "Andy completed the NHS Mary Seacole Programme in 2018 (scoring 78%). At Tesco, he created a national induction training plan and eLearning modules, and supervised two staff through NVQ3 to pharmacy technician registration.",
       "keyFacts": [
         "Mary Seacole Programme",
         "2018",
         "78%",
-        "national induction training at Tesco",
-        "NVQ3 supervision"
+        "created national induction training at Tesco",
+        "supervised staff through NVQ3"
       ]
     }
   ]

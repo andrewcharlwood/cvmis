@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react'
 import {
   sendChatMessage,
-  isGeminiAvailable,
+  isLLMAvailable,
   parseItemIds,
   stripItemsSuffix,
-  GEMINI_DISPLAY_NAME,
+  LLM_DISPLAY_NAME,
   type ChatMessage,
-} from '@/lib/gemini'
+} from '@/lib/llm'
 import { buildPaletteData } from '@/lib/search'
 import type { PaletteItem, PaletteAction } from '@/lib/search'
 import { iconByType, iconColorStyles } from '@/lib/palette-icons'
@@ -64,7 +64,7 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  const geminiAvailable = isGeminiAvailable()
+  const llmAvailable = isLLMAvailable()
 
   // Build palette map for looking up items by ID
   const paletteMap = useMemo(() => {
@@ -264,7 +264,7 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
                       color: 'var(--text-tertiary)',
                     }}
                   >
-                    {GEMINI_DISPLAY_NAME}
+                    {LLM_DISPLAY_NAME}
                   </span>
                 </div>
                 <button
@@ -306,7 +306,7 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
                 }}
                 className="pmr-scrollbar"
               >
-                {!geminiAvailable && (
+                {!llmAvailable && (
                   <div
                     style={{
                       textAlign: 'center',
@@ -320,7 +320,7 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
                   </div>
                 )}
 
-                {geminiAvailable && messages.length === 0 && (
+                {llmAvailable && messages.length === 0 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {/* Welcome bubble — styled as assistant message */}
                     <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
@@ -537,7 +537,7 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
               </div>
 
               {/* Input area */}
-              {geminiAvailable && (
+              {llmAvailable && (
                 <div
                   style={{
                     padding: '12px 16px',

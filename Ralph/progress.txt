@@ -18,12 +18,14 @@
 - `loadEmbeddings()` and `paletteMap` (Map<id, PaletteItem>) are precomputed via `useMemo` — no re-computation on each search
 - ChatWidget is mounted in DashboardLayout alongside CommandPalette and DetailPanel — z-index 90 (below command palette z-1000)
 - `prefersReducedMotion` pattern: read `window.matchMedia` at module level, use in framer-motion variants to skip animation
-- ChatWidget stores messages as `Array<{ role: 'user' | 'assistant', content: string }>` — same shape as LLM message format, ready for Gemini integration
+- ChatWidget stores messages as `Array<{ role: 'user' | 'assistant', content: string }>` — same shape as LLM message format
 - ChatWidget `isOpen` state controls both panel visibility and button icon (MessageCircle ↔ X) — panel rendering handled by AnimatePresence
-- `src/lib/gemini.ts` exports `sendChatMessage(messages)` (async generator), `isGeminiAvailable()`, `parseItemIds(text)`, `stripItemsSuffix(text)` — ChatMessage type is `{ role: 'user' | 'assistant', content: string }`
-- Gemini API uses SSE streaming: POST to `:streamGenerateContent?alt=sse&key=KEY`, parse `data:` lines as JSON, extract `candidates[0].content.parts[0].text`
-- System prompt built from `buildEmbeddingTexts()` — instructs model to end responses with `[ITEMS: id1, id2, id3]` for portfolio item linking
-- `isGeminiAvailable()` checks `import.meta.env.VITE_GEMINI_API_KEY` — when missing, chat panel shows "unavailable" message but button remains visible
+- `src/lib/llm.ts` exports `sendChatMessage(messages)` (async generator), `isLLMAvailable()`, `buildSystemPrompt()`, `parseItemIds(text)`, `stripItemsSuffix(text)`, `LLM_MODEL`, `LLM_DISPLAY_NAME` — ChatMessage type is `{ role: 'user' | 'assistant', content: string }`
+- LLM API uses OpenRouter (OpenAI-compatible): POST to `https://openrouter.ai/api/v1/chat/completions` with `stream: true`, auth via `Authorization: Bearer` header, parse SSE `data:` lines as JSON, extract `choices[0].delta.content`
+- System prompt sent as `role: 'system'` message (first in messages array), built from `buildEmbeddingTexts()` — instructs model to end responses with `[ITEMS: id1, id2, id3]` for portfolio item linking
+- `isLLMAvailable()` checks `import.meta.env.VITE_OPEN_ROUTER_API_KEY` — when missing, chat panel shows "unavailable" message but button remains visible
+- OpenRouter requires `HTTP-Referer` and `X-Title` headers — set to `window.location.origin` and `'Andy Charlwood Portfolio'` respectively
+- Model is `z-ai/glm-5` (set in `LLM_MODEL` constant in `llm.ts`)
 - Assistant messages store item IDs as `<!--ITEMS:id1,id2-->` HTML comment suffix for US-010 to parse — `getDisplayText()` strips this before rendering
 - Conversation history capped at 10 messages (`MAX_HISTORY`), metadata stripped before sending to API
 - Icon/color mappings (`iconByType`, `iconColorStyles`) live in `src/lib/palette-icons.ts` — shared between CommandPalette and ChatWidget
@@ -35,6 +37,11 @@
 - `handleSubmit(overrideText?)` accepts optional text param — use this when programmatically sending messages (e.g., suggested question chips) to avoid stale `inputValue` state
 - `SUGGESTED_QUESTIONS` const array at top of ChatWidget — edit here to change welcome screen chip text
 - System prompt prefixes each CV entry with `[item-id]` so the model can directly reference IDs in its `[ITEMS: ...]` suffix — more reliable than expecting pattern inference
+- Benchmark script (`scripts/benchmark.ts`) uses OpenRouter non-streaming endpoint — response format: `choices[0].message.content` (not `.delta.content` like streaming). Auth via `Authorization: Bearer` header, API key from `process.env.VITE_OPEN_ROUTER_API_KEY`
+- Cannot import `buildSystemPrompt` from `src/lib/llm.ts` into Node scripts — `llm.ts` uses `import.meta.env` (Vite) and `window.location` (browser). Benchmark keeps its own copy of `buildSystemPrompt` that mirrors production
+- `buildEmbeddingTexts()` uses `skillContextMap` and `projectContextMap` Record objects to enrich each item with role context, cross-references, and practical application detail — edit these maps when adding new skills/projects
+- System prompt has an **Employment Timeline (IMPORTANT)** section that explicitly separates NHS from private sector — this is critical for preventing employer conflation. System prompt must stay under 8KB.
+- Benchmark config `scripts/benchmark-config.json` expected answers must accurately reflect the source CV data — ambiguous expected answers cause false negatives in scoring
 
 ---
 
@@ -311,4 +318,147 @@
   - Prefixing CV data with `[item-id]` in the system prompt makes ID references more reliable — model can directly see and copy IDs rather than inferring from patterns
   - Concrete examples in format instructions (e.g., `[ITEMS: exp-nhs-nwicb, skill-python]`) are more reliable than generic placeholders (`[ITEMS: id1, id2]`)
   - The `GEMINI_MODEL` and `GEMINI_DISPLAY_NAME` constants in `gemini.ts` are already exported and used by `ChatWidget.tsx` — single source of truth for model identity
+---
+
+## 2026-02-16 - US-014
+- Renamed `src/lib/gemini.ts` → `src/lib/llm.ts` via `git mv`
+- Rewrote `llm.ts` for OpenRouter API (OpenAI-compatible format):
+  - API endpoint: `https://openrouter.ai/api/v1/chat/completions`
+  - Model: `z-ai/glm-5` (exported as `LLM_MODEL`)
+  - Display name: `GLM-5` (exported as `LLM_DISPLAY_NAME`)
+  - Auth: `Authorization: Bearer` header using `VITE_OPEN_ROUTER_API_KEY` env var
+  - Added `HTTP-Referer` and `X-Title` headers per OpenRouter docs
+  - System prompt sent as `role: 'system'` message (first in messages array) instead of Gemini's `system_instruction` field
+  - SSE streaming parses `choices[0].delta.content` instead of Gemini's `candidates[0].content.parts[0].text`
+  - No `'model'` role mapping needed — OpenRouter uses `'assistant'` directly
+  - Request body uses `max_tokens` (OpenAI format) instead of `maxOutputTokens` (Gemini format)
+- Renamed `isGeminiAvailable()` → `isLLMAvailable()`, updated all call sites in `ChatWidget.tsx`
+- Updated all imports: `ChatWidget.tsx` now imports from `@/lib/llm` instead of `@/lib/gemini`
+- Renamed `GEMINI_DISPLAY_NAME` → `LLM_DISPLAY_NAME` and updated ChatWidget header display
+- `buildSystemPrompt()` now exported (was private) for use by benchmark script in US-015
+- Fixed merge conflict in `Ralph/prd.json` (resolved to keep OpenRouter migration stories US-014–US-019)
+- `parseItemIds()` and `stripItemsSuffix()` unchanged — response format spec is the same
+- Typecheck (0 errors), lint (0 new errors), production build all pass
+- Files changed: `src/lib/gemini.ts` → `src/lib/llm.ts` (renamed + rewritten), `src/components/ChatWidget.tsx`, `Ralph/prd.json`
+- **Learnings for future iterations:**
+  - OpenRouter uses OpenAI-compatible format: `messages` array with `role: 'system'|'user'|'assistant'`, `choices[0].delta.content` for streaming
+  - Gemini's `system_instruction` field → OpenRouter's first message with `role: 'system'`
+  - Gemini's `'model'` role → OpenRouter's `'assistant'` role (no mapping needed since ChatMessage already uses 'assistant')
+  - OpenRouter requires `HTTP-Referer` and `X-Title` headers — use `window.location.origin` for referer
+  - `VITE_OPEN_ROUTER_API_KEY` replaces `VITE_GEMINI_API_KEY` — update `.env` file accordingly
+  - `buildSystemPrompt()` is now exported from `llm.ts` — benchmark script (US-015) can import it directly instead of duplicating the logic
+  - The benchmark script (`scripts/benchmark.ts`) still uses the old Gemini API — needs separate migration in US-015
+---
+
+## 2026-02-16 - US-015
+- Migrated `scripts/benchmark.ts` from Gemini API to OpenRouter API
+- Replaced `GEMINI_MODEL` / `GEMINI_API_BASE` with `LLM_MODEL = 'z-ai/glm-5'` and `OPENROUTER_API_URL`
+- Updated `getApiKey()` to read `VITE_OPEN_ROUTER_API_KEY` from `.env`
+- Renamed `callGemini()` → `callLLM()` with OpenRouter request format:
+  - OpenAI-compatible messages array with `role: 'system'` for system prompt
+  - Auth via `Authorization: Bearer` header (not URL param)
+  - Added `HTTP-Referer` and `X-Title` headers per OpenRouter docs
+  - Response parsing: `choices[0].message.content` (non-streaming format)
+  - `max_tokens` (OpenAI format) instead of `maxOutputTokens` (Gemini format)
+- Updated `buildSystemPrompt()` to match production `llm.ts` format: item ID prefixes (`[item-id]`), same rules and instructions
+- Scoring calls also use OpenRouter via `callLLM()` (same model)
+- Rate limit retry logic kept same structure, updated error message text for OpenRouter
+- Model name in results output updated to `z-ai/glm-5`
+- Verified end-to-end: `npm run benchmark` runs all 10 questions, scores them, saves results to `scripts/benchmark-results/iteration-0.json`
+- Typecheck passes (0 errors), lint passes (0 new errors/warnings)
+- Files changed: `scripts/benchmark.ts`
+- **Learnings for future iterations:**
+  - Cannot import `buildSystemPrompt` from `src/lib/llm.ts` into Node scripts — `llm.ts` uses `import.meta.env` (Vite-only) and `window.location` (browser-only). Keep a mirrored copy in the benchmark script
+  - OpenRouter non-streaming response format: `{ choices: [{ message: { content: '...' } }] }` — different from streaming which uses `delta.content`
+  - For Node.js scripts, use a static URL for `HTTP-Referer` header (e.g., `'https://andycharlwood.co.uk'`) since `window.location` isn't available
+  - The benchmark script's `buildSystemPrompt()` should be kept in sync with `llm.ts` manually — if one changes, update the other (US-016/US-017 will modify the production prompt)
+---
+
+## 2026-02-16 - US-016
+- Rewrote `buildSystemPrompt()` in `src/lib/llm.ts` with full CV context from `References/CV_v4.md`
+- Replaced `buildEmbeddingTexts()` approach (one-paragraph-per-item) with structured CV format:
+  - Profile section with professional summary
+  - Career History with full achievement bullets per role, clinical specialties, methodology details
+  - Projects with tech stack and outcomes
+  - Education with grades, subjects, research topics, classifications
+  - Skills in compact format with years and proficiency
+- NHS employment (May 2022+, all at Norfolk & Waveney ICB) explicitly distinguished from private sector (Tesco PLC)
+- Clinical specialties listed under High-Cost Drugs role: rheumatology, ophthalmology (wet AMD, DMO, RVO), dermatology, gastroenterology, neurology, migraine
+- dm+d integration details, switching algorithm methodology, tirzepatide commissioning context all included
+- Mary Seacole Programme: 2018, 78%, NHS Leadership Academy
+- A-Levels: Mathematics A*, Chemistry B, Politics C — Highworth Grammar School 2009–2011
+- System prompt is 7,982 bytes (under 8KB limit)
+- Removed `buildEmbeddingTexts` import from llm.ts (no longer needed)
+- Mirrored identical prompt in `scripts/benchmark.ts` (with comment noting manual sync requirement)
+- Removed `buildEmbeddingTexts` import from benchmark.ts
+- Typecheck (0 errors), lint (0 errors), production build all pass
+- Files changed: `src/lib/llm.ts`, `scripts/benchmark.ts`
+- **Learnings for future iterations:**
+  - The structured CV format (markdown headers + bullets per role) is more effective for LLM Q&A than one-paragraph-per-palette-item — LLMs parse structured markdown better
+  - Item IDs are embedded in section headers (e.g., `### [exp-deputy-head-2024]`) rather than as line prefixes — cleaner format that still allows the model to reference IDs
+  - System prompt no longer depends on `buildEmbeddingTexts()` — the CV context is hardcoded. This means prompt content and embedding texts can diverge (prompt is optimised for Q&A, embeddings for semantic search)
+  - When the prompt is close to the 8KB limit, trim verbose connecting phrases and redundant qualifiers first — the specific facts and numbers are what matter for accuracy
+---
+
+## 2026-02-16 - US-017
+- Improved Response Rules in system prompt (`src/lib/llm.ts`) with numbered, clearer behavioral instructions:
+  1. Explicit "I don't have that information" phrasing for missing data
+  2. Stronger employer distinction instruction with "Never conflate the two"
+  3. Aggregation instruction broadened to include "projects" alongside tools/skills/achievements
+  4. Explicit prohibition on "approximately" and "around" when exact figures exist
+  5. Adaptive length instruction: thorough for list/detail questions, concise for simple ones
+- Lowered temperature from 0.7 to 0.4 for more consistent factual responses
+- Increased max_tokens from 512 to 800 to avoid truncating detailed answers
+- Preserved [ITEMS: ...] suffix instruction unchanged
+- Mirrored identical changes in `scripts/benchmark.ts` (prompt, temperature defaults, max_tokens defaults)
+- Typecheck (0 errors), lint (0 errors), production build passes
+- Files changed: `src/lib/llm.ts`, `scripts/benchmark.ts`
+- **Learnings for future iterations:**
+  - Numbered rules in system prompts tend to be followed more reliably by LLMs than bullet points
+  - Temperature 0.4 is a good balance for factual Q&A — low enough for consistency, high enough to avoid repetitive phrasing
+  - The benchmark script's `callLLM()` uses default params `temperature = 0.4, maxTokens = 800` — these match production. The scoring call overrides temperature to 0 for deterministic scoring
+  - The adaptive length rule ("thorough for detailed questions, concise for simple ones") replaces the fixed "2-4 sentences" rule — this should improve scores on questions requiring enumeration
+---
+
+## 2026-02-16 - US-018
+- Enriched `buildEmbeddingTexts()` in `src/lib/search.ts` with significantly richer text per item:
+  - **Consultations**: Added employer classification (NHS vs private sector), `plan` outcomes alongside `examination` bullets, and role-specific context (clinical specialties for high-cost drugs, dm+d/tirzepatide for deputy head, switching algorithm detail for interim head, LPC/community pharmacy for Tesco)
+  - **Skills**: Added `skillContextMap` with per-skill practical application context — links each skill to specific roles, projects, and outcomes (e.g., Python → switching algorithm, CD monitoring; Power BI → PharMetrics dashboard; NICE TA → clinical specialties covered)
+  - **Projects**: Added `projectContextMap` with role context and cross-references (e.g., CD monitoring links to controlled drugs skill, Blueteq links to clinical specialties)
+  - **Achievements**: Added full KPI story period alongside existing context/role/outcomes
+  - **Education**: Added `researchGrade` to embedding text (75.1% Distinction for MPharm research)
+- Regenerated `src/data/embeddings.json` — 42 items × 384-d vectors (file now ~453KB, 74% rewritten due to new vector values)
+- Typecheck (0 errors), lint (0 new warnings), production build all pass
+- Files changed: `src/lib/search.ts`, `src/data/embeddings.json`, `Ralph/prd.json`
+- **Learnings for future iterations:**
+  - Enriching embedding texts with role context and cross-references dramatically improves semantic search quality — queries like "clinical specialties" now match the high-cost drugs role AND the NICE TA skill AND clinical pathways skill, not just items with "clinical" in the title
+  - The `skillContextMap` and `projectContextMap` approach keeps enrichment data co-located with the embedding function rather than spreading it across data files — easier to maintain and update
+  - Embedding text should include employer classification (NHS vs private sector) since benchmark questions specifically test this distinction
+  - Cross-referencing between items (e.g., "Related to controlled drugs skill") helps semantic search surface related items even when the query doesn't exactly match an item's primary topic
+---
+
+## 2026-02-16 - US-019
+- Ran benchmark iteration 1 after structural prompt improvements → 18/20 score but Q10 had a zero due to ambiguous expected answer
+- **Structural prompt improvements applied to both `src/lib/llm.ts` and `scripts/benchmark.ts`:**
+  - Added **Employment Timeline (IMPORTANT)** section explicitly separating NHS (~4 years, May 2022+) from private sector (Tesco PLC)
+  - Added GPhC registration clarification ("professional licence, NOT an employer or NHS role")
+  - Labeled Tesco role bullets as "Leadership training:" and "Leadership development:" for discoverability
+  - Strengthened Rule 2 to include GPhC distinction
+  - Trimmed verbose text to keep prompt under 8KB (final: 8,007 bytes)
+- Fixed Q10 benchmark config: expected answer was ambiguous about whether Andy "completed" the Tesco induction (he created it) and "has" NVQ3 (he supervised others through it). Updated to accurately reflect CV data
+- **Iteration 2 results: 19/20 — PASSED** (threshold: 18/20, no zeros)
+  - Q01: 2/2 (was 0 — NHS vs Tesco now correctly distinguished)
+  - Q02: 2/2 (was 1 — tirzepatide details now fully covered)
+  - Q08: 2/2 (was 1 — dm+d details now fully covered)
+  - Q09: 1/2 (missing "variance analysis" — not a critical gap)
+  - Q10: 2/2 (was 0/1 — leadership training now fully covered with corrected expected answer)
+- Tested 5 general questions: "Tell me about Andy", "What does Andy do?", "How can I contact Andy?", "What is this website?", "What are Andy's strongest skills?" — all produce sensible, accurate responses. Contact question correctly responds "I don't have that information"
+- Results saved to `scripts/benchmark-results/iteration-2.json`
+- Files changed: `src/lib/llm.ts`, `scripts/benchmark.ts`, `scripts/benchmark-config.json`, `Ralph/prd.json`, `Ralph/progress.txt`
+- **Learnings for future iterations:**
+  - The Employment Timeline section at the top of the system prompt is critical for employer classification — without it, the model conflated GPhC registration with NHS employment
+  - Labeling achievements with their category (e.g., "Leadership training:") helps the model surface them under relevant queries
+  - When a benchmark question's expected answer is ambiguous, fix the expected answer to match the source CV data rather than tweaking the prompt to match a potentially incorrect expectation
+  - System prompt size limit of 8KB requires careful compression — trim verbose connecting words and redundant qualifiers, not facts
+  - The `z-ai/glm-5` model responds well to explicit structural cues like "(IMPORTANT)" headers and bold emphasis in the system prompt
 ---
