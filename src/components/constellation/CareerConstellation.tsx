@@ -42,12 +42,25 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
   const highlightedNodeIdRef = useRef<string | null>(highlightedNodeId ?? null)
   const [dimensions, setDimensions] = useState({ width: 800, height: MIN_HEIGHT, scaleFactor: 1 })
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null)
+  const [chartInView, setChartInView] = useState(true)
 
   callbacksRef.current = { onRoleClick, onSkillClick, onNodeHover }
 
   useEffect(() => {
     highlightedNodeIdRef.current = highlightedNodeId ?? null
   }, [highlightedNodeId])
+
+  // Track chart visibility for play/pause button
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setChartInView(entry.isIntersecting),
+      { threshold: 0.1 },
+    )
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const container = containerRef.current
@@ -235,6 +248,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
           isPlaying={animation.isPlaying}
           onToggle={animation.togglePlayPause}
           isMobile={isMobile}
+          visible={chartInView}
         />
       )}
 

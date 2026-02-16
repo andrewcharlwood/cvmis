@@ -20,8 +20,8 @@ export const LABEL_REST_OPACITY = 0.5
 // Link visual params
 export const LINK_BASE_WIDTH = 0.5
 export const LINK_STRENGTH_WIDTH_FACTOR = 1.5
-export const LINK_BASE_OPACITY = 0.08
-export const LINK_STRENGTH_OPACITY_FACTOR = 0.12
+export const LINK_BASE_OPACITY = 0.04
+export const LINK_STRENGTH_OPACITY_FACTOR = 0.06
 export const LINK_HIGHLIGHT_BASE_WIDTH = 1
 export const LINK_HIGHLIGHT_STRENGTH_WIDTH_FACTOR = 2
 export const LINK_BEZIER_VERTICAL_OFFSET = 0.15

@@ -51,6 +51,7 @@ export function useConstellationHighlight(deps: {
       nodeSelection.filter(d => d.type !== 'skill')
         .attr('filter', null)
         .select('.node-circle')
+        .attr('fill', null)
         .attr('fill-opacity', null)
         .attr('stroke-opacity', 0.4)
         .attr('stroke-width', 1)
@@ -105,7 +106,8 @@ export function useConstellationHighlight(deps: {
         return null
       })
       .select('.node-circle')
-      .attr('fill-opacity', d => d.id === activeNodeId ? 0.25 : null)
+      .attr('fill', d => d.id === activeNodeId ? '#FFFFFF' : null)
+      .attr('fill-opacity', d => d.id === activeNodeId ? 1 : null)
       .attr('stroke-opacity', d => {
         if (d.id === activeNodeId) return 1
         if (connected.has(d.id)) return 0.7

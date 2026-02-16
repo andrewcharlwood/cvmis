@@ -4,9 +4,10 @@ interface PlayPauseButtonProps {
   isPlaying: boolean
   onToggle: () => void
   isMobile: boolean
+  visible?: boolean
 }
 
-export const PlayPauseButton: React.FC<PlayPauseButtonProps> = ({ isPlaying, onToggle, isMobile }) => {
+export const PlayPauseButton: React.FC<PlayPauseButtonProps> = ({ isPlaying, onToggle, isMobile, visible = true }) => {
   const size = isMobile ? 44 : 36
   const offset = isMobile ? 8 : 12
 
@@ -16,22 +17,25 @@ export const PlayPauseButton: React.FC<PlayPauseButtonProps> = ({ isPlaying, onT
       aria-label={isPlaying ? 'Pause animation' : 'Play animation'}
       style={{
         position: 'absolute',
-        bottom: offset,
-        right: offset,
+        left: offset,
+        top: '50%',
+        transform: 'translateY(-50%)',
         width: size,
         height: size,
         borderRadius: '50%',
-        border: '1px solid var(--border-light)',
+        border: '1.5px solid var(--border)',
         background: 'var(--surface)',
+        boxShadow: '0 1px 4px rgba(26,43,42,0.10)',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        opacity: 0.6,
+        opacity: visible ? 0.85 : 0,
+        pointerEvents: visible ? 'auto' : 'none',
         transition: 'opacity 150ms ease',
       }}
       onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-      onMouseLeave={e => (e.currentTarget.style.opacity = '0.6')}
+      onMouseLeave={e => { if (visible) e.currentTarget.style.opacity = '0.85' }}
     >
       {isPlaying ? (
         <svg width="14" height="14" viewBox="0 0 14 14" fill="var(--text-secondary)">

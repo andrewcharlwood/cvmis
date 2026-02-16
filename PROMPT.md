@@ -1,155 +1,131 @@
-# Task: CareerConstellation Overhaul
+# Task: Career Constellation Chart & Layout Polish
 
-Refactor, visually improve, and add chronological animation to the CareerConstellation D3 force chart — the centrepiece of the portfolio's Patient Pathway section.
+Visual polish and layout adjustments to the career constellation chart, sidebar, and repeat medications section. 12 discrete changes across 10 files.
 
 ## Requirements
 
-### Phase 1 — Refactor the Monolith
+### 1. Reduce link opacity (`src/components/constellation/constants.ts`)
+- Lower `LINK_BASE_OPACITY` from `0.08` → `0.04`
+- Lower `LINK_STRENGTH_OPACITY_FACTOR` from `0.12` → `0.06`
+- Makes skill connection lines subtler so job pills are visually clearer
 
-Decompose `src/components/CareerConstellation.tsx` (1102 lines) into focused modules:
+### 2. White background on hovered job pill (`src/hooks/useConstellationHighlight.ts`)
+- When a role/education node is the `activeNodeId`, override its `.node-circle` fill to `#FFFFFF` with `fill-opacity: 1`
+- Currently uses a gradient fill with `fill-opacity: 0.25` — make it solid white, fully opaque
 
-```
-src/components/constellation/
-  CareerConstellation.tsx          -- Orchestrator (< 300 lines)
-  MobileAccordion.tsx              -- Mobile tap-to-expand accordion
-  ConstellationLegend.tsx          -- Domain legend with node counts
-  AccessibleNodeOverlay.tsx        -- Keyboard navigation button overlay
-  constants.ts                     -- All magic numbers as named exports
-  types.ts                         -- SimNode, SimLink, LayoutParams, local interfaces
+### 3. Move legend to top of chart + increase font size (`src/components/constellation/ConstellationLegend.tsx`)
+- Position legend as absolutely-positioned overlay at the **top** of the chart container (not below the SVG)
+- Increase font size from `10px` to `12px` to match work node label text size
+- Separate the "Hover to explore connections" text from the legend — see item 12
 
-src/hooks/
-  useForceSimulation.ts            -- D3 simulation lifecycle (setup, forces, tick, cleanup)
-  useConstellationHighlight.ts     -- applyGraphHighlight + connectedMap + highlight refs
-  useConstellationInteraction.ts   -- Mouse/touch/pin handlers, callback refs
-```
+### 4. Move year labels to right side of chart (`src/hooks/useForceSimulation.ts`)
+- Keep the current node layout unchanged (roles, skills, timeline line stay where they are)
+- Move year label text elements to the right edge of the chart: position at `width - sidePadding`, `text-anchor: 'end'`
 
-- [ ] Constants extracted (forces, sizes, opacities, durations)
-- [ ] Types extracted (SimNode, SimLink, LayoutParams)
-- [ ] MobileAccordion extracted as standalone component
-- [ ] ConstellationLegend extracted
-- [ ] AccessibleNodeOverlay extracted
-- [ ] useForceSimulation hook created
-- [ ] useConstellationHighlight hook created
-- [ ] useConstellationInteraction hook created
-- [ ] Orchestrator composed from hooks + sub-components (< 300 lines)
-- [ ] All existing behaviour preserved (hover, click, tap, keyboard, mobile, detail panel)
-- [ ] `npm run lint && npm run typecheck && npm run build` passes
+### 5. Change chart fonts to dashboard style (`src/hooks/useForceSimulation.ts`)
+- Year labels: change `font-family` from `var(--font-geist-mono)` to `var(--font-ui)`
+- Year indicator (animation): same font change
 
-### Phase 2 — Visual Improvements
+### 6. Reverse pathway column split to 40/60 (`src/index.css`)
+- Change `.pathway-columns` grid from `minmax(0, 1.3fr) minmax(0, 1fr)` to `minmax(0, 2fr) minmax(0, 3fr)`
+- This gives 40% to work experience text and 60% to the graph
 
-Enhance the chart aesthetics while maintaining the PMR design language:
+### 7. Sidebar: collapses to icon rail when patient summary scrolls out of view (`src/components/Sidebar.tsx` + `src/components/DashboardLayout.tsx`)
+- Sidebar already starts expanded on desktop — no change needed there
+- Add IntersectionObserver on the PatientSummaryTile element in DashboardLayout
+- When PatientSummaryTile scrolls out of view, pass a `forceCollapsed` prop to Sidebar
+- Sidebar collapses to icon rail (same as current mobile rail behaviour with nav buttons + hamburger menu)
+- When PatientSummaryTile scrolls back into view, re-expand the sidebar
+- Only applies on desktop (≥1024px) — mobile behaviour unchanged
 
-**Links:**
-- [ ] Strength-weighted stroke width at rest: `0.5 + strength * 1.5` (range 0.5–2px)
-- [ ] Domain-colored at rest (very low opacity: `0.08 + strength * 0.12`)
-- [ ] Improved bezier curves: offset control point by vertical distance (`cx = (sx+tx)/2 + (ty-sy)*0.15`)
-- [ ] On highlight: width `1 + strength * 2`, domain color at higher opacity
+### 8. Change pathway stacking breakpoint from 1024px to 768px (`src/index.css`)
+- The `.pathway-columns` two-column layout currently triggers at `min-width: 1024px`
+- Change this to `min-width: 768px` so the graph sits beside text on tablets too
+- Sidebar breakpoint remains at 1024px (this only affects pathway columns)
+- Also update `.pathway-graph-sticky` responsive rule to match the `768px` breakpoint
 
-**Skill nodes:**
-- [ ] Thin domain-colored stroke at rest (`stroke-width: 1, stroke-opacity: 0.4`)
-- [ ] Size encoding by connected role count: `baseRadius + roleCount * 0.8`
-- [ ] On highlight: subtle glow filter (feGaussianBlur, 2–3px stdDeviation, domain color)
+### 9. Repeat medications: 3-column layout (`src/components/RepeatMedicationsSubsection.tsx`)
+- Render all 3 category sections (Technical, Healthcare Domain, Strategic & Leadership) side-by-side
+- Use CSS grid: `grid-template-columns: repeat(3, 1fr)` on `md` (768px+) screens
+- Stack vertically on mobile (<768px)
+- Remove the `marginTop` between categories when in grid mode (they'll be in columns)
 
-**Role nodes:**
-- [ ] Fill gradient: left-to-right from orgColor@0.08 to orgColor@0.18
-- [ ] On highlight: fill-opacity 0.25, stroke-width 2, shadow-md filter
+### 10. Skills hover → chart highlight (verify only)
+- `RepeatMedicationsSubsection` already calls `onNodeHighlight` on hover
+- This flows through `DashboardLayout` → `highlightedNodeId` → `CareerConstellation` → `useConstellationHighlight`
+- Verify this interaction works end-to-end. If it does, no code change needed.
 
-**Entry animation (mount, replaced by over-time animation in Phase 3):**
-- [ ] Timeline guides fade in (200ms)
-- [ ] Role nodes slide in from left along connectors (staggered 80ms, 300ms each)
-- [ ] Skill nodes scale up from 0 (staggered 30ms, 250ms each)
-- [ ] Links draw on via stroke-dashoffset (after source+target visible)
-- [ ] Skipped entirely when `prefers-reduced-motion`
+### 11. Play/pause button: left edge of chart, visible only when chart is in view (`src/components/constellation/PlayPauseButton.tsx` + `src/components/constellation/CareerConstellation.tsx`)
+- Move button to the far-left edge of the chart container (not bottom-right)
+- Use IntersectionObserver on the chart container to track if chart is visible
+- When chart is in viewport: show button at left edge, vertically centered
+- When chart scrolls out of view: hide the button
+- Increase base opacity from 0.6 to 0.85
+- Add slightly stronger border and subtle box-shadow for visibility
 
-**Legend:**
-- [ ] Domain node counts displayed: "Technical (8) · Clinical (6) · Leadership (7)"
-
-### Phase 3 — Over-Time Animation
-
-Build the constellation chronologically from 2009 to present:
-
-**Data changes:**
-- [ ] Modify `buildConstellationData()` in `src/data/timeline.ts` to include education entities
-- [ ] Education entities appear as nodes on the timeline (use `type: 'role'` with education styling, or add `type: 'education'`)
-- [ ] Update `src/types/pmr.ts` if new node types are needed
-- [ ] Timeline order (oldest first): A-Levels (2009) → MPharm (2011) → Pre-Reg (2015) → Duty Manager (2016) → Pharmacy Manager (2017) → High Cost Drugs (2022) → Deputy Head (2024) → Interim Head (2025)
-
-**Animation architecture:**
-- [ ] Create `useTimelineAnimation` hook in `src/hooks/`
-- [ ] All nodes present in simulation from start but hidden (opacity: 0) — stable positions, no layout jitter
-- [ ] Reveal chronologically: each role/education entity appears, then its skills animate in
-- [ ] Skills already visible from earlier roles just get new links (reinforcement pulse: scale 1.3x → 1.0x over 350ms)
-- [ ] Uses requestAnimationFrame + timestamp scheduler (not setTimeout chains)
-- [ ] Animation state machine in refs: IDLE → PLAYING → PAUSED → HOLDING → RESETTING → loop back to PLAYING
-- [ ] Auto-plays on load (after force simulation settles)
-- [ ] Loops continuously: hold 3s at end → fade all 400ms → pause 200ms → restart
-
-**Visual effects during reveal:**
-- [ ] Role/education nodes scale from 0 with ease-out-back
-- [ ] New skill nodes scale from 0 with ease-out
-- [ ] Links draw on via stroke-dashoffset animation
-- [ ] Year indicator overlay (top-left of SVG, monospace font, var(--text-tertiary))
-
-**Accessibility:**
-- [ ] `prefers-reduced-motion`: skip animation entirely, show final state immediately
-- [ ] Play/pause button with appropriate aria-label
-
-### Phase 4 — Animation + Interaction Integration
-
-Wire the animation to the existing highlight system:
-
-- [ ] Hover/tap pauses animation, applies highlight normally (on visible nodes only)
-- [ ] Highlight only operates on revealed nodes — unrevealed nodes stay at opacity 0
-- [ ] Multiplicative opacity: animation visibility (0 or target) × highlight emphasis (1.0 or 0.15)
-- [ ] Resume animation 800ms after last interaction ends (mouseout / background tap)
-- [ ] Explicit pause via button stays paused until user clicks play again
-- [ ] Play/pause toggle button (bottom-right of SVG area, subtle styling, larger touch target on mobile)
-- [ ] Mobile accordion works during paused state
-- [ ] Keyboard navigation works during paused state
-- [ ] Click → detail panel works during paused state
+### 12. "Hover to explore connections" text — more visible, top-left above year indicator (`src/components/constellation/ConstellationLegend.tsx` or `src/components/constellation/CareerConstellation.tsx`)
+- Separate this text from the legend dot items
+- Position at the top-left of the chart, above the year indicator text
+- Increase opacity from 0.7 to 1
+- Increase font size (match or approach the legend font size)
+- On touch devices, show "Tap to explore connections" instead
 
 ## Success Criteria
 
-All of the following must be true for LOOP_COMPLETE:
-
-- [ ] `npm run lint && npm run typecheck && npm run build` passes with zero errors
-- [ ] CareerConstellation orchestrator is < 300 lines
-- [ ] Education entities (A-Levels, MPharm) appear in the constellation
-- [ ] Animation auto-plays on load and loops continuously
-- [ ] Network builds chronologically from 2009 through to present
-- [ ] Skills accumulate visually — existing skills get new links, not duplicated
-- [ ] Hover/tap pauses animation and shows highlight on visible nodes
-- [ ] Animation resumes after 800ms of no interaction
-- [ ] Play/pause button visible and functional
-- [ ] Existing interactions preserved: click → detail panel, keyboard nav, mobile accordion
-- [ ] `prefers-reduced-motion` shows final state immediately with no animation
-- [ ] Links show domain colors and strength-weighted width at rest
-- [ ] No TypeScript `any` types introduced
-- [ ] No dead code or commented-out blocks
+All of the following must be true:
+- [ ] `npm run lint` passes with zero errors
+- [ ] `npm run typecheck` passes with zero errors
+- [ ] `npm run build` completes successfully
+- [ ] Link opacity constants lowered (LINK_BASE_OPACITY=0.04, LINK_STRENGTH_OPACITY_FACTOR=0.06)
+- [ ] Hovered role/education node gets white fill (#FFFFFF, fill-opacity 1)
+- [ ] Legend positioned at top of chart with 12px font size
+- [ ] Year labels positioned at right edge of chart with `var(--font-ui)` font
+- [ ] Pathway columns use 40/60 split (2fr/3fr)
+- [ ] Sidebar collapses to icon rail when patient summary scrolls out of view (desktop only)
+- [ ] Pathway columns go side-by-side at 768px (not 1024px)
+- [ ] Repeat medications renders 3 categories in grid columns on md+ screens
+- [ ] Play/pause button on left edge of chart, hidden when chart not in view
+- [ ] "Hover to explore" text at top-left of chart, full opacity, larger font
 
 ## Constraints
 
-- TypeScript strict mode (`noUnusedLocals`, `noUnusedParameters`)
+- TypeScript strict mode — `noUnusedLocals`, `noUnusedParameters` enforced
 - Path alias: `@/*` → `src/*`
-- Styling: Tailwind utilities + CSS custom properties for design tokens
-- D3 v6 (already installed)
-- Framer Motion for non-D3 animations; respect `prefers-reduced-motion`
-- Design tokens: Primary teal #00897B, Accent coral #FF6B6B, PMR greens/teals/greys
-- Font tokens: `--font-ui` (Elvaro), `--font-geist-mono` (monospace), `--font-primary` / `--font-secondary`
-- No automated tests — quality gates are lint + typecheck + build
-- D3 patterns: reference `.claude/skills/d3-visualization/` for force layout examples
+- Styling: Tailwind utility classes + inline `CSSProperties` for dynamic/theme values
+- Animations: Framer Motion; respects `prefers-reduced-motion`
+- Design tokens: Primary teal `#00897B`, Accent coral `#FF6B6B`
+- Font tokens: `--font-ui` (Elvaro Grotesque), `--font-geist-mono` (Geist Mono)
+- Do not break existing hover/click/keyboard interactions on the constellation
+- Do not alter the D3 force simulation physics or node positioning logic (except year labels)
+- Preserve existing mobile behaviour unless explicitly changed (items 8, 9)
 
-## Key Architecture Decisions
+## Files to Modify
 
-1. **"All nodes hidden" for animation** — every node participates in the force simulation from the start (positions are stable). Reveal via opacity transitions only. Do NOT dynamically add/remove nodes from the simulation.
-
-2. **Ref-based animation state** — the animation state machine lives in refs (not React state) to avoid re-renders in the rAF loop. Only sync to React state for UI controls (play/pause button).
-
-3. **Multiplicative opacity model** — animation controls visibility (0 or target), highlight controls emphasis (1.0 or 0.15). Final opacity = animation × highlight. This prevents the two systems from conflicting.
-
-4. **Imperative D3 + React hybrid** — D3 manages SVG rendering and force simulation imperatively via refs. React manages keyboard overlay buttons and UI controls. Follow the existing pattern in the codebase.
+1. `src/components/constellation/constants.ts`
+2. `src/hooks/useConstellationHighlight.ts`
+3. `src/components/constellation/ConstellationLegend.tsx`
+4. `src/hooks/useForceSimulation.ts`
+5. `src/index.css`
+6. `src/components/Sidebar.tsx`
+7. `src/components/DashboardLayout.tsx`
+8. `src/components/RepeatMedicationsSubsection.tsx`
+9. `src/components/constellation/PlayPauseButton.tsx`
+10. `src/components/constellation/CareerConstellation.tsx`
 
 ## Status
 
 Track progress here. Mark items complete as you go.
-When ALL success criteria are met, print LOOP_COMPLETE.
+When all success criteria are met, print LOOP_COMPLETE.
+
+- [ ] Item 1: Link opacity
+- [ ] Item 2: White hover pill
+- [ ] Item 3: Legend top position
+- [ ] Item 4: Year labels right
+- [ ] Item 5: Font change
+- [ ] Item 6: Column split 40/60
+- [ ] Item 7: Sidebar scroll collapse
+- [ ] Item 8: Stacking breakpoint 768px
+- [ ] Item 9: Medications 3-column
+- [ ] Item 10: Skills hover verify
+- [ ] Item 11: Play/pause button
+- [ ] Item 12: Hover text visibility

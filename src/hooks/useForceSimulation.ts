@@ -160,7 +160,7 @@ export function useForceSimulation(
       .attr('x', sidePadding + 8)
       .attr('y', topPadding - 4)
       .attr('font-size', isMobile ? '18' : `${Math.round(24 * sf)}`)
-      .attr('font-family', 'var(--font-geist-mono)')
+      .attr('font-family', 'var(--font-ui)')
       .attr('fill', 'var(--text-tertiary)')
       .attr('opacity', 0)
     yearIndicatorRef.current = yearIndicator as unknown as d3.Selection<SVGTextElement, unknown, null, undefined>
@@ -207,11 +207,11 @@ export function useForceSimulation(
       .data(tickYears)
       .join('text')
       .attr('class', 'year-label')
-      .attr('x', timelineX - (isMobile ? 8 : Math.round(12 * sf)))
+      .attr('x', width - sidePadding)
       .attr('y', d => yScale(d) + Math.round(4 * sf))
       .attr('text-anchor', 'end')
       .attr('font-size', isMobile ? '9' : `${Math.round(11 * sf)}`)
-      .attr('font-family', 'var(--font-geist-mono)')
+      .attr('font-family', 'var(--font-ui)')
       .attr('fill', 'var(--text-tertiary)')
       .text(d => d)
 

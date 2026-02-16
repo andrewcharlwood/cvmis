@@ -250,13 +250,39 @@ export function DashboardLayout() {
   const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null)
   const [highlightedRoleId, setHighlightedRoleId] = useState<string | null>(null)
   const [chronologyHeight, setChronologyHeight] = useState<number | null>(null)
+  const [sidebarForceCollapsed, setSidebarForceCollapsed] = useState(false)
   const chronologyRef = useRef<HTMLDivElement>(null)
+  const patientSummaryRef = useRef<HTMLDivElement>(null)
   const activeSection = useActiveSection()
   const { openPanel } = useDetailPanel()
   const careerConsultationsById = useMemo(
     () => new Map(timelineConsultations.map((consultation) => [consultation.id, consultation])),
     [],
   )
+
+  // Sidebar collapse when patient summary scrolls out of view (desktop only)
+  useEffect(() => {
+    const el = patientSummaryRef.current
+    if (!el) return
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (mq.matches) {
+          setSidebarForceCollapsed(!entry.isIntersecting)
+        }
+      },
+      { threshold: 0 },
+    )
+    observer.observe(el)
+    const handleResize = () => {
+      if (!mq.matches) setSidebarForceCollapsed(false)
+    }
+    mq.addEventListener('change', handleResize)
+    return () => {
+      observer.disconnect()
+      mq.removeEventListener('change', handleResize)
+    }
+  }, [])
 
   // Measure the chronology stream height so the constellation graph can match it
   useEffect(() => {
@@ -410,6 +436,7 @@ export function DashboardLayout() {
             activeSection={activeSection}
             onNavigate={scrollToSection}
             onSearchClick={handleSearchClick}
+            forceCollapsed={sidebarForceCollapsed}
           />
         </motion.div>
 
@@ -427,7 +454,9 @@ export function DashboardLayout() {
         >
           <div className="dashboard-grid">
             {/* PatientSummaryTile — full width (includes Latest Results subsection) */}
-            <PatientSummaryTile />
+            <div ref={patientSummaryRef}>
+              <PatientSummaryTile />
+            </div>
 
             {/* ProjectsTile — full width */}
             <ProjectsTile />

@@ -268,18 +268,20 @@ export function RepeatMedicationsSubsection({ onNodeHighlight }: RepeatMedicatio
         title="REPEAT MEDICATIONS"
         rightText="Active prescriptions"
       />
-      {groupedSkills.map((group, index) => (
-        <CategorySection
-          key={group.id}
-          label={group.label}
-          categoryId={group.id}
-          skills={group.skills}
-          onSkillClick={handleSkillClick}
-          onViewAll={handleViewAll}
-          isFirst={index === 0}
-          onNodeHighlight={onNodeHighlight}
-        />
-      ))}
+      <div className="medications-grid">
+        {groupedSkills.map((group) => (
+          <CategorySection
+            key={group.id}
+            label={group.label}
+            categoryId={group.id}
+            skills={group.skills}
+            onSkillClick={handleSkillClick}
+            onViewAll={handleViewAll}
+            isFirst
+            onNodeHighlight={onNodeHighlight}
+          />
+        ))}
+      </div>
     </div>
   )
 }

@@ -1,11 +1,11 @@
 # Session Handoff
 
-_Generated: 2026-02-16 12:44:34 UTC_
+_Generated: 2026-02-16 14:36:25 UTC_
 
 ## Git Context
 
-- **Branch:** `codex/sidebar`
-- **HEAD:** 2e242a6: chore: auto-commit before merge (loop primary)
+- **Branch:** `master`
+- **HEAD:** aca5771: chore: auto-commit before merge (loop primary)
 
 ## Tasks
 
@@ -30,22 +30,38 @@ _Generated: 2026-02-16 12:44:34 UTC_
 - [x] Stabilize pathway graph hover/render lifecycle
 - [x] Unify experience + education card rendering
 - [x] Aggregate sidebar tags from canonical timeline skills and verify
+- [x] Constellation data parity: career-only role mapping
+- [x] Constellation interaction remediation: hover/focus layer
+- [x] Timeline parity + token alignment
+- [x] Backpressure and manual review evidence
+- [x] Resolve build.blocked backpressure gate
+- [x] Recover build.blocked gate after abandoned retries
+- [x] Phase 2: Strength-weighted link styling (stroke width, domain color, bezier curves, highlight)
+- [x] Phase 2: Skill node visual enhancements (stroke, size encoding, glow filter)
+- [x] Phase 2: Role node visual enhancements (gradient fill, highlight styling)
+- [x] Phase 2: Entry animation (timeline guides, staggered role/skill/link appearance)
+- [x] Phase 2: Legend with domain node counts
+- [x] Data: Include education entities in buildConstellationData
+- [x] Hook: Create useTimelineAnimation for chronological reveal
+- [x] Visual: Entry animation reveal effects
+- [x] Integration: Wire animation to highlight system (Phase 4)
+- [x] Accessibility: reduced-motion + play/pause button
 
 
 ## Key Files
 
 Recently modified:
 
-- `.codex/skills/skills/ralph-setup/SKILL.md`
-- `.codex/skills/skills/ralph-setup/references/hat-based-reference.md`
-- `.codex/skills/skills/ralph-setup/references/simple-prompt-reference.md`
-- `.ralph/agent/handoff.md`
-- `.ralph/agent/memories.md`
-- `.ralph/agent/scratchpad.md`
-- `.ralph/agent/summary.md`
-- `.ralph/agent/tasks.jsonl`
-- `.ralph/current-events`
-- `.ralph/current-loop-id`
+- `.claude/skills/d3-visualization/SKILL (3).md:Zone.Identifier`
+- `.claude/skills/d3-visualization/SKILL.md`
+- `.claude/skills/d3-visualization/scripts/bubble_chart_example.js`
+- `.claude/skills/d3-visualization/scripts/bubble_chart_example.js:Zone.Identifier`
+- `.claude/skills/d3-visualization/scripts/check_tooltip.js`
+- `.claude/skills/d3-visualization/scripts/check_tooltip.js:Zone.Identifier`
+- `.claude/skills/d3-visualization/scripts/interactive_table_example.js`
+- `.claude/skills/d3-visualization/scripts/interactive_table_example.js:Zone.Identifier`
+- `.claude/skills/d3-visualization/scripts/tooltip_handler.js`
+- `.claude/skills/d3-visualization/scripts/tooltip_handler.js:Zone.Identifier`
 
 ## Next Session
 
@@ -54,13 +70,18 @@ Session completed successfully. No pending work.
 **Original objective:**
 
 ```
-# Task: Patient Pathway Graph Stability + Unified Experience/Education Data Model
+# Task: CareerConstellation Overhaul
 
-Refactor the patient-pathway style timeline/graph and related experience UI so interaction feels stable, data is consistent across all sections, and education is merged into the same primary timeline flow.
+Refactor, visually improve, and add chronological animation to the CareerConstellation D3 force chart — the centrepiece of the portfolio's Patient Pathway section.
 
-## Context
+## Requirements
 
-Current behavior has two major quality issues:
-- Hovering graph-related content appears to trigger graph-wide motion/jiggle, implying unnecessary re-rendering or unstable layout state.
-- Timeline da...
+### Phase 1 — Refactor the Monolith
+
+Decompose `src/components/CareerConstellation.tsx` (1102 lines) into focused modules:
+
+```
+src/components/constellation/
+  CareerConstellation.tsx          -- Orchestrator (< 300 lines)
+  MobileAccordion.tsx              -- Mobile tap-to-e...
 ```

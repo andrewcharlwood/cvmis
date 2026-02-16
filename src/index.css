@@ -438,10 +438,10 @@ html {
   border-color: rgba(124, 58, 237, 0.28);
 }
 
-/* Desktop: 2 columns */
-@media (min-width: 1024px) {
+/* Tablet+: 2 columns */
+@media (min-width: 768px) {
   .pathway-columns {
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
     align-items: start;
     gap: 22px;
   }
@@ -450,6 +450,19 @@ html {
     position: sticky;
     top: 12px;
     min-height: 100%;
+  }
+}
+
+/* Repeat medications 3-column grid */
+.medications-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .medications-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
