@@ -75,6 +75,7 @@
 - Bidirectional highlighting uses two independent state vars in DashboardLayout: highlightedNodeId (timeline→graph) and highlightedRoleId (graph→timeline)
 - callbacksRef pattern in CareerConstellation prevents stale closures — always add new callbacks there
 - LastConsultationSubsection is defined inline in DashboardLayout.tsx, not a separate file
+- Link lines are `<path>` elements (not `<line>`) using quadratic bezier curves — tick handler sets `d` attr, not x1/y1/x2/y2. CSS transitions handle highlight animations on stroke properties
 ---
 
 ## 2026-02-16 - US-005
@@ -108,4 +109,18 @@
   - For highlight styling on timeline cards, use `border: 1px solid transparent` as default with padding/margin compensation to prevent layout shift when highlighting activates
   - LastConsultationSubsection is defined inline in DashboardLayout.tsx, not as a separate file — props must be threaded through the local function definition
   - D3 mouseenter events on SVG `<g>` elements require direct mouse interaction with the SVG, not the React button overlay layer
+---
+
+## 2026-02-16 - US-007
+- Replaced straight `<line>` elements with curved `<path>` elements for link lines between roles and skills
+- Link paths use quadratic bezier curves: `M sx,sy Q cx,sy tx,ty` where cx is the horizontal midpoint — creating a gentle arc that exits horizontally from the role node before curving to the skill
+- Added `fill: none` to paths (required since paths auto-fill unlike lines)
+- Added CSS transitions on stroke/stroke-opacity/stroke-width (150ms ease) for smooth highlight animations, respecting prefers-reduced-motion
+- applyGraphHighlight link styling unchanged — stroke/stroke-opacity/stroke-width attributes work identically on `<path>` as on `<line>`
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json
+- **Learnings for future iterations:**
+  - When converting `<line>` to `<path>`, always add `fill: none` — SVG paths default to `fill: black` which would cover the curve area
+  - Quadratic bezier with control point at `((sx+tx)/2, sy)` creates a nice horizontal-exit curve from role nodes — the path leaves horizontally then arcs down/up to the skill
+  - CSS transitions work on SVG `<path>` stroke properties, so no D3 `.transition()` needed for link highlight animations (unlike `r` attribute which requires D3 transitions)
+  - The tick handler generates the `d` attribute string directly — simpler than using `d3.line().curve()` since we only need two-point curves
 ---

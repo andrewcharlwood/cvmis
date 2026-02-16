@@ -138,7 +138,7 @@
         "Verify in browser — links are nearly invisible at rest and clearly trace pathways on hover"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "The linkSelection is created at lines ~340-345. Change from .join('line') to .join('path'). For the curve, generate a simple quadratic or cubic bezier path string in the tick handler: given source (sx,sy) and target (tx,ty), create a path like M sx,sy Q cx,cy tx,ty where cx,cy is a control point offset to create a gentle arc. A simple approach: control point at ((sx+tx)/2, sy) or ((sx+tx)/2, (sy+ty)/2 + offset). Alternatively use d3.linkHorizontal() or d3.linkVertical() which generate smooth curves between two points. The applyGraphHighlight function's link styling (lines ~465-482) needs updating from line attributes to path attributes — but stroke/stroke-opacity/stroke-width work the same on paths. Use the d3-viz skill for implementation."
     },
     {

@@ -313,12 +313,17 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     const connectorGroup = svg.append('g').attr('class', 'connectors')
     const nodeGroup = svg.append('g').attr('class', 'nodes')
 
-    const linkSelection = linkGroup.selectAll('line')
+    const linkSelection = linkGroup.selectAll('path')
       .data(links)
-      .join('line')
+      .join('path')
+      .attr('fill', 'none')
       .attr('stroke', 'var(--border-light)')
       .attr('stroke-width', 1)
       .attr('stroke-opacity', 0.08)
+      .style('transition', prefersReducedMotion
+        ? 'none'
+        : 'stroke 150ms ease, stroke-opacity 150ms ease, stroke-width 150ms ease'
+      )
 
     const nodeSelection = nodeGroup.selectAll<SVGGElement, SimNode>('g')
       .data(nodes)
@@ -573,10 +578,14 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       })
 
       linkSelection
-        .attr('x1', d => (d.source as SimNode).x)
-        .attr('y1', d => (d.source as SimNode).y)
-        .attr('x2', d => (d.target as SimNode).x)
-        .attr('y2', d => (d.target as SimNode).y)
+        .attr('d', d => {
+          const sx = (d.source as SimNode).x
+          const sy = (d.source as SimNode).y
+          const tx = (d.target as SimNode).x
+          const ty = (d.target as SimNode).y
+          const cx = (sx + tx) / 2
+          return `M${sx},${sy} Q${cx},${sy} ${tx},${ty}`
+        })
 
       nodeSelection.attr('transform', d => `translate(${d.x},${d.y})`)
 
