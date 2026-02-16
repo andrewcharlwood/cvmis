@@ -78,7 +78,7 @@ function buildScreenReaderDescription(): string {
     return `${role.label} at ${role.organization} (${yearRange}): ${skillNames}`
   })
 
-  return `Career constellation graph with ${roleNodes.length} roles and ${skillNodes.length} skills aligned against a vertical timeline. ` +
+  return `Career constellation graph showing ${roleNodes.length} roles and ${skillNodes.length} skills in reverse-chronological order along a vertical timeline, with the most recent role at the top. ` +
     roleDescriptions.join('. ') + '.'
 }
 
@@ -151,7 +151,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     const timelineX = Math.max(100, Math.min(160, width * 0.18))
 
     const yScale = d3.scaleLinear()
-      .domain([minYear, maxYear])
+      .domain([maxYear, minYear])
       .range([topPadding, height - bottomPadding])
 
     // Defs with subtle radial gradient
