@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import * as d3 from 'd3'
-import { constellationNodes, roleSkillMappings } from '@/data/constellation'
+import { constellationNodes } from '@/data/constellation'
 import { timelineEntities } from '@/data/timeline'
 import { useForceSimulation, getHeight } from '@/hooks/useForceSimulation'
 import { useConstellationHighlight } from '@/hooks/useConstellationHighlight'
@@ -9,6 +9,8 @@ import { useTimelineAnimation } from '@/hooks/useTimelineAnimation'
 import { MobileAccordion } from './MobileAccordion'
 import { ConstellationLegend } from './ConstellationLegend'
 import { AccessibleNodeOverlay } from './AccessibleNodeOverlay'
+import { PlayPauseButton } from './PlayPauseButton'
+import { srDescription } from './screen-reader-description'
 import {
   MIN_HEIGHT,
   SKILL_RADIUS_DEFAULT, SKILL_RADIUS_ACTIVE,
@@ -26,29 +28,6 @@ interface CareerConstellationProps {
 
 const nodeById = new Map(constellationNodes.map(node => [node.id, node]))
 const careerEntityById = new Map(timelineEntities.map(entity => [entity.id, entity]))
-const srDescription = buildScreenReaderDescription()
-
-function buildScreenReaderDescription(): string {
-  const entities = constellationNodes.filter(n => n.type === 'role' || n.type === 'education')
-  const skills = constellationNodes.filter(n => n.type === 'skill')
-
-  const entityDescriptions = entities.map(entity => {
-    const mapping = roleSkillMappings.find(m => m.roleId === entity.id)
-    const skillNames = mapping
-      ? mapping.skillIds
-          .map(sid => skills.find(s => s.id === sid)?.label)
-          .filter(Boolean)
-          .join(', ')
-      : ''
-    const yearRange = entity.endYear
-      ? `${entity.startYear}-${entity.endYear}`
-      : `${entity.startYear}-present`
-    return `${entity.label} at ${entity.organization} (${yearRange}): ${skillNames}`
-  })
-
-  return `Career constellation graph showing ${entities.length} roles and ${skills.length} skills in reverse-chronological order along a vertical timeline, with the most recent role at the top. ` +
-    entityDescriptions.join('. ') + '.'
-}
 
 const CareerConstellation: React.FC<CareerConstellationProps> = ({
   onRoleClick,
@@ -252,39 +231,11 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       <MobileAccordion pinnedCareerEntity={pinnedCareerEntity} show={showAccordion} />
 
       {!prefersReducedMotion && (
-        <button
-          onClick={animation.togglePlayPause}
-          aria-label={animation.isPlaying ? 'Pause animation' : 'Play animation'}
-          style={{
-            position: 'absolute',
-            bottom: isMobile ? 8 : 12,
-            right: isMobile ? 8 : 12,
-            width: isMobile ? 44 : 36,
-            height: isMobile ? 44 : 36,
-            borderRadius: '50%',
-            border: '1px solid var(--border-light)',
-            background: 'var(--surface)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: 0.6,
-            transition: 'opacity 150ms ease',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-          onMouseLeave={e => (e.currentTarget.style.opacity = '0.6')}
-        >
-          {animation.isPlaying ? (
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="var(--text-secondary)">
-              <rect x="2" y="1" width="4" height="12" rx="1" />
-              <rect x="8" y="1" width="4" height="12" rx="1" />
-            </svg>
-          ) : (
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="var(--text-secondary)">
-              <polygon points="3,1 13,7 3,13" />
-            </svg>
-          )}
-        </button>
+        <PlayPauseButton
+          isPlaying={animation.isPlaying}
+          onToggle={animation.togglePlayPause}
+          isMobile={isMobile}
+        />
       )}
 
       <p
