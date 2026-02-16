@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
 import { TopBar } from './TopBar'
@@ -236,8 +236,24 @@ function LastConsultationSubsection() {
 export function DashboardLayout() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null)
+  const [chronologyHeight, setChronologyHeight] = useState<number | null>(null)
+  const chronologyRef = useRef<HTMLDivElement>(null)
   const activeSection = useActiveSection()
   const { openPanel } = useDetailPanel()
+
+  // Measure the chronology stream height so the constellation graph can match it
+  useEffect(() => {
+    const el = chronologyRef.current
+    if (!el) return
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setChronologyHeight(entry.contentRect.height)
+      }
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const handleSearchClick = () => {
     setCommandPaletteOpen(true)
@@ -383,15 +399,7 @@ export function DashboardLayout() {
             {/* Patient Pathway — parent section with constellation graph + subsections */}
             <ParentSection title="Patient Pathway" tileId="patient-pathway">
               <div className="pathway-columns">
-                <div className="pathway-graph-sticky">
-                  <CareerConstellation
-                    onRoleClick={handleRoleClick}
-                    onSkillClick={handleSkillClick}
-                    highlightedNodeId={highlightedNodeId}
-                  />
-                </div>
-
-                <div className="chronology-stream" data-tile-id="section-experience">
+                <div ref={chronologyRef} className="chronology-stream" data-tile-id="section-experience">
                   <div
                     style={{
                       marginBottom: '14px',
@@ -433,6 +441,16 @@ export function DashboardLayout() {
                     <EducationSubsection />
                   </div>
                 </div>
+                <div className="pathway-graph-sticky">
+                  <CareerConstellation
+                    onRoleClick={handleRoleClick}
+                    onSkillClick={handleSkillClick}
+                    highlightedNodeId={highlightedNodeId}
+                    containerHeight={chronologyHeight}
+                  />
+                </div>
+
+
               </div>
 
               <div data-tile-id="section-skills" style={{ marginTop: '22px' }}>

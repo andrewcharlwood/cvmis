@@ -7,11 +7,11 @@ interface CareerConstellationProps {
   onRoleClick: (id: string) => void
   onSkillClick: (id: string) => void
   highlightedNodeId?: string | null
+  containerHeight?: number | null
 }
 
-const DESKTOP_HEIGHT = 480
-const TABLET_HEIGHT = 380
-const MOBILE_HEIGHT = 310
+const MIN_HEIGHT = 400
+const MOBILE_FALLBACK_HEIGHT = 360
 
 const ROLE_RADIUS = 30
 const SKILL_RADIUS = 14
@@ -28,10 +28,12 @@ const domainColorMap: Record<string, string> = {
 const roleNodes = constellationNodes.filter(n => n.type === 'role')
 const srDescription = buildScreenReaderDescription()
 
-function getHeight(width: number): number {
-  if (width < 768) return MOBILE_HEIGHT
-  if (width < 1024) return TABLET_HEIGHT
-  return DESKTOP_HEIGHT
+function getHeight(width: number, containerHeight?: number | null): number {
+  // Mobile/tablet: use fallback since columns stack vertically
+  if (width < 1024) return MOBILE_FALLBACK_HEIGHT
+  // Desktop: use measured container height if available, with minimum
+  if (containerHeight && containerHeight > 0) return Math.max(MIN_HEIGHT, containerHeight)
+  return MIN_HEIGHT
 }
 
 interface SimNode extends ConstellationNode {
@@ -86,13 +88,14 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
   onRoleClick,
   onSkillClick,
   highlightedNodeId,
+  containerHeight,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const simulationRef = useRef<d3.Simulation<SimNode, SimLink> | null>(null)
   const highlightGraphRef = useRef<((activeNodeId: string | null) => void) | null>(null)
   const callbacksRef = useRef({ onRoleClick, onSkillClick })
-  const [dimensions, setDimensions] = useState({ width: 800, height: DESKTOP_HEIGHT })
+  const [dimensions, setDimensions] = useState({ width: 800, height: MIN_HEIGHT })
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null)
   const [pinnedNodeId, setPinnedNodeId] = useState<string | null>(null)
   const [nodeButtonPositions, setNodeButtonPositions] = useState<Record<string, { x: number; y: number }>>({})
@@ -117,7 +120,9 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
     const updateDimensions = () => {
       const width = container.clientWidth
-      const height = getHeight(width)
+      // Use viewport width for breakpoint check since container may overflow on mobile
+      const viewportWidth = window.innerWidth
+      const height = getHeight(viewportWidth, containerHeight)
       setDimensions({ width, height })
     }
 
@@ -127,7 +132,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     observer.observe(container)
 
     return () => observer.disconnect()
-  }, [])
+  }, [containerHeight])
 
   useEffect(() => {
     const svg = d3.select(svgRef.current)
