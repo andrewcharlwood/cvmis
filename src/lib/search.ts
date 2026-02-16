@@ -7,7 +7,7 @@ import { skills } from '@/data/skills'
 import { kpis } from '@/data/kpis'
 import type { DetailPanelContent } from '@/types/pmr'
 
-export type PaletteSection = 'Experience' | 'Core Skills' | 'Active Projects' | 'Achievements' | 'Education' | 'Quick Actions'
+export type PaletteSection = 'Experience' | 'Core Skills' | 'Significant Interventions' | 'Achievements' | 'Education' | 'Quick Actions'
 
 export type PaletteAction =
   | { type: 'scroll'; tileId: string }
@@ -61,13 +61,13 @@ export function buildPaletteData(): PaletteItem[] {
     })
   })
 
-  // Active Projects — all 5 investigations from investigations.ts
+  // Significant Interventions — all 5 investigations from investigations.ts
   investigations.forEach((inv) => {
     items.push({
       id: `proj-${inv.id}`,
       title: inv.name,
       subtitle: `${inv.methodology.split('.')[0]} \u00b7 ${inv.requestedYear}`,
-      section: 'Active Projects',
+      section: 'Significant Interventions',
       iconVariant: 'amber',
       iconType: 'project',
       keywords: `${inv.name.toLowerCase()} ${inv.methodology.toLowerCase()} ${inv.techStack.join(' ').toLowerCase()} ${inv.requestedYear}`,
@@ -218,7 +218,7 @@ export function buildSearchIndex(items: PaletteItem[]): Fuse<PaletteItem> {
 const SECTION_ORDER: PaletteSection[] = [
   'Experience',
   'Core Skills',
-  'Active Projects',
+  'Significant Interventions',
   'Achievements',
   'Education',
   'Quick Actions',
@@ -332,7 +332,7 @@ export function buildEmbeddingTexts(): Array<{ id: string; text: string }> {
     })
   })
 
-  // Investigations (Active Projects) — enriched with role context and cross-references
+  // Investigations (Significant Interventions) — enriched with role context and cross-references
   const projectContextMap: Record<string, string> = {
     'inv-pharmetrics': 'Built during Deputy Head role at NHS Norfolk & Waveney ICB. Provides self-serve analytics for budget holders across the integrated care system. Live at medicines.charlwood.xyz.',
     'inv-switching-algorithm': 'Built during Interim Head role at NHS Norfolk & Waveney ICB. Uses real-world GP prescribing data to auto-identify patients on expensive drugs suitable for cost-effective alternatives. Compressed months of manual analysis into 3 days. Includes novel GP payment system linking incentive rewards to prescribing savings.',
@@ -394,4 +394,3 @@ export function buildEmbeddingTexts(): Array<{ id: string; text: string }> {
 
   return texts
 }
-

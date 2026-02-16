@@ -127,7 +127,7 @@ export function ProjectsTile() {
 
   return (
     <Card tileId="projects">
-      <CardHeader dotColor="amber" title="ACTIVE PROJECTS" />
+      <CardHeader dotColor="amber" title="SIGNIFICANT INTERVENTIONS" />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {investigations.map((project) => (

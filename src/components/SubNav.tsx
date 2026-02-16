@@ -13,7 +13,7 @@ const sections: NavSection[] = [
   { id: 'overview', label: 'Overview', tileId: 'patient-summary' },
   { id: 'skills', label: 'Skills', tileId: 'section-skills' },
   { id: 'experience', label: 'Experience', tileId: 'section-experience' },
-  { id: 'projects', label: 'Projects', tileId: 'projects' },
+  { id: 'projects', label: 'Significant Interventions', tileId: 'projects' },
   { id: 'education', label: 'Education', tileId: 'section-education' },
 ]
 
