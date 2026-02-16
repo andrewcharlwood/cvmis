@@ -212,7 +212,7 @@
         "Typecheck passes (npm run typecheck)"
       ],
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "notes": "The accessibility buttons are at lines ~661-705 in the JSX. The critical bug is pointerEvents: 'none' on line 688 — change to 'auto'. Also check the containing div at line 658 which also has pointerEvents: 'none' — the buttons inside should override with 'auto'. The constellationNodes.map ordering determines tab order — consider sorting the nodes array for this specific rendering (roles first sorted by startYear desc, then skills grouped by domain). The focus/blur handlers at lines 692-693 already exist and work with the D3 focus ring. The SVG aria-label at line 629 should be updated."
     },
     {

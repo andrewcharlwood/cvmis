@@ -76,6 +76,8 @@
 - callbacksRef pattern in CareerConstellation prevents stale closures — always add new callbacks there
 - LastConsultationSubsection is defined inline in DashboardLayout.tsx, not a separate file
 - Link lines are `<path>` elements (not `<line>`) using quadratic bezier curves — tick handler sets `d` attr, not x1/y1/x2/y2. CSS transitions handle highlight animations on stroke properties
+- Accessibility buttons are overlaid React `<button>` elements at opacity 0 — container div has pointerEvents 'none', buttons have 'auto'. Tab order is controlled by DOM order (sort the array before .map())
+- Focus on an accessibility button should call `highlightGraphRef.current?.(node.id)` to trigger the D3 focus ring and graph highlights — otherwise keyboard users can't see which node they've tabbed to
 - Force simulation parameters: role forceX/Y strength ~1.0, skill forceX/Y ~0.18, charge -120 (role) / -55 (skill), link distance 72, collide iterations 2
 - Role homeX uses consistent offset (`timelineX + 80 + ROLE_WIDTH/2`), no jitter — roles align vertically
 - Skill homeX pushed right of roles: `skillSpaceStart = roleX + ROLE_WIDTH/2 + 40` ensures skills cluster in the right-side space
@@ -179,4 +181,22 @@
   - constellation.ts role nodes use integer startYear/endYear (null for current roles) while consultations.ts uses formatted duration strings — both are consistent representations of the same dates
   - The `javascript-typescript` skill node exists but has no constellationLinks entries — it appears in the graph as a disconnected node, which is intentional since JS/TS isn't attributed to any specific role
   - codedEntries arrays in consultations.ts are portfolio-specific shorthand codes, not from the CV — they're part of the clinical metaphor design
+---
+
+## 2026-02-16 - US-011
+- Fixed accessibility button `pointerEvents` from `'none'` to `'auto'` so buttons are actually focusable and clickable
+- Sorted accessibility buttons for tab order: roles in reverse-chronological order (Interim Head → Deputy Head → HCD → Pharm Mgr), then skills grouped by domain (technical → clinical → leadership), alphabetically within each domain
+- Added focus ring for skill nodes (circle with radius SKILL_RADIUS_ACTIVE + 3) — previously only role nodes had focus rings
+- Updated focus ring stroke to use `var(--accent)` instead of hardcoded `#0D6E6E`
+- Updated SVG `aria-label` to mention "Clinical pathway constellation" and reverse-chronological order
+- Added keyboard focus triggers: when a button receives focus, the corresponding node highlights in the graph and fires `onNodeHover` for bidirectional highlighting
+- On blur, highlight reverts to pinned node state (or clears)
+- Verified prefers-reduced-motion is already properly respected throughout (no changes needed)
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json, Ralph/progress.txt
+- **Learnings for future iterations:**
+  - The accessibility buttons are React `<button>` elements overlaid on top of the SVG, positioned via `nodeButtonPositions` state — they are invisible (opacity: 0) but focusable
+  - The containing div has `pointerEvents: 'none'` correctly — only the buttons inside override with `pointerEvents: 'auto'`
+  - Tab order is determined by DOM order of the buttons, not by any `tabindex` — sorting the `constellationNodes` array before `.map()` controls the tab sequence
+  - Focus on a button should trigger `highlightGraphRef.current?.(node.id)` to show the D3 focus ring AND highlight connected nodes — without this, keyboard users can't see which node they've tabbed to
+  - The focus ring useEffect syncs `focusedNodeId` → D3 `.focus-ring` elements; it clears all first then applies to the focused one
 ---

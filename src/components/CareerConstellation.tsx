@@ -376,6 +376,14 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
     nodeSelection.filter(d => d.type === 'skill')
       .append('circle')
+      .attr('class', 'focus-ring')
+      .attr('r', SKILL_RADIUS_ACTIVE + 3)
+      .attr('fill', 'none')
+      .attr('stroke', 'transparent')
+      .attr('stroke-width', 2)
+
+    nodeSelection.filter(d => d.type === 'skill')
+      .append('circle')
       .attr('class', 'node-circle')
       .attr('r', SKILL_RADIUS_DEFAULT)
       .attr('fill', d => domainColorMap[d.domain ?? 'technical'] ?? '#0D6E6E')
@@ -657,7 +665,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       svg.selectAll<SVGGElement, SimNode>('g.node')
         .filter(d => d.id === focusedNodeId)
         .select('.focus-ring')
-        .attr('stroke', '#0D6E6E')
+        .attr('stroke', 'var(--accent)')
+        .attr('stroke-width', 2)
     }
   }, [focusedNodeId])
 
@@ -683,7 +692,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         height={dimensions.height}
         viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
         role="img"
-        aria-label="Career constellation showing roles and skills across career timeline"
+        aria-label="Clinical pathway constellation showing career roles and skills in reverse-chronological order along a vertical timeline"
         style={{ display: 'block' }}
       />
 
@@ -756,7 +765,21 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
           pointerEvents: 'none',
         }}
       >
-        {constellationNodes.map(node => {
+        {(() => {
+          const domainOrder: Record<string, number> = { technical: 0, clinical: 1, leadership: 2 }
+          const sorted = [...constellationNodes].sort((a, b) => {
+            if (a.type === 'role' && b.type !== 'role') return -1
+            if (a.type !== 'role' && b.type === 'role') return 1
+            if (a.type === 'role' && b.type === 'role') {
+              return (b.startYear ?? 0) - (a.startYear ?? 0)
+            }
+            const da = domainOrder[a.domain ?? 'technical'] ?? 0
+            const db = domainOrder[b.domain ?? 'technical'] ?? 0
+            if (da !== db) return da - db
+            return (a.label ?? '').localeCompare(b.label ?? '')
+          })
+          return sorted
+        })().map(node => {
           const yearRange = node.endYear
             ? `${node.startYear}-${node.endYear}`
             : `${node.startYear}-present`
@@ -784,12 +807,22 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
                 background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
-                pointerEvents: 'none',
+                pointerEvents: 'auto',
                 padding: 0,
                 opacity: 0,
               }}
-              onFocus={() => setFocusedNodeId(node.id)}
-              onBlur={() => setFocusedNodeId(null)}
+              onFocus={() => {
+                setFocusedNodeId(node.id)
+                highlightGraphRef.current?.(node.id)
+                if (node.type === 'role') {
+                  onNodeHover?.(node.id)
+                }
+              }}
+              onBlur={() => {
+                setFocusedNodeId(null)
+                highlightGraphRef.current?.(pinnedNodeId)
+                onNodeHover?.(pinnedNodeId)
+              }}
               onClick={() => {
                 setPinnedNodeId(node.id)
                 if (node.type === 'role') {
