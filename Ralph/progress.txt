@@ -69,4 +69,24 @@
   - Filter bounds need generous overflow (x/y -20%, width/height 140%+) to avoid clipping the shadow
   - When clearing a filter, use `.attr('filter', null)` — not empty string
   - The role node pill rendering (rect with rx/ry, orgColor fill at 0.12, border at 0.4) was built incrementally across US-003 and US-004 — check existing code before implementing to avoid duplication
+- Skill nodes use SKILL_RADIUS_DEFAULT (7) for resting state and SKILL_RADIUS_ACTIVE (11) for highlighted state — controlled via applyGraphHighlight, not CSS transitions (SVG `r` doesn't transition via CSS)
+- Skill labels default to opacity 0 and are shown/hidden via D3 transitions in applyGraphHighlight — the old updateSkillLabelVisibility collision-based approach was removed
+- Link lines use var(--border-light) at opacity 0.08 for resting state — highlighted links use the skill's domain colour from domainColorMap with strength-proportional opacity
+---
+
+## 2026-02-16 - US-005
+- Replaced SKILL_RADIUS (14) with SKILL_RADIUS_DEFAULT (7) and SKILL_RADIUS_ACTIVE (11)
+- Skill nodes now default to small (r=7), low opacity (0.2), no stroke, hidden labels (opacity 0)
+- On hover/pin: connected skills grow to r=11, fill-opacity 0.85, labels fade in; unconnected nodes dim to opacity 0.06
+- Link lines default to var(--border-light) at opacity 0.08; highlighted links use domain colour with strength-proportional opacity (0.35-0.65)
+- Removed updateSkillLabelVisibility function — label visibility now fully controlled by applyGraphHighlight
+- D3 transitions (180ms) used for skill radius and opacity changes, respecting prefers-reduced-motion
+- Updated collision force and boundary clamping to use SKILL_RADIUS_ACTIVE
+- Skill labels styled: font-geist-mono, 10px, var(--text-secondary)
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json
+- **Learnings for future iterations:**
+  - SVG `r` attribute cannot be animated via CSS transitions — must use D3 `.transition().duration()` for radius changes
+  - The applyGraphHighlight function is the single source of truth for all visual states (resting, highlighted, dimmed) — keep all styling logic there, not split between initial rendering and highlight
+  - D3 transition on a selection that already has a pending transition interrupts it — this is fine for hover interactions where the latest state wins
+  - domainColorMap hex values are needed for D3 attrs (can't use CSS custom properties for computed color values in stroke/fill of highlighted links)
 ---

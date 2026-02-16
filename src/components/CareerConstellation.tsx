@@ -16,7 +16,8 @@ const MOBILE_FALLBACK_HEIGHT = 360
 const ROLE_WIDTH = 104
 const ROLE_HEIGHT = 32
 const ROLE_RX = 16
-const SKILL_RADIUS = 14
+const SKILL_RADIUS_DEFAULT = 7
+const SKILL_RADIUS_ACTIVE = 11
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const supportsCoarsePointer = window.matchMedia('(pointer: coarse)').matches
@@ -313,9 +314,9 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     const linkSelection = linkGroup.selectAll('line')
       .data(links)
       .join('line')
-      .attr('stroke', '#B0C4C0')
-      .attr('stroke-width', 1.5)
-      .attr('stroke-opacity', 0.45)
+      .attr('stroke', 'var(--border-light)')
+      .attr('stroke-width', 1)
+      .attr('stroke-opacity', 0.08)
 
     const nodeSelection = nodeGroup.selectAll<SVGGElement, SimNode>('g')
       .data(nodes)
@@ -365,21 +366,21 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     nodeSelection.filter(d => d.type === 'skill')
       .append('circle')
       .attr('class', 'node-circle')
-      .attr('r', SKILL_RADIUS)
+      .attr('r', SKILL_RADIUS_DEFAULT)
       .attr('fill', d => domainColorMap[d.domain ?? 'technical'] ?? '#0D6E6E')
-      .attr('stroke', '#FFFFFF')
-      .attr('stroke-width', 1.5)
-      .attr('fill-opacity', 0.86)
+      .attr('stroke', 'none')
+      .attr('fill-opacity', 0.2)
 
     nodeSelection.filter(d => d.type === 'skill')
       .append('text')
       .attr('class', 'node-label')
       .attr('text-anchor', 'middle')
-      .attr('dy', SKILL_RADIUS + 14)
-      .attr('fill', '#436964')
-      .attr('font-size', '11')
+      .attr('dy', SKILL_RADIUS_ACTIVE + 14)
+      .attr('fill', 'var(--text-secondary)')
+      .attr('font-size', '10')
       .attr('font-family', 'var(--font-geist-mono)')
       .attr('pointer-events', 'none')
+      .attr('opacity', 0)
       .text(d => {
         const label = d.shortLabel ?? d.label
         return label.length > 16 ? `${label.slice(0, 15)}…` : label
@@ -400,58 +401,47 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       connectedMap.get(l.source)!.add(l.target)
       connectedMap.get(l.target)!.add(l.source)
     })
-    const updateSkillLabelVisibility = (activeNodeId: string | null) => {
-      const shownPositions: Array<{ x: number; y: number }> = []
-      nodeSelection
-        .filter(n => n.type === 'skill')
-        .each(function(n) {
-          const textSel = d3.select(this).select<SVGTextElement>('text.node-label')
-          const connected = activeNodeId ? connectedMap.get(activeNodeId) : null
-          const shouldForceShow = Boolean(activeNodeId && (n.id === activeNodeId || connected?.has(n.id)))
-
-          if (shouldForceShow) {
-            textSel.attr('opacity', 1)
-            shownPositions.push({ x: n.x, y: n.y + SKILL_RADIUS + 14 })
-            return
-          }
-
-          const x = n.x
-          const y = n.y + SKILL_RADIUS + 14
-          const collides = shownPositions.some(p => Math.abs(p.x - x) < 28 && Math.abs(p.y - y) < 14)
-
-          textSel.attr('opacity', collides ? 0 : 1)
-
-          if (!collides) {
-            shownPositions.push({ x, y })
-          }
-        })
-    }
-
     const applyGraphHighlight = (activeNodeId: string | null) => {
+      const dur = prefersReducedMotion ? 0 : 180
+
       if (!activeNodeId) {
         nodeSelection.style('opacity', '1')
+
         nodeSelection.filter(d => d.type === 'role')
           .attr('filter', null)
           .select('.node-circle')
           .attr('stroke-opacity', 0.4)
           .attr('stroke-width', 1)
-        nodeSelection.filter(d => d.type === 'skill')
-          .select('.node-circle')
-          .attr('r', SKILL_RADIUS)
+
+        const skillNodes = nodeSelection.filter(d => d.type === 'skill')
+        if (dur > 0) {
+          skillNodes.select('.node-circle')
+            .transition().duration(dur)
+            .attr('r', SKILL_RADIUS_DEFAULT)
+            .attr('fill-opacity', 0.2)
+          skillNodes.select('.node-label')
+            .transition().duration(dur)
+            .attr('opacity', 0)
+        } else {
+          skillNodes.select('.node-circle')
+            .attr('r', SKILL_RADIUS_DEFAULT)
+            .attr('fill-opacity', 0.2)
+          skillNodes.select('.node-label')
+            .attr('opacity', 0)
+        }
+
         linkSelection
-          .attr('stroke', '#B0C4C0')
-          .attr('stroke-width', 1.5)
-          .attr('stroke-opacity', 0.45)
-        updateSkillLabelVisibility(null)
+          .attr('stroke', 'var(--border-light)')
+          .attr('stroke-width', 1)
+          .attr('stroke-opacity', 0.08)
+
         return
       }
 
       const connected = connectedMap.get(activeNodeId) ?? new Set()
+      const isInGroup = (id: string) => id === activeNodeId || connected.has(id)
 
-      nodeSelection.style('opacity', d => {
-        if (d.id === activeNodeId || connected.has(d.id)) return '1'
-        return '0.16'
-      })
+      nodeSelection.style('opacity', d => isInGroup(d.id) ? '1' : '0.06')
 
       nodeSelection.filter(d => d.type === 'role')
         .attr('filter', d => {
@@ -467,31 +457,48 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         })
         .attr('stroke-width', d => d.id === activeNodeId ? 1.5 : 1)
 
-      nodeSelection.filter(d => d.type === 'skill')
-        .select('.node-circle')
-        .attr('r', d => (d.id === activeNodeId || connected.has(d.id)) ? SKILL_RADIUS + 3 : SKILL_RADIUS)
+      const skillNodes = nodeSelection.filter(d => d.type === 'skill')
+      if (dur > 0) {
+        skillNodes.select('.node-circle')
+          .transition().duration(dur)
+          .attr('r', d => isInGroup(d.id) ? SKILL_RADIUS_ACTIVE : SKILL_RADIUS_DEFAULT)
+          .attr('fill-opacity', d => isInGroup(d.id) ? 0.85 : 0.2)
+        skillNodes.select('.node-label')
+          .transition().duration(dur)
+          .attr('opacity', d => isInGroup(d.id) ? 1 : 0)
+      } else {
+        skillNodes.select('.node-circle')
+          .attr('r', d => isInGroup(d.id) ? SKILL_RADIUS_ACTIVE : SKILL_RADIUS_DEFAULT)
+          .attr('fill-opacity', d => isInGroup(d.id) ? 0.85 : 0.2)
+        skillNodes.select('.node-label')
+          .attr('opacity', d => isInGroup(d.id) ? 1 : 0)
+      }
 
       linkSelection
         .attr('stroke', l => {
           const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
           const tgt = typeof l.target === 'string' ? l.target : (l.target as SimNode).id
-          if (src === activeNodeId || tgt === activeNodeId) return '#0D6E6E'
-          return '#B0C4C0'
+          if (src === activeNodeId || tgt === activeNodeId) {
+            const skillId = src === activeNodeId ? tgt : src
+            const skillNode = nodes.find(n => n.id === skillId)
+            return domainColorMap[skillNode?.domain ?? 'technical'] ?? '#0D6E6E'
+          }
+          return 'var(--border-light)'
         })
         .attr('stroke-opacity', l => {
           const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
           const tgt = typeof l.target === 'string' ? l.target : (l.target as SimNode).id
-          if (src === activeNodeId || tgt === activeNodeId) return 0.76
-          return 0.1
+          if (src === activeNodeId || tgt === activeNodeId) {
+            return Math.max(0.35, Math.min(0.65, l.strength * 0.55 + 0.2))
+          }
+          return 0.08
         })
         .attr('stroke-width', l => {
           const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
           const tgt = typeof l.target === 'string' ? l.target : (l.target as SimNode).id
-          if (src === activeNodeId || tgt === activeNodeId) return 2.5
-          return 1.5
+          if (src === activeNodeId || tgt === activeNodeId) return 1.5
+          return 1
         })
-
-      updateSkillLabelVisibility(activeNodeId)
     }
 
     highlightGraphRef.current = applyGraphHighlight
@@ -538,7 +545,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         return d.homeY
       }).strength(d => d.type === 'role' ? 1 : 0.2))
       .force('collide', d3.forceCollide<SimNode>(d =>
-        d.type === 'role' ? Math.max(ROLE_WIDTH, ROLE_HEIGHT) / 2 + 8 : SKILL_RADIUS + 8
+        d.type === 'role' ? Math.max(ROLE_WIDTH, ROLE_HEIGHT) / 2 + 8 : SKILL_RADIUS_ACTIVE + 10
       ))
 
     simulationRef.current = simulation
@@ -549,8 +556,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
           d.x = Math.max(ROLE_WIDTH / 2 + 6, Math.min(width - ROLE_WIDTH / 2 - 6, d.x))
           d.y = Math.max(ROLE_HEIGHT / 2 + 6, Math.min(height - ROLE_HEIGHT / 2 - 6, d.y))
         } else {
-          d.x = Math.max(SKILL_RADIUS + 6, Math.min(width - SKILL_RADIUS - 6, d.x))
-          d.y = Math.max(SKILL_RADIUS + 6, Math.min(height - SKILL_RADIUS - 6, d.y))
+          d.x = Math.max(SKILL_RADIUS_ACTIVE + 6, Math.min(width - SKILL_RADIUS_ACTIVE - 6, d.x))
+          d.y = Math.max(SKILL_RADIUS_ACTIVE + 6, Math.min(height - SKILL_RADIUS_ACTIVE - 6, d.y))
         }
       })
 

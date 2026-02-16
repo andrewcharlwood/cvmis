@@ -98,7 +98,7 @@
         "Verify in browser — graph looks clean and quiet at rest, informative on hover"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "This modifies the applyGraphHighlight() function (line ~439) and the initial skill node rendering (lines ~382-403). The resting state setup happens when nodes are first created and in the 'no activeNodeId' branch of applyGraphHighlight. The highlighted state logic is in the activeNodeId branch. Key change: skill labels default to opacity 0 (not the current collision-based visibility), and only become visible via applyGraphHighlight when connected. The updateSkillLabelVisibility() function can be simplified or merged into applyGraphHighlight. The SKILL_RADIUS constant should be split into SKILL_RADIUS_DEFAULT (7) and SKILL_RADIUS_ACTIVE (11). Link line styling in the resting branch should use much lower opacity than current 0.45. Use the d3-viz skill for implementation."
     },
     {
