@@ -1,0 +1,227 @@
+# Progress Log — Career Constellation Clinical Pathway Overhaul
+# Branch: ralph/constellation-overhaul
+# Started: 2026-02-16
+
+## Codebase Patterns
+- CareerConstellation.tsx is a D3 force-directed graph rendered in an SVG with React overlay buttons for accessibility
+- D3 simulation uses forceSimulation with charge, link, x, y, and collide forces
+- Module-level window.matchMedia reads for prefersReducedMotion and supportsCoarsePointer
+- DashboardLayout manages constellation state: highlightedNodeId, pinnedNodeId via callbacks
+- Work experience data in src/data/consultations.ts, skills in src/data/skills.ts, constellation-specific data in src/data/constellation.ts
+- CSS layout: .pathway-columns is a grid that switches from 1fr (mobile) to minmax(0,1.15fr) minmax(0,1.5fr) at desktop breakpoint
+- .pathway-graph-sticky has position: sticky; top: 12px; min-height: 100% for the graph column
+- containerHeight prop drives graph height on desktop; on mobile (viewport < 1024px) uses MOBILE_FALLBACK_HEIGHT (360px)
+- Use window.innerWidth for breakpoint checks, not container.clientWidth — the SVG container overflows on mobile
+- Design tokens in index.css :root — use var(--accent), var(--border-light), var(--text-tertiary), etc.
+- Use the d3-viz skill for all D3 rendering stories
+- yScale domain reversal automatically flows through all timeline elements (guides, dots, labels, role positions, simulation forces) — no per-element changes needed
+- Always use CSS custom properties (var(--border), var(--surface), var(--text-tertiary), etc.) for colours in D3 — never hardcode hex values
+- SVG shadows: use <filter> with <feDropShadow> in <defs>, apply to <g> groups via .attr('filter', 'url(#filter-id)'), clear with .attr('filter', null)
+- Role nodes are already pill-shaped rects (ROLE_WIDTH=104, ROLE_HEIGHT=32, ROLE_RX=16) with orgColor badge styling — check before re-implementing
+
+## 2026-02-16 - US-001
+- Reversed yScale domain from [minYear, maxYear] to [maxYear, minYear] so 2025 appears at top
+- Updated buildScreenReaderDescription() to mention reverse-chronological order
+- Files changed: src/components/CareerConstellation.tsx
+- **Learnings for future iterations:**
+  - The yScale is the single source of truth for vertical positioning — reversing its domain is a one-line change that cascades to all D3 elements using it
+  - Year guide lines, year dots, year labels, role initial positions, and simulation forceY all reference yScale — no individual element updates needed
+  - buildScreenReaderDescription() is defined at module level (line ~63), not inside the component
+---
+
+## 2026-02-16 - US-002
+- Removed fixed DESKTOP_HEIGHT/TABLET_HEIGHT/MOBILE_HEIGHT constants, replaced with MIN_HEIGHT (400) and MOBILE_FALLBACK_HEIGHT (360)
+- Added containerHeight prop to CareerConstellation — DashboardLayout measures .chronology-stream via ResizeObserver and passes height
+- getHeight() now takes containerHeight param: on mobile uses fallback, on desktop uses measured height with MIN_HEIGHT floor
+- Used window.innerWidth for mobile breakpoint detection (container.clientWidth is unreliable due to SVG overflow)
+- Files changed: src/components/CareerConstellation.tsx, src/components/DashboardLayout.tsx, src/index.css
+- **Learnings for future iterations:**
+  - The CareerConstellation container div overflows on mobile — its clientWidth reports desktop-sized values even at 375px viewport. Always use window.innerWidth for responsive breakpoint checks in this component.
+  - ResizeObserver on .chronology-stream fires when cards expand/collapse, triggering height update in the graph — this is the key mechanism for dynamic sync.
+  - The dimensions useEffect depends on [containerHeight] so it re-runs when the measured height changes, updating the D3 scales.
+  - CSS grid column ratio was adjusted to minmax(0,1.15fr) minmax(0,1.5fr) to give the graph more horizontal space.
+---
+
+## 2026-02-16 - US-003
+- Removed radial gradient background, replaced with clean var(--surface) fill
+- Added 1px solid var(--border-light) border to the container div
+- Refined timeline vertical rule to 1px stroke using var(--border) colour
+- Replaced year dots (circles) with horizontal tick marks (6-8px lines extending right from timeline)
+- Updated year labels fill to var(--text-tertiary)
+- Made horizontal guide lines subtle: stroke-opacity 0.25, stroke-dasharray '3 4', using var(--border-light)
+- Removed the entire SVG legend group (replacement HTML legend comes in US-008)
+- Files changed: src/components/CareerConstellation.tsx
+- **Learnings for future iterations:**
+  - All colours should use CSS custom property values (var(--border), var(--surface), etc.) rather than hardcoded hex values — the design system tokens are defined in index.css :root
+  - The legend was ~47 lines of D3 code; removing it is a significant net reduction. The HTML replacement in US-008 will be simpler React JSX
+  - Year ticks as horizontal lines are positioned with x1=timelineX, x2=timelineX+width — they extend right from the timeline axis, not centred on it
+  - The container div border + borderRadius + overflow:hidden creates a clean framed look for the SVG without needing an SVG-level border
+---
+
+## 2026-02-16 - US-004
+- Added SVG filter defs for drop shadows: shadow-sm-filter (subtle, for hover/connected) and shadow-md-filter (stronger, for active/pinned)
+- Updated applyGraphHighlight to apply shadow filters on role node `<g>` elements during highlight states
+- Resting state: no filter; connected role: shadow-sm; active/pinned role: shadow-md with stroke-opacity 1 and stroke-width 1.5
+- Note: most of US-004 (pill shape, orgColor styling, connector lines, focus rings, collision detection) was already implemented in prior iterations
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json
+- **Learnings for future iterations:**
+  - SVG drop shadows use `<filter>` with `<feDropShadow>` — apply to the parent `<g>` group, not the individual shape, for proper rendering
+  - Filter bounds need generous overflow (x/y -20%, width/height 140%+) to avoid clipping the shadow
+  - When clearing a filter, use `.attr('filter', null)` — not empty string
+  - The role node pill rendering (rect with rx/ry, orgColor fill at 0.12, border at 0.4) was built incrementally across US-003 and US-004 — check existing code before implementing to avoid duplication
+- Skill nodes use SKILL_RADIUS_DEFAULT (7) for resting state and SKILL_RADIUS_ACTIVE (11) for highlighted state — controlled via applyGraphHighlight, not CSS transitions (SVG `r` doesn't transition via CSS)
+- Skill labels default to opacity 0 and are shown/hidden via D3 transitions in applyGraphHighlight — the old updateSkillLabelVisibility collision-based approach was removed
+- Link lines use var(--border-light) at opacity 0.08 for resting state — highlighted links use the skill's domain colour from domainColorMap with strength-proportional opacity
+- Bidirectional highlighting uses two independent state vars in DashboardLayout: highlightedNodeId (timeline→graph) and highlightedRoleId (graph→timeline)
+- callbacksRef pattern in CareerConstellation prevents stale closures — always add new callbacks there
+- LastConsultationSubsection is defined inline in DashboardLayout.tsx, not a separate file
+- Link lines are `<path>` elements (not `<line>`) using quadratic bezier curves — tick handler sets `d` attr, not x1/y1/x2/y2. CSS transitions handle highlight animations on stroke properties
+- Accessibility buttons are overlaid React `<button>` elements at opacity 0 — container div has pointerEvents 'none', buttons have 'auto'. Tab order is controlled by DOM order (sort the array before .map())
+- Focus on an accessibility button should call `highlightGraphRef.current?.(node.id)` to trigger the D3 focus ring and graph highlights — otherwise keyboard users can't see which node they've tabbed to
+- Force simulation parameters: role forceX/Y strength ~1.0, skill forceX/Y ~0.18, charge -120 (role) / -55 (skill), link distance 72, collide iterations 2
+- Role homeX uses consistent offset (`timelineX + 80 + ROLE_WIDTH/2`), no jitter — roles align vertically
+- Skill homeX pushed right of roles: `skillSpaceStart = roleX + ROLE_WIDTH/2 + 40` ensures skills cluster in the right-side space
+- Boundary clamping accounts for `topPadding`/`bottomPadding` and `skillBottomPadding` (radius + gap + label line height) to prevent label clipping
+---
+
+## 2026-02-16 - US-005
+- Replaced SKILL_RADIUS (14) with SKILL_RADIUS_DEFAULT (7) and SKILL_RADIUS_ACTIVE (11)
+- Skill nodes now default to small (r=7), low opacity (0.2), no stroke, hidden labels (opacity 0)
+- On hover/pin: connected skills grow to r=11, fill-opacity 0.85, labels fade in; unconnected nodes dim to opacity 0.06
+- Link lines default to var(--border-light) at opacity 0.08; highlighted links use domain colour with strength-proportional opacity (0.35-0.65)
+- Removed updateSkillLabelVisibility function — label visibility now fully controlled by applyGraphHighlight
+- D3 transitions (180ms) used for skill radius and opacity changes, respecting prefers-reduced-motion
+- Updated collision force and boundary clamping to use SKILL_RADIUS_ACTIVE
+- Skill labels styled: font-geist-mono, 10px, var(--text-secondary)
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json
+- **Learnings for future iterations:**
+  - SVG `r` attribute cannot be animated via CSS transitions — must use D3 `.transition().duration()` for radius changes
+  - The applyGraphHighlight function is the single source of truth for all visual states (resting, highlighted, dimmed) — keep all styling logic there, not split between initial rendering and highlight
+  - D3 transition on a selection that already has a pending transition interrupts it — this is fine for hover interactions where the latest state wins
+  - domainColorMap hex values are needed for D3 attrs (can't use CSS custom properties for computed color values in stroke/fill of highlighted links)
+---
+
+## 2026-02-16 - US-006
+- Added `onNodeHover?: (id: string | null) => void` prop to CareerConstellation — fires on role node mouseenter/mouseleave and pin/unpin
+- Added `highlightedRoleId` state in DashboardLayout, wired via `handleNodeHover` callback
+- WorkExperienceSubsection receives `highlightedRoleId` prop; RoleItem shows subtle teal border + background tint when matched
+- LastConsultationSubsection receives `highlightedRoleId` prop; outer wrapper shows border/background highlight for consultations[0]
+- Existing timeline→graph direction (`onNodeHighlight` / `highlightedNodeId`) continues working alongside new reverse direction
+- Touch/pin: clicking/tapping a role node fires `onNodeHover` with the pinned role ID, keeping timeline card highlighted while pinned
+- Files changed: src/components/CareerConstellation.tsx, src/components/DashboardLayout.tsx, src/components/WorkExperienceSubsection.tsx
+- **Learnings for future iterations:**
+  - The bidirectional system uses two separate state variables: `highlightedNodeId` (timeline→graph) and `highlightedRoleId` (graph→timeline) — they coexist independently in DashboardLayout
+  - `callbacksRef` pattern in CareerConstellation avoids stale closure issues — add new callbacks there (e.g., `onNodeHover`) alongside existing ones
+  - For highlight styling on timeline cards, use `border: 1px solid transparent` as default with padding/margin compensation to prevent layout shift when highlighting activates
+  - LastConsultationSubsection is defined inline in DashboardLayout.tsx, not as a separate file — props must be threaded through the local function definition
+  - D3 mouseenter events on SVG `<g>` elements require direct mouse interaction with the SVG, not the React button overlay layer
+---
+
+## 2026-02-16 - US-007
+- Replaced straight `<line>` elements with curved `<path>` elements for link lines between roles and skills
+- Link paths use quadratic bezier curves: `M sx,sy Q cx,sy tx,ty` where cx is the horizontal midpoint — creating a gentle arc that exits horizontally from the role node before curving to the skill
+- Added `fill: none` to paths (required since paths auto-fill unlike lines)
+- Added CSS transitions on stroke/stroke-opacity/stroke-width (150ms ease) for smooth highlight animations, respecting prefers-reduced-motion
+- applyGraphHighlight link styling unchanged — stroke/stroke-opacity/stroke-width attributes work identically on `<path>` as on `<line>`
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json
+- **Learnings for future iterations:**
+  - When converting `<line>` to `<path>`, always add `fill: none` — SVG paths default to `fill: black` which would cover the curve area
+  - Quadratic bezier with control point at `((sx+tx)/2, sy)` creates a nice horizontal-exit curve from role nodes — the path leaves horizontally then arcs down/up to the skill
+  - CSS transitions work on SVG `<path>` stroke properties, so no D3 `.transition()` needed for link highlight animations (unlike `r` attribute which requires D3 transitions)
+  - The tick handler generates the `d` attribute string directly — simpler than using `d3.line().curve()` since we only need two-point curves
+---
+
+## 2026-02-16 - US-008
+- Added compact HTML legend below SVG inside CareerConstellation container
+- Legend shows three 6px coloured dots with labels: Technical (var(--accent)), Clinical (var(--success)), Leadership (var(--amber))
+- Items separated by middle dot (·) separators using var(--border) colour
+- Includes "Hover to explore connections" hint text at slightly reduced opacity (0.7)
+- Uses font-family var(--font-geist-mono), font-size 10px, colour var(--text-tertiary)
+- flex-wrap enabled for graceful narrowing on small screens
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json
+- **Learnings for future iterations:**
+  - The legend is pure React JSX — no D3 involved. Placed between the SVG and the screen reader description paragraph inside the container div
+  - Using React.Fragment with the `.map()` allows conditional separator rendering (skip before first item) without extra wrapper divs
+  - The container div's overflow:hidden clips the legend's border-radius corners cleanly
+---
+
+## 2026-02-16 - US-009
+- Tuned D3 force simulation for clinical layout — role nodes firmly anchored, skill nodes distributed cleanly to the right
+- Role positioning: removed jitter from homeX, all roles at consistent `timelineX + 80 + ROLE_WIDTH/2` offset
+- Skill positioning: pushed centroid right of roles (`skillSpaceStart = roleX + ROLE_WIDTH/2 + 40`) so skills cluster in available right-side space
+- Charge force: split by node type — roles get -120 (stronger repulsion for pill shapes), skills get -55 (moderate clustering)
+- Link distance increased from 56 to 72 to account for wider pill-shaped role nodes
+- Link strength reduced from `strength * 0.7` to `strength * 0.5` for more organic skill distribution
+- Skill forceX/Y strength reduced from 0.2 to 0.18 for slightly more organic spread
+- Role forceY reduced marginally from 1.0 to 0.98 (effectively still anchored but allows micro-adjustment)
+- Collision force: skill radius increased to `SKILL_RADIUS_ACTIVE + 16` (27px) to prevent label overlap on hover; added `.iterations(2)` for better separation
+- alphaDecay increased from 0.06 to 0.08 (animated) and 0.26 to 0.28 (reduced-motion) for faster settling (~1.5s)
+- Reduced-motion tick count decreased from 220 to 150 to match faster alphaDecay
+- Boundary clamping: roles now respect topPadding/bottomPadding; skills use skillBottomPadding (radius + gap + label height = 37px) and 40px right margin for label overflow
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json, Ralph/progress.txt
+- **Learnings for future iterations:**
+  - Split charge strength by node type (`d => d.type === 'role' ? -120 : -55`) — pill-shaped roles need stronger repulsion to avoid overlap while small skill nodes can cluster more tightly
+  - Collision `.iterations(2)` significantly improves separation quality for densely connected subgraphs at minimal performance cost
+  - Consistent role homeX (no jitter) creates a clean vertical column effect — visual order comes from the simulation, not random initial positioning
+  - Skill homeX centroid should be explicitly pushed right of the role column, not just inherited from role positions — the +60 offset plus skillSpaceStart ensures skills don't overlap role pills
+  - Boundary clamping must account for the full visual footprint including labels: for skills, that's radius + dy offset + text line height below the node center
+---
+
+## 2026-02-16 - US-010
+- Content audit: cross-referenced consultations.ts and constellation.ts against References/CV_v4.md
+- Verified all 4 role titles, organisation names, date ranges, and orgColor values match exactly
+- Verified all examination/achievement bullets (numbers, percentages, claims) are accurate against CV source
+- Verified constellation.ts role node labels, shortLabels, startYear/endYear, and organization names are consistent with consultations.ts
+- Verified plan arrays contain accurate outcomes matching CV content
+- No discrepancies found — no data file changes required
+- Note: `javascript-typescript` skill node in constellation.ts is an intentional orphan (no role links) — it's in the CV Core Competencies but not attributed to any specific role's achievements
+- Files changed: Ralph/prd.json (marked passes: true), Ralph/progress.txt
+- **Learnings for future iterations:**
+  - consultations.ts has 4 roles matching CV_v4.md exactly: Interim Head (May-Nov 2025), Deputy Head (Jul 2024-Present), High-Cost Drugs (May 2022-Jul 2024), Pharmacy Manager (Nov 2017-May 2022)
+  - constellation.ts role nodes use integer startYear/endYear (null for current roles) while consultations.ts uses formatted duration strings — both are consistent representations of the same dates
+  - The `javascript-typescript` skill node exists but has no constellationLinks entries — it appears in the graph as a disconnected node, which is intentional since JS/TS isn't attributed to any specific role
+  - codedEntries arrays in consultations.ts are portfolio-specific shorthand codes, not from the CV — they're part of the clinical metaphor design
+---
+
+## 2026-02-16 - US-011
+- Fixed accessibility button `pointerEvents` from `'none'` to `'auto'` so buttons are actually focusable and clickable
+- Sorted accessibility buttons for tab order: roles in reverse-chronological order (Interim Head → Deputy Head → HCD → Pharm Mgr), then skills grouped by domain (technical → clinical → leadership), alphabetically within each domain
+- Added focus ring for skill nodes (circle with radius SKILL_RADIUS_ACTIVE + 3) — previously only role nodes had focus rings
+- Updated focus ring stroke to use `var(--accent)` instead of hardcoded `#0D6E6E`
+- Updated SVG `aria-label` to mention "Clinical pathway constellation" and reverse-chronological order
+- Added keyboard focus triggers: when a button receives focus, the corresponding node highlights in the graph and fires `onNodeHover` for bidirectional highlighting
+- On blur, highlight reverts to pinned node state (or clears)
+- Verified prefers-reduced-motion is already properly respected throughout (no changes needed)
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json, Ralph/progress.txt
+- **Learnings for future iterations:**
+  - The accessibility buttons are React `<button>` elements overlaid on top of the SVG, positioned via `nodeButtonPositions` state — they are invisible (opacity: 0) but focusable
+  - The containing div has `pointerEvents: 'none'` correctly — only the buttons inside override with `pointerEvents: 'auto'`
+  - Tab order is determined by DOM order of the buttons, not by any `tabindex` — sorting the `constellationNodes` array before `.map()` controls the tab sequence
+  - Focus on a button should trigger `highlightGraphRef.current?.(node.id)` to show the D3 focus ring AND highlight connected nodes — without this, keyboard users can't see which node they've tabbed to
+  - The focus ring useEffect syncs `focusedNodeId` → D3 `.focus-ring` elements; it clears all first then applies to the focused one
+---
+
+## 2026-02-16 - US-012
+- Added mobile-responsive constants: MOBILE_ROLE_WIDTH (80), MOBILE_SKILL_RADIUS_DEFAULT (6), MOBILE_SKILL_RADIUS_ACTIVE (9)
+- Increased MOBILE_FALLBACK_HEIGHT from 360 to 380
+- Added `isMobile = window.innerWidth < 640` breakpoint detection in D3 effect (using window.innerWidth, not container.clientWidth, due to known overflow issue)
+- Computed responsive layout parameters: role width, skill radii, padding, timelineX, roleGap, skillGap all scale down on mobile
+- Mobile label truncation: roles 10 chars max, skills 12 chars max (with ellipsis)
+- Reduced force simulation parameters on mobile: charge -80/-35 (vs -120/-55), link distance 48 (vs 72), smaller collision radii
+- Fixed CSS grid overflow: added `min-width: 0` to `.pathway-columns` and `.pathway-graph-sticky`, plus `overflow: hidden` on `.pathway-graph-sticky`
+- Accessibility button width uses responsive check for mobile pill width
+- Verified at 375px (SVG 258x380), 430px (mobile layout), and 1440px (full desktop 1706px height)
+- Touch interactions (tap-to-pin) already worked via `supportsCoarsePointer` — no changes needed
+- HTML legend wraps gracefully on narrow screens via existing `flex-wrap`
+- Files changed: src/components/CareerConstellation.tsx, src/index.css, Ralph/prd.json, Ralph/progress.txt
+- **Learnings for future iterations:**
+  - CSS Grid children with `min-width: auto` (the default) allow oversized SVG content to overflow the grid cell. Fix with `min-width: 0` on the grid child and `overflow: hidden`
+  - Always use `window.innerWidth` for mobile breakpoint detection in CareerConstellation — `container.clientWidth` reports incorrect values due to the SVG overflow issue
+  - D3 force simulation parameters need separate tuning for mobile — smaller charge, shorter link distance, and tighter collision radii produce a compact layout that fits in ~260px width
+  - Label truncation prevents text overflow on mobile but loses information — keep truncation length generous enough to remain identifiable (10 chars for roles, 12 for skills)
+  - The `.pathway-graph-sticky` overflow fix must be `hidden` not `auto` to prevent scrollbars appearing inside the grid cell
+---
+
+## COMPLETE
+All 12 user stories (US-001 through US-012) implemented and passing.
+Feature branch: ralph/constellation-overhaul
