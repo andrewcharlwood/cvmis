@@ -294,7 +294,7 @@
         "Typecheck passes"
       ],
       "priority": 15,
-      "passes": false,
+      "passes": true,
       "notes": "The benchmark uses the non-streaming endpoint (no stream:true needed). OpenRouter non-streaming response format: { choices: [{ message: { content: '...' } }] }. The buildSystemPrompt() function should be imported from the renamed llm.ts (or duplicated if the import path alias doesn't work in tsx scripts — check if @/ alias resolves). Keep the same retry logic structure but update status code handling for OpenRouter. The scoring prompt and question flow are unchanged — only the API transport layer changes."
     },
     {

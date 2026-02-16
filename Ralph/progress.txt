@@ -37,6 +37,8 @@
 - `handleSubmit(overrideText?)` accepts optional text param — use this when programmatically sending messages (e.g., suggested question chips) to avoid stale `inputValue` state
 - `SUGGESTED_QUESTIONS` const array at top of ChatWidget — edit here to change welcome screen chip text
 - System prompt prefixes each CV entry with `[item-id]` so the model can directly reference IDs in its `[ITEMS: ...]` suffix — more reliable than expecting pattern inference
+- Benchmark script (`scripts/benchmark.ts`) uses OpenRouter non-streaming endpoint — response format: `choices[0].message.content` (not `.delta.content` like streaming). Auth via `Authorization: Bearer` header, API key from `process.env.VITE_OPEN_ROUTER_API_KEY`
+- Cannot import `buildSystemPrompt` from `src/lib/llm.ts` into Node scripts — `llm.ts` uses `import.meta.env` (Vite) and `window.location` (browser). Benchmark keeps its own copy of `buildSystemPrompt` that mirrors production
 
 ---
 
@@ -343,4 +345,28 @@
   - `VITE_OPEN_ROUTER_API_KEY` replaces `VITE_GEMINI_API_KEY` — update `.env` file accordingly
   - `buildSystemPrompt()` is now exported from `llm.ts` — benchmark script (US-015) can import it directly instead of duplicating the logic
   - The benchmark script (`scripts/benchmark.ts`) still uses the old Gemini API — needs separate migration in US-015
+---
+
+## 2026-02-16 - US-015
+- Migrated `scripts/benchmark.ts` from Gemini API to OpenRouter API
+- Replaced `GEMINI_MODEL` / `GEMINI_API_BASE` with `LLM_MODEL = 'z-ai/glm-5'` and `OPENROUTER_API_URL`
+- Updated `getApiKey()` to read `VITE_OPEN_ROUTER_API_KEY` from `.env`
+- Renamed `callGemini()` → `callLLM()` with OpenRouter request format:
+  - OpenAI-compatible messages array with `role: 'system'` for system prompt
+  - Auth via `Authorization: Bearer` header (not URL param)
+  - Added `HTTP-Referer` and `X-Title` headers per OpenRouter docs
+  - Response parsing: `choices[0].message.content` (non-streaming format)
+  - `max_tokens` (OpenAI format) instead of `maxOutputTokens` (Gemini format)
+- Updated `buildSystemPrompt()` to match production `llm.ts` format: item ID prefixes (`[item-id]`), same rules and instructions
+- Scoring calls also use OpenRouter via `callLLM()` (same model)
+- Rate limit retry logic kept same structure, updated error message text for OpenRouter
+- Model name in results output updated to `z-ai/glm-5`
+- Verified end-to-end: `npm run benchmark` runs all 10 questions, scores them, saves results to `scripts/benchmark-results/iteration-0.json`
+- Typecheck passes (0 errors), lint passes (0 new errors/warnings)
+- Files changed: `scripts/benchmark.ts`
+- **Learnings for future iterations:**
+  - Cannot import `buildSystemPrompt` from `src/lib/llm.ts` into Node scripts — `llm.ts` uses `import.meta.env` (Vite-only) and `window.location` (browser-only). Keep a mirrored copy in the benchmark script
+  - OpenRouter non-streaming response format: `{ choices: [{ message: { content: '...' } }] }` — different from streaming which uses `delta.content`
+  - For Node.js scripts, use a static URL for `HTTP-Referer` header (e.g., `'https://andycharlwood.co.uk'`) since `window.location` isn't available
+  - The benchmark script's `buildSystemPrompt()` should be kept in sync with `llm.ts` manually — if one changes, update the other (US-016/US-017 will modify the production prompt)
 ---

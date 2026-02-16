@@ -62,75 +62,74 @@ interface BenchmarkResults {
   results: QuestionResult[]
 }
 
-// --- Gemini API ---
+// --- OpenRouter API ---
 
-const GEMINI_MODEL = 'gemini-3-flash-preview'
-const GEMINI_API_BASE = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}`
+const LLM_MODEL = 'z-ai/glm-5'
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 function getApiKey(): string {
-  const key = process.env.VITE_GEMINI_API_KEY
+  const key = process.env.VITE_OPEN_ROUTER_API_KEY
   if (!key) {
-    throw new Error('VITE_GEMINI_API_KEY not set. Ensure .env file exists with this key.')
+    throw new Error('VITE_OPEN_ROUTER_API_KEY not set. Ensure .env file exists with this key.')
   }
   return key
 }
 
 function buildSystemPrompt(): string {
   const texts = buildEmbeddingTexts()
-  const cvContent = texts.map((t) => `- ${t.text}`).join('\n')
+  const cvContent = texts.map((t) => `[${t.id}] ${t.text}`).join('\n')
 
-  return `You are an AI assistant on Andy Charlwood's portfolio website. Answer questions about his experience, skills, projects, and qualifications.
+  return `You are a helpful assistant on Andy Charlwood's portfolio website.
 
-## Andy's Professional Profile
+## Profile Data
+Each entry is prefixed with its ID in square brackets.
 
 ${cvContent}
 
-## Rules
-1. Use ONLY the profile above. Never invent roles, dates, or achievements.
-2. Be concise (2-4 sentences). Be professional but friendly.
-3. If the information isn't in the profile, say so.
+## Response Rules
+- Answer ONLY from the profile data above. Never invent facts, roles, dates, or achievements.
+- Be concise: 2-4 sentences. Professional and friendly tone.
+- If the answer isn't in the profile, say so honestly.
+- Do not fabricate URLs, email addresses, or contact details.
 
 ## Item References
-After your answer, on a NEW line, list relevant portfolio item IDs:
-[ITEMS: id1, id2, id3]
-- IDs match the profile entries above (exp-*, skill-*, proj-*, ach-*, edu-*, action-*).
-- Only include IDs directly relevant to your answer.
-- If no items are relevant, omit the [ITEMS: ...] line entirely.`
+End your response with a single line listing relevant item IDs:
+[ITEMS: exp-nhs-nwicb, skill-python]
+Only include IDs that directly support your answer. Omit the line if none are relevant.`
 }
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-async function callGemini(
+async function callLLM(
   systemPrompt: string,
   userMessage: string,
   temperature = 0.7,
-  maxOutputTokens = 512,
+  maxTokens = 512,
 ): Promise<string> {
   const apiKey = getApiKey()
   const maxRetries = 5
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
-    const response = await fetch(
-      `${GEMINI_API_BASE}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemPrompt }],
-          },
-          contents: [
-            { role: 'user', parts: [{ text: userMessage }] },
-          ],
-          generationConfig: {
-            temperature,
-            maxOutputTokens,
-          },
-        }),
+    const response = await fetch(OPENROUTER_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://andycharlwood.co.uk',
+        'X-Title': 'Andy Charlwood Portfolio',
       },
-    )
+      body: JSON.stringify({
+        model: LLM_MODEL,
+        temperature,
+        max_tokens: maxTokens,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage },
+        ],
+      }),
+    })
 
     if (response.status === 429 || response.status === 503) {
       const errorBody = await response.text()
@@ -144,13 +143,13 @@ async function callGemini(
 
     if (!response.ok) {
       const errorBody = await response.text()
-      throw new Error(`Gemini API error ${response.status}: ${errorBody}`)
+      throw new Error(`OpenRouter API error ${response.status}: ${errorBody}`)
     }
 
     const data = await response.json()
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
+    const text = data?.choices?.[0]?.message?.content
     if (!text) {
-      throw new Error(`No text in Gemini response: ${JSON.stringify(data)}`)
+      throw new Error(`No text in OpenRouter response: ${JSON.stringify(data)}`)
     }
     return text
   }
@@ -220,7 +219,7 @@ EXPECTED ANSWER: ${expectedAnswer}
 
 ACTUAL ANSWER: ${actualAnswer}`
 
-  const rawResponse = await callGemini(scoringPrompt, userMessage, 0, 512)
+  const rawResponse = await callLLM(scoringPrompt, userMessage, 0, 512)
 
   // Extract JSON — handle code fences, preamble text, multiline responses
   const extracted = extractJson(rawResponse)
@@ -311,7 +310,7 @@ async function main() {
   const iteration = getNextIteration(resultsDir)
   console.log(`Running iteration ${iteration}...`)
 
-  // Build system prompt (same as production)
+  // Build system prompt (same as production llm.ts)
   const systemPrompt = buildSystemPrompt()
   console.log(`System prompt built (${systemPrompt.length} chars).`)
 
@@ -321,9 +320,9 @@ async function main() {
   for (const q of config.questions) {
     console.log(`\n[${q.id}] ${q.question}`)
 
-    // Get answer from Gemini
+    // Get answer from LLM
     console.log('  Getting answer...')
-    const actualAnswer = await callGemini(systemPrompt, q.question)
+    const actualAnswer = await callLLM(systemPrompt, q.question)
     console.log(`  Answer: ${actualAnswer.slice(0, 100)}...`)
 
     // Score the answer
@@ -354,7 +353,7 @@ async function main() {
   const results: BenchmarkResults = {
     iteration,
     timestamp: new Date().toISOString(),
-    model: GEMINI_MODEL,
+    model: LLM_MODEL,
     totalScore,
     maxPossibleScore: config.maxScore,
     passThreshold: config.passThreshold,
