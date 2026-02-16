@@ -36,7 +36,7 @@
         "Verify in browser: expand/collapse work experience cards and confirm graph height adjusts"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Add a ref to the .chronology-stream div in DashboardLayout. Use ResizeObserver to measure its offsetHeight. Pass it as a prop to CareerConstellation. Inside the constellation, use this prop in the dimensions state instead of the fixed getHeight() function. The getHeight() function can become the fallback for when no containerHeight is provided. CSS class .pathway-graph-sticky already has position:sticky — the height change should work within that. Use the d3-viz skill for implementation."
     },
     {
@@ -56,7 +56,7 @@
         "Verify in browser — the graph background and structure should feel consistent with the rest of the dashboard tiles"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Most changes are in the main useEffect that builds the SVG (starting around line 132). Remove the radialGradient defs and the rect that uses it. Replace with a simple rect fill. The legendGroup creation (lines ~221-265) should be removed entirely. The timeline vertical line (lines ~189-196) should change from stroke #A8C4BF / width 2 to the border token colour / width 1. Year dots (circle.year-dot) should become short horizontal ticks (line elements). Year guide lines should become dashed. Use the d3-viz skill for implementation."
     },
     {

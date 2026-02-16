@@ -9,10 +9,13 @@
 - DashboardLayout manages constellation state: highlightedNodeId, pinnedNodeId via callbacks
 - Work experience data in src/data/consultations.ts, skills in src/data/skills.ts, constellation-specific data in src/data/constellation.ts
 - CSS layout: .pathway-columns is a grid that switches from 1fr (mobile) to minmax(0,1.15fr) minmax(0,1.5fr) at desktop breakpoint
-- .pathway-graph-sticky has position: sticky; top: 12px for the graph column
+- .pathway-graph-sticky has position: sticky; top: 12px; min-height: 100% for the graph column
+- containerHeight prop drives graph height on desktop; on mobile (viewport < 1024px) uses MOBILE_FALLBACK_HEIGHT (360px)
+- Use window.innerWidth for breakpoint checks, not container.clientWidth — the SVG container overflows on mobile
 - Design tokens in index.css :root — use var(--accent), var(--border-light), var(--text-tertiary), etc.
 - Use the d3-viz skill for all D3 rendering stories
 - yScale domain reversal automatically flows through all timeline elements (guides, dots, labels, role positions, simulation forces) — no per-element changes needed
+- Always use CSS custom properties (var(--border), var(--surface), var(--text-tertiary), etc.) for colours in D3 — never hardcode hex values
 
 ## 2026-02-16 - US-001
 - Reversed yScale domain from [minYear, maxYear] to [maxYear, minYear] so 2025 appears at top
@@ -22,4 +25,33 @@
   - The yScale is the single source of truth for vertical positioning — reversing its domain is a one-line change that cascades to all D3 elements using it
   - Year guide lines, year dots, year labels, role initial positions, and simulation forceY all reference yScale — no individual element updates needed
   - buildScreenReaderDescription() is defined at module level (line ~63), not inside the component
+---
+
+## 2026-02-16 - US-002
+- Removed fixed DESKTOP_HEIGHT/TABLET_HEIGHT/MOBILE_HEIGHT constants, replaced with MIN_HEIGHT (400) and MOBILE_FALLBACK_HEIGHT (360)
+- Added containerHeight prop to CareerConstellation — DashboardLayout measures .chronology-stream via ResizeObserver and passes height
+- getHeight() now takes containerHeight param: on mobile uses fallback, on desktop uses measured height with MIN_HEIGHT floor
+- Used window.innerWidth for mobile breakpoint detection (container.clientWidth is unreliable due to SVG overflow)
+- Files changed: src/components/CareerConstellation.tsx, src/components/DashboardLayout.tsx, src/index.css
+- **Learnings for future iterations:**
+  - The CareerConstellation container div overflows on mobile — its clientWidth reports desktop-sized values even at 375px viewport. Always use window.innerWidth for responsive breakpoint checks in this component.
+  - ResizeObserver on .chronology-stream fires when cards expand/collapse, triggering height update in the graph — this is the key mechanism for dynamic sync.
+  - The dimensions useEffect depends on [containerHeight] so it re-runs when the measured height changes, updating the D3 scales.
+  - CSS grid column ratio was adjusted to minmax(0,1.15fr) minmax(0,1.5fr) to give the graph more horizontal space.
+---
+
+## 2026-02-16 - US-003
+- Removed radial gradient background, replaced with clean var(--surface) fill
+- Added 1px solid var(--border-light) border to the container div
+- Refined timeline vertical rule to 1px stroke using var(--border) colour
+- Replaced year dots (circles) with horizontal tick marks (6-8px lines extending right from timeline)
+- Updated year labels fill to var(--text-tertiary)
+- Made horizontal guide lines subtle: stroke-opacity 0.25, stroke-dasharray '3 4', using var(--border-light)
+- Removed the entire SVG legend group (replacement HTML legend comes in US-008)
+- Files changed: src/components/CareerConstellation.tsx
+- **Learnings for future iterations:**
+  - All colours should use CSS custom property values (var(--border), var(--surface), etc.) rather than hardcoded hex values — the design system tokens are defined in index.css :root
+  - The legend was ~47 lines of D3 code; removing it is a significant net reduction. The HTML replacement in US-008 will be simpler React JSX
+  - Year ticks as horizontal lines are positioned with x1=timelineX, x2=timelineX+width — they extend right from the timeline axis, not centred on it
+  - The container div border + borderRadius + overflow:hidden creates a clean framed look for the SVG without needing an SVG-level border
 ---
