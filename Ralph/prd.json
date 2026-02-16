@@ -117,7 +117,7 @@
         "Verify in browser at mobile viewport: tap role → accordion expands with details, tap again → collapses"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "New JSX inside CareerConstellation container div, below the SVG and HTML legend. Import consultations from '@/data/consultations'. When pinnedNodeId matches a consultation.id on a coarse pointer device, render the accordion. Use a local showMore state for the expand toggle. Consultation data provides: role (title), organization, duration, examination (string[] achievements), plan (string[] outcomes). Show first 3 examination items collapsed, all when expanded. Animation: use max-height + overflow hidden with CSS transition (200ms ease-out), or measure content height dynamically. Add click handler on SVG background rect to clear pinnedNodeId for 'tap elsewhere to close'. Hide accordion entirely when !supportsCoarsePointer. Style with the same font and spacing as WorkExperienceSubsection for consistency. Use the d3-viz skill."
     },
     {

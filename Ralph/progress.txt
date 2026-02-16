@@ -29,6 +29,8 @@
 - Use the d3-viz skill for all D3 rendering stories
 - Consultation entries ordered reverse-chronologically (newest first) — new entries go at the end of the array
 - Constellation role nodes, skill mappings, and links are in constellation.ts — adding nodes there automatically extends yScale domain and screen reader description
+- Mobile accordion (coarse pointer): pinnedNodeId drives both graph highlight AND accordion visibility. Accordion only shows for role-type nodes (not skills)
+- SVG background rect has class `.bg-rect` — used for "tap elsewhere to close" handler on touch devices
 
 ## 2026-02-16 - US-001
 - Added Duty Pharmacy Manager (2016-2017, Tesco PLC) and Pre-Registration Pharmacist (2015-2016, Paydens Pharmacy) role nodes to constellation.ts
@@ -109,4 +111,25 @@
   - Role rect fill-opacity 0.12 IS the resting state (initialized at line 384), not a dimmed state — don't confuse with skill resting at 0.35
   - mouseleave should reset to highlightedNodeId (external prop) not pinnedNodeId — on desktop there is no pin, so fallback is null (resting)
   - The supportsCoarsePointer guard at top of each handler cleanly separates desktop/touch paths without duplicating the handler
+---
+
+## 2026-02-16 - US-006
+- Added mobile accordion expansion below constellation SVG for role details on tap
+- Accordion shows role title, organisation, duration, and top 3 examination items by default
+- "Show more" button reveals full examination and plan arrays (only appears when >3 examination items)
+- Tapping a different role switches accordion content and auto-collapses "show more" (via useEffect on pinnedNodeId)
+- Tapping the same role again or tapping empty SVG background collapses accordion and resets highlights
+- Added click handler on SVG background rect (`.bg-rect`) to clear pinnedNodeId on coarse pointer
+- Accordion uses Framer Motion AnimatePresence with height 0→auto, 200ms ease-out (matches tile expansion pattern)
+- Accordion hidden entirely on desktop (fine pointer) via supportsCoarsePointer guard
+- Skill node taps do not open accordion — only role nodes (filtered by `n.type === 'role'`)
+- Legend hint text changes to "Tap to explore connections" on coarse pointer devices
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json, Ralph/progress.txt
+- **Learnings for future iterations:**
+  - The SVG background rect must have a class (`.bg-rect`) for later selection — D3 event handlers on SVG elements created early in the useEffect can reference functions defined later by selecting the element after the function is defined
+  - pinnedNodeId is local to CareerConstellation — it's not passed to DashboardLayout. The accordion relies on this internal state
+  - Framer Motion `key` prop on motion.div enables smooth exit→enter transitions when switching between different roles (AnimatePresence exits the old key, enters the new)
+  - `accordionShowMore` state must reset on pinnedNodeId change to auto-collapse "show more" when switching roles
+  - Not all consultations have >3 examination items — the "Show more" button only renders conditionally, and plan items are only shown when expanded
+  - Browser testing for coarse pointer features requires touch emulation — Playwright's default Chromium reports fine pointer, so the accordion won't appear without explicit touch device emulation
 ---

@@ -1,6 +1,8 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import * as d3 from 'd3'
 import { constellationNodes, constellationLinks, roleSkillMappings } from '@/data/constellation'
+import { consultations } from '@/data/consultations'
 import type { ConstellationNode } from '@/types/pmr'
 
 interface CareerConstellationProps {
@@ -107,6 +109,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
   const [dimensions, setDimensions] = useState({ width: 800, height: MIN_HEIGHT, scaleFactor: 1 })
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null)
   const [pinnedNodeId, setPinnedNodeId] = useState<string | null>(null)
+  const [accordionShowMore, setAccordionShowMore] = useState(false)
   const [nodeButtonPositions, setNodeButtonPositions] = useState<Record<string, { x: number; y: number }>>({})
 
   callbacksRef.current = { onRoleClick, onSkillClick, onNodeHover }
@@ -186,6 +189,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .range([topPadding, height - bottomPadding])
 
     svg.append('rect')
+      .attr('class', 'bg-rect')
       .attr('width', width)
       .attr('height', height)
       .attr('fill', 'var(--surface)')
@@ -551,6 +555,15 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
     highlightGraphRef.current = applyGraphHighlight
 
+    // Touch: tap on background to clear pinned highlight and close accordion
+    svg.select('.bg-rect').on('click', () => {
+      if (supportsCoarsePointer) {
+        setPinnedNodeId(null)
+        applyGraphHighlight(null)
+        callbacksRef.current.onNodeHover?.(null)
+      }
+    })
+
     nodeSelection.on('mouseenter', function(_event, d) {
       if (supportsCoarsePointer) return
       applyGraphHighlight(d.id)
@@ -706,6 +719,16 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     highlightGraphRef.current(highlightedNodeId ?? pinnedNodeId)
   }, [highlightedNodeId, pinnedNodeId])
 
+  // Reset "show more" when switching between pinned roles
+  useEffect(() => {
+    setAccordionShowMore(false)
+  }, [pinnedNodeId])
+
+  // Find consultation for pinned role (accordion on mobile)
+  const pinnedRoleNode = pinnedNodeId ? constellationNodes.find(n => n.id === pinnedNodeId && n.type === 'role') : null
+  const pinnedConsultation = pinnedRoleNode ? consultations.find(c => c.id === pinnedRoleNode.id) : null
+  const showAccordion = supportsCoarsePointer && pinnedConsultation !== null && pinnedConsultation !== undefined
+
   return (
     <div
       ref={containerRef}
@@ -765,8 +788,165 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
           </React.Fragment>
         ))}
         <span style={{ color: 'var(--border)', userSelect: 'none' }} aria-hidden="true">·</span>
-        <span style={{ opacity: 0.7 }}>Hover to explore connections</span>
+        <span style={{ opacity: 0.7 }}>{supportsCoarsePointer ? 'Tap to explore connections' : 'Hover to explore connections'}</span>
       </div>
+
+      {/* Mobile accordion: role details on tap */}
+      <AnimatePresence>
+        {showAccordion && pinnedConsultation && (
+          <motion.div
+            key={pinnedConsultation.id}
+            initial={{ height: 0 }}
+            animate={{ height: 'auto' }}
+            exit={{ height: 0 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div
+              style={{
+                padding: '12px 16px',
+                borderTop: `1px solid ${pinnedConsultation.orgColor ?? 'var(--border-light)'}`,
+                fontFamily: 'var(--font-ui)',
+              }}
+            >
+              <div style={{ marginBottom: '8px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginBottom: '2px',
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      backgroundColor: pinnedConsultation.orgColor ?? 'var(--accent)',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      color: 'var(--text-primary)',
+                    }}
+                  >
+                    {pinnedConsultation.role}
+                  </span>
+                </div>
+                <div
+                  style={{
+                    fontSize: '11px',
+                    color: 'var(--text-secondary)',
+                    fontFamily: 'var(--font-geist-mono)',
+                    paddingLeft: '14px',
+                  }}
+                >
+                  {pinnedConsultation.organization} · {pinnedConsultation.duration}
+                </div>
+              </div>
+
+              <ul
+                style={{
+                  margin: 0,
+                  paddingLeft: '14px',
+                  listStyle: 'none',
+                }}
+              >
+                {(accordionShowMore ? pinnedConsultation.examination : pinnedConsultation.examination.slice(0, 3)).map((item, i) => (
+                  <li
+                    key={i}
+                    style={{
+                      fontSize: '12px',
+                      color: 'var(--text-secondary)',
+                      lineHeight: '1.5',
+                      marginBottom: '4px',
+                      display: 'flex',
+                      gap: '8px',
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        width: '4px',
+                        height: '4px',
+                        borderRadius: '50%',
+                        backgroundColor: pinnedConsultation.orgColor ?? 'var(--accent)',
+                        opacity: 0.5,
+                        flexShrink: 0,
+                        marginTop: '7px',
+                      }}
+                    />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              {accordionShowMore && pinnedConsultation.plan.length > 0 && (
+                <ul
+                  style={{
+                    margin: '8px 0 0',
+                    paddingLeft: '14px',
+                    listStyle: 'none',
+                  }}
+                >
+                  {pinnedConsultation.plan.map((item, i) => (
+                    <li
+                      key={i}
+                      style={{
+                        fontSize: '12px',
+                        color: 'var(--text-tertiary)',
+                        lineHeight: '1.5',
+                        marginBottom: '4px',
+                        display: 'flex',
+                        gap: '8px',
+                      }}
+                    >
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          width: '4px',
+                          height: '4px',
+                          borderRadius: '50%',
+                          backgroundColor: 'var(--text-tertiary)',
+                          opacity: 0.4,
+                          flexShrink: 0,
+                          marginTop: '7px',
+                        }}
+                      />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {pinnedConsultation.examination.length > 3 && (
+                <button
+                  type="button"
+                  onClick={() => setAccordionShowMore(prev => !prev)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '4px 14px',
+                    fontSize: '11px',
+                    fontFamily: 'var(--font-geist-mono)',
+                    color: pinnedConsultation.orgColor ?? 'var(--accent)',
+                    fontWeight: 500,
+                    marginTop: '4px',
+                  }}
+                >
+                  {accordionShowMore ? 'Show less' : 'Show more'}
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <p
         style={{
