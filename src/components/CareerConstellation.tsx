@@ -248,11 +248,12 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
     const roleOrder = [...roleNodes].sort((a, b) => (a.startYear ?? 0) - (b.startYear ?? 0))
     const roleInitialMap = new Map<string, { x: number; y: number }>()
+    // Consistent horizontal offset for all role nodes — anchored right of timeline
+    const roleX = Math.min(width - sidePadding - ROLE_WIDTH / 2, timelineX + 80 + ROLE_WIDTH / 2)
 
-    roleOrder.forEach((role, index) => {
-      const jitter = (index % 2 === 0 ? -1 : 1) * 32
+    roleOrder.forEach((role) => {
       roleInitialMap.set(role.id, {
-        x: Math.min(width - sidePadding, Math.max(timelineX + 64, timelineX + 124 + jitter)),
+        x: roleX,
         y: yScale(role.startYear ?? minYear),
       })
     })
@@ -279,12 +280,15 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         .map(roleId => roleInitialMap.get(roleId))
         .filter(Boolean) as Array<{ x: number; y: number }>
 
+      // Skill centroid: offset right of roles into the available distribution space
+      const skillSpaceStart = roleX + ROLE_WIDTH / 2 + 40
+      const skillSpaceMid = (skillSpaceStart + width - sidePadding) / 2
       const centroid = linkedRolePositions.length > 0
         ? {
-          x: linkedRolePositions.reduce((sum, p) => sum + p.x, 0) / linkedRolePositions.length,
+          x: Math.max(skillSpaceStart, linkedRolePositions.reduce((sum, p) => sum + p.x, 0) / linkedRolePositions.length + 60),
           y: linkedRolePositions.reduce((sum, p) => sum + p.y, 0) / linkedRolePositions.length,
         }
-        : { x: width * 0.55, y: height * 0.5 }
+        : { x: skillSpaceMid, y: height * 0.5 }
 
       const hash = hashString(n.id)
       const domainBaseAngle = n.domain === 'clinical'
@@ -293,7 +297,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
           ? Math.PI * 1.35
           : Math.PI * 0.05
       const angle = domainBaseAngle + ((hash % 360) * Math.PI / 180) * 0.18
-      const radius = 54 + (hash % 46)
+      const radius = 50 + (hash % 50)
 
       const seededX = centroid.x + Math.cos(angle) * radius
       const seededY = centroid.y + Math.sin(angle) * radius
@@ -547,33 +551,38 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
     const simulation = d3.forceSimulation<SimNode>(nodes)
       .alpha(0.65)
-      .alphaDecay(prefersReducedMotion ? 0.26 : 0.06)
-      .force('charge', d3.forceManyBody<SimNode>().strength(-85))
+      .alphaDecay(prefersReducedMotion ? 0.28 : 0.08)
+      .force('charge', d3.forceManyBody<SimNode>().strength(d =>
+        d.type === 'role' ? -120 : -55
+      ))
       .force('link', d3.forceLink<SimNode, SimLink>(links)
         .id(d => d.id)
-        .distance(56)
-        .strength(d => (d as SimLink).strength * 0.7))
-      .force('x', d3.forceX<SimNode>(d => d.homeX).strength(d => d.type === 'role' ? 1 : 0.2))
+        .distance(72)
+        .strength(d => (d as SimLink).strength * 0.5))
+      .force('x', d3.forceX<SimNode>(d => d.homeX).strength(d => d.type === 'role' ? 1.0 : 0.18))
       .force('y', d3.forceY<SimNode>(d => {
         if (d.type === 'role') {
           return yScale(d.startYear ?? minYear)
         }
         return d.homeY
-      }).strength(d => d.type === 'role' ? 1 : 0.2))
+      }).strength(d => d.type === 'role' ? 0.98 : 0.18))
       .force('collide', d3.forceCollide<SimNode>(d =>
-        d.type === 'role' ? Math.max(ROLE_WIDTH, ROLE_HEIGHT) / 2 + 8 : SKILL_RADIUS_ACTIVE + 10
-      ))
+        d.type === 'role' ? Math.max(ROLE_WIDTH, ROLE_HEIGHT) / 2 + 10 : SKILL_RADIUS_ACTIVE + 16
+      ).iterations(2))
 
     simulationRef.current = simulation
+
+    // Padding for skill label text below the node (radius + gap + line height)
+    const skillBottomPadding = SKILL_RADIUS_ACTIVE + 14 + 12
 
     const renderTick = () => {
       nodes.forEach(d => {
         if (d.type === 'role') {
           d.x = Math.max(ROLE_WIDTH / 2 + 6, Math.min(width - ROLE_WIDTH / 2 - 6, d.x))
-          d.y = Math.max(ROLE_HEIGHT / 2 + 6, Math.min(height - ROLE_HEIGHT / 2 - 6, d.y))
+          d.y = Math.max(ROLE_HEIGHT / 2 + topPadding, Math.min(height - ROLE_HEIGHT / 2 - bottomPadding, d.y))
         } else {
-          d.x = Math.max(SKILL_RADIUS_ACTIVE + 6, Math.min(width - SKILL_RADIUS_ACTIVE - 6, d.x))
-          d.y = Math.max(SKILL_RADIUS_ACTIVE + 6, Math.min(height - SKILL_RADIUS_ACTIVE - 6, d.y))
+          d.x = Math.max(SKILL_RADIUS_ACTIVE + 6, Math.min(width - SKILL_RADIUS_ACTIVE - 40, d.x))
+          d.y = Math.max(SKILL_RADIUS_ACTIVE + topPadding, Math.min(height - skillBottomPadding, d.y))
         }
       })
 
@@ -624,7 +633,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
     if (prefersReducedMotion) {
       simulation.stop()
-      for (let i = 0; i < 220; i++) {
+      for (let i = 0; i < 150; i++) {
         simulation.tick()
       }
       renderTick()

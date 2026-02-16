@@ -76,6 +76,10 @@
 - callbacksRef pattern in CareerConstellation prevents stale closures — always add new callbacks there
 - LastConsultationSubsection is defined inline in DashboardLayout.tsx, not a separate file
 - Link lines are `<path>` elements (not `<line>`) using quadratic bezier curves — tick handler sets `d` attr, not x1/y1/x2/y2. CSS transitions handle highlight animations on stroke properties
+- Force simulation parameters: role forceX/Y strength ~1.0, skill forceX/Y ~0.18, charge -120 (role) / -55 (skill), link distance 72, collide iterations 2
+- Role homeX uses consistent offset (`timelineX + 80 + ROLE_WIDTH/2`), no jitter — roles align vertically
+- Skill homeX pushed right of roles: `skillSpaceStart = roleX + ROLE_WIDTH/2 + 40` ensures skills cluster in the right-side space
+- Boundary clamping accounts for `topPadding`/`bottomPadding` and `skillBottomPadding` (radius + gap + label line height) to prevent label clipping
 ---
 
 ## 2026-02-16 - US-005
@@ -137,4 +141,26 @@
   - The legend is pure React JSX — no D3 involved. Placed between the SVG and the screen reader description paragraph inside the container div
   - Using React.Fragment with the `.map()` allows conditional separator rendering (skip before first item) without extra wrapper divs
   - The container div's overflow:hidden clips the legend's border-radius corners cleanly
+---
+
+## 2026-02-16 - US-009
+- Tuned D3 force simulation for clinical layout — role nodes firmly anchored, skill nodes distributed cleanly to the right
+- Role positioning: removed jitter from homeX, all roles at consistent `timelineX + 80 + ROLE_WIDTH/2` offset
+- Skill positioning: pushed centroid right of roles (`skillSpaceStart = roleX + ROLE_WIDTH/2 + 40`) so skills cluster in available right-side space
+- Charge force: split by node type — roles get -120 (stronger repulsion for pill shapes), skills get -55 (moderate clustering)
+- Link distance increased from 56 to 72 to account for wider pill-shaped role nodes
+- Link strength reduced from `strength * 0.7` to `strength * 0.5` for more organic skill distribution
+- Skill forceX/Y strength reduced from 0.2 to 0.18 for slightly more organic spread
+- Role forceY reduced marginally from 1.0 to 0.98 (effectively still anchored but allows micro-adjustment)
+- Collision force: skill radius increased to `SKILL_RADIUS_ACTIVE + 16` (27px) to prevent label overlap on hover; added `.iterations(2)` for better separation
+- alphaDecay increased from 0.06 to 0.08 (animated) and 0.26 to 0.28 (reduced-motion) for faster settling (~1.5s)
+- Reduced-motion tick count decreased from 220 to 150 to match faster alphaDecay
+- Boundary clamping: roles now respect topPadding/bottomPadding; skills use skillBottomPadding (radius + gap + label height = 37px) and 40px right margin for label overflow
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json, Ralph/progress.txt
+- **Learnings for future iterations:**
+  - Split charge strength by node type (`d => d.type === 'role' ? -120 : -55`) — pill-shaped roles need stronger repulsion to avoid overlap while small skill nodes can cluster more tightly
+  - Collision `.iterations(2)` significantly improves separation quality for densely connected subgraphs at minimal performance cost
+  - Consistent role homeX (no jitter) creates a clean vertical column effect — visual order comes from the simulation, not random initial positioning
+  - Skill homeX centroid should be explicitly pushed right of the role column, not just inherited from role positions — the +60 offset plus skillSpaceStart ensures skills don't overlap role pills
+  - Boundary clamping must account for the full visual footprint including labels: for skills, that's radius + dy offset + text line height below the node center
 ---

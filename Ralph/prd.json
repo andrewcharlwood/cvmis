@@ -176,7 +176,7 @@
         "Verify in browser — nodes appear organised and intentional, not randomly scattered"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "The simulation is configured at lines ~515-532. Key parameters to tune: forceX/forceY strengths for roles (increase to ~1.0), forceX/forceY for skills (keep at 0.15-0.25 for organic clustering), charge strength (currently -85, may need adjustment with new pill-shaped roles), collide radius (needs to account for pill width for roles, and active radius + label for skills), link distance (currently 56, may need increase with larger role nodes). The alphaDecay is currently 0.06 for animated mode — could increase to 0.08-0.1 for faster settling. For the reduced-motion path, the 220 ticks (line 580) may need adjustment. Use the d3-viz skill for implementation."
     },
     {
