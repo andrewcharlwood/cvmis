@@ -16,6 +16,8 @@
 - Use the d3-viz skill for all D3 rendering stories
 - yScale domain reversal automatically flows through all timeline elements (guides, dots, labels, role positions, simulation forces) — no per-element changes needed
 - Always use CSS custom properties (var(--border), var(--surface), var(--text-tertiary), etc.) for colours in D3 — never hardcode hex values
+- SVG shadows: use <filter> with <feDropShadow> in <defs>, apply to <g> groups via .attr('filter', 'url(#filter-id)'), clear with .attr('filter', null)
+- Role nodes are already pill-shaped rects (ROLE_WIDTH=104, ROLE_HEIGHT=32, ROLE_RX=16) with orgColor badge styling — check before re-implementing
 
 ## 2026-02-16 - US-001
 - Reversed yScale domain from [minYear, maxYear] to [maxYear, minYear] so 2025 appears at top
@@ -54,4 +56,17 @@
   - The legend was ~47 lines of D3 code; removing it is a significant net reduction. The HTML replacement in US-008 will be simpler React JSX
   - Year ticks as horizontal lines are positioned with x1=timelineX, x2=timelineX+width — they extend right from the timeline axis, not centred on it
   - The container div border + borderRadius + overflow:hidden creates a clean framed look for the SVG without needing an SVG-level border
+---
+
+## 2026-02-16 - US-004
+- Added SVG filter defs for drop shadows: shadow-sm-filter (subtle, for hover/connected) and shadow-md-filter (stronger, for active/pinned)
+- Updated applyGraphHighlight to apply shadow filters on role node `<g>` elements during highlight states
+- Resting state: no filter; connected role: shadow-sm; active/pinned role: shadow-md with stroke-opacity 1 and stroke-width 1.5
+- Note: most of US-004 (pill shape, orgColor styling, connector lines, focus rings, collision detection) was already implemented in prior iterations
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json
+- **Learnings for future iterations:**
+  - SVG drop shadows use `<filter>` with `<feDropShadow>` — apply to the parent `<g>` group, not the individual shape, for proper rendering
+  - Filter bounds need generous overflow (x/y -20%, width/height 140%+) to avoid clipping the shadow
+  - When clearing a filter, use `.attr('filter', null)` — not empty string
+  - The role node pill rendering (rect with rx/ry, orgColor fill at 0.12, border at 0.4) was built incrementally across US-003 and US-004 — check existing code before implementing to avoid duplication
 ---

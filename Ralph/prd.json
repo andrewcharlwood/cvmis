@@ -77,7 +77,7 @@
         "Verify in browser — role nodes appear as labelled pill badges along the timeline"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "This changes role nodes from <circle> to <rect> with rounded corners. The nodeSelection code that filters d.type === 'role' (lines ~354-380) needs to append 'rect' instead of 'circle'. Position with x = -ROLE_WIDTH/2 and y = -ROLE_HEIGHT/2 so they centre on the force simulation position. The focus-ring can also become a rect. The text element stays largely the same but needs its positioning adjusted (no more dy offset needed if dominant-baseline is middle). The collision force for roles should use a radius roughly equal to Math.max(ROLE_WIDTH, ROLE_HEIGHT)/2 + padding. The connector line should go from the timeline X position to the left edge of the pill node. Use the d3-viz skill for implementation."
     },
     {

@@ -13,9 +13,10 @@ interface CareerConstellationProps {
 const MIN_HEIGHT = 400
 const MOBILE_FALLBACK_HEIGHT = 360
 
-const ROLE_RADIUS = 30
+const ROLE_WIDTH = 104
+const ROLE_HEIGHT = 32
+const ROLE_RX = 16
 const SKILL_RADIUS = 14
-const COLLIDE_RADIUS = 36
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const supportsCoarsePointer = window.matchMedia('(pointer: coarse)').matches
@@ -165,6 +166,27 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .attr('fill', 'var(--surface)')
       .attr('rx', 6)
 
+    // SVG filter defs for role node shadows
+    const defs = svg.append('defs')
+
+    const shadowSm = defs.append('filter')
+      .attr('id', 'shadow-sm-filter')
+      .attr('x', '-20%').attr('y', '-20%')
+      .attr('width', '140%').attr('height', '140%')
+    shadowSm.append('feDropShadow')
+      .attr('dx', 0).attr('dy', 1)
+      .attr('stdDeviation', 1.5)
+      .attr('flood-color', 'rgba(26,43,42,0.08)')
+
+    const shadowMd = defs.append('filter')
+      .attr('id', 'shadow-md-filter')
+      .attr('x', '-30%').attr('y', '-30%')
+      .attr('width', '160%').attr('height', '160%')
+    shadowMd.append('feDropShadow')
+      .attr('dx', 0).attr('dy', 2)
+      .attr('stdDeviation', 3)
+      .attr('flood-color', 'rgba(26,43,42,0.12)')
+
     // Timeline guides and subtle era lanes
     const timelineGroup = svg.append('g').attr('class', 'timeline-guides')
 
@@ -285,6 +307,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     })
 
     const linkGroup = svg.append('g').attr('class', 'links')
+    const connectorGroup = svg.append('g').attr('class', 'connectors')
     const nodeGroup = svg.append('g').attr('class', 'nodes')
 
     const linkSelection = linkGroup.selectAll('line')
@@ -302,32 +325,42 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .attr('data-node-id', d => d.id)
 
     nodeSelection.filter(d => d.type === 'role')
-      .append('circle')
+      .append('rect')
       .attr('class', 'focus-ring')
-      .attr('r', ROLE_RADIUS + 4)
+      .attr('x', -ROLE_WIDTH / 2 - 3)
+      .attr('y', -ROLE_HEIGHT / 2 - 3)
+      .attr('width', ROLE_WIDTH + 6)
+      .attr('height', ROLE_HEIGHT + 6)
+      .attr('rx', ROLE_RX + 2)
       .attr('fill', 'none')
       .attr('stroke', 'transparent')
       .attr('stroke-width', 2)
 
     nodeSelection.filter(d => d.type === 'role')
-      .append('circle')
+      .append('rect')
       .attr('class', 'node-circle')
-      .attr('r', ROLE_RADIUS)
-      .attr('fill', d => d.orgColor ?? '#0D6E6E')
-      .attr('stroke', '#FFFFFF')
-      .attr('stroke-width', 2)
+      .attr('x', -ROLE_WIDTH / 2)
+      .attr('y', -ROLE_HEIGHT / 2)
+      .attr('width', ROLE_WIDTH)
+      .attr('height', ROLE_HEIGHT)
+      .attr('rx', ROLE_RX)
+      .attr('fill', d => d.orgColor ?? 'var(--accent)')
+      .attr('fill-opacity', 0.12)
+      .attr('stroke', d => d.orgColor ?? 'var(--accent)')
+      .attr('stroke-opacity', 0.4)
+      .attr('stroke-width', 1)
 
     nodeSelection.filter(d => d.type === 'role')
       .append('text')
       .attr('class', 'node-label')
       .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .attr('fill', '#FFFFFF')
-      .attr('font-size', '10')
+      .attr('dominant-baseline', 'central')
+      .attr('fill', d => d.orgColor ?? 'var(--accent)')
+      .attr('font-size', '11')
       .attr('font-weight', '600')
       .attr('font-family', 'var(--font-ui)')
       .attr('pointer-events', 'none')
-      .text(d => d.shortLabel ?? d.label.slice(0, 9))
+      .text(d => d.shortLabel ?? d.label.slice(0, 12))
 
     nodeSelection.filter(d => d.type === 'skill')
       .append('circle')
@@ -351,6 +384,14 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         const label = d.shortLabel ?? d.label
         return label.length > 16 ? `${label.slice(0, 15)}…` : label
       })
+
+    const roleConnectors = connectorGroup.selectAll('line.role-connector')
+      .data(nodes.filter(n => n.type === 'role'))
+      .join('line')
+      .attr('class', 'role-connector')
+      .attr('stroke', 'var(--border)')
+      .attr('stroke-width', 1)
+      .attr('stroke-opacity', 0.3)
 
     const connectedMap = new Map<string, Set<string>>()
     constellationLinks.forEach(l => {
@@ -389,6 +430,11 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     const applyGraphHighlight = (activeNodeId: string | null) => {
       if (!activeNodeId) {
         nodeSelection.style('opacity', '1')
+        nodeSelection.filter(d => d.type === 'role')
+          .attr('filter', null)
+          .select('.node-circle')
+          .attr('stroke-opacity', 0.4)
+          .attr('stroke-width', 1)
         nodeSelection.filter(d => d.type === 'skill')
           .select('.node-circle')
           .attr('r', SKILL_RADIUS)
@@ -406,6 +452,20 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         if (d.id === activeNodeId || connected.has(d.id)) return '1'
         return '0.16'
       })
+
+      nodeSelection.filter(d => d.type === 'role')
+        .attr('filter', d => {
+          if (d.id === activeNodeId) return 'url(#shadow-md-filter)'
+          if (connected.has(d.id)) return 'url(#shadow-sm-filter)'
+          return null
+        })
+        .select('.node-circle')
+        .attr('stroke-opacity', d => {
+          if (d.id === activeNodeId) return 1
+          if (connected.has(d.id)) return 0.7
+          return 0.4
+        })
+        .attr('stroke-width', d => d.id === activeNodeId ? 1.5 : 1)
 
       nodeSelection.filter(d => d.type === 'skill')
         .select('.node-circle')
@@ -478,16 +538,20 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         return d.homeY
       }).strength(d => d.type === 'role' ? 1 : 0.2))
       .force('collide', d3.forceCollide<SimNode>(d =>
-        d.type === 'role' ? COLLIDE_RADIUS : SKILL_RADIUS + 8
+        d.type === 'role' ? Math.max(ROLE_WIDTH, ROLE_HEIGHT) / 2 + 8 : SKILL_RADIUS + 8
       ))
 
     simulationRef.current = simulation
 
     const renderTick = () => {
       nodes.forEach(d => {
-        const r = d.type === 'role' ? ROLE_RADIUS : SKILL_RADIUS
-        d.x = Math.max(r + 6, Math.min(width - r - 6, d.x))
-        d.y = Math.max(r + 6, Math.min(height - r - 6, d.y))
+        if (d.type === 'role') {
+          d.x = Math.max(ROLE_WIDTH / 2 + 6, Math.min(width - ROLE_WIDTH / 2 - 6, d.x))
+          d.y = Math.max(ROLE_HEIGHT / 2 + 6, Math.min(height - ROLE_HEIGHT / 2 - 6, d.y))
+        } else {
+          d.x = Math.max(SKILL_RADIUS + 6, Math.min(width - SKILL_RADIUS - 6, d.x))
+          d.y = Math.max(SKILL_RADIUS + 6, Math.min(height - SKILL_RADIUS - 6, d.y))
+        }
       })
 
       linkSelection
@@ -497,6 +561,12 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         .attr('y2', d => (d.target as SimNode).y)
 
       nodeSelection.attr('transform', d => `translate(${d.x},${d.y})`)
+
+      roleConnectors
+        .attr('x1', timelineX)
+        .attr('y1', d => d.y)
+        .attr('x2', d => d.x - ROLE_WIDTH / 2)
+        .attr('y2', d => d.y)
 
       const nextNodePositions: Record<string, { x: number; y: number }> = {}
       nodes.forEach(node => {
@@ -615,7 +685,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
             : `${node.startYear}-present`
 
           const position = nodeButtonPositions[node.id] ?? { x: dimensions.width * 0.5, y: dimensions.height * 0.5 }
-          const buttonSize = node.type === 'role' ? 54 : 34
+          const buttonWidth = node.type === 'role' ? ROLE_WIDTH : 34
+          const buttonHeight = node.type === 'role' ? ROLE_HEIGHT : 34
 
           return (
             <button
@@ -628,8 +699,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
               }
               style={{
                 position: 'absolute',
-                width: buttonSize,
-                height: buttonSize,
+                width: buttonWidth,
+                height: buttonHeight,
                 top: `${position.y}px`,
                 left: `${position.x}px`,
                 transform: 'translate(-50%, -50%)',
