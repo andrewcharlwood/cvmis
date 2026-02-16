@@ -14,11 +14,11 @@ const statusColorMap: Record<string, string> = {
 
 interface ProjectItemProps {
   project: Investigation
-  slideBasis: string
+  slideWidth: string
   onClick: () => void
 }
 
-function ProjectItem({ project, slideBasis, onClick }: ProjectItemProps) {
+function ProjectItem({ project, slideWidth, onClick }: ProjectItemProps) {
   const dotColor = statusColorMap[project.status] || '#0D6E6E'
   const isLive = project.status === 'Live'
 
@@ -35,9 +35,8 @@ function ProjectItem({ project, slideBasis, onClick }: ProjectItemProps) {
   return (
     <div
       style={{
-        flex: `0 0 ${slideBasis}`,
+        flex: `0 0 ${slideWidth}`,
         minWidth: 0,
-        paddingRight: '10px',
       }}
     >
       <div
@@ -64,6 +63,14 @@ function ProjectItem({ project, slideBasis, onClick }: ProjectItemProps) {
           e.currentTarget.style.boxShadow = '0 2px 8px rgba(26,43,42,0.08)'
         }}
         onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = 'var(--border-light)'
+          e.currentTarget.style.boxShadow = 'none'
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = 'var(--accent-border)'
+          e.currentTarget.style.boxShadow = '0 2px 8px rgba(26,43,42,0.08)'
+        }}
+        onBlur={(e) => {
           e.currentTarget.style.borderColor = 'var(--border-light)'
           e.currentTarget.style.boxShadow = 'none'
         }}
@@ -178,7 +185,8 @@ export function ProjectsTile() {
       align: 'start',
       containScroll: 'trimSnaps',
       loop: true,
-      dragFree: true,
+      dragFree: false,
+      slidesToScroll: 1,
     },
     useMemo(() => [autoplayPlugin.current], []),
   )
@@ -222,27 +230,33 @@ export function ProjectsTile() {
     return () => mediaQuery.removeEventListener('change', syncMotionPreference)
   }, [])
 
-  const slideBasis = useMemo(() => {
+  const cardsPerView = useMemo(() => {
     if (viewportWidth < 768) {
-      return '100%'
+      return 1
     }
     if (viewportWidth < 1200) {
-      return '50%'
+      return 2
     }
-    return '33.3333%'
+    return 3
   }, [viewportWidth])
+
+  const slideWidth = useMemo(() => {
+    const gap = 12
+    const totalGap = (cardsPerView - 1) * gap
+    return `calc((100% - ${totalGap}px) / ${cardsPerView})`
+  }, [cardsPerView])
 
   return (
     <Card tileId="projects">
       <CardHeader dotColor="amber" title="SIGNIFICANT INTERVENTIONS" />
 
       <div ref={emblaRef} style={{ overflow: 'hidden' }}>
-        <div style={{ display: 'flex', marginRight: '-10px' }}>
+        <div style={{ display: 'flex', gap: '12px' }}>
           {investigations.map((project) => (
             <ProjectItem
               key={project.id}
               project={project}
-              slideBasis={slideBasis}
+              slideWidth={slideWidth}
               onClick={() => openPanel({ type: 'project', investigation: project })}
             />
           ))}
