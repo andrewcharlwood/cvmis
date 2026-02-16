@@ -76,7 +76,7 @@
         "Verify in browser at 1440px and 2560px widths: elements clearly legible and well-proportioned"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Compute scaleFactor in the dimensions useEffect that already handles containerHeight and resize. Use window.innerWidth (not container.clientWidth — known overflow issue on mobile). Create scaled constants: const scaledRoleWidth = Math.round(ROLE_WIDTH * scaleFactor), etc. Apply throughout D3 rendering where base constants are used. Force simulation parameters also scale: charge strength, link distance, collision radius. The isMobile check (window.innerWidth < 640) bypasses scaling entirely, using MOBILE_ constants as-is. The existing MOBILE_ROLE_WIDTH (80), MOBILE_SKILL_RADIUS_DEFAULT (6), MOBILE_SKILL_RADIUS_ACTIVE (9) remain unchanged. Store scaleFactor in a ref or state so D3 code can access it. Use the d3-viz skill."
     },
     {

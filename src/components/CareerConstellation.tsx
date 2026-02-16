@@ -104,7 +104,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
   const simulationRef = useRef<d3.Simulation<SimNode, SimLink> | null>(null)
   const highlightGraphRef = useRef<((activeNodeId: string | null) => void) | null>(null)
   const callbacksRef = useRef({ onRoleClick, onSkillClick, onNodeHover })
-  const [dimensions, setDimensions] = useState({ width: 800, height: MIN_HEIGHT })
+  const [dimensions, setDimensions] = useState({ width: 800, height: MIN_HEIGHT, scaleFactor: 1 })
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null)
   const [pinnedNodeId, setPinnedNodeId] = useState<string | null>(null)
   const [nodeButtonPositions, setNodeButtonPositions] = useState<Record<string, { x: number; y: number }>>({})
@@ -132,7 +132,12 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       // Use viewport width for breakpoint check since container may overflow on mobile
       const viewportWidth = window.innerWidth
       const height = getHeight(viewportWidth, containerHeight)
-      setDimensions({ width, height })
+      // Viewport-proportional scaling: 1.0x at 1440px, up to 1.6x at 2560px+
+      // Only applies on desktop (>=1024px); mobile/tablet stays at 1.0
+      const scaleFactor = viewportWidth >= 1024
+        ? Math.max(1, Math.min(1.6, viewportWidth / 1440))
+        : 1
+      setDimensions({ width, height, scaleFactor })
     }
 
     updateDimensions()
@@ -147,9 +152,10 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     const svg = d3.select(svgRef.current)
     if (!svgRef.current) return
 
-    const { width, height } = dimensions
+    const { width, height, scaleFactor } = dimensions
     // Use viewport width for responsive breakpoint — container.clientWidth overflows on mobile
     const isMobile = window.innerWidth < 640
+    const sf = isMobile ? 1 : scaleFactor
 
     if (simulationRef.current) {
       simulationRef.current.stop()
@@ -161,19 +167,19 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     const minYear = Math.min(...years)
     const maxYear = Math.max(...years)
 
-    // Responsive layout parameters
-    const rw = isMobile ? MOBILE_ROLE_WIDTH : ROLE_WIDTH
-    const rh = ROLE_HEIGHT
-    const rrx = ROLE_RX
-    const srDefault = isMobile ? MOBILE_SKILL_RADIUS_DEFAULT : SKILL_RADIUS_DEFAULT
-    const srActive = isMobile ? MOBILE_SKILL_RADIUS_ACTIVE : SKILL_RADIUS_ACTIVE
+    // Responsive layout parameters — desktop values scale proportionally with viewport
+    const rw = isMobile ? MOBILE_ROLE_WIDTH : Math.round(ROLE_WIDTH * sf)
+    const rh = isMobile ? ROLE_HEIGHT : Math.round(ROLE_HEIGHT * sf)
+    const rrx = isMobile ? ROLE_RX : Math.round(ROLE_RX * sf)
+    const srDefault = isMobile ? MOBILE_SKILL_RADIUS_DEFAULT : Math.round(SKILL_RADIUS_DEFAULT * sf)
+    const srActive = isMobile ? MOBILE_SKILL_RADIUS_ACTIVE : Math.round(SKILL_RADIUS_ACTIVE * sf)
 
-    const topPadding = isMobile ? 32 : 46
-    const bottomPadding = isMobile ? 32 : 46
-    const sidePadding = isMobile ? 20 : 56
+    const topPadding = isMobile ? 32 : Math.round(46 * sf)
+    const bottomPadding = isMobile ? 32 : Math.round(46 * sf)
+    const sidePadding = isMobile ? 20 : Math.round(56 * sf)
     const timelineX = isMobile
       ? Math.max(60, width * 0.16)
-      : Math.max(100, Math.min(160, width * 0.18))
+      : Math.max(Math.round(100 * sf), Math.min(Math.round(160 * sf), width * 0.18))
 
     const yScale = d3.scaleLinear()
       .domain([maxYear, minYear])
@@ -247,10 +253,10 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .data(tickYears)
       .join('text')
       .attr('class', 'year-label')
-      .attr('x', timelineX - (isMobile ? 8 : 12))
-      .attr('y', d => yScale(d) + 4)
+      .attr('x', timelineX - (isMobile ? 8 : Math.round(12 * sf)))
+      .attr('y', d => yScale(d) + Math.round(4 * sf))
       .attr('text-anchor', 'end')
-      .attr('font-size', isMobile ? '9' : '10')
+      .attr('font-size', isMobile ? '9' : `${Math.round(11 * sf)}`)
       .attr('font-family', 'var(--font-geist-mono)')
       .attr('fill', 'var(--text-tertiary)')
       .text(d => d)
@@ -265,7 +271,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     const roleOrder = [...roleNodes].sort((a, b) => (a.startYear ?? 0) - (b.startYear ?? 0))
     const roleInitialMap = new Map<string, { x: number; y: number }>()
     // Consistent horizontal offset for all role nodes — anchored right of timeline
-    const roleGap = isMobile ? 40 : 80
+    const roleGap = isMobile ? 40 : Math.round(80 * sf)
     const roleX = Math.min(width - sidePadding - rw / 2, timelineX + roleGap + rw / 2)
 
     roleOrder.forEach((role) => {
@@ -298,12 +304,12 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         .filter(Boolean) as Array<{ x: number; y: number }>
 
       // Skill centroid: offset right of roles into the available distribution space
-      const skillGap = isMobile ? 20 : 40
+      const skillGap = isMobile ? 20 : Math.round(40 * sf)
       const skillSpaceStart = roleX + rw / 2 + skillGap
       const skillSpaceMid = (skillSpaceStart + width - sidePadding) / 2
       const centroid = linkedRolePositions.length > 0
         ? {
-          x: Math.max(skillSpaceStart, linkedRolePositions.reduce((sum, p) => sum + p.x, 0) / linkedRolePositions.length + (isMobile ? 30 : 60)),
+          x: Math.max(skillSpaceStart, linkedRolePositions.reduce((sum, p) => sum + p.x, 0) / linkedRolePositions.length + (isMobile ? 30 : Math.round(60 * sf))),
           y: linkedRolePositions.reduce((sum, p) => sum + p.y, 0) / linkedRolePositions.length,
         }
         : { x: skillSpaceMid, y: height * 0.5 }
@@ -315,7 +321,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
           ? Math.PI * 1.35
           : Math.PI * 0.05
       const angle = domainBaseAngle + ((hash % 360) * Math.PI / 180) * 0.18
-      const radius = (isMobile ? 25 : 50) + (hash % (isMobile ? 25 : 50))
+      const radius = (isMobile ? 25 : Math.round(50 * sf)) + (hash % (isMobile ? 25 : Math.round(50 * sf)))
 
       const seededX = centroid.x + Math.cos(angle) * radius
       const seededY = centroid.y + Math.sin(angle) * radius
@@ -387,7 +393,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
       .attr('fill', d => d.orgColor ?? 'var(--accent)')
-      .attr('font-size', isMobile ? '10' : '11')
+      .attr('font-size', isMobile ? '10' : `${Math.round(12 * sf)}`)
       .attr('font-weight', '600')
       .attr('font-family', 'var(--font-ui)')
       .attr('pointer-events', 'none')
@@ -416,9 +422,9 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .append('text')
       .attr('class', 'node-label')
       .attr('text-anchor', 'middle')
-      .attr('dy', srActive + 14)
+      .attr('dy', srActive + Math.round(14 * sf))
       .attr('fill', 'var(--text-secondary)')
-      .attr('font-size', isMobile ? '9' : '10')
+      .attr('font-size', isMobile ? '9' : `${Math.round(11 * sf)}`)
       .attr('font-family', 'var(--font-geist-mono)')
       .attr('pointer-events', 'none')
       .attr('opacity', 0.5)
@@ -584,11 +590,11 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .alpha(0.65)
       .alphaDecay(prefersReducedMotion ? 0.28 : 0.08)
       .force('charge', d3.forceManyBody<SimNode>().strength(d =>
-        d.type === 'role' ? (isMobile ? -80 : -120) : (isMobile ? -35 : -55)
+        d.type === 'role' ? (isMobile ? -80 : Math.round(-120 * sf)) : (isMobile ? -35 : Math.round(-55 * sf))
       ))
       .force('link', d3.forceLink<SimNode, SimLink>(links)
         .id(d => d.id)
-        .distance(isMobile ? 48 : 72)
+        .distance(isMobile ? 48 : Math.round(72 * sf))
         .strength(d => (d as SimLink).strength * 0.5))
       .force('x', d3.forceX<SimNode>(d => d.homeX).strength(d => d.type === 'role' ? 1.0 : 0.18))
       .force('y', d3.forceY<SimNode>(d => {
@@ -598,14 +604,14 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         return d.homeY
       }).strength(d => d.type === 'role' ? 0.98 : 0.18))
       .force('collide', d3.forceCollide<SimNode>(d =>
-        d.type === 'role' ? Math.max(rw, rh) / 2 + (isMobile ? 6 : 10) : srActive + (isMobile ? 10 : 16)
+        d.type === 'role' ? Math.max(rw, rh) / 2 + (isMobile ? 6 : Math.round(10 * sf)) : srActive + (isMobile ? 10 : Math.round(16 * sf))
       ).iterations(2))
 
     simulationRef.current = simulation
 
     // Padding for skill label text below the node (radius + gap + line height)
-    const skillBottomPadding = srActive + 14 + 12
-    const rightMargin = isMobile ? 16 : 40
+    const skillBottomPadding = srActive + Math.round(14 * sf) + Math.round(12 * sf)
+    const rightMargin = isMobile ? 16 : Math.round(40 * sf)
 
     const renderTick = () => {
       nodes.forEach(d => {
@@ -810,8 +816,9 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
           const position = nodeButtonPositions[node.id] ?? { x: dimensions.width * 0.5, y: dimensions.height * 0.5 }
           const mobileBtn = window.innerWidth < 640
-          const buttonWidth = node.type === 'role' ? (mobileBtn ? MOBILE_ROLE_WIDTH : ROLE_WIDTH) : 34
-          const buttonHeight = node.type === 'role' ? ROLE_HEIGHT : 34
+          const btnSf = mobileBtn ? 1 : dimensions.scaleFactor
+          const buttonWidth = node.type === 'role' ? (mobileBtn ? MOBILE_ROLE_WIDTH : Math.round(ROLE_WIDTH * btnSf)) : Math.round(34 * btnSf)
+          const buttonHeight = node.type === 'role' ? Math.round(ROLE_HEIGHT * btnSf) : Math.round(34 * btnSf)
 
           return (
             <button

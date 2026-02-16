@@ -24,6 +24,8 @@
 - applyGraphHighlight is the single source of truth for all visual states (resting, highlighted, dimmed)
 - Resting state values (US-003): skill fill-opacity 0.35, skill label opacity 0.5, link stroke-opacity 0.15, dimmed node opacity 0.15, active skill fill-opacity 0.9
 - Initial D3 rendering values MUST match applyGraphHighlight resting values — initial stroke-opacity, fill-opacity, label opacity are set during node/link creation AND in the highlight function
+- Viewport-proportional scaling: dimensions state includes { width, height, scaleFactor }. D3 effect uses `const sf = isMobile ? 1 : scaleFactor`. All desktop pixel values scaled via Math.round(value * sf)
+- scaleFactor formula: Math.max(1, Math.min(1.6, viewportWidth / 1440)) — 1.0x at ≤1440px, 1.6x at ≥2560px. Only active at ≥1024px viewport
 - Use the d3-viz skill for all D3 rendering stories
 - Consultation entries ordered reverse-chronologically (newest first) — new entries go at the end of the array
 - Constellation role nodes, skill mappings, and links are in constellation.ts — adding nodes there automatically extends yScale domain and screen reader description
@@ -72,4 +74,24 @@
   - Initial D3 rendering attributes (set during node/link creation) must stay in sync with applyGraphHighlight resting values — there are TWO places to update for each visual property
   - The highlighted branch also has a fallback opacity for non-active links/labels — remember to update those too (3 places total: initial render, resting branch, highlighted branch fallback)
   - The constellation ResizeObserver + containerHeight system handles narrower columns automatically — no explicit graph resize code needed
+---
+
+## 2026-02-16 - US-004
+- Added viewport-proportional scaling: scaleFactor = Math.max(1, Math.min(1.6, viewportWidth / 1440))
+- scaleFactor stored in dimensions state alongside width/height, computed in resize useEffect
+- Created local `sf` variable in D3 effect (isMobile ? 1 : scaleFactor) to bypass scaling on mobile
+- Scaled node sizes: ROLE_WIDTH (104→~166), ROLE_HEIGHT (32→~51), ROLE_RX (16→~26), SKILL_RADIUS_DEFAULT (7→~11), SKILL_RADIUS_ACTIVE (11→~18)
+- Scaled font sizes: year labels (10→11 base, scales to ~18), role labels (11→12 base, scales to ~19), skill labels (10→11 base, scales to ~18)
+- Scaled spacing: topPadding, bottomPadding, sidePadding, timelineX, roleGap, skillGap, centroid offsets, seeding radius, rightMargin, skillBottomPadding, label dy offset
+- Scaled force simulation: charge (-120→~-192 role, -55→~-88 skill), link distance (72→~115), collision radius offset (10→~16 role, 16→~26 skill)
+- Scaled accessibility button sizes to match scaled SVG nodes
+- Mobile (< 640px) completely bypasses scaling (sf=1), uses MOBILE_ constants unchanged
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json, Ralph/progress.txt
+- Browser verified at 1440px (sf=1.0, identical to pre-change) and 2560px (sf=1.6, all elements clearly larger and well-proportioned)
+- **Learnings for future iterations:**
+  - Store scaleFactor in the dimensions state object, not a separate ref — keeps it synced with width/height changes
+  - Use `const sf = isMobile ? 1 : scaleFactor` at top of D3 effect to avoid repeating the mobile guard everywhere
+  - Every hardcoded pixel value in the D3 effect that relates to element sizing, spacing, or force params needs sf multiplication on desktop path
+  - Math.round() wraps all scaled values to avoid sub-pixel rendering artifacts
+  - Accessibility overlay buttons in the React JSX also need scaling — they use base constants directly, not the D3-scoped variables
 ---
