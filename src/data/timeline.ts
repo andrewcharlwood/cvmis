@@ -402,7 +402,16 @@ export const timelineEntities: TimelineEntity[] = [...timelineEntitySeeds].sort(
   return b.dateRange.start.localeCompare(a.dateRange.start)
 })
 
-export const timelineRoleEntities = timelineEntities
+export const timelineCareerEntities: TimelineEntity[] = timelineEntities.filter(
+  (entity) => entity.kind === 'career',
+)
+
+export const timelineEducationEntities: TimelineEntity[] = timelineEntities.filter(
+  (entity) => entity.kind === 'education',
+)
+
+// Compatibility alias retained for downstream consumers that still import role entities.
+export const timelineRoleEntities = timelineCareerEntities
 
 function mapTimelineToConsultation(entity: TimelineEntity): Consultation {
   const codedEntries: CodedEntry[] = entity.codedEntries ?? entity.details.map((detail, index) => ({
@@ -425,7 +434,7 @@ function mapTimelineToConsultation(entity: TimelineEntity): Consultation {
   }
 }
 
-export const timelineConsultations: Consultation[] = timelineRoleEntities.map(mapTimelineToConsultation)
+export const timelineConsultations: Consultation[] = timelineCareerEntities.map(mapTimelineToConsultation)
 
 const skillDomainByCategory: Record<string, 'technical' | 'clinical' | 'leadership'> = {
   Technical: 'technical',
@@ -438,12 +447,12 @@ export function buildConstellationData(): {
   constellationNodes: ConstellationNode[]
   constellationLinks: ConstellationLink[]
 } {
-  const roleSkillMappings: RoleSkillMapping[] = timelineRoleEntities.map((entity) => ({
+  const roleSkillMappings: RoleSkillMapping[] = timelineCareerEntities.map((entity) => ({
     roleId: entity.id,
     skillIds: entity.skills,
   }))
 
-  const roleNodes: ConstellationNode[] = timelineRoleEntities.map((entity) => ({
+  const roleNodes: ConstellationNode[] = timelineCareerEntities.map((entity) => ({
     id: entity.id,
     type: 'role',
     label: entity.title,
@@ -462,7 +471,7 @@ export function buildConstellationData(): {
     domain: skillDomainByCategory[skill.category],
   }))
 
-  const constellationLinks: ConstellationLink[] = timelineRoleEntities.flatMap((entity) =>
+  const constellationLinks: ConstellationLink[] = timelineCareerEntities.flatMap((entity) =>
     entity.skills.map((skillId) => ({
       source: entity.id,
       target: skillId,

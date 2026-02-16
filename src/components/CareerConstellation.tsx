@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import * as d3 from 'd3'
 import { constellationNodes, constellationLinks, roleSkillMappings } from '@/data/constellation'
-import { consultations } from '@/data/consultations'
+import { timelineCareerEntities } from '@/data/timeline'
 import type { ConstellationNode } from '@/types/pmr'
 
 interface CareerConstellationProps {
@@ -36,6 +36,8 @@ const domainColorMap: Record<string, string> = {
   leadership: '#D97706',
 }
 const roleNodes = constellationNodes.filter(n => n.type === 'role')
+const nodeById = new Map(constellationNodes.map(node => [node.id, node]))
+const careerEntityById = new Map(timelineCareerEntities.map(entity => [entity.id, entity]))
 const srDescription = buildScreenReaderDescription()
 
 function getHeight(width: number, containerHeight?: number | null): number {
@@ -116,17 +118,43 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
   callbacksRef.current = { onRoleClick, onSkillClick, onNodeHover }
 
+  const resolveGraphFallback = useCallback(
+    () => highlightedNodeIdRef.current ?? pinnedNodeIdRef.current,
+    [],
+  )
+
+  const resolveRoleFallback = useCallback(() => {
+    const highlightedId = highlightedNodeIdRef.current
+    if (highlightedId && nodeById.get(highlightedId)?.type === 'role') {
+      return highlightedId
+    }
+
+    const pinnedId = pinnedNodeIdRef.current
+    if (pinnedId && nodeById.get(pinnedId)?.type === 'role') {
+      return pinnedId
+    }
+
+    return null
+  }, [])
+
   const handleNodeKeyDown = useCallback((e: React.KeyboardEvent, nodeId: string, nodeType: 'role' | 'skill') => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       setPinnedNodeId(nodeId)
+      pinnedNodeIdRef.current = nodeId
+      highlightGraphRef.current?.(nodeId)
+      if (nodeType === 'role') {
+        onNodeHover?.(nodeId)
+      } else {
+        onNodeHover?.(resolveRoleFallback())
+      }
       if (nodeType === 'role') {
         onRoleClick(nodeId)
       } else {
         onSkillClick(nodeId)
       }
     }
-  }, [onRoleClick, onSkillClick])
+  }, [onRoleClick, onSkillClick, onNodeHover, resolveRoleFallback])
 
   useEffect(() => {
     const container = containerRef.current
@@ -585,8 +613,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
     nodeSelection.on('mouseleave', function() {
       if (supportsCoarsePointer) return
-      applyGraphHighlight(highlightedNodeIdRef.current ?? pinnedNodeIdRef.current)
-      callbacksRef.current.onNodeHover?.(null)
+      applyGraphHighlight(resolveGraphFallback())
+      callbacksRef.current.onNodeHover?.(resolveRoleFallback())
     })
 
     nodeSelection.on('click', function(_event, d) {
@@ -601,7 +629,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
           setPinnedNodeId(d.id)
           pinnedNodeIdRef.current = d.id
           applyGraphHighlight(d.id)
-          callbacksRef.current.onNodeHover?.(d.type === 'role' ? d.id : null)
+          callbacksRef.current.onNodeHover?.(d.type === 'role' ? d.id : resolveRoleFallback())
         }
       }
 
@@ -693,7 +721,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         return prev
       })
 
-      applyGraphHighlight(highlightedNodeIdRef.current ?? pinnedNodeIdRef.current)
+      applyGraphHighlight(resolveGraphFallback())
     }
 
     if (prefersReducedMotion) {
@@ -709,7 +737,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     return () => {
       simulation.stop()
     }
-  }, [dimensions])
+  }, [dimensions, resolveGraphFallback, resolveRoleFallback])
 
   useEffect(() => {
     if (!svgRef.current) return
@@ -737,10 +765,10 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     setAccordionShowMore(false)
   }, [pinnedNodeId])
 
-  // Find consultation for pinned role (accordion on mobile)
+  // Find canonical career entity for pinned role (accordion on mobile)
   const pinnedRoleNode = pinnedNodeId ? constellationNodes.find(n => n.id === pinnedNodeId && n.type === 'role') : null
-  const pinnedConsultation = pinnedRoleNode ? consultations.find(c => c.id === pinnedRoleNode.id) : null
-  const showAccordion = supportsCoarsePointer && pinnedConsultation !== null && pinnedConsultation !== undefined
+  const pinnedCareerEntity = pinnedRoleNode ? careerEntityById.get(pinnedRoleNode.id) : null
+  const showAccordion = supportsCoarsePointer && pinnedCareerEntity !== null && pinnedCareerEntity !== undefined
 
   return (
     <div
@@ -806,9 +834,9 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
       {/* Mobile accordion: role details on tap */}
       <AnimatePresence>
-        {showAccordion && pinnedConsultation && (
+        {showAccordion && pinnedCareerEntity && (
           <motion.div
-            key={pinnedConsultation.id}
+            key={pinnedCareerEntity.id}
             initial={{ height: 0 }}
             animate={{ height: 'auto' }}
             exit={{ height: 0 }}
@@ -818,7 +846,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
             <div
               style={{
                 padding: '12px 16px',
-                borderTop: `1px solid ${pinnedConsultation.orgColor ?? 'var(--border-light)'}`,
+                borderTop: `1px solid ${pinnedCareerEntity.orgColor ?? 'var(--border-light)'}`,
                 fontFamily: 'var(--font-ui)',
               }}
             >
@@ -837,7 +865,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
                       width: '6px',
                       height: '6px',
                       borderRadius: '50%',
-                      backgroundColor: pinnedConsultation.orgColor ?? 'var(--accent)',
+                      backgroundColor: pinnedCareerEntity.orgColor ?? 'var(--accent)',
                       flexShrink: 0,
                     }}
                   />
@@ -848,7 +876,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
                       color: 'var(--text-primary)',
                     }}
                   >
-                    {pinnedConsultation.role}
+                    {pinnedCareerEntity.title}
                   </span>
                 </div>
                 <div
@@ -859,7 +887,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
                     paddingLeft: '14px',
                   }}
                 >
-                  {pinnedConsultation.organization} · {pinnedConsultation.duration}
+                  {pinnedCareerEntity.organization} · {pinnedCareerEntity.dateRange.display}
                 </div>
               </div>
 
@@ -870,7 +898,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
                   listStyle: 'none',
                 }}
               >
-                {(accordionShowMore ? pinnedConsultation.examination : pinnedConsultation.examination.slice(0, 3)).map((item, i) => (
+                {(accordionShowMore ? pinnedCareerEntity.details : pinnedCareerEntity.details.slice(0, 3)).map((item, i) => (
                   <li
                     key={i}
                     style={{
@@ -888,7 +916,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
                         width: '4px',
                         height: '4px',
                         borderRadius: '50%',
-                        backgroundColor: pinnedConsultation.orgColor ?? 'var(--accent)',
+                        backgroundColor: pinnedCareerEntity.orgColor ?? 'var(--accent)',
                         opacity: 0.5,
                         flexShrink: 0,
                         marginTop: '7px',
@@ -899,7 +927,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
                 ))}
               </ul>
 
-              {accordionShowMore && pinnedConsultation.plan.length > 0 && (
+              {accordionShowMore && (pinnedCareerEntity.outcomes ?? []).length > 0 && (
                 <ul
                   style={{
                     margin: '8px 0 0',
@@ -907,7 +935,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
                     listStyle: 'none',
                   }}
                 >
-                  {pinnedConsultation.plan.map((item, i) => (
+                  {(pinnedCareerEntity.outcomes ?? []).map((item, i) => (
                     <li
                       key={i}
                       style={{
@@ -932,12 +960,12 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
                         }}
                       />
                       {item}
-                    </li>
-                  ))}
-                </ul>
+                  </li>
+                ))}
+              </ul>
               )}
 
-              {pinnedConsultation.examination.length > 3 && (
+              {pinnedCareerEntity.details.length > 3 && (
                 <button
                   type="button"
                   onClick={() => setAccordionShowMore(prev => !prev)}
@@ -948,7 +976,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
                     padding: '4px 14px',
                     fontSize: '11px',
                     fontFamily: 'var(--font-geist-mono)',
-                    color: pinnedConsultation.orgColor ?? 'var(--accent)',
+                    color: pinnedCareerEntity.orgColor ?? 'var(--accent)',
                     fontWeight: 500,
                     marginTop: '4px',
                   }}
@@ -1032,8 +1060,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
                 transform: 'translate(-50%, -50%)',
                 background: 'transparent',
                 border: 'none',
-                cursor: 'pointer',
-                pointerEvents: 'auto',
+                cursor: 'default',
+                pointerEvents: 'none',
                 padding: 0,
                 opacity: 0,
               }}
@@ -1046,14 +1074,18 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
               }}
               onBlur={() => {
                 setFocusedNodeId(null)
-                highlightGraphRef.current?.(pinnedNodeId)
-                onNodeHover?.(pinnedNodeId)
+                highlightGraphRef.current?.(resolveGraphFallback())
+                onNodeHover?.(resolveRoleFallback())
               }}
               onClick={() => {
                 setPinnedNodeId(node.id)
+                pinnedNodeIdRef.current = node.id
+                highlightGraphRef.current?.(node.id)
                 if (node.type === 'role') {
+                  onNodeHover?.(node.id)
                   onRoleClick(node.id)
                 } else {
+                  onNodeHover?.(resolveRoleFallback())
                   onSkillClick(node.id)
                 }
               }}

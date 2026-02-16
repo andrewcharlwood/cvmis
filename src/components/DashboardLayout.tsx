@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
 import Sidebar from './Sidebar'
@@ -14,7 +14,7 @@ import { RepeatMedicationsSubsection } from './RepeatMedicationsSubsection'
 import { ChatWidget } from './ChatWidget'
 import { useActiveSection } from '@/hooks/useActiveSection'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
-import { consultations } from '@/data/consultations'
+import { timelineConsultations } from '@/data/timeline'
 import { skills } from '@/data/skills'
 import type { PaletteAction } from '@/lib/search'
 
@@ -54,7 +54,10 @@ interface LastConsultationSubsectionProps {
 
 function LastConsultationSubsection({ highlightedRoleId }: LastConsultationSubsectionProps) {
   const { openPanel } = useDetailPanel()
-  const consultation = consultations[0]
+  const consultation = timelineConsultations[0]
+  if (!consultation) {
+    return null
+  }
   const isHighlighted = highlightedRoleId === consultation.id
 
   const handleOpenPanel = () => {
@@ -250,6 +253,10 @@ export function DashboardLayout() {
   const chronologyRef = useRef<HTMLDivElement>(null)
   const activeSection = useActiveSection()
   const { openPanel } = useDetailPanel()
+  const careerConsultationsById = useMemo(
+    () => new Map(timelineConsultations.map((consultation) => [consultation.id, consultation])),
+    [],
+  )
 
   // Measure the chronology stream height so the constellation graph can match it
   useEffect(() => {
@@ -283,12 +290,12 @@ export function DashboardLayout() {
   // Constellation graph handlers
   const handleRoleClick = useCallback(
     (roleId: string) => {
-      const consultation = consultations.find((c) => c.id === roleId)
+      const consultation = careerConsultationsById.get(roleId)
       if (consultation) {
         openPanel({ type: 'career-role', consultation })
       }
     },
-    [openPanel],
+    [careerConsultationsById, openPanel],
   )
 
   const handleSkillClick = useCallback(

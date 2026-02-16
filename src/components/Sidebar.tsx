@@ -278,26 +278,12 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                 src={cvmisLogo}
                 alt="CVMIS"
                 style={{
-                  width: '140px',
+                  width: '25%',
                   height: 'auto',
                   display: 'block',
                 }}
               />
-              <div
-                style={{
-                  flex: 1,
-                  fontSize: '11px',
-                  color: 'var(--text-tertiary)',
-                  letterSpacing: '0.04em',
-                  lineHeight: 1.1,
-                  textAlign: 'center',
-                }}
-              >
-                CVMIS v1.0
-              </div>
-            </div>
-
-            <button
+                          <button
               type="button"
               onClick={onSearchClick}
               className="sidebar-control"
@@ -335,6 +321,10 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                 Ctrl+K
               </kbd>
             </button>
+
+            </div>
+
+
 
             <SectionTitle>Patient Data</SectionTitle>
 

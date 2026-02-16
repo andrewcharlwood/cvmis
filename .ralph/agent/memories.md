@@ -30,6 +30,14 @@
 
 ## Fixes
 
+### mem-1771246458-9388
+> failure: cmd=rg -n "--font-mono\b|font-mono-dashboard|font-geist-mono|timeline-intervention|chronology|pathway" src/index.css, exit=2, error=pattern beginning with -- parsed as flag, next=use rg -n -- '<pattern>' <file>
+<!-- tags: tooling, error-handling, search | created: 2026-02-16 -->
+
+### mem-1771246427-39d3
+> failure: cmd=sed -n '1,220p' .ralph/agent/scratchpad.md (in chained context read), exit=2, error=.ralph/agent/scratchpad.md missing, next=create scratchpad file before context reads
+<!-- tags: tooling, error-handling, ralph | created: 2026-02-16 -->
+
 ### mem-1771245621-03a4
 > failure: cmd=rg --files src/components | rg -E 'WorkExperienceSubsection|EducationSubsection|DashboardLayout|Timeline|CareerConstellation', exit=2, error=used grep-style -E on ripgrep causing encoding parse error, next=use plain regex pattern with rg or escape patterns correctly
 <!-- tags: tooling, error-handling, search | created: 2026-02-16 -->

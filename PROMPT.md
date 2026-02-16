@@ -1,69 +1,87 @@
-# Task: Patient Pathway Graph Stability + Unified Experience/Education Data Model
+# Task: D3 Career Constellation Remediation (Hover, Timeline Parity, Visual Alignment)
 
-Refactor the patient-pathway style timeline/graph and related experience UI so interaction feels stable, data is consistent across all sections, and education is merged into the same primary timeline flow.
+Implement a full remediation of the career constellation chart and its linked timeline UI so interactions are reliable, timeline semantics are correct, and styling aligns with the rest of the site typography/tokens.
 
 ## Context
 
-Current behavior has two major quality issues:
-- Hovering graph-related content appears to trigger graph-wide motion/jiggle, implying unnecessary re-rendering or unstable layout state.
-- Timeline dates shown in the graph do not match the dates shown in work-experience content.
+Recent chart refresh work did not fully resolve key issues:
+- Hover highlighting is still not consistently activating on chart nodes.
+- Timeline behavior in the chart is now more broken versus the work-experience timeline.
+- Styling in the chart layer is not fully aligned with the main design system (including font token consistency).
 
-The layout/content model is also split in ways that make consistency harder:
-- Work and education data appear to be rendered through different pathways.
-- Education is duplicated via a separate section beneath work experience.
+The implementation should be grounded in the current codebase and preserve existing UX intent where possible.
 
 ## Requirements
 
-- Fix interaction stability:
-  - Hovering either a graph element OR its corresponding experience/education card must apply the same highlight behavior.
-  - Hover should not cause global graph jiggle/repositioning.
-- Diagnose and resolve date mismatch root cause:
-  - Determine whether mismatch is from render logic, duplicated data sources, or both.
-  - Deliver a fix so graph timeline dates match displayed card dates.
-- Create one source of truth for timeline entities (career + education):
-  - Include fields for full title, shortened graph label, date range, description/details, and skills list.
-  - Use this canonical dataset to drive graph nodes/edges and card rendering.
-- Skills integration:
-  - Aggregate skills from canonical entities.
-  - Feed the highest-frequency skills into sidebar tags.
-- Experience/Education presentation update:
-  - Remove the standalone work-experience subheader and existing role pill treatment.
-  - In the unified timeline list, career entries show a `Career Intervention` pill.
-  - Education entries remain in the same overall list/component flow but are visually right-aligned.
-  - Education entries include an `Education Intervention` pill inside each card.
-  - Remove the separate education section that currently sits below work experience.
+- Fix hover interaction reliability in the D3 chart:
+  - Ensure node hover consistently triggers graph highlighting on desktop.
+  - Preserve touch behavior (tap-to-pin and clear interactions).
+  - Preserve keyboard accessibility interactions.
+- Remove interaction-layer conflicts:
+  - Resolve any pointer interception between invisible accessibility overlays and SVG node hit targets.
+  - Ensure focus-only controls do not break pointer hover behavior.
+- Correct timeline data/semantic parity:
+  - Ensure constellation role nodes map to the intended work-experience scope.
+  - Prevent unintended education entries from being treated as role nodes unless explicitly intended.
+  - Align ordering semantics between the chart timeline and work-experience timeline.
+- Stabilize highlight state behavior:
+  - Ensure graph highlight state and linked timeline card highlighting remain coherent when hovering roles vs skills.
+  - Avoid reset/flicker edge cases on mouseleave/blur transitions.
+- Align chart styling with site design system:
+  - Use canonical font tokens consistently (UI vs mono usage should match the broader app).
+  - Remove or replace invalid/undefined font token usage impacting timeline/chart-adjacent components.
+  - Keep visual treatment consistent with existing dashboard cards/tokens (no unrelated redesign).
+- Keep architecture maintainable:
+  - Clarify data exports for timeline consumers (career-only, education-only, combined) where needed.
+  - Avoid duplicate or dead timeline component paths if they create inconsistency.
+
+## Validation Requirements
+
+Run and pass:
+- `npm run lint`
+- `npm run typecheck`
+- `npm run build`
+
+Also perform manual behavioral checks and record concise notes in `.ralph/review.md`:
+- Desktop hover on role nodes and skill nodes.
+- Cross-highlight behavior between chart and timeline cards.
+- Touch/coarse-pointer behavior (tap-to-pin and clear).
+- Keyboard focus navigation and activation behavior.
+- Timeline order parity sanity-check against work-experience content.
 
 ## Likely Files In Scope
 
-- `src/data/*` (or equivalent canonical data files)
-- `src/types/*` (shared timeline entity typing)
-- `src/components/*` for graph, timeline cards, sidebar tags, and experience/education sections
-- Any related hooks/utilities managing hover state, mapping, and aggregation
+- `src/components/CareerConstellation.tsx`
+- `src/components/DashboardLayout.tsx`
+- `src/components/TimelineInterventionsSubsection.tsx`
+- `src/components/WorkExperienceSubsection.tsx` (if retained, removed, or reintegrated)
+- `src/data/timeline.ts`
+- `src/data/constellation.ts`
+- `src/index.css`
+- Related types in `src/types/pmr.ts` if needed
 
 ## Success Criteria
 
 All of the following must be true:
-
-- [ ] Hovering on graph items and corresponding cards produces the same highlight outcome.
-- [ ] Hover interactions do not cause full-graph jitter/repositioning artifacts.
-- [ ] Graph dates and card dates are consistent for every timeline entry.
-- [ ] A single canonical dataset powers both graph rendering and experience/education card content.
-- [ ] Each timeline entry supports title + short graph label + skills + date fields needed by all consumers.
-- [ ] Sidebar tags are sourced from aggregated canonical skills (most frequent first).
-- [ ] Career entries show `Career Intervention` pill treatment.
-- [ ] Education entries are visually right-aligned and show `Education Intervention` pill treatment.
-- [ ] Separate standalone education section below work experience is removed.
+- [ ] Constellation hover highlighting works reliably with pointer input.
+- [ ] Accessibility/focus affordances remain functional without breaking pointer interactions.
+- [ ] Timeline/role mapping in the chart is semantically correct and aligned with work-experience content.
+- [ ] Highlight synchronization between chart and timeline cards behaves predictably.
+- [ ] Font/token usage in chart and timeline-adjacent components is consistent with the app's design tokens.
+- [ ] Any legacy/duplicate timeline path that causes divergence is resolved or clearly justified.
 - [ ] `npm run lint` passes.
 - [ ] `npm run typecheck` passes.
 - [ ] `npm run build` passes.
+- [ ] Reviewer records manual verification outcomes in `.ralph/review.md`.
 
 ## Constraints
 
-- Use existing stack/patterns (TypeScript + React + current project conventions).
-- Keep changes focused on graph/timeline/data consistency and the requested UI restructuring.
-- Do not introduce unrelated visual/system-wide refactors.
+- Use the existing TypeScript + React + Vite stack and project conventions.
+- Keep changes scoped to constellation/timeline correctness and visual consistency.
+- Do not introduce broad unrelated refactors.
+- Prioritize correctness and maintainability over cosmetic novelty.
 
 ## Status
 
-Track implementation progress in this file or `.ralph/plan.md`.
-When all success criteria are met, print LOOP_COMPLETE.
+Track progress in `.ralph/plan.md` and keep it updated.
+When all success criteria are met, print `LOOP_COMPLETE`.

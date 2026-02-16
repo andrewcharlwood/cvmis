@@ -2,8 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
-import { consultations } from '@/data/consultations'
-import { timelineEntities } from '@/data/timeline'
+import { timelineEntities, timelineConsultations } from '@/data/timeline'
 import type { TimelineEntity } from '@/types/pmr'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -144,7 +143,7 @@ function TimelineInterventionItem({
             <div
               style={{
                 fontSize: '11px',
-                fontFamily: 'var(--font-mono)',
+                fontFamily: 'var(--font-geist-mono)',
                 color: 'var(--text-tertiary)',
                 marginTop: '3px',
               }}
@@ -240,7 +239,7 @@ function TimelineInterventionItem({
                         key={entry.code}
                         style={{
                           fontSize: '11px',
-                          fontFamily: 'var(--font-mono)',
+                          fontFamily: 'var(--font-geist-mono)',
                           padding: '3px 8px',
                           borderRadius: '4px',
                           background: hexToRgba(entity.orgColor, 0.08),
@@ -301,7 +300,7 @@ export function TimelineInterventionsSubsection({ onNodeHighlight, highlightedRo
   const { openPanel } = useDetailPanel()
 
   const consultationsById = useMemo(
-    () => new Map(consultations.map((consultation) => [consultation.id, consultation])),
+    () => new Map(timelineConsultations.map((consultation) => [consultation.id, consultation])),
     [],
   )
 

@@ -116,7 +116,7 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
           <div
             style={{
               fontSize: '11px',
-              fontFamily: 'var(--font-mono)',
+              fontFamily: 'var(--font-geist-mono)',
               color: 'var(--text-tertiary)',
               marginTop: '3px',
             }}
@@ -215,7 +215,7 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
                     key={entry.code}
                     style={{
                       fontSize: '11px',
-                      fontFamily: 'var(--font-mono)',
+                      fontFamily: 'var(--font-geist-mono)',
                       padding: '3px 8px',
                       borderRadius: '4px',
                       background: hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.08),

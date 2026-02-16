@@ -208,6 +208,37 @@ backpressure:
 
 Only add gates for tools that exist in the project. If there are no tests yet, don't add a test gate (unless the task IS to create tests).
 
+### No-Skip Safety Rules
+
+When configuring backpressure and completion logic, preserve quality standards:
+
+- Never treat a circuit breaker as an automatic pass.
+- Never skip required checks that are configured in the repository.
+- Always require an explicit review outcome before completion (`LOOP_COMPLETE` or concrete changes requested).
+- If tests exist in the project and are part of quality gates, they must run and pass before completion.
+- If a gate is not configured in the repo, mark it `not-configured` explicitly rather than fabricating retries.
+
+### Loop Circuit Breaker and Escalation
+
+To prevent infinite review/backpressure churn, include a circuit breaker policy in generated prompts/hats:
+
+- Detect repeated identical evidence cycles (same blocker class and materially identical build evidence) across 2-3 consecutive iterations.
+- If repetition threshold is reached, stop retrying the same recovery path.
+- Escalate instead of auto-completing:
+  - record the blocker and evidence in `.ralph/review.md`
+  - assign an owner and target finish date
+  - set status to require human decision/clarification
+- Resume the loop only after the blocker criteria are clarified or configuration is corrected.
+
+### Operational Hygiene Between Runs
+
+Treat runtime coordination state as loop-scoped:
+
+- Do not carry stale "recovery" tasks into a new objective unless explicitly intended.
+- Avoid creating new meta/recovery tasks when all implementation tasks are already closed and no new actionable finding exists.
+- Keep artifacts (`.ralph/plan.md`, `.ralph/review.md`, event logs) for auditability, but ensure open task queues reflect only current-loop actionable work.
+- Prefer one clear escalation handoff over repeated coordination retries with identical payloads.
+
 ## Cost and Safety
 
 Always configure iteration limits. Remind the user:
