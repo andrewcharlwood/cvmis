@@ -12,8 +12,6 @@ import {
   LINK_BEZIER_VERTICAL_OFFSET,
   SKILL_STROKE_WIDTH, SKILL_STROKE_OPACITY, SKILL_SIZE_ROLE_FACTOR,
   SKILL_GLOW_STD_DEVIATION,
-  ENTRY_GUIDE_FADE_MS, ENTRY_ROLE_STAGGER_MS, ENTRY_ROLE_DURATION_MS,
-  ENTRY_SKILL_STAGGER_MS, ENTRY_SKILL_DURATION_MS,
 } from '@/components/constellation/constants'
 import type { SimNode, SimLink, LayoutParams } from '@/components/constellation/types'
 
@@ -26,13 +24,17 @@ function hashString(input: string): number {
   return Math.abs(hash)
 }
 
+function isEntityNode(type: string): boolean {
+  return type === 'role' || type === 'education'
+}
+
 function getHeight(width: number, containerHeight?: number | null): number {
   if (width < 1024) return 520
   if (containerHeight && containerHeight > 0) return Math.max(400, containerHeight)
   return 400
 }
 
-const roleNodes = constellationNodes.filter(n => n.type === 'role')
+const roleNodes = constellationNodes.filter(n => n.type === 'role' || n.type === 'education')
 
 export function useForceSimulation(
   svgRef: React.RefObject<SVGSVGElement | null>,
@@ -46,6 +48,9 @@ export function useForceSimulation(
   const nodesRef = useRef<SimNode[]>([])
   const nodeSelectionRef = useRef<d3.Selection<SVGGElement, SimNode, SVGGElement, unknown> | null>(null)
   const linkSelectionRef = useRef<d3.Selection<SVGPathElement, SimLink, SVGGElement, unknown> | null>(null)
+  const connectorSelectionRef = useRef<d3.Selection<SVGLineElement, SimNode, SVGGElement, unknown> | null>(null)
+  const yearIndicatorRef = useRef<d3.Selection<SVGTextElement, unknown, null, undefined> | null>(null)
+  const timelineGroupRef = useRef<d3.Selection<SVGGElement, unknown, null, undefined> | null>(null)
   const connectedMapRef = useRef<Map<string, Set<string>>>(new Map())
   const skillRestRadiiRef = useRef<Map<string, number>>(new Map())
   const layoutParamsRef = useRef<LayoutParams | null>(null)
@@ -138,7 +143,7 @@ export function useForceSimulation(
     })
 
     // Role gradient defs
-    const uniqueOrgColors = [...new Set(constellationNodes.filter(n => n.type === 'role').map(n => n.orgColor ?? 'var(--accent)'))]
+    const uniqueOrgColors = [...new Set(constellationNodes.filter(n => isEntityNode(n.type)).map(n => n.orgColor ?? 'var(--accent)'))]
     uniqueOrgColors.forEach((color, i) => {
       const grad = defs.append('linearGradient')
         .attr('id', `role-grad-${i}`)
@@ -149,8 +154,20 @@ export function useForceSimulation(
     })
     const orgColorGradientMap = new Map(uniqueOrgColors.map((c, i) => [c, `url(#role-grad-${i})`]))
 
+    // Year indicator (for animation)
+    const yearIndicator = svg.append('text')
+      .attr('class', 'year-indicator')
+      .attr('x', sidePadding + 8)
+      .attr('y', topPadding - 4)
+      .attr('font-size', isMobile ? '18' : `${Math.round(24 * sf)}`)
+      .attr('font-family', 'var(--font-geist-mono)')
+      .attr('fill', 'var(--text-tertiary)')
+      .attr('opacity', 0)
+    yearIndicatorRef.current = yearIndicator as unknown as d3.Selection<SVGTextElement, unknown, null, undefined>
+
     // Timeline guides
     const timelineGroup = svg.append('g').attr('class', 'timeline-guides')
+    timelineGroupRef.current = timelineGroup as unknown as d3.Selection<SVGGElement, unknown, null, undefined>
 
     const tickYears = d3.range(minYear, maxYear + 1)
     timelineGroup.selectAll('line.year-guide')
@@ -218,7 +235,7 @@ export function useForceSimulation(
     })
 
     const nodes: SimNode[] = constellationNodes.map(n => {
-      if (n.type === 'role') {
+      if (isEntityNode(n.type)) {
         const pos = roleInitialMap.get(n.id)!
         return { ...n, x: pos.x, y: pos.y, vx: 0, vy: 0, homeX: pos.x, homeY: pos.y }
       }
@@ -307,8 +324,10 @@ export function useForceSimulation(
 
     nodeSelectionRef.current = nodeSelection
 
-    // Role nodes
-    nodeSelection.filter(d => d.type === 'role')
+    // Role + education entity nodes
+    const entityFilter = (d: SimNode) => isEntityNode(d.type)
+
+    nodeSelection.filter(entityFilter)
       .append('rect')
       .attr('class', 'focus-ring')
       .attr('x', -rw / 2 - 3)
@@ -320,7 +339,7 @@ export function useForceSimulation(
       .attr('stroke', 'transparent')
       .attr('stroke-width', 2)
 
-    nodeSelection.filter(d => d.type === 'role')
+    nodeSelection.filter(entityFilter)
       .append('rect')
       .attr('class', 'node-circle')
       .attr('x', -rw / 2)
@@ -332,8 +351,9 @@ export function useForceSimulation(
       .attr('stroke', d => d.orgColor ?? 'var(--accent)')
       .attr('stroke-opacity', 0.4)
       .attr('stroke-width', 1)
+      .attr('stroke-dasharray', d => d.type === 'education' ? '4 3' : null)
 
-    nodeSelection.filter(d => d.type === 'role')
+    nodeSelection.filter(entityFilter)
       .append('text')
       .attr('class', 'node-label')
       .attr('text-anchor', 'middle')
@@ -383,35 +403,37 @@ export function useForceSimulation(
         return label.length > maxLen ? `${label.slice(0, maxLen - 1)}…` : label
       })
 
-    // Role connectors to timeline
+    // Entity connectors to timeline
     const roleConnectors = connectorGroup.selectAll('line.role-connector')
-      .data(nodes.filter(n => n.type === 'role'))
+      .data(nodes.filter(n => isEntityNode(n.type)))
       .join('line')
       .attr('class', 'role-connector')
       .attr('stroke', 'var(--border)')
       .attr('stroke-width', 1)
       .attr('stroke-opacity', 0.3)
 
+    connectorSelectionRef.current = roleConnectors as unknown as d3.Selection<SVGLineElement, SimNode, SVGGElement, unknown>
+
     // Simulation
     const simulation = d3.forceSimulation<SimNode>(nodes)
       .alpha(0.65)
       .alphaDecay(prefersReducedMotion ? 0.28 : 0.08)
       .force('charge', d3.forceManyBody<SimNode>().strength(d =>
-        d.type === 'role' ? (isMobile ? -100 : Math.round(-120 * sf)) : (isMobile ? -45 : Math.round(-55 * sf))
+        isEntityNode(d.type) ? (isMobile ? -100 : Math.round(-120 * sf)) : (isMobile ? -45 : Math.round(-55 * sf))
       ))
       .force('link', d3.forceLink<SimNode, SimLink>(links)
         .id(d => d.id)
         .distance(isMobile ? 56 : Math.round(72 * sf))
         .strength(d => (d as SimLink).strength * 0.5))
-      .force('x', d3.forceX<SimNode>(d => d.homeX).strength(d => d.type === 'role' ? 1.0 : 0.25))
+      .force('x', d3.forceX<SimNode>(d => d.homeX).strength(d => isEntityNode(d.type) ? 1.0 : 0.25))
       .force('y', d3.forceY<SimNode>(d => {
-        if (d.type === 'role') {
+        if (isEntityNode(d.type)) {
           return yScale(d.startYear ?? minYear)
         }
         return d.homeY
-      }).strength(d => d.type === 'role' ? 0.98 : 0.18))
+      }).strength(d => isEntityNode(d.type) ? 0.98 : 0.18))
       .force('collide', d3.forceCollide<SimNode>(d =>
-        d.type === 'role' ? Math.max(rw, rh) / 2 + (isMobile ? 8 : Math.round(10 * sf)) : srActive + (isMobile ? 14 : Math.round(16 * sf))
+        isEntityNode(d.type) ? Math.max(rw, rh) / 2 + (isMobile ? 8 : Math.round(10 * sf)) : srActive + (isMobile ? 14 : Math.round(16 * sf))
       ).iterations(3))
 
     simulationRef.current = simulation
@@ -421,7 +443,7 @@ export function useForceSimulation(
 
     const renderTick = () => {
       nodes.forEach(d => {
-        if (d.type === 'role') {
+        if (isEntityNode(d.type)) {
           d.x = Math.max(rw / 2 + 6, Math.min(width - rw / 2 - 6, d.x))
           d.y = Math.max(rh / 2 + topPadding, Math.min(height - rh / 2 - bottomPadding, d.y))
         } else {
@@ -475,77 +497,6 @@ export function useForceSimulation(
       options.applyHighlight(options.resolveGraphFallback())
     }
 
-    // Entry animation: set initial hidden state for non-reduced-motion
-    if (!prefersReducedMotion) {
-      timelineGroup.attr('opacity', 0)
-      linkSelection.attr('opacity', 0)
-      nodeSelection.filter(d => d.type === 'role').attr('opacity', 0)
-      nodeSelection.filter(d => d.type === 'skill')
-        .attr('opacity', 0)
-        .select('.node-circle').attr('r', 0)
-      roleConnectors.attr('opacity', 0)
-    }
-
-    let entryAnimationRan = false
-    const maybeRunEntryAnimation = () => {
-      if (entryAnimationRan || prefersReducedMotion) return
-      if (simulation.alpha() > 0.05) return
-      entryAnimationRan = true
-
-      const roleCount = nodes.filter(n => n.type === 'role').length
-      const skillCount = constellationNodes.filter(n => n.type === 'skill').length
-
-      // Timeline guides fade in
-      timelineGroup.transition().duration(ENTRY_GUIDE_FADE_MS).attr('opacity', 1)
-
-      // Role nodes staggered
-      nodeSelection.filter(d => d.type === 'role')
-        .transition()
-        .delay((_d, i) => ENTRY_GUIDE_FADE_MS + i * ENTRY_ROLE_STAGGER_MS)
-        .duration(ENTRY_ROLE_DURATION_MS)
-        .attr('opacity', 1)
-
-      // Role connectors follow their roles
-      roleConnectors
-        .transition()
-        .delay((_d, i) => ENTRY_GUIDE_FADE_MS + i * ENTRY_ROLE_STAGGER_MS)
-        .duration(ENTRY_ROLE_DURATION_MS)
-        .attr('opacity', 1)
-
-      // Skill nodes scale up
-      const roleAnimEnd = ENTRY_GUIDE_FADE_MS + roleCount * ENTRY_ROLE_STAGGER_MS + ENTRY_ROLE_DURATION_MS
-      nodeSelection.filter(d => d.type === 'skill')
-        .transition()
-        .delay((_d, i) => roleAnimEnd + i * ENTRY_SKILL_STAGGER_MS)
-        .duration(ENTRY_SKILL_DURATION_MS)
-        .attr('opacity', 1)
-
-      nodeSelection.filter(d => d.type === 'skill')
-        .select('.node-circle')
-        .transition()
-        .delay((_d, i) => roleAnimEnd + i * ENTRY_SKILL_STAGGER_MS)
-        .duration(ENTRY_SKILL_DURATION_MS)
-        .attr('r', d => skillRestRadii.get(d.id) ?? srDefault)
-
-      // Links draw on via stroke-dashoffset
-      const skillAnimEnd = roleAnimEnd + skillCount * ENTRY_SKILL_STAGGER_MS + ENTRY_SKILL_DURATION_MS
-      linkSelection
-        .each(function () {
-          const length = (this as SVGPathElement).getTotalLength()
-          d3.select(this)
-            .attr('stroke-dasharray', `${length} ${length}`)
-            .attr('stroke-dashoffset', length)
-        })
-        .attr('opacity', 1)
-        .transition()
-        .delay((_d, i) => skillAnimEnd + i * 15)
-        .duration(300)
-        .attr('stroke-dashoffset', 0)
-        .on('end', function () {
-          d3.select(this).attr('stroke-dasharray', null).attr('stroke-dashoffset', null)
-        })
-    }
-
     if (prefersReducedMotion) {
       simulation.stop()
       for (let i = 0; i < 150; i++) {
@@ -553,10 +504,7 @@ export function useForceSimulation(
       }
       renderTick()
     } else {
-      simulation.on('tick', () => {
-        renderTick()
-        maybeRunEntryAnimation()
-      })
+      simulation.on('tick', renderTick)
     }
 
     return () => {
@@ -569,6 +517,9 @@ export function useForceSimulation(
     nodesRef,
     nodeSelectionRef,
     linkSelectionRef,
+    connectorSelectionRef,
+    yearIndicatorRef,
+    timelineGroupRef,
     nodeButtonPositions,
     layoutParams: layoutParamsRef.current,
     connectedMap: connectedMapRef.current,

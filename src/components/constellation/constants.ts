@@ -39,6 +39,20 @@ export const ENTRY_ROLE_DURATION_MS = 300
 export const ENTRY_SKILL_STAGGER_MS = 30
 export const ENTRY_SKILL_DURATION_MS = 250
 
+// Timeline animation
+export const ANIM_ENTITY_REVEAL_MS = 600
+export const ANIM_SKILL_REVEAL_MS = 350
+export const ANIM_SKILL_STAGGER_MS = 60
+export const ANIM_LINK_DRAW_MS = 300
+export const ANIM_LINK_STAGGER_MS = 40
+export const ANIM_REINFORCEMENT_MS = 350
+export const ANIM_STEP_GAP_MS = 400
+export const ANIM_HOLD_MS = 3000
+export const ANIM_RESET_MS = 400
+export const ANIM_RESTART_DELAY_MS = 200
+export const ANIM_INTERACTION_RESUME_MS = 800
+export const ANIM_SETTLE_ALPHA = 0.05
+
 // Domain color map
 export const DOMAIN_COLOR_MAP: Record<string, string> = {
   clinical: '#059669',

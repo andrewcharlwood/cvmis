@@ -11,6 +11,8 @@ export function useConstellationInteraction(deps: {
   resolveGraphFallback: () => string | null
   resolveRoleFallback: () => string | null
   dimensionsTrigger: number
+  pauseForInteraction?: () => void
+  resumeAfterInteraction?: () => void
 }) {
   const [pinnedNodeId, setPinnedNodeId] = useState<string | null>(null)
   const pinnedNodeIdRef = useRef<string | null>(null)
@@ -32,13 +34,15 @@ export function useConstellationInteraction(deps: {
         pinnedNodeIdRef.current = null
         deps.highlightGraphRef.current?.(null)
         deps.callbacksRef.current.onNodeHover?.(null)
+        deps.resumeAfterInteraction?.()
       }
     })
 
     nodeSelection.on('mouseenter.interaction', function(_event: MouseEvent, d: SimNode) {
       if (supportsCoarsePointer) return
+      deps.pauseForInteraction?.()
       deps.highlightGraphRef.current?.(d.id)
-      if (d.type === 'role') {
+      if (d.type !== 'skill') {
         deps.callbacksRef.current.onNodeHover?.(d.id)
       }
     })
@@ -47,6 +51,7 @@ export function useConstellationInteraction(deps: {
       if (supportsCoarsePointer) return
       deps.highlightGraphRef.current?.(deps.resolveGraphFallback())
       deps.callbacksRef.current.onNodeHover?.(deps.resolveRoleFallback())
+      deps.resumeAfterInteraction?.()
     })
 
     nodeSelection.on('click.interaction', function(_event: MouseEvent, d: SimNode) {
@@ -56,15 +61,17 @@ export function useConstellationInteraction(deps: {
           pinnedNodeIdRef.current = null
           deps.highlightGraphRef.current?.(null)
           deps.callbacksRef.current.onNodeHover?.(null)
+          deps.resumeAfterInteraction?.()
         } else {
           setPinnedNodeId(d.id)
           pinnedNodeIdRef.current = d.id
+          deps.pauseForInteraction?.()
           deps.highlightGraphRef.current?.(d.id)
-          deps.callbacksRef.current.onNodeHover?.(d.type === 'role' ? d.id : deps.resolveRoleFallback())
+          deps.callbacksRef.current.onNodeHover?.(d.type !== 'skill' ? d.id : deps.resolveRoleFallback())
         }
       }
 
-      if (d.type === 'role') {
+      if (d.type !== 'skill') {
         deps.callbacksRef.current.onRoleClick(d.id)
       } else {
         deps.callbacksRef.current.onSkillClick(d.id)
@@ -72,7 +79,6 @@ export function useConstellationInteraction(deps: {
     })
   }, [deps])
 
-  // Re-bind events whenever selections change (triggered by simulation re-creation)
   useEffect(() => {
     bindEvents()
   }, [deps.dimensionsTrigger, bindEvents])

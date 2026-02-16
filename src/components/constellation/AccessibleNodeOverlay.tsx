@@ -8,8 +8,8 @@ interface AccessibleNodeOverlayProps {
   dimensions: { width: number; height: number; scaleFactor: number }
   onFocus: (nodeId: string) => void
   onBlur: () => void
-  onClick: (nodeId: string, nodeType: 'role' | 'skill') => void
-  onKeyDown: (e: React.KeyboardEvent, nodeId: string, nodeType: 'role' | 'skill') => void
+  onClick: (nodeId: string, nodeType: 'role' | 'skill' | 'education') => void
+  onKeyDown: (e: React.KeyboardEvent, nodeId: string, nodeType: 'role' | 'skill' | 'education') => void
 }
 
 export const AccessibleNodeOverlay: React.FC<AccessibleNodeOverlayProps> = ({
@@ -22,10 +22,11 @@ export const AccessibleNodeOverlay: React.FC<AccessibleNodeOverlayProps> = ({
   onKeyDown,
 }) => {
   const domainOrder: Record<string, number> = { technical: 0, clinical: 1, leadership: 2 }
+  const isEntity = (t: string) => t === 'role' || t === 'education'
   const sorted = [...nodes].sort((a, b) => {
-    if (a.type === 'role' && b.type !== 'role') return -1
-    if (a.type !== 'role' && b.type === 'role') return 1
-    if (a.type === 'role' && b.type === 'role') {
+    if (isEntity(a.type) && !isEntity(b.type)) return -1
+    if (!isEntity(a.type) && isEntity(b.type)) return 1
+    if (isEntity(a.type) && isEntity(b.type)) {
       return (b.startYear ?? 0) - (a.startYear ?? 0)
     }
     const da = domainOrder[a.domain ?? 'technical'] ?? 0
@@ -56,15 +57,16 @@ export const AccessibleNodeOverlay: React.FC<AccessibleNodeOverlayProps> = ({
           : `${node.startYear}-present`
 
         const position = nodeButtonPositions[node.id] ?? { x: dimensions.width * 0.5, y: dimensions.height * 0.5 }
-        const buttonWidth = node.type === 'role' ? (isMobileBtn ? MOBILE_ROLE_WIDTH : Math.round(ROLE_WIDTH * btnSf)) : Math.round(34 * btnSf)
-        const buttonHeight = node.type === 'role' ? Math.round(ROLE_HEIGHT * btnSf) : Math.round(34 * btnSf)
+        const isEntityBtn = isEntity(node.type)
+        const buttonWidth = isEntityBtn ? (isMobileBtn ? MOBILE_ROLE_WIDTH : Math.round(ROLE_WIDTH * btnSf)) : Math.round(34 * btnSf)
+        const buttonHeight = isEntityBtn ? Math.round(ROLE_HEIGHT * btnSf) : Math.round(34 * btnSf)
 
         return (
           <button
             key={node.id}
             type="button"
             aria-label={
-              node.type === 'role'
+              isEntityBtn
                 ? `${node.label} at ${node.organization}, ${yearRange}. Press Enter to view details.`
                 : `${node.label} skill node. Press Enter to view details.`
             }

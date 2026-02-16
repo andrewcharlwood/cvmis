@@ -187,7 +187,7 @@ export interface KPIStory {
 // Constellation-specific types
 export interface ConstellationNode {
   id: string
-  type: 'role' | 'skill'
+  type: 'role' | 'skill' | 'education'
   label: string
   shortLabel?: string    // abbreviated for small nodes
   organization?: string

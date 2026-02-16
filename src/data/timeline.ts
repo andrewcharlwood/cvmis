@@ -447,14 +447,14 @@ export function buildConstellationData(): {
   constellationNodes: ConstellationNode[]
   constellationLinks: ConstellationLink[]
 } {
-  const roleSkillMappings: RoleSkillMapping[] = timelineCareerEntities.map((entity) => ({
+  const roleSkillMappings: RoleSkillMapping[] = timelineEntities.map((entity) => ({
     roleId: entity.id,
     skillIds: entity.skills,
   }))
 
-  const roleNodes: ConstellationNode[] = timelineCareerEntities.map((entity) => ({
+  const roleNodes: ConstellationNode[] = timelineEntities.map((entity) => ({
     id: entity.id,
-    type: 'role',
+    type: entity.kind === 'education' ? 'education' as const : 'role' as const,
     label: entity.title,
     shortLabel: entity.graphLabel,
     organization: entity.organization,
@@ -471,7 +471,7 @@ export function buildConstellationData(): {
     domain: skillDomainByCategory[skill.category],
   }))
 
-  const constellationLinks: ConstellationLink[] = timelineCareerEntities.flatMap((entity) =>
+  const constellationLinks: ConstellationLink[] = timelineEntities.flatMap((entity) =>
     entity.skills.map((skillId) => ({
       source: entity.id,
       target: skillId,

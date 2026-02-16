@@ -39,3 +39,14 @@ export interface ConstellationCallbacks {
   onSkillClick: (id: string) => void
   onNodeHover?: (id: string | null) => void
 }
+
+export type AnimationState = 'IDLE' | 'PLAYING' | 'PAUSED' | 'HOLDING' | 'RESETTING'
+
+export interface AnimationStep {
+  entityId: string
+  startYear: number
+  skillIds: string[]
+  newSkillIds: string[]
+  reinforcedSkillIds: string[]
+  linkPairs: Array<{ source: string; target: string }>
+}
