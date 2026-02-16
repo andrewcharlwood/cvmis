@@ -1,367 +1,535 @@
-# D3 Constellation Remediation Plan (Hover, Timeline Parity, Token Alignment)
+# Phase 3+4 Plan — Over-Time Animation + Interaction Integration
 
-## Objective
-Restore reliable constellation interactions and align timeline semantics/styling with the dashboard system without broad refactors.
+## Goal
+Build the constellation chronologically from 2009 to present, replacing the Phase 2 entry animation with a looping timeline reveal. Wire animation to the existing highlight system using multiplicative opacity. Add play/pause control and reduced-motion support.
 
-## Current Findings (from code inspection)
-- Pointer/focus layer conflict: `src/components/CareerConstellation.tsx` renders an absolute full-chart button overlay with `pointerEvents: 'auto'` per node. This can intercept pointer hover intended for SVG node groups, making desktop highlight activation inconsistent.
-- Timeline semantic drift: `src/data/timeline.ts` currently exports `timelineRoleEntities = timelineEntities`, so education items are incorrectly treated as role nodes for constellation data generation.
-- Timeline/card data coupling still uses compatibility layer in key UI paths:
-  - `src/components/CareerConstellation.tsx` reads pinned accordion content from `consultations`.
-  - `src/components/TimelineInterventionsSubsection.tsx` uses `consultationsById` for detail panel open.
-  - `src/components/DashboardLayout.tsx` uses `consultations` for role click and “Last Consultation”.
-- Highlight state split remains (`highlightedNodeId` vs `highlightedRoleId` in `DashboardLayout`), increasing mismatch risk between graph and timeline cards.
-- Font token mismatch persists: components use `var(--font-mono)` while tokens define `--font-geist-mono` / `--font-mono-dashboard` in `src/index.css`.
+---
 
-## Scope Boundaries
-- In scope:
-  - Constellation pointer/focus/hover reliability and highlight lifecycle.
-  - Timeline role/education semantic parity between graph and chronology stream.
-  - Token-consistent typography fixes in constellation and timeline-adjacent components.
-  - Cleanup of duplicate timeline consumer paths only where they cause behavioral divergence.
-- Out of scope:
-  - Sidebar/tag system changes.
-  - New visual redesigns unrelated to existing card/token language.
-  - Non-pathway feature work.
+## Task Order
 
-## File-Level Implementation Steps
-1. Fix role vs education selectors in canonical timeline exports.
-- File: `src/data/timeline.ts`
-- Changes:
-  - Export explicit selectors:
-    - `timelineCareerEntities` (`kind === 'career'`)
-    - `timelineEducationEntities` (`kind === 'education'`)
-    - keep `timelineEntities` as combined sorted list.
-  - Build constellation role nodes, mappings, and links from `timelineCareerEntities` only.
-  - Keep compatibility exports only if required by current panel types; avoid role graph deriving from combined data.
-- Acceptance:
-  - No education entry appears as `type: 'role'` in `buildConstellationData()` outputs.
+Five tasks, built in dependency order. Tasks 1-2 are P1 (foundations), 3-5 are P2 (visual/integration/a11y).
 
-2. Remove pointer interception while preserving keyboard accessibility.
-- File: `src/components/CareerConstellation.tsx`
-- Changes:
-  - Replace always-active absolute button hit targets with focus-only accessibility controls that do not capture pointer hover.
-  - Maintain keyboard tab/focus/Enter/Space activation behavior.
-  - Keep touch coarse-pointer tap-to-pin + background clear behavior.
-  - Ensure mouseenter/mouseleave on D3 nodes are the authoritative desktop hover path.
-- Acceptance:
-  - Desktop pointer hover over visible SVG nodes consistently activates highlight.
-  - Keyboard focus still highlights and activates nodes.
+---
 
-3. Stabilize highlight source-of-truth and reset semantics.
-- Files: `src/components/CareerConstellation.tsx`, `src/components/DashboardLayout.tsx`, `src/components/TimelineInterventionsSubsection.tsx`
-- Changes:
-  - Normalize graph/card highlight flow so role hover, skill hover, and card hover transitions do not flicker on mouseleave/blur.
-  - Ensure blur/mouseleave fall back to current pinned/external highlight state coherently (no forced null unless intended).
-  - Keep role-card cross-highlight and avoid skill-hover clearing active role card unexpectedly.
-- Acceptance:
-  - Highlight transitions are predictable when moving pointer between graph nodes and timeline cards.
-  - No visible reset/flicker on quick node-to-node movement.
+### Task 1: Data — Include education entities (task-1771251473-edda)
 
-4. Align timeline/detail consumers to canonical timeline semantics.
-- Files: `src/components/CareerConstellation.tsx`, `src/components/TimelineInterventionsSubsection.tsx`, `src/components/DashboardLayout.tsx`, optional `src/types/pmr.ts`
-- Changes:
-  - Prefer timeline-entity-based lookup for role details where feasible, with career-only lookup for constellation role interactions.
-  - Keep education entries in chronology stream, but exclude from role-node click/hover mapping.
-  - Verify timeline ordering matches work-experience chronology intent (latest to oldest parity).
-- Acceptance:
-  - Constellation role interactions map to career records only.
-  - Chronology order in timeline stream matches expected work-experience-first semantics.
+**Files:** `src/data/timeline.ts`, `src/types/pmr.ts`
 
-5. Token-consistent typography cleanup (no redesign).
-- Files: `src/components/CareerConstellation.tsx`, `src/components/TimelineInterventionsSubsection.tsx`, `src/components/DashboardLayout.tsx`, `src/index.css`
-- Changes:
-  - Replace invalid `var(--font-mono)` usage with canonical mono token (`var(--font-geist-mono)` or standardized dashboard mono alias).
-  - Keep UI text on existing UI token family (`var(--font-ui)` where already used).
-- Acceptance:
-  - No unresolved/undefined font token usage remains in constellation/timeline-adjacent UI.
+**`src/types/pmr.ts` changes:**
 
-6. Verification and review notes.
-- Commands:
-  - `npm run lint`
-  - `npm run typecheck`
-  - `npm run build`
-- Manual checks to record in `.ralph/review.md`:
-  - Desktop hover on role and skill nodes.
-  - Graph ↔ timeline cross-highlight behavior.
-  - Touch/coarse-pointer tap-to-pin and clear.
-  - Keyboard focus navigation and activation.
-  - Timeline order parity sanity check vs work-experience content.
+1. **ConstellationNode.type** — Add `'education'` as a valid type:
+   ```ts
+   type: 'role' | 'skill' | 'education'
+   ```
+   This allows education nodes to have distinct styling (e.g., dashed border, different shape) while sharing role-like positioning on the timeline.
 
-## Suggested Runtime Task Sequence
-- Task A: Data parity selectors + constellation career-only mapping.
-- Task B: Constellation pointer/focus layer remediation + highlight state stabilization.
-- Task C: Timeline/detail consumer parity + token alignment.
-- Task D: Backpressure checks + manual verification notes in `.ralph/review.md`.
+**`src/data/timeline.ts` changes:**
 
-## Completion Gate
-All objective success criteria pass, including lint/typecheck/build and recorded manual verification outcomes.
+2. **`buildConstellationData()`** — Include education entities alongside career entities:
+   - Change `timelineCareerEntities` → `timelineEntities` (all entities) in `roleSkillMappings`, `roleNodes`, and `constellationLinks` builders
+   - For education entities, use `type: 'education'` instead of `type: 'role'`
+   - Education entities already have `skills`, `skillStrengths`, `orgColor`, `graphLabel`, and `dateRange` — no data changes needed
+   - The `roleNodes` builder becomes `entityNodes` conceptually but keep the variable name for minimal diff
 
-## Runtime Task IDs
-- `task-1771246519-9ce3` Constellation data parity: career-only role mapping
-- `task-1771246519-1e54` Constellation interaction remediation: hover/focus layer
-- `task-1771246519-92f0` Timeline parity + token alignment
-- `task-1771246519-fd59` Backpressure and manual review evidence
+   Specific changes to `buildConstellationData()`:
+   ```ts
+   // Line 450: Change timelineCareerEntities → timelineEntities
+   const roleSkillMappings = timelineEntities.map(entity => ({
+     roleId: entity.id,
+     skillIds: entity.skills,
+   }))
 
-## Progress Notes
-- 2026-02-16: Completed Task A (`task-1771246519-9ce3`).
-  - Added explicit timeline selectors in `src/data/timeline.ts`:
-    - `timelineCareerEntities` (`kind === 'career'`)
-    - `timelineEducationEntities` (`kind === 'education'`)
-    - compatibility alias `timelineRoleEntities = timelineCareerEntities`
-  - Updated constellation role nodes/mappings/links and `timelineConsultations` derivation to use `timelineCareerEntities` only.
-  - Validation: `npm run typecheck` passed.
+   // Line 455: Change timelineCareerEntities → timelineEntities, add education type
+   const roleNodes = timelineEntities.map(entity => ({
+     id: entity.id,
+     type: entity.kind === 'education' ? 'education' as const : 'role' as const,
+     label: entity.title,
+     shortLabel: entity.graphLabel,
+     organization: entity.organization,
+     startYear: entity.dateRange.startYear,
+     endYear: entity.dateRange.endYear,
+     orgColor: entity.orgColor,
+   }))
 
-## Atomic Execution Plan: task-1771246519-1e54 (Hover/Focus Layer)
+   // Line 474: Change timelineCareerEntities → timelineEntities
+   const constellationLinks = timelineEntities.flatMap(entity => ...)
+   ```
 
-### Scope for this execution
-- Primary files: `src/components/CareerConstellation.tsx`, `src/components/DashboardLayout.tsx`, `src/components/TimelineInterventionsSubsection.tsx`
-- Allowed supporting touchpoint: `src/data/timeline.ts` only if career-entity lookup is needed to replace role detail dependencies in constellation overlay content.
-- Explicitly out of scope for this task: typography token cleanup and broader timeline consumer consolidation (covered by `task-1771246519-92f0`).
+**Impact on downstream:**
+- `constellationNodes` now includes 2 education nodes (A-Levels, MPharm)
+- `constellationLinks` now includes links from education entities to skills
+- `roleSkillMappings` now includes education entity mappings
+- `useForceSimulation.ts` filters `roleNodes` at line 35 with `.filter(n => n.type === 'role')` — this needs updating to include `'education'` type for timeline placement: `.filter(n => n.type === 'role' || n.type === 'education')`
+- The orchestrator's `buildScreenReaderDescription()` and `careerEntityById` already use `constellationNodes` and `timelineCareerEntities` respectively — the description function should handle education nodes, and the entity lookup should extend to all timeline entities
+- The `nodeById` lookup in `useForceSimulation.ts` (line 277) uses `constellationNodes` directly — no change needed
 
-### Diagnosed root causes to remediate
-- Pointer interception:
-  - `CareerConstellation` accessibility layer buttons are absolute-positioned, full-hitbox, and `pointerEvents: 'auto'` while parent group is `pointerEvents: 'none'`.
-  - These controls overlap node hit targets and can steal/mask pointer hover intended for D3 `g.node` handlers.
-- Highlight fallback inconsistency:
-  - Graph mouseleave unconditionally calls `onNodeHover(null)` while blur path restores `onNodeHover(pinnedNodeId)`.
-  - This mixed reset policy causes card highlight flicker when moving between graph nodes, cards, and focus controls.
-- Role detail lookup drift:
-  - Mobile pinned accordion currently resolves role details from legacy `consultations`, not canonical timeline career entities.
+**Education node visual styling (in useForceSimulation.ts):**
+- Education nodes should render like role nodes but with a dashed border to visually distinguish them
+- Same `rw`/`rh` dimensions, same gradient fill, but `stroke-dasharray: '4 3'`
+- Change role-specific rendering filters to include education: `.filter(d => d.type === 'role' || d.type === 'education')`
 
-### Implementation steps for builder
-1. Make keyboard overlay non-intercepting for pointer.
-- File: `src/components/CareerConstellation.tsx`
-- Replace always-active button layer with a focus-only model:
-  - Keep semantic `button` controls for tab/Enter/Space.
-  - Prevent pointer capture by default (`pointerEvents: 'none'` on buttons), and only enable during keyboard focus state when needed.
-  - Preserve visible focus ring via existing `.focus-ring` sync (`focusedNodeId` path).
-  - Ensure keyboard users can still tab through all nodes in deterministic order.
+**Pitfall:** The `roleNodes` constant at line 35 of `useForceSimulation.ts` is module-level, computed once. After adding education entities, it must include education nodes for year scale computation. Update to: `const roleNodes = constellationNodes.filter(n => n.type === 'role' || n.type === 'education')`
 
-2. Unify highlight fallback semantics across mouse and keyboard.
-- Files: `src/components/CareerConstellation.tsx`, `src/components/DashboardLayout.tsx`, `src/components/TimelineInterventionsSubsection.tsx`
-- Introduce one fallback resolver in constellation:
-  - `resolveFallbackHighlight = highlightedNodeIdRef.current ?? pinnedNodeIdRef.current`
-  - Use this on node mouseleave and accessibility-control blur (instead of mixed null/pinned behavior).
-- Keep skill hover from driving role-card highlight:
-  - Role hover/focus sets role highlight.
-  - Skill hover/focus should not forcibly clear an active role highlight unless fallback is null.
-- Ensure timeline card mouseleave does not induce graph/card thrash when crossing between adjacent cards.
+---
 
-3. Preserve touch behavior while removing desktop hover conflict.
-- File: `src/components/CareerConstellation.tsx`
-- Keep existing coarse-pointer behavior:
-  - Node tap toggles pin.
-  - Background tap clears pin + highlight.
-- Confirm touch branch remains independent from desktop hover path after overlay change.
+### Task 2: Hook — Create useTimelineAnimation (task-1771251475-c04e)
 
-4. Align mobile pinned role details with canonical timeline career data.
-- File: `src/components/CareerConstellation.tsx` (and `src/data/timeline.ts` only if needed for import shape)
-- Replace `consultations.find(...)` for pinned role accordion with career entity lookup from canonical timeline exports (or mapped career consultation export already derived from timeline career entities).
-- Acceptance in this task: no new dependency on combined timeline entities for role detail surface.
+**Files:** `src/hooks/useTimelineAnimation.ts` (NEW), `src/components/constellation/types.ts`, `src/components/constellation/constants.ts`
 
-### Acceptance checks (task-local)
-- Desktop pointer:
-  - Hovering any visible role/skill node reliably triggers graph highlight without dead zones.
-  - Moving pointer node-to-node does not cause highlight flash-to-none.
-- Keyboard:
-  - Tab reaches node controls in intended order.
-  - Focus highlights target node and role cards (for role nodes).
-  - Blur returns to fallback highlight state (external hover or pinned) without forced reset.
-- Touch/coarse pointer:
-  - Tap node pins/unpins.
-  - Tap background clears pinned state and timeline highlight.
-- Cross-surface coherence:
-  - Timeline card hover and graph hover no longer fight each other during transitions.
+**Core Architecture:**
 
-### Handoff note to builder
-- Keep the patch minimal and behavior-focused.
-- Do not combine token/font changes or broad timeline refactors into this task; defer those to `task-1771246519-92f0`.
+The animation hook manages a state machine that reveals nodes chronologically. All nodes exist in the D3 simulation from the start (positions stable) but are hidden via `opacity: 0`. The hook uses `requestAnimationFrame` with a timestamp-based scheduler.
 
-- 2026-02-16: Completed Task B (`task-1771246519-1e54`).
-  - Updated `src/components/CareerConstellation.tsx` to remove pointer interception from accessibility overlay controls (`pointerEvents: 'none'` on invisible positioned buttons) so SVG hover handlers remain authoritative for desktop pointer input.
-  - Added fallback resolvers (`resolveGraphFallback`, `resolveRoleFallback`) and wired them into node `mouseleave`, keyboard-control `blur`, and coarse-pointer skill pin paths to prevent role-highlight reset flicker.
-  - Kept coarse-pointer tap-to-pin behavior and background clear behavior intact while preserving keyboard focus/Enter/Space activation.
-  - Replaced mobile pinned role accordion dependency on `consultations` with canonical `timelineCareerEntities` lookup to keep role detail semantics aligned with career-only timeline scope.
-  - Validation: `npm run lint` (pass, 2 existing warnings), `npm run typecheck` (pass), `npm run build` (pass).
+**`src/components/constellation/types.ts` additions:**
+```ts
+export type AnimationState = 'IDLE' | 'PLAYING' | 'PAUSED' | 'HOLDING' | 'RESETTING'
 
-## Atomic Execution Plan: task-1771246519-fd59 (Backpressure + Manual Review Evidence)
+export interface AnimationStep {
+  entityId: string        // The role/education entity being revealed
+  startYear: number       // For year indicator display
+  skillIds: string[]      // Skills to reveal with this entity
+  newSkillIds: string[]   // Skills not yet visible (first appearance)
+  reinforcedSkillIds: string[]  // Skills already visible (get pulse)
+  linkPairs: Array<{ source: string; target: string }>  // Links to draw on
+}
+```
 
-### Scope for this execution
-- Primary files: `.ralph/review.md`, `.ralph/plan.md`
-- Allowed supporting touchpoints: command outputs from `npm run lint`, `npm run typecheck`, `npm run build`, plus any available audit/coverage/complexity/duplication scripts or documented equivalents.
-- Explicitly out of scope for this task: feature implementation work in `src/` (handled by `task-1771246519-92f0` and prior tasks).
+**`src/components/constellation/constants.ts` additions:**
+```ts
+// Timeline animation
+export const ANIM_ENTITY_REVEAL_MS = 600       // Role/education node scale-in duration
+export const ANIM_SKILL_REVEAL_MS = 350        // New skill node scale-in duration
+export const ANIM_SKILL_STAGGER_MS = 60        // Stagger between skills within a step
+export const ANIM_LINK_DRAW_MS = 300           // Link stroke-dashoffset draw-on
+export const ANIM_LINK_STAGGER_MS = 40         // Stagger between links
+export const ANIM_REINFORCEMENT_MS = 350       // Pulse duration for already-visible skills
+export const ANIM_STEP_GAP_MS = 400            // Pause between steps (entities)
+export const ANIM_HOLD_MS = 3000               // Hold at end before reset
+export const ANIM_RESET_MS = 400               // Fade-all duration
+export const ANIM_RESTART_DELAY_MS = 200       // Pause after reset before replaying
+export const ANIM_INTERACTION_RESUME_MS = 800   // Resume delay after interaction ends
+export const ANIM_SETTLE_ALPHA = 0.05          // Simulation alpha threshold to start
+```
 
-### Objective for this task
-- Produce reviewer-visible evidence that manual behavior checks were executed against the current remediation state.
-- Satisfy pending `build.blocked` contract by preparing a compliant `build.done` payload with explicit status fields.
+**`src/hooks/useTimelineAnimation.ts` — Hook Design:**
 
-### Required evidence contract
-The next `build.done` event payload must include all required fields:
-- `tests: <status>`
-- `lint: <status>`
-- `typecheck: <status>`
-- `audit: <status>`
-- `coverage: <status>`
-- `complexity: <value or status>`
-- `duplication: <status>`
-- Optional when available: `performance: <status>`, `specs: <status>`
+```ts
+export function useTimelineAnimation(deps: {
+  nodeSelectionRef: React.MutableRefObject<d3.Selection<...> | null>
+  linkSelectionRef: React.MutableRefObject<d3.Selection<...> | null>
+  simulationRef: React.MutableRefObject<d3.Simulation<...> | null>
+  nodesRef: React.MutableRefObject<SimNode[]>
+  connectedMapRef: React.MutableRefObject<Map<string, Set<string>>>
+  skillRestRadiiRef: React.MutableRefObject<Map<string, number>>
+  srDefault: number
+  isMobile: boolean
+  sf: number
+  dimensionsTrigger: number
+}): {
+  animationStateRef: React.MutableRefObject<AnimationState>
+  visibleNodeIdsRef: React.MutableRefObject<Set<string>>
+  isPlaying: boolean     // React state for UI button
+  togglePlayPause: () => void
+  pauseForInteraction: () => void
+  resumeAfterInteraction: () => void
+}
+```
 
-If a metric is not implemented in this repository, report it explicitly as `not-configured` with a short qualifier in `.ralph/review.md`; do not omit the field from `build.done`.
+**Animation Step Sequence:**
 
-### Implementation steps for builder/reviewer
-1. Run backpressure checks and capture concrete outcomes.
-- Execute:
-  - `npm run lint`
-  - `npm run typecheck`
-  - `npm run build`
-- Discover audit/coverage/complexity/duplication command availability from `package.json` and existing tooling files; run what exists.
-- For unavailable gates, record `not-configured` with one-line rationale tied to repository state.
+1. **Pre-compute steps** from `timelineEntities` sorted oldest-first:
+   ```
+   A-Levels (2009) → MPharm (2011) → Pre-Reg (2015) → Duty Manager (2016) →
+   Pharmacy Manager (2017) → HCD Pharm (2022) → Deputy Head (2024) → Interim Head (2025)
+   ```
 
-2. Record manual behavior verification in `.ralph/review.md`.
-- Add a concise section with date/time and environment assumptions (desktop pointer + coarse pointer + keyboard path tested).
-- Record pass/fail notes for:
-  - Desktop hover on role nodes and skill nodes (fill and border hit areas).
-  - Graph/timeline cross-highlight coherence.
-  - Touch/coarse-pointer tap-to-pin and background clear.
-  - Keyboard tab/focus/Enter/Space behavior.
-  - Timeline ordering parity against work-experience chronology.
-- If any item fails, include minimal repro steps and keep task open.
+2. **For each step**, determine:
+   - `newSkillIds`: skills not in `visibleNodeIds` set yet
+   - `reinforcedSkillIds`: skills already in `visibleNodeIds` set
+   - `linkPairs`: all links from this entity
 
-3. Prepare compliant `build.done` summary string.
-- Construct one-line payload covering every required field in the contract.
-- Example shape (statuses illustrative only):
-  - `tests: pass, lint: pass, typecheck: pass, audit: not-configured, coverage: not-configured, complexity: not-configured, duplication: not-configured, performance: optional, specs: optional`
+3. **Reveal sequence per step** (all via D3 transitions):
+   a. Entity node: scale from 0 with `ease-out-back` (custom easing or D3 `d3.easeBackOut`)
+   b. Entity connector: fade in
+   c. New skills: scale from 0 with `ease-out`, staggered by `ANIM_SKILL_STAGGER_MS`
+   d. Reinforced skills: pulse `transform: scale(1.3)` → `scale(1.0)` over `ANIM_REINFORCEMENT_MS`
+   e. Links: draw on via `stroke-dashoffset` animation, staggered
+   f. Update `visibleNodeIds` set
+   g. Wait `ANIM_STEP_GAP_MS` before next step
 
-### Acceptance checks (task-local)
-- `.ralph/review.md` contains dated manual verification notes for all required interaction categories.
-- Backpressure command outcomes are explicitly documented (pass/fail/not-configured).
-- `build.done` payload draft includes every required field and uses no missing keys.
-- No source feature code changes are introduced in this task.
+4. **State machine in refs:**
+   - `animationStateRef`: current state
+   - `currentStepRef`: index of current entity step
+   - `rafIdRef`: requestAnimationFrame ID for cleanup
+   - `visibleNodeIdsRef`: Set of revealed node IDs (shared with highlight system)
 
-- 2026-02-16: Completed Task D (`task-1771246519-fd59`).
-  - Added a dated backpressure/manual-evidence addendum to `.ralph/review.md` with explicit outcomes for lint/typecheck/build/audit.
-  - Documented required `build.done` field statuses with no omitted keys:
-    - `tests: not-configured, lint: pass, typecheck: pass, audit: pass, coverage: not-configured, complexity: not-configured, duplication: not-configured, performance: not-configured, specs: not-configured`
-  - Confirmed this iteration was evidence-only (no `src/` feature edits) and preserved existing reviewer manual-interaction validation record.
+5. **Loop cycle:**
+   - After all steps: state → `HOLDING`, wait `ANIM_HOLD_MS`
+   - Fade all nodes to opacity 0 over `ANIM_RESET_MS`: state → `RESETTING`
+   - Clear `visibleNodeIds`, wait `ANIM_RESTART_DELAY_MS`
+   - State → `PLAYING`, restart from step 0
 
-## Atomic Execution Plan: task-1771246519-92f0 (Timeline Ordering Parity + Token Alignment)
+**Key implementation details:**
 
-### Scope for this execution
-- Primary files: `src/components/TimelineInterventionsSubsection.tsx`, `src/components/DashboardLayout.tsx`, `src/data/timeline.ts`
-- Secondary files (only if needed to remove remaining invalid token usage in timeline paths): `src/components/WorkExperienceSubsection.tsx`, `src/index.css`
-- Explicitly out of scope: pointer/focus architecture changes in `CareerConstellation` unless a regression fix is strictly required.
+- **rAF scheduler:** The main loop uses `requestAnimationFrame` with accumulated elapsed time. Each frame checks if enough time has passed to advance to the next phase of the current step. This avoids setTimeout chains and gives smooth control.
 
-### Current residual gaps (post Task B/D)
-- `TimelineInterventionsSubsection` still opens detail panels through `consultations` compatibility import instead of canonical timeline-derived exports.
-- `DashboardLayout` still uses `consultations` for role click resolution and "Last Consultation" content derivation (`consultations[0]`), which leaves chronology semantics coupled to a compatibility layer rather than explicit career timeline selectors.
-- Timeline-adjacent components still contain invalid token references (`fontFamily: 'var(--font-mono)'`) despite canonical mono tokens being `--font-geist-mono` / `--font-mono-dashboard`.
-- Legacy duplicate path `WorkExperienceSubsection` remains in repo and still carries `var(--font-mono)` usage; while currently not mounted, leaving unresolved token drift risks reintroducing inconsistency if re-enabled.
+- **D3 transitions for node reveal:** Rather than managing every frame in rAF, use D3 transitions for the actual visual changes (they handle interpolation). The rAF scheduler just triggers step transitions at the right time and manages state.
 
-### Implementation steps for builder
-1. Align timeline detail-panel lookups to canonical timeline exports.
-- File: `src/components/TimelineInterventionsSubsection.tsx`
-- Replace `consultations` import/lookup with canonical timeline-derived source (`timelineConsultations` or direct mapping from `timelineCareerEntities`).
-- Preserve behavior: only career entities open `career-role` panel payloads, and non-career entries safely no-op for role panel opening.
+- **Initial hidden state:** On mount (or dimension change), hide ALL entity/skill nodes and links at `opacity: 0`. Skill nodes also get `r: 0` on their circles. This replaces the Phase 2 entry animation hiding logic.
 
-2. Enforce explicit career-order source in dashboard chronology controls.
-- File: `src/components/DashboardLayout.tsx`
-- Replace compatibility-layer lookups for:
-  - role click (`handleRoleClick`)
-  - last-consultation summary source (`consultations[0]`)
-  with canonical career timeline ordering (`timelineCareerEntities` + deterministic consultation mapping).
-- Ensure "Most recent role" reflects the first canonical career entity by sorted timeline order, matching constellation role chronology.
+- **Wait for simulation:** Don't start animation until `simulationRef.current.alpha() < ANIM_SETTLE_ALPHA`. Check this in the rAF loop's first frame.
 
-3. Complete mono token cleanup for chart/timeline-adjacent UI.
-- Files: `src/components/TimelineInterventionsSubsection.tsx`, `src/components/WorkExperienceSubsection.tsx` (if retained), optional `src/index.css`
-- Replace `var(--font-mono)` usage with canonical mono token (`var(--font-geist-mono)` or `var(--font-mono-dashboard)`), avoiding introduction of new ad-hoc token names.
-- Keep UI/body text tokens unchanged (no redesign).
+- **Cleanup:** On unmount or dimension change, cancel rAF, stop all D3 transitions on selections.
 
-4. Clarify legacy/duplicate timeline path handling.
-- File: `src/components/WorkExperienceSubsection.tsx` (and/or `.ralph/review.md` note)
-- Choose one minimal path and document it:
-  - either normalize remaining tokens in this unused component, or
-  - explicitly justify that it is unused/deprecated and excluded from runtime parity checks.
-- Do not do a broad delete/refactor in this task.
+**Relationship to highlight system:**
+- The hook exposes `visibleNodeIdsRef` — the highlight system reads this to know which nodes can be highlighted
+- The hook exposes `pauseForInteraction()` and `resumeAfterInteraction()` — called by interaction handlers
+- When paused for interaction, current step freezes but visible nodes remain visible
 
-5. Regression-safe validation.
-- Run:
-  - `npm run lint`
-  - `npm run typecheck`
-  - `npm run build`
-- Manual sanity checks to capture in `.ralph/review.md`:
-  - Timeline ordering parity: top chronology role matches top constellation role.
-  - Role-card hover and graph hover remain coherent after data-source alignment.
-  - Node hover over fill area remains reliable (no regression of Task B fix).
-  - Last consultation card reflects canonical latest career entry.
+---
 
-### Acceptance checks (task-local)
-- No chart/timeline-adjacent component references `var(--font-mono)`.
-- Timeline and dashboard role-detail lookups use canonical timeline career sources, not legacy compatibility imports in component logic.
-- Latest-role summary and chronology ordering are consistent with `timelineCareerEntities` ordering semantics.
-- Hover/focus interaction behavior from Task B remains intact.
-- `npm run lint`, `npm run typecheck`, and `npm run build` pass.
+### Task 3: Visual — Entry animation reveal effects (task-1771251477-81a2)
 
-### Handoff note to builder
-- Keep this patch data-source/token focused; avoid reworking D3 forces or node event wiring unless a direct regression is detected.
-- If a legacy path is left in place, add explicit rationale in `.ralph/review.md` so success criterion "resolved or clearly justified" is satisfied.
+**Files:** `src/hooks/useForceSimulation.ts`, `src/hooks/useTimelineAnimation.ts`
 
-- 2026-02-16: Completed Task C (`task-1771246519-92f0`).
-  - Updated `src/components/TimelineInterventionsSubsection.tsx` to use canonical `timelineConsultations` lookup for role detail-panel opening instead of legacy `consultations` import.
-  - Updated `src/components/DashboardLayout.tsx` to source "Last Consultation" and role-click resolution from canonical `timelineConsultations` (including memoized id map) to align chronology semantics with career timeline selectors.
-  - Replaced remaining `var(--font-mono)` usage in timeline-adjacent components with canonical `var(--font-geist-mono)`:
-    - `src/components/TimelineInterventionsSubsection.tsx`
-    - `src/components/WorkExperienceSubsection.tsx` (legacy path retained, token-normalized to prevent style drift if re-enabled).
-  - Validation: `npm run lint` (pass, 2 existing warnings), `npm run typecheck` (pass), `npm run build` (pass).
+**`src/hooks/useForceSimulation.ts` changes:**
 
-## Atomic Execution Plan: task-1771247453-c78f (Resolve build.blocked Backpressure Gate)
+1. **Remove Phase 2 entry animation** — Delete the entire `maybeRunEntryAnimation` function and its related code (lines 479-559):
+   - Remove initial hidden state setting (lines 479-487)
+   - Remove `entryAnimationRan` flag and `maybeRunEntryAnimation` function (lines 489-547)
+   - Remove the `maybeRunEntryAnimation()` call from tick handler (line 558)
+   - The entry animation constants can remain in `constants.ts` (no harm, or remove if desired)
 
-### Scope for this execution
-- Primary files: `.ralph/review.md`, `.ralph/plan.md` (progress note only if needed)
-- Event output: one compliant `build.done` payload from builder after evidence capture
-- Explicitly out of scope: `src/` feature changes (only revisit if a gate fails and fix is required)
+2. **Year indicator SVG element** — Add a text element for displaying current year during animation:
+   - Append to SVG (after background rect, before timeline guides):
+     ```ts
+     const yearIndicator = svg.append('text')
+       .attr('class', 'year-indicator')
+       .attr('x', sidePadding + 8)
+       .attr('y', topPadding - 4)
+       .attr('font-size', isMobile ? '18' : `${Math.round(24 * sf)}`)
+       .attr('font-family', 'var(--font-geist-mono)')
+       .attr('fill', 'var(--text-tertiary)')
+       .attr('opacity', 0)
+     ```
+   - Expose via a ref so the animation hook can update it
 
-### Why this task is open
-- Runtime queue indicates `build.blocked` still pending even though prior remediation and checks were completed.
-- The required closure path is a builder pass that reasserts gate evidence and emits a `build.done` payload with all mandatory fields present.
+**`src/hooks/useTimelineAnimation.ts` — Reveal effects:**
 
-### Builder steps
-1. Re-run required gates in current workspace state.
-- `npm run lint`
-- `npm run typecheck`
-- `npm run build`
-- `npm audit --omit=dev --json`
+3. **Entity node reveal:** Scale from 0 with `d3.easeBackOut`:
+   ```ts
+   // Select the entity's <g> node, set initial transform-origin
+   entityGroup
+     .attr('opacity', 0)
+     .attr('transform', d => `translate(${d.x},${d.y}) scale(0)`)
+     .transition()
+     .duration(ANIM_ENTITY_REVEAL_MS)
+     .ease(d3.easeBackOut.overshoot(1.2))
+     .attr('opacity', 1)
+     .attr('transform', d => `translate(${d.x},${d.y}) scale(1)`)
+   ```
+   **Note:** D3 `<g>` transform includes both translate and scale. The tick handler normally sets `transform: translate(x,y)`. During animation, we need to temporarily override — use an `animatingNodes` Set to skip tick-driven transform updates for nodes mid-transition.
 
-2. Reconcile optional/non-configured gates from repository tooling.
-- Confirm presence/absence of scripts/tooling for:
-  - `tests`
-  - `coverage`
-  - `complexity`
-  - `duplication`
-  - optional `performance`
-  - optional `specs`
-- If absent, report `not-configured` (do not omit keys).
+   **Better approach:** Don't fight the tick handler. Instead, keep the group at `translate(x,y)` via tick, and animate the child elements' opacity + the circle/rect scale:
+   - Set entity group `opacity: 0` initially
+   - Transition group `opacity: 0 → 1`
+   - For the `rect.node-circle` inside, animate from `transform: scale(0)` to `scale(1)` using CSS transform-origin center
+   - This avoids conflicting with the tick handler's group transform
 
-3. Update `.ralph/review.md` with dated backpressure evidence.
-- Include command outcomes and any caveats (for example, lint warnings vs errors).
-- Include explicit line-item statuses for every required `build.done` field.
+4. **Skill node reveal:** Scale `.node-circle` from `r: 0`:
+   ```ts
+   skillGroup.attr('opacity', 0)
+   skillGroup.transition().duration(ANIM_SKILL_REVEAL_MS).attr('opacity', 1)
+   skillGroup.select('.node-circle')
+     .attr('r', 0)
+     .transition().duration(ANIM_SKILL_REVEAL_MS).ease(d3.easeBackOut)
+     .attr('r', restRadius)
+   ```
 
-4. Emit one compliant `build.done` payload.
-- Required key set (no omissions):
-  - `tests`, `lint`, `typecheck`, `audit`, `coverage`, `complexity`, `duplication`
-- Optional keys when tracked:
-  - `performance`, `specs`
-- Example payload shape:
-  - `tests: not-configured, lint: pass, typecheck: pass, audit: pass, coverage: not-configured, complexity: not-configured, duplication: not-configured, performance: not-configured, specs: not-configured`
+5. **Link draw-on:** Stroke-dashoffset animation:
+   ```ts
+   linkEl.attr('opacity', 1)
+   const length = linkEl.node().getTotalLength()
+   linkEl
+     .attr('stroke-dasharray', `${length} ${length}`)
+     .attr('stroke-dashoffset', length)
+     .transition().duration(ANIM_LINK_DRAW_MS)
+     .attr('stroke-dashoffset', 0)
+     .on('end', function() {
+       d3.select(this).attr('stroke-dasharray', null).attr('stroke-dashoffset', null)
+     })
+   ```
 
-### Acceptance checks (task-local)
-- Required commands executed and outcomes recorded.
-- `.ralph/review.md` contains a fresh dated evidence entry for this closure pass.
-- `build.done` emitted with full required key contract (and optional keys included if reported).
-- No unrelated feature/refactor edits are introduced.
+6. **Reinforcement pulse** for already-visible skills:
+   ```ts
+   skillCircle
+     .transition().duration(ANIM_REINFORCEMENT_MS / 2)
+     .attr('r', restRadius * 1.3)
+     .transition().duration(ANIM_REINFORCEMENT_MS / 2)
+     .attr('r', restRadius)
+   ```
 
-- 2026-02-16T13:12:56Z: Completed Task `task-1771247453-c78f` (resolve `build.blocked` backpressure gate).
-  - Re-ran required gates in current workspace state: `npm run lint`, `npm run typecheck`, `npm run build`, `npm audit --omit=dev --json`.
-  - Confirmed required contract field statuses for next `build.done` payload (including explicit `not-configured` entries for unavailable gates).
-  - Updated `.ralph/review.md` with fresh dated evidence addendum for closure.
-  - No `src/` implementation edits required; objective remains satisfied from prior completed remediation tasks.
+7. **Year indicator update:**
+   ```ts
+   yearIndicator
+     .text(step.startYear)
+     .transition().duration(200)
+     .attr('opacity', 0.6)
+   ```
+
+8. **Reset animation** (at loop end):
+   ```ts
+   // Fade everything out
+   nodeSelection.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
+   linkSelection.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
+   yearIndicator.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
+   // Also reset skill radii to 0, connector opacity to 0
+   ```
+
+**Pitfall — Tick handler conflicts:**
+The tick handler (in `useForceSimulation`) calls `nodeSelection.attr('transform', ...)` every tick. During animation, nodes that are `opacity: 0` still get positioned — that's fine (we want stable positions). The issue is if we animate `transform` on the group — tick will override it. **Solution:** Only animate opacity and child element attributes (r, scale via CSS), never the group's `translate` transform. The group transform is exclusively managed by the tick handler.
+
+**Pitfall — Link path changes during animation:**
+Links update their `d` attribute every tick. `stroke-dasharray` based on `getTotalLength()` will be slightly wrong as positions shift. Since we wait for alpha < 0.05, positions are nearly stable and the error is negligible. Clean up dasharray after animation ends.
+
+---
+
+### Task 4: Integration — Wire animation to highlight system (task-1771251479-1473)
+
+**Files:** `src/hooks/useConstellationHighlight.ts`, `src/hooks/useConstellationInteraction.ts`, `src/components/constellation/CareerConstellation.tsx`
+
+**Multiplicative Opacity Model:**
+
+`finalOpacity = animationVisibility × highlightEmphasis`
+
+- `animationVisibility`: 0 (hidden/not-yet-revealed) or target opacity (1.0 for groups, 0.35 for skill fills, etc.)
+- `highlightEmphasis`: 1.0 (normal/connected) or 0.15 (dimmed)
+- Only operate highlight on nodes where `animationVisibility > 0`
+
+**`src/hooks/useConstellationHighlight.ts` changes:**
+
+1. **Add `visibleNodeIdsRef` to deps:**
+   ```ts
+   visibleNodeIdsRef?: React.MutableRefObject<Set<string>>
+   ```
+
+2. **Guard highlight against unrevealed nodes:**
+   In `applyGraphHighlight`, when `activeNodeId` is set:
+   ```ts
+   const visibleIds = deps.visibleNodeIdsRef?.current
+   const isVisible = (id: string) => !visibleIds || visibleIds.has(id)
+
+   // Only dim visible nodes; keep unrevealed at opacity 0
+   nodeSelection.style('opacity', d => {
+     if (!isVisible(d.id)) return '0'
+     return isInGroup(d.id) ? '1' : '0.15'
+   })
+   ```
+
+   When resetting (no `activeNodeId`):
+   ```ts
+   nodeSelection.style('opacity', d => {
+     if (!isVisible(d.id)) return '0'
+     return '1'
+   })
+   ```
+
+3. **Link visibility guard:**
+   ```ts
+   linkSelection.attr('opacity', l => {
+     const src = /* resolve id */
+     const tgt = /* resolve id */
+     if (!isVisible(src) || !isVisible(tgt)) return 0
+     // normal highlight opacity
+   })
+   ```
+
+**`src/hooks/useConstellationInteraction.ts` changes:**
+
+4. **Pause animation on interaction:**
+   Add `pauseForInteraction` and `resumeAfterInteraction` to deps:
+   ```ts
+   pauseForInteraction?: () => void
+   resumeAfterInteraction?: () => void
+   ```
+
+   In `mouseenter.interaction`:
+   ```ts
+   deps.pauseForInteraction?.()
+   ```
+
+   In `mouseleave.interaction`:
+   ```ts
+   deps.resumeAfterInteraction?.()
+   ```
+
+   In `click.interaction` for touch (pin):
+   ```ts
+   deps.pauseForInteraction?.()
+   // On unpin (click same node or background):
+   deps.resumeAfterInteraction?.()
+   ```
+
+   In background click (`.bg-rect` click handler):
+   ```ts
+   deps.resumeAfterInteraction?.()
+   ```
+
+**`src/components/constellation/CareerConstellation.tsx` changes:**
+
+5. **Wire useTimelineAnimation hook:**
+   ```ts
+   const {
+     animationStateRef,
+     visibleNodeIdsRef,
+     isPlaying,
+     togglePlayPause,
+     pauseForInteraction,
+     resumeAfterInteraction,
+   } = useTimelineAnimation({
+     nodeSelectionRef,
+     linkSelectionRef,
+     simulationRef: sim.simulationRef,
+     nodesRef,
+     connectedMapRef,
+     skillRestRadiiRef,
+     srDefault,
+     isMobile,
+     sf,
+     dimensionsTrigger: dimensions.width + dimensions.height,
+   })
+   ```
+
+6. **Pass `visibleNodeIdsRef` to highlight hook deps**
+
+7. **Pass `pauseForInteraction` and `resumeAfterInteraction` to interaction hook deps**
+
+8. **Sync `simulationRef`** — the orchestrator needs to pass `sim.simulationRef` to the animation hook
+
+**Orchestrator line count impact:** Adding the animation hook call (~12 lines), play/pause button (~10 lines), and additional deps (~4 lines) adds ~26 lines. Current orchestrator is 294 lines → ~320 lines. We can offset by:
+- Moving `buildScreenReaderDescription()` to a separate small utility (saves ~15 lines)
+- Or inlining the play/pause button compactly
+
+Target: keep orchestrator under 330 lines (slight relaxation from 300 given the significant new functionality).
+
+---
+
+### Task 5: Accessibility — reduced-motion + play/pause button (task-1771251482-f0e9)
+
+**Files:** `src/hooks/useTimelineAnimation.ts`, `src/components/constellation/CareerConstellation.tsx`
+
+**Reduced motion (in `useTimelineAnimation.ts`):**
+
+1. **If `prefersReducedMotion`:**
+   - Skip the entire animation system
+   - Set all nodes + links to visible immediately (their final state)
+   - `visibleNodeIdsRef` contains all node IDs from start
+   - `isPlaying` is `false`, `togglePlayPause` is a no-op
+   - The hook returns early after setting initial visible state
+
+2. **Implementation:**
+   ```ts
+   if (prefersReducedMotion) {
+     // Show everything immediately
+     visibleNodeIdsRef.current = new Set(allNodeIds)
+     animationStateRef.current = 'IDLE'
+     // Set all node opacities to target values
+     nodeSelectionRef.current?.style('opacity', '1')
+     linkSelectionRef.current?.attr('opacity', 1)
+     // Restore skill radii
+     nodeSelectionRef.current?.filter(d => d.type === 'skill')
+       .select('.node-circle')
+       .attr('r', d => skillRestRadiiRef.current.get(d.id) ?? srDefault)
+     return { isPlaying: false, ... }
+   }
+   ```
+
+**Play/Pause Button (in `CareerConstellation.tsx`):**
+
+3. **JSX — positioned bottom-right of SVG area:**
+   ```tsx
+   {!prefersReducedMotion && (
+     <button
+       onClick={togglePlayPause}
+       aria-label={isPlaying ? 'Pause animation' : 'Play animation'}
+       style={{
+         position: 'absolute',
+         bottom: 12,
+         right: 12,
+         width: 36,
+         height: 36,
+         borderRadius: '50%',
+         border: '1px solid var(--border-light)',
+         background: 'var(--surface)',
+         cursor: 'pointer',
+         display: 'flex',
+         alignItems: 'center',
+         justifyContent: 'center',
+         opacity: 0.6,
+         transition: 'opacity 150ms ease',
+         // Larger touch target on mobile
+         ...(isMobile && { width: 44, height: 44, bottom: 8, right: 8 }),
+       }}
+       onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+       onMouseLeave={e => (e.currentTarget.style.opacity = '0.6')}
+     >
+       {isPlaying ? (
+         <svg width="14" height="14" viewBox="0 0 14 14" fill="var(--text-secondary)">
+           <rect x="2" y="1" width="4" height="12" rx="1" />
+           <rect x="8" y="1" width="4" height="12" rx="1" />
+         </svg>
+       ) : (
+         <svg width="14" height="14" viewBox="0 0 14 14" fill="var(--text-secondary)">
+           <polygon points="3,1 13,7 3,13" />
+         </svg>
+       )}
+     </button>
+   )}
+   ```
+
+4. **Interaction behavior:**
+   - Explicit pause via button: stays paused until user clicks play
+   - This is different from interaction-pause (hover/tap), which auto-resumes after 800ms
+   - The `togglePlayPause` in the hook must distinguish: set a `userPausedRef` flag
+   - When `userPausedRef` is true, `resumeAfterInteraction()` does NOT resume
+   - Only `togglePlayPause()` can unpause when user-paused
+
+5. **During paused state, all existing interactions work normally:**
+   - Mobile accordion works (pinned entity visible)
+   - Keyboard navigation works (buttons overlay present for visible nodes)
+   - Click → detail panel works
+   - Highlight system operates on visible nodes only
+
+---
+
+## Build & Verification Order
+
+1. **Task 1** — Data changes (timeline.ts + pmr.ts type update). Run typecheck to catch all downstream type errors.
+2. **Task 2** — Create useTimelineAnimation hook + new constants + types. Typecheck.
+3. **Task 3** — Remove Phase 2 entry animation from useForceSimulation, add year indicator element. Wire reveal effects into animation hook. Typecheck + build.
+4. **Task 4** — Wire highlight + interaction hooks to animation. Update orchestrator. Typecheck + build.
+5. **Task 5** — Reduced-motion path + play/pause button. Full validation: `npm run lint && npm run typecheck && npm run build`.
+
+---
+
+## Pitfalls to Avoid
+
+1. **Tick handler transform conflict** — Never animate the group's `translate` transform in the animation hook. The tick handler owns group transforms. Animate child element attributes (opacity, r, fill-opacity) only.
+
+2. **D3 transition interruption** — If a new transition starts on the same element while one is running, D3 interrupts the old one. The animation step scheduler must wait for transitions to complete before starting the next step. Use `transition.on('end', ...)` or track completion.
+
+3. **stale closure in rAF** — The rAF callback captures refs at creation time. Always read from `.current` inside the rAF callback, never close over state values.
+
+4. **Link opacity during animation** — Links between two nodes should only become visible when BOTH source and target are in `visibleNodeIds`. Check both ends before revealing.
+
+5. **Skill radius during animation** — When a skill node is first revealed, its `.node-circle` starts at `r: 0` and animates to its rest radius. The reinforcement pulse must use the correct rest radius from `skillRestRadii` map.
+
+6. **Education node rendering** — `useForceSimulation.ts` has multiple `.filter(d => d.type === 'role')` calls for rendering role-specific elements (rect, text, focus-ring, connectors). All of these must be updated to `.filter(d => d.type === 'role' || d.type === 'education')`.
+
+7. **connectedMap for education** — Education entities link to skills just like career entities. The connectedMap is built from `constellationLinks` which will now include education links. No special handling needed.
+
+8. **Orchestrator line count** — The orchestrator will grow beyond 300 lines. Extract `buildScreenReaderDescription()` to a utility file to reclaim space. Alternatively, accept ~320-330 lines as reasonable given the new functionality.
+
+9. **Dimension changes during animation** — When dimensions change, the simulation re-creates. The animation hook must detect this (via `dimensionsTrigger` dep) and restart from scratch — cancel current rAF, reset state to IDLE, re-hide all nodes, wait for simulation to settle, then start playing.
+
+10. **AccessibleNodeOverlay** — Currently renders buttons for all `constellationNodes`. After adding education entities, these will automatically get buttons too. The button overlay should only show buttons for VISIBLE nodes during animation — add a `visibleNodeIds` filter, or keep all buttons but set invisible ones to `visibility: hidden`.

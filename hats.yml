@@ -1,11 +1,11 @@
 cli:
-  backend: "codex"
+  backend: "claude"
 
 event_loop:
   prompt_file: "PROMPT.md"
   starting_event: "work.start"
   completion_promise: "LOOP_COMPLETE"
-  max_iterations: 35
+  max_iterations: 50
 
 backpressure:
   gates:
@@ -22,60 +22,118 @@ backpressure:
 hats:
   planner:
     name: "Constellation Planner"
-    description: "Plans chart interaction, timeline parity, and design-token alignment changes."
+    description: "Analyses the codebase and writes a detailed implementation plan for the current phase."
     triggers: ["work.start", "review.changes_requested"]
     publishes: ["plan.ready"]
+    memory:
+      path: ".ralph/agent/memories.md"
+      scope: "global"
     instructions: |
-      Read PROMPT.md first.
+      You are the Planner. Read PROMPT.md to understand the full task.
 
-      Your role is planning only:
-      - Inspect chart pointer/focus interaction layers and hover event flow.
-      - Inspect timeline data exports and role/education mapping used by constellation + timeline UI.
-      - Write/update .ralph/plan.md with concrete file-level steps and acceptance checks.
-      - Define clear scope boundaries so the builder avoids unrelated refactors.
-      - If triggered by review.changes_requested, read .ralph/review.md and revise the plan.
+      If triggered by review.changes_requested, read .ralph/review.md for feedback
+      and update the plan to address the reviewer's concerns.
 
-      Do not implement code.
-      Emit plan.ready when the plan is ready.
+      Your job:
+      1. Read PROMPT.md to understand the overall task and which phases remain
+      2. Explore the current state of the codebase — check what's already been done
+         by looking at PROMPT.md status checkboxes and the actual files
+      3. Identify the NEXT incomplete phase to work on
+      4. Write a detailed implementation plan to .ralph/plan.md with:
+         - Which phase you're planning for
+         - Specific files to create/modify (with full paths)
+         - What each file should contain (key functions, exports, signatures)
+         - Existing code/patterns to reuse (reference specific line ranges)
+         - Potential pitfalls to avoid
+      5. Emit plan.ready
+
+      IMPORTANT: Plan ONE phase at a time. Do not try to plan all 4 phases at once.
+      Each plan should be focused and achievable in a single builder iteration.
+
+      Key files to reference:
+      - src/components/CareerConstellation.tsx (the 1102-line monolith to decompose)
+      - src/data/timeline.ts (temporal data, buildConstellationData)
+      - src/data/skills.ts (skill definitions with startYear)
+      - src/data/constellation.ts (data exports)
+      - src/types/pmr.ts (type definitions)
+      - src/components/DashboardLayout.tsx (integration point)
+      - .claude/skills/d3-visualization/ (D3 patterns and examples)
+
+      Do NOT write any code. Planning only.
 
   builder:
     name: "Constellation Builder"
-    description: "Implements chart hover fixes, timeline/data alignment, and token-consistent styling."
+    description: "Implements the current plan phase, writing clean code that passes all quality gates."
     triggers: ["plan.ready"]
     publishes: ["build.done"]
+    memory:
+      path: ".ralph/agent/memories.md"
+      scope: "global"
     instructions: |
-      Read PROMPT.md and .ralph/plan.md first.
+      You are the Builder. Read PROMPT.md for the overall task and .ralph/plan.md
+      for the current implementation plan.
 
-      Implement the planned work end-to-end:
-      - Fix pointer hover reliability in the constellation chart.
-      - Resolve interaction-layer conflicts between accessibility overlay controls and SVG node events.
-      - Keep touch and keyboard flows working.
-      - Align timeline mapping/order semantics between chart and work-experience surfaces.
-      - Clarify timeline data exports (career/education/combined) where needed for correctness.
-      - Align font/token usage with the site design system and remove invalid token usage.
-      - Resolve or remove divergent/duplicate timeline pathing that causes inconsistent behavior.
+      Your job:
+      1. Read the plan carefully — understand what files to create/modify
+      2. Implement the plan step by step
+      3. After each significant change, run: npm run lint && npm run typecheck && npm run build
+      4. Fix any lint/type/build errors immediately
+      5. Update PROMPT.md status checkboxes as you complete items
+      6. When the current phase's plan is fully implemented, emit build.done
 
-      Keep project conventions intact and avoid unrelated refactors.
-      Update .ralph/plan.md as steps are completed.
-      Emit build.done exactly once when implementation is complete and lint/typecheck/build pass.
+      Code quality rules:
+      - Follow existing patterns in the codebase (Tailwind, path aliases @/*, strict TS)
+      - Prefer self-explanatory variable names over comments
+      - Keep only active code — no dead code, no commented-out blocks
+      - Reference .claude/skills/d3-visualization/ for D3 force layout patterns
+      - Domain colors: clinical=#059669, technical=#0D6E6E, leadership=#D97706
+      - Font tokens: --font-ui (Elvaro), --font-geist-mono (monospace)
+
+      IMPORTANT: When refactoring, preserve ALL existing behaviour — hover, click, tap,
+      keyboard nav, mobile accordion, detail panel integration, reduced motion support.
+      Verify imports resolve and the app compiles after every extraction.
+
+      Do NOT assess overall quality — that's the Reviewer's job.
 
   reviewer:
     name: "Constellation Reviewer"
-    description: "Validates behavior, parity, accessibility flows, and build quality against PROMPT requirements."
+    description: "Validates the build against PROMPT.md success criteria and project quality standards."
     triggers: ["build.done"]
     publishes: ["review.changes_requested"]
+    memory:
+      path: ".ralph/agent/memories.md"
+      scope: "global"
     instructions: |
-      Read PROMPT.md (and .ralph/plan.md if needed), then review the final implementation.
+      You are the Reviewer. Read PROMPT.md for the full success criteria.
 
-      Validate all success criteria:
-      - Pointer hover reliability in chart nodes
-      - No pointer/focus layering conflicts
-      - Timeline parity between chart and work-experience surfaces
-      - Coherent cross-highlighting behavior
-      - Font/token consistency for chart and timeline-adjacent UI
-      - Touch and keyboard behavior preserved
-      - Lint/typecheck/build passing
+      Your job:
+      1. Run the quality gates: npm run lint && npm run typecheck && npm run build
+         - All three MUST pass. If any fail, request changes immediately.
+      2. Check PROMPT.md status — which phase was just completed?
+      3. Review the code changes against the plan and success criteria:
+         - Phase 1 (Refactor): Is the code well-structured? Orchestrator < 300 lines?
+           All hooks and sub-components properly extracted? All existing behaviour preserved?
+         - Phase 2 (Visual): Do links show domain colors and strength-weighted width?
+           Are role/skill nodes visually enhanced? Entry animation present?
+         - Phase 3 (Animation): Does it auto-play? Build chronologically from 2009?
+           Include education entities? Loop continuously?
+         - Phase 4 (Integration): Does hover/tap pause? Resume after 800ms?
+           Play/pause button functional? Reduced motion handled?
+      4. Check for regressions:
+         - All CareerConstellation props still supported?
+         - DashboardLayout integration intact?
+         - Accessibility preserved (keyboard nav, screen reader, reduced motion)?
+         - Import paths resolve correctly?
+         - No TypeScript `any` types introduced?
 
-      Write findings and manual verification notes to .ralph/review.md.
-      If anything is incomplete or incorrect, emit review.changes_requested with specific fixes.
-      If all criteria pass, print LOOP_COMPLETE and stop.
+      If ALL success criteria for the completed phase are met AND quality gates pass:
+        - If more phases remain, write feedback to .ralph/review.md noting the phase
+          is done, then emit review.changes_requested so the Planner plans the next phase.
+        - If ALL four phases are complete and ALL success criteria met,
+          write final review to .ralph/review.md and print LOOP_COMPLETE.
+
+      If changes are needed, write specific actionable feedback to .ralph/review.md
+      referencing file paths. Emit review.changes_requested.
+
+      Circuit breaker: If the same blocker repeats across 2+ consecutive reviews
+      with no meaningful progress, escalate in .ralph/review.md with status "needs-human".
