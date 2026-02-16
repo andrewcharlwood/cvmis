@@ -22,6 +22,7 @@ export const ConstellationLegend: React.FC<ConstellationLegendProps> = ({ isTouc
         right: 0,
         display: 'flex',
         flexDirection: 'column',
+        alignItems: 'center',
         gap: '2px',
         padding: '8px 12px',
         pointerEvents: 'none',

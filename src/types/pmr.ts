@@ -192,6 +192,7 @@ export interface ConstellationNode {
   shortLabel?: string    // abbreviated for small nodes
   organization?: string
   startYear?: number
+  startDate?: string   // ISO date for fractional year positioning
   endYear?: number | null
   orgColor?: string
   domain?: 'clinical' | 'technical' | 'leadership'

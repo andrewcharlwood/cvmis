@@ -69,7 +69,7 @@ const COLORS = {
 }
 
 const BOOT_CONFIG: BootConfig = {
-  header: 'CLINICAL TERMINAL v3.2.1',
+  header: 'CV Management Information System v1.0.0',
   lines: [
     { type: 'status', text: 'Initialising pharmacist profile...', style: 'dim' },
     { type: 'separator', text: '---', style: 'dim' },
@@ -88,7 +88,7 @@ const BOOT_CONFIG: BootConfig = {
   timing: {
     lineDelay: 220,
     cursorBlinkInterval: 300,
-    holdAfterComplete: 900,
+    holdAfterComplete: 1000,
     fadeOutDuration: 600,
     cursorShrinkDuration: 600,
     ecgStartDelay: 0,

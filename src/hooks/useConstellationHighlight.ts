@@ -1,11 +1,17 @@
 import { useRef, useCallback } from 'react'
 import type * as d3 from 'd3'
+import { select as d3select } from 'd3'
 import {
   DOMAIN_COLOR_MAP, prefersReducedMotion,
   LINK_BASE_WIDTH, LINK_STRENGTH_WIDTH_FACTOR,
   LINK_BASE_OPACITY, LINK_STRENGTH_OPACITY_FACTOR,
   LINK_HIGHLIGHT_BASE_WIDTH, LINK_HIGHLIGHT_STRENGTH_WIDTH_FACTOR,
-  SKILL_STROKE_OPACITY,
+  SKILL_STROKE_OPACITY, SKILL_ACTIVE_STROKE_OPACITY,
+  SKILL_REST_OPACITY, SKILL_ACTIVE_OPACITY, LABEL_REST_OPACITY,
+  HIGHLIGHT_DIM_OPACITY,
+  ROLE_STROKE_OPACITY_DEFAULT, ROLE_STROKE_OPACITY_ACTIVE, ROLE_STROKE_OPACITY_CONNECTED,
+  ROLE_STROKE_WIDTH_DEFAULT, ROLE_STROKE_WIDTH_ACTIVE,
+  ROLE_FILL_OPACITY_ACTIVE, ROLE_FILL_ACTIVE,
 } from '@/components/constellation/constants'
 import type { SimNode, SimLink } from '@/components/constellation/types'
 
@@ -42,7 +48,7 @@ export function useConstellationHighlight(deps: {
     const nodes = deps.nodesRef.current
     const dur = prefersReducedMotion ? 0 : 180
     const visibleIds = deps.visibleNodeIdsRef?.current
-    const isVisible = (id: string) => !visibleIds || visibleIds.size === 0 || visibleIds.has(id)
+    const isVisible = (id: string) => !visibleIds || visibleIds.has(id)
 
     if (!activeNodeId) {
       // Reset — respect animation visibility
@@ -51,10 +57,13 @@ export function useConstellationHighlight(deps: {
       nodeSelection.filter(d => d.type !== 'skill')
         .attr('filter', null)
         .select('.node-circle')
-        .attr('fill', null)
+        .each(function () {
+          const el = d3select(this)
+          el.attr('fill', el.attr('data-base-fill'))
+        })
         .attr('fill-opacity', null)
-        .attr('stroke-opacity', 0.4)
-        .attr('stroke-width', 1)
+        .attr('stroke-opacity', ROLE_STROKE_OPACITY_DEFAULT)
+        .attr('stroke-width', ROLE_STROKE_WIDTH_DEFAULT)
 
       const skillNodes = nodeSelection.filter(d => d.type === 'skill')
       const getRestRadius = (d: SimNode) => skillRestRadii?.get(d.id) ?? srDefault
@@ -62,20 +71,20 @@ export function useConstellationHighlight(deps: {
         skillNodes.select('.node-circle')
           .transition().duration(dur)
           .attr('r', d => isVisible(d.id) ? getRestRadius(d) : 0)
-          .attr('fill-opacity', 0.35)
+          .attr('fill-opacity', SKILL_REST_OPACITY)
           .attr('filter', null)
           .attr('stroke-opacity', SKILL_STROKE_OPACITY)
         skillNodes.select('.node-label')
           .transition().duration(dur)
-          .attr('opacity', 0.5)
+          .attr('opacity', LABEL_REST_OPACITY)
       } else {
         skillNodes.select('.node-circle')
           .attr('r', d => isVisible(d.id) ? getRestRadius(d) : 0)
-          .attr('fill-opacity', 0.35)
+          .attr('fill-opacity', SKILL_REST_OPACITY)
           .attr('filter', null)
           .attr('stroke-opacity', SKILL_STROKE_OPACITY)
         skillNodes.select('.node-label')
-          .attr('opacity', 0.5)
+          .attr('opacity', LABEL_REST_OPACITY)
       }
 
       linkSelection
@@ -96,7 +105,7 @@ export function useConstellationHighlight(deps: {
 
     nodeSelection.style('opacity', d => {
       if (!isVisible(d.id)) return '0'
-      return isInGroup(d.id) ? '1' : '0.15'
+      return isInGroup(d.id) ? '1' : String(HIGHLIGHT_DIM_OPACITY)
     })
 
     nodeSelection.filter(d => d.type !== 'skill')
@@ -106,14 +115,17 @@ export function useConstellationHighlight(deps: {
         return null
       })
       .select('.node-circle')
-      .attr('fill', d => d.id === activeNodeId ? '#FFFFFF' : null)
-      .attr('fill-opacity', d => d.id === activeNodeId ? 1 : null)
-      .attr('stroke-opacity', d => {
-        if (d.id === activeNodeId) return 1
-        if (connected.has(d.id)) return 0.7
-        return 0.4
+      .each(function (d) {
+        const el = d3select(this)
+        el.attr('fill', d.id === activeNodeId ? ROLE_FILL_ACTIVE : el.attr('data-base-fill'))
       })
-      .attr('stroke-width', d => d.id === activeNodeId ? 2 : 1)
+      .attr('fill-opacity', d => d.id === activeNodeId ? ROLE_FILL_OPACITY_ACTIVE : null)
+      .attr('stroke-opacity', d => {
+        if (d.id === activeNodeId) return ROLE_STROKE_OPACITY_ACTIVE
+        if (connected.has(d.id)) return ROLE_STROKE_OPACITY_CONNECTED
+        return ROLE_STROKE_OPACITY_DEFAULT
+      })
+      .attr('stroke-width', d => d.id === activeNodeId ? ROLE_STROKE_WIDTH_ACTIVE : ROLE_STROKE_WIDTH_DEFAULT)
 
     const skillNodes = nodeSelection.filter(d => d.type === 'skill')
     const getRestRadius = (d: SimNode) => skillRestRadii?.get(d.id) ?? srDefault
@@ -128,23 +140,23 @@ export function useConstellationHighlight(deps: {
           if (!isVisible(d.id)) return 0
           return isInGroup(d.id) ? getActiveRadius(d) : getRestRadius(d)
         })
-        .attr('fill-opacity', d => isInGroup(d.id) ? 0.9 : 0.35)
+        .attr('fill-opacity', d => isInGroup(d.id) ? SKILL_ACTIVE_OPACITY : SKILL_REST_OPACITY)
         .attr('filter', d => isInGroup(d.id) ? `url(#glow-${d.domain ?? 'technical'})` : null)
-        .attr('stroke-opacity', d => isInGroup(d.id) ? 0.8 : SKILL_STROKE_OPACITY)
+        .attr('stroke-opacity', d => isInGroup(d.id) ? SKILL_ACTIVE_STROKE_OPACITY : SKILL_STROKE_OPACITY)
       skillNodes.select('.node-label')
         .transition().duration(dur)
-        .attr('opacity', d => isInGroup(d.id) ? 1 : 0.5)
+        .attr('opacity', d => isInGroup(d.id) ? 1 : LABEL_REST_OPACITY)
     } else {
       skillNodes.select('.node-circle')
         .attr('r', d => {
           if (!isVisible(d.id)) return 0
           return isInGroup(d.id) ? getActiveRadius(d) : getRestRadius(d)
         })
-        .attr('fill-opacity', d => isInGroup(d.id) ? 0.9 : 0.35)
+        .attr('fill-opacity', d => isInGroup(d.id) ? SKILL_ACTIVE_OPACITY : SKILL_REST_OPACITY)
         .attr('filter', d => isInGroup(d.id) ? `url(#glow-${d.domain ?? 'technical'})` : null)
-        .attr('stroke-opacity', d => isInGroup(d.id) ? 0.8 : SKILL_STROKE_OPACITY)
+        .attr('stroke-opacity', d => isInGroup(d.id) ? SKILL_ACTIVE_STROKE_OPACITY : SKILL_STROKE_OPACITY)
       skillNodes.select('.node-label')
-        .attr('opacity', d => isInGroup(d.id) ? 1 : 0.5)
+        .attr('opacity', d => isInGroup(d.id) ? 1 : LABEL_REST_OPACITY)
     }
 
     linkSelection

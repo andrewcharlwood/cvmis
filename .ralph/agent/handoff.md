@@ -1,11 +1,11 @@
 # Session Handoff
 
-_Generated: 2026-02-16 14:36:25 UTC_
+_Generated: 2026-02-16 15:06:20 UTC_
 
 ## Git Context
 
 - **Branch:** `master`
-- **HEAD:** aca5771: chore: auto-commit before merge (loop primary)
+- **HEAD:** e9a7581: chore: auto-commit before merge (loop primary)
 
 ## Tasks
 
@@ -70,18 +70,16 @@ Session completed successfully. No pending work.
 **Original objective:**
 
 ```
-# Task: CareerConstellation Overhaul
+# Task: Career Constellation Chart & Layout Polish
 
-Refactor, visually improve, and add chronological animation to the CareerConstellation D3 force chart — the centrepiece of the portfolio's Patient Pathway section.
+Visual polish and layout adjustments to the career constellation chart, sidebar, and repeat medications section. 12 discrete changes across 10 files.
 
 ## Requirements
 
-### Phase 1 — Refactor the Monolith
+### 1. Reduce link opacity (`src/components/constellation/constants.ts`)
+- Lower `LINK_BASE_OPACITY` from `0.08` → `0.04`
+- Lower `LINK_STRENGTH_OPACITY_FACTOR` from `0.12` → `0.06`
+- Makes skill connection lines subtler so job pills are visually clearer
 
-Decompose `src/components/CareerConstellation.tsx` (1102 lines) into focused modules:
-
-```
-src/components/constellation/
-  CareerConstellation.tsx          -- Orchestrator (< 300 lines)
-  MobileAccordion.tsx              -- Mobile tap-to-e...
+### 2. White backgro...
 ```

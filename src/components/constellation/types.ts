@@ -45,6 +45,7 @@ export type AnimationState = 'IDLE' | 'PLAYING' | 'PAUSED' | 'HOLDING' | 'RESETT
 export interface AnimationStep {
   entityId: string
   startYear: number
+  startMonth: number // 0-indexed (0 = January)
   skillIds: string[]
   newSkillIds: string[]
   reinforcedSkillIds: string[]

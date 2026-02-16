@@ -40,6 +40,7 @@ const HOLD_SECONDS = 2 // Hold after text completes, before flatline/transition
 const FLATLINE_DRAW_SECONDS = 0.3 // Time to draw flatline
 const FADE_TO_BLACK_SECONDS = 0.2 // Canvas fade out
 const BG_TRANSITION_SECONDS = 0.2 // Background color transition
+const SKIP_TEXT = true // Skip text phase — transition directly after heartbeats
 
 // =============================================================================
 // Letter Definitions (ECG waveform shapes for each letter)
@@ -344,7 +345,7 @@ export function ECGAnimation({ onComplete, startPosition }: ECGAnimationProps) {
     const lastBeatEndWX = lastBeat.startWX + lastBeat.widthPx
     const textStartWX = lastBeatEndWX + FLAT_GAP_SECONDS * TRACE_SPEED
     const totalTextW = getTextTotalWidth(LETTER_W, LETTER_G, SPACE_W)
-    const textEndWX = textStartWX + totalTextW
+    const textEndWX = SKIP_TEXT ? textStartWX : textStartWX + totalTextW
     const textLayout = layoutText(
       textStartWX, LETTER_W, LETTER_G, SPACE_W,
       baselineY, 0, Infinity
@@ -354,7 +355,7 @@ export function ECGAnimation({ onComplete, startPosition }: ECGAnimationProps) {
     const textEndTime = (textEndWX - startOffsetX) / TRACE_SPEED
     const holdEndTime = textEndTime 
     const flatlineEndTime = textEndTime + FLATLINE_DRAW_SECONDS
-    const fadeStartTime = flatlineEndTime + HOLD_SECONDS
+    const fadeStartTime = flatlineEndTime + (SKIP_TEXT ? 0.3 : HOLD_SECONDS)
     const fadeEndTime = fadeStartTime + FADE_TO_BLACK_SECONDS
     const bgTransitionEndTime = fadeEndTime + BG_TRANSITION_SECONDS
     const exitEndTime = bgTransitionEndTime
@@ -500,7 +501,7 @@ export function ECGAnimation({ onComplete, startPosition }: ECGAnimationProps) {
       const isTextPhase = headWX > textStartWX
       const isTextDone = elapsed >= textEndTime
 
-      if (isTextPhase) {
+      if (isTextPhase && !SKIP_TEXT) {
         ctx.save()
 
         // Clip for progressive reveal

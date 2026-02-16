@@ -24,6 +24,7 @@ interface CareerConstellationProps {
   onNodeHover?: (id: string | null) => void
   highlightedNodeId?: string | null
   containerHeight?: number | null
+  animationReady?: boolean
 }
 
 const nodeById = new Map(constellationNodes.map(node => [node.id, node]))
@@ -35,6 +36,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
   onNodeHover,
   highlightedNodeId,
   containerHeight,
+  animationReady = false,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -66,6 +68,9 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     const container = containerRef.current
     if (!container) return
 
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null
+    const CHANGE_THRESHOLD = 0.3
+
     const updateDimensions = () => {
       const width = container.clientWidth
       const viewportWidth = window.innerWidth
@@ -73,13 +78,28 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       const scaleFactor = viewportWidth >= 1024
         ? Math.max(1, Math.min(1.6, viewportWidth / 1440))
         : 1
-      setDimensions({ width, height, scaleFactor })
+      setDimensions(prev => {
+        const widthDelta = Math.abs(prev.width - width) / prev.width
+        const heightDelta = Math.abs(prev.height - height) / prev.height
+        if (widthDelta < CHANGE_THRESHOLD && heightDelta < CHANGE_THRESHOLD) {
+          return prev
+        }
+        return { width, height, scaleFactor }
+      })
     }
 
+    // Initial measurement (no debounce)
     updateDimensions()
-    const observer = new ResizeObserver(updateDimensions)
+
+    const observer = new ResizeObserver(() => {
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(updateDimensions, 2000)
+    })
     observer.observe(container)
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      if (debounceTimer) clearTimeout(debounceTimer)
+    }
   }, [containerHeight])
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 640
@@ -157,6 +177,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     skillRestRadiiRef,
     srDefault,
     dimensionsTrigger: dimensions.width + dimensions.height,
+    ready: animationReady,
   })
 
   // Sync visibleNodeIdsRef from animation hook
@@ -231,12 +252,15 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     >
       <svg
         ref={svgRef}
-        width={dimensions.width}
-        height={dimensions.height}
         viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
         role="img"
         aria-label="Clinical pathway constellation showing career roles and skills in reverse-chronological order along a vertical timeline"
-        style={{ display: 'block' }}
+        style={{
+          display: 'block',
+          width: '100%',
+          height: dimensions.height,
+          opacity: 1,
+        }}
       />
 
       <ConstellationLegend isTouch={supportsCoarsePointer} domainCounts={domainCounts} />
@@ -249,6 +273,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
           onToggle={animation.togglePlayPause}
           isMobile={isMobile}
           visible={chartInView}
+          containerRef={containerRef}
         />
       )}
 

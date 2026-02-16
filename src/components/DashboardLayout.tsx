@@ -128,7 +128,7 @@ function LastConsultationSubsection({ highlightedRoleId }: LastConsultationSubse
           display: 'flex',
           flexWrap: 'wrap',
           gap: '20px',
-          marginBottom: '14px',
+          marginBottom: '1=px',
           paddingBottom: '14px',
           borderBottom: '1px solid var(--border-light)',
           cursor: 'pointer',
@@ -182,7 +182,7 @@ function LastConsultationSubsection({ highlightedRoleId }: LastConsultationSubse
           display: 'flex',
           flexDirection: 'column',
           gap: '7px',
-          marginBottom: '16px',
+          marginBottom: '0px',
         }}
       >
         {consultation.examination.map((bullet, index) => (
@@ -250,7 +250,7 @@ export function DashboardLayout() {
   const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null)
   const [highlightedRoleId, setHighlightedRoleId] = useState<string | null>(null)
   const [chronologyHeight, setChronologyHeight] = useState<number | null>(null)
-  const [sidebarForceCollapsed, setSidebarForceCollapsed] = useState(false)
+  const [constellationReady, setConstellationReady] = useState(false)
   const chronologyRef = useRef<HTMLDivElement>(null)
   const patientSummaryRef = useRef<HTMLDivElement>(null)
   const activeSection = useActiveSection()
@@ -260,28 +260,18 @@ export function DashboardLayout() {
     [],
   )
 
-  // Sidebar collapse when patient summary scrolls out of view (desktop only)
+  // Signal constellation animation readiness when patient summary scrolls out of view
   useEffect(() => {
     const el = patientSummaryRef.current
     if (!el) return
-    const mq = window.matchMedia('(min-width: 1024px)')
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (mq.matches) {
-          setSidebarForceCollapsed(!entry.isIntersecting)
-        }
+        if (!entry.isIntersecting) setConstellationReady(true)
       },
       { threshold: 0 },
     )
     observer.observe(el)
-    const handleResize = () => {
-      if (!mq.matches) setSidebarForceCollapsed(false)
-    }
-    mq.addEventListener('change', handleResize)
-    return () => {
-      observer.disconnect()
-      mq.removeEventListener('change', handleResize)
-    }
+    return () => observer.disconnect()
   }, [])
 
   // Measure the chronology stream height so the constellation graph can match it
@@ -436,7 +426,6 @@ export function DashboardLayout() {
             activeSection={activeSection}
             onNavigate={scrollToSection}
             onSearchClick={handleSearchClick}
-            forceCollapsed={sidebarForceCollapsed}
           />
         </motion.div>
 
@@ -465,31 +454,7 @@ export function DashboardLayout() {
             <ParentSection title="Patient Pathway" tileId="patient-pathway">
               <div className="pathway-columns">
                 <div ref={chronologyRef} className="chronology-stream" data-tile-id="section-experience">
-                  <div
-                    style={{
-                      marginBottom: '14px',
-                      padding: '10px 12px',
-                      border: '1px solid var(--border-light)',
-                      borderRadius: 'var(--radius-sm)',
-                      background: 'var(--bg-dashboard)',
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: '11px',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        color: 'var(--text-tertiary)',
-                        marginBottom: '4px',
-                        fontFamily: 'var(--font-geist-mono)',
-                      }}
-                    >
-                      Clinical Record Stream
-                    </div>
-                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                      Chronological role and education entries. Select items to inspect full records.
-                    </div>
-                  </div>
+
 
                   <div className="chronology-item">
                     <LastConsultationSubsection highlightedRoleId={highlightedRoleId} />
@@ -506,6 +471,7 @@ export function DashboardLayout() {
                     onNodeHover={handleNodeHover}
                     highlightedNodeId={highlightedNodeId}
                     containerHeight={chronologyHeight}
+                    animationReady={constellationReady}
                   />
                 </div>
 

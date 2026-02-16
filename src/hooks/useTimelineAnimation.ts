@@ -15,14 +15,19 @@ import {
   ANIM_RESTART_DELAY_MS,
   ANIM_INTERACTION_RESUME_MS,
   ANIM_SETTLE_ALPHA,
+  ANIM_MONTH_STEP_MS,
+  ANIM_CHRONOLOGICAL_ENABLED,
+  HIDDEN_ENTITY_IDS,
   prefersReducedMotion,
 } from '@/components/constellation/constants'
 import type { SimNode, SimLink, AnimationState, AnimationStep } from '@/components/constellation/types'
 
-// Pre-compute animation steps from timeline entities (oldest first)
-const sortedEntities = [...timelineEntities].sort(
-  (a, b) => a.dateRange.startYear - b.dateRange.startYear
-)
+// Pre-compute animation steps from timeline entities (newest first → reverse chronological)
+const sortedEntities = [...timelineEntities]
+  .filter(e => !HIDDEN_ENTITY_IDS.has(e.id))
+  .sort((a, b) => b.dateRange.startYear - a.dateRange.startYear)
+
+const MONTH_ABBREVS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
 
 function buildAnimationSteps(): AnimationStep[] {
   const seen = new Set<string>()
@@ -34,9 +39,11 @@ function buildAnimationSteps(): AnimationStep[] {
     const linkPairs = constellationLinks
       .filter(l => l.source === entity.id)
       .map(l => ({ source: l.source, target: l.target }))
+    const startDate = new Date(entity.dateRange.start)
     return {
       entityId: entity.id,
       startYear: entity.dateRange.startYear,
+      startMonth: startDate.getMonth(),
       skillIds,
       newSkillIds,
       reinforcedSkillIds,
@@ -57,6 +64,7 @@ interface UseTimelineAnimationDeps {
   skillRestRadiiRef: React.MutableRefObject<Map<string, number>>
   srDefault: number
   dimensionsTrigger: number
+  ready?: boolean
 }
 
 export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
@@ -68,13 +76,103 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
   const userPausedRef = useRef(false)
   const interactionPausedRef = useRef(false)
   const resumeTimerRef = useRef(0)
+  const displayedMonthRef = useRef(-1) // 0-indexed, -1 = not yet shown
+  const displayedYearRef = useRef(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [animationInitialized, setAnimationInitialized] = useState(false)
 
   const scheduleTimeout = useCallback((fn: () => void, ms: number) => {
     const id = window.setTimeout(fn, ms)
     timeoutIdsRef.current.push(id)
     return id
   }, [])
+
+  // Scroll the month/year indicator from current position to target, one month at a time
+  const scrollDateIndicator = useCallback((
+    targetMonth: number,
+    targetYear: number,
+    onComplete: () => void,
+  ) => {
+    const dateGroup = deps.yearIndicatorRef.current
+    if (!dateGroup) { onComplete(); return }
+
+    const monthText = dateGroup.select('.date-month') as d3.Selection<SVGTextElement, unknown, null, undefined>
+    const yearText = dateGroup.select('.date-year') as d3.Selection<SVGTextElement, unknown, null, undefined>
+    const lineHeight = parseFloat(monthText.attr('font-size') || '24') * 1.3
+
+    // First step: just show immediately if nothing displayed yet
+    if (displayedMonthRef.current === -1) {
+      displayedMonthRef.current = targetMonth
+      displayedYearRef.current = targetYear
+      monthText.text(MONTH_ABBREVS[targetMonth])
+      yearText.text(targetYear)
+      dateGroup.transition().duration(400).attr('opacity', 0.6)
+      onComplete()
+      return
+    }
+
+    // Calculate total months to scroll backwards
+    const fromTotal = displayedYearRef.current * 12 + displayedMonthRef.current
+    const toTotal = targetYear * 12 + targetMonth
+    const monthSteps = fromTotal - toTotal // positive = scrolling back in time
+    if (monthSteps <= 0) {
+      // Same or forward — just snap
+      displayedMonthRef.current = targetMonth
+      displayedYearRef.current = targetYear
+      monthText.text(MONTH_ABBREVS[targetMonth])
+      yearText.text(targetYear)
+      onComplete()
+      return
+    }
+
+    let currentMonth = displayedMonthRef.current
+    let currentYear = displayedYearRef.current
+    let step = 0
+
+    const tickMonth = () => {
+      if (step >= monthSteps) {
+        onComplete()
+        return
+      }
+
+      // Step back one month
+      currentMonth--
+      if (currentMonth < 0) {
+        currentMonth = 11
+        currentYear--
+        // Animate year change with vertical slide
+        yearText
+          .transition().duration(ANIM_MONTH_STEP_MS * 0.4)
+          .attr('dy', lineHeight * 0.4)
+          .attr('opacity', 0)
+          .transition().duration(0)
+          .attr('dy', -lineHeight * 0.4)
+          .text(currentYear)
+          .transition().duration(ANIM_MONTH_STEP_MS * 0.4)
+          .attr('dy', 0)
+          .attr('opacity', 0.6)
+      }
+
+      // Animate month with vertical slide
+      monthText
+        .transition().duration(ANIM_MONTH_STEP_MS * 0.4)
+        .attr('dy', lineHeight * 0.4)
+        .attr('opacity', 0)
+        .transition().duration(0)
+        .attr('dy', -lineHeight * 0.4)
+        .text(MONTH_ABBREVS[currentMonth])
+        .transition().duration(ANIM_MONTH_STEP_MS * 0.4)
+        .attr('dy', 0)
+        .attr('opacity', 1)
+
+      displayedMonthRef.current = currentMonth
+      displayedYearRef.current = currentYear
+      step++
+      scheduleTimeout(tickMonth, ANIM_MONTH_STEP_MS)
+    }
+
+    tickMonth()
+  }, [deps.yearIndicatorRef, scheduleTimeout])
 
   const cancelAll = useCallback(() => {
     if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current)
@@ -99,12 +197,15 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
     nodeSel.selectAll('*').interrupt()
     connSel?.interrupt()
     tlGroup?.interrupt()
+    yearInd?.interrupt()
+    yearInd?.selectAll('*').interrupt()
 
     nodeSel.style('opacity', '0')
-    linkSel.attr('opacity', 0)
+    linkSel.attr('stroke-opacity', 0)
     connSel?.attr('opacity', 0)
-    tlGroup?.attr('opacity', 0)
     yearInd?.attr('opacity', 0)
+    displayedMonthRef.current = -1
+    displayedYearRef.current = 0
 
     // Reset skill radii to 0
     nodeSel.filter((d: SimNode) => d.type === 'skill')
@@ -112,6 +213,23 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
       .attr('r', 0)
 
     visibleNodeIdsRef.current = new Set()
+
+    // Show full axis immediately — axis stays visible throughout animation
+    if (tlGroup) {
+      tlGroup.attr('opacity', 1)
+      let minTickY = Infinity
+      tlGroup.selectAll<SVGLineElement, number>('line.year-tick').each(function () {
+        const y = parseFloat(d3.select(this).attr('y1'))
+        if (y < minTickY) minTickY = y
+      })
+      if (minTickY < Infinity) {
+        tlGroup.select('.axis-line').attr('y1', minTickY - 12)
+      }
+      tlGroup.selectAll('line.year-tick').attr('stroke-opacity', 0.8)
+      tlGroup.selectAll('text.year-label').attr('opacity', 1)
+      tlGroup.selectAll('line.year-guide').attr('stroke-opacity', 0.25)
+    }
+    setAnimationInitialized(true)
   }, [deps.nodeSelectionRef, deps.linkSelectionRef, deps.connectorSelectionRef, deps.timelineGroupRef, deps.yearIndicatorRef])
 
   const showFinalState = useCallback(() => {
@@ -128,37 +246,42 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
     })
     visibleNodeIdsRef.current = allIds
 
-    nodeSel.style('opacity', '1')
-    linkSel.attr('opacity', null)
-    connSel?.attr('opacity', null)
+    nodeSel.style('opacity', (d: SimNode) => allIds.has(d.id) ? '1' : '0')
+    linkSel.attr('stroke-opacity', null)
+    connSel?.attr('opacity', (d: SimNode) => allIds.has(d.id) ? null : 0)
     tlGroup?.attr('opacity', 1)
+
+    setAnimationInitialized(true)
+
+    // Show full axis
+    if (tlGroup) {
+      // Find the topmost tick y to set axis line extent
+      let minTickY = Infinity
+      tlGroup.selectAll<SVGLineElement, number>('line.year-tick').each(function () {
+        const y = parseFloat(d3.select(this).attr('y1'))
+        if (y < minTickY) minTickY = y
+      })
+      if (minTickY < Infinity) {
+        tlGroup.select('.axis-line').attr('y1', minTickY - 12)
+      }
+      tlGroup.selectAll('line.year-tick').attr('stroke-opacity', 0.8)
+      tlGroup.selectAll('text.year-label').attr('opacity', 1)
+      tlGroup.selectAll('line.year-guide').attr('stroke-opacity', 0.25)
+    }
 
     nodeSel.filter((d: SimNode) => d.type === 'skill')
       .select('.node-circle')
       .attr('r', (d: SimNode) => deps.skillRestRadiiRef.current.get(d.id) ?? deps.srDefault)
   }, [deps.nodeSelectionRef, deps.linkSelectionRef, deps.connectorSelectionRef, deps.timelineGroupRef, deps.skillRestRadiiRef, deps.srDefault])
 
-  const revealStep = useCallback((stepIdx: number, onComplete: () => void) => {
+  const revealEntityAndSkills = useCallback((stepIdx: number, onComplete: () => void) => {
     const nodeSel = deps.nodeSelectionRef.current
     const linkSel = deps.linkSelectionRef.current
     const connSel = deps.connectorSelectionRef.current
-    const yearInd = deps.yearIndicatorRef.current
-    const tlGroup = deps.timelineGroupRef.current
     if (!nodeSel || !linkSel) return
 
     const step = animationSteps[stepIdx]
     if (!step) { onComplete(); return }
-
-    // Show timeline guides on first step
-    if (stepIdx === 0 && tlGroup) {
-      tlGroup.transition().duration(200).attr('opacity', 1)
-    }
-
-    // Update year indicator
-    if (yearInd) {
-      yearInd.text(step.startYear)
-        .transition().duration(200).attr('opacity', 0.6)
-    }
 
     // Reveal entity node
     const entityGroup = nodeSel.filter((d: SimNode) => d.id === step.entityId)
@@ -237,7 +360,7 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
           const el = d3.select(this)
           const pathEl = this as SVGPathElement
           const length = pathEl.getTotalLength()
-          el.attr('opacity', 1)
+          el.attr('stroke-opacity', 1)
             .attr('stroke-dasharray', `${length} ${length}`)
             .attr('stroke-dashoffset', length)
             .transition()
@@ -258,7 +381,16 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
     const totalStepMs = Math.max(ANIM_ENTITY_REVEAL_MS, skillDuration, linkDuration)
 
     scheduleTimeout(onComplete, totalStepMs + ANIM_STEP_GAP_MS)
-  }, [deps.nodeSelectionRef, deps.linkSelectionRef, deps.connectorSelectionRef, deps.yearIndicatorRef, deps.timelineGroupRef, deps.skillRestRadiiRef, deps.srDefault, scheduleTimeout])
+  }, [deps.nodeSelectionRef, deps.linkSelectionRef, deps.connectorSelectionRef, deps.skillRestRadiiRef, deps.srDefault, scheduleTimeout])
+
+  const revealStep = useCallback((stepIdx: number, onComplete: () => void) => {
+    const step = animationSteps[stepIdx]
+    if (!step) { onComplete(); return }
+
+    // Run date scroll and entity/skills reveal concurrently
+    scrollDateIndicator(step.startMonth, step.startYear, () => {})
+    revealEntityAndSkills(stepIdx, onComplete)
+  }, [scrollDateIndicator, revealEntityAndSkills])
 
   const runAnimation = useCallback(() => {
     if (prefersReducedMotion) return
@@ -274,17 +406,15 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
           if (userPausedRef.current || interactionPausedRef.current) return
           animationStateRef.current = 'RESETTING'
 
-          // Fade year indicator
+          // Fade date indicator
           deps.yearIndicatorRef.current?.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
 
           // Fade all
           deps.nodeSelectionRef.current
             ?.transition().duration(ANIM_RESET_MS).style('opacity', '0')
           deps.linkSelectionRef.current
-            ?.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
+            ?.transition().duration(ANIM_RESET_MS).attr('stroke-opacity', 0)
           deps.connectorSelectionRef.current
-            ?.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
-          deps.timelineGroupRef.current
             ?.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
 
           scheduleTimeout(() => {
@@ -296,6 +426,8 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
               .attr('r', 0)
 
             visibleNodeIdsRef.current = new Set()
+            displayedMonthRef.current = -1
+            displayedYearRef.current = 0
             currentStepRef.current = 0
             animationStateRef.current = 'PLAYING'
             setIsPlaying(true)
@@ -330,7 +462,7 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
     }
 
     rafIdRef.current = requestAnimationFrame(waitForSettle)
-  }, [deps.simulationRef, deps.nodeSelectionRef, deps.linkSelectionRef, deps.connectorSelectionRef, deps.yearIndicatorRef, deps.timelineGroupRef, hideAll, revealStep, scheduleTimeout])
+  }, [deps.simulationRef, deps.nodeSelectionRef, deps.linkSelectionRef, deps.connectorSelectionRef, deps.yearIndicatorRef, hideAll, revealStep, scheduleTimeout])
 
   const togglePlayPause = useCallback(() => {
     if (prefersReducedMotion) return
@@ -393,9 +525,8 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
             animationStateRef.current = 'RESETTING'
             deps.yearIndicatorRef.current?.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
             deps.nodeSelectionRef.current?.transition().duration(ANIM_RESET_MS).style('opacity', '0')
-            deps.linkSelectionRef.current?.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
+            deps.linkSelectionRef.current?.transition().duration(ANIM_RESET_MS).attr('stroke-opacity', 0)
             deps.connectorSelectionRef.current?.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
-            deps.timelineGroupRef.current?.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
             scheduleTimeout(() => {
               if (userPausedRef.current) return
               deps.nodeSelectionRef.current
@@ -403,6 +534,8 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
                 .select('.node-circle')
                 .attr('r', 0)
               visibleNodeIdsRef.current = new Set()
+              displayedMonthRef.current = -1
+              displayedYearRef.current = 0
               currentStepRef.current = 0
               animationStateRef.current = 'PLAYING'
               setIsPlaying(true)
@@ -419,11 +552,13 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
 
       advanceFromCurrent()
     }, ANIM_INTERACTION_RESUME_MS)
-  }, [deps.nodeSelectionRef, deps.linkSelectionRef, deps.connectorSelectionRef, deps.yearIndicatorRef, deps.timelineGroupRef, revealStep, scheduleTimeout])
+  }, [deps.nodeSelectionRef, deps.linkSelectionRef, deps.connectorSelectionRef, deps.yearIndicatorRef, revealStep, scheduleTimeout])
 
-  // Start animation on mount / dimension change
+  // Start animation on mount / dimension change — wait for ready signal
   useEffect(() => {
-    if (prefersReducedMotion) {
+    if (!deps.ready) return
+
+    if (prefersReducedMotion || !ANIM_CHRONOLOGICAL_ENABLED) {
       // Show final state immediately after a tick to let simulation refs populate
       const id = requestAnimationFrame(() => {
         showFinalState()
@@ -444,12 +579,13 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
       cancelAll()
       animationStateRef.current = 'IDLE'
     }
-  }, [deps.dimensionsTrigger, cancelAll, runAnimation, showFinalState])
+  }, [deps.dimensionsTrigger, deps.ready, cancelAll, runAnimation, showFinalState])
 
   return {
     animationStateRef,
     visibleNodeIdsRef,
     isPlaying,
+    animationInitialized,
     togglePlayPause,
     pauseForInteraction,
     resumeAfterInteraction,

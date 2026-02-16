@@ -34,7 +34,7 @@ function TimelineInterventionItem({
   onHighlight,
 }: TimelineInterventionItemProps) {
   const isEducation = entity.kind === 'education'
-  const interventionLabel = isEducation ? 'Education Intervention' : 'Career Intervention'
+  const interventionLabel = isEducation ? 'Education' : 'Employment'
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -76,9 +76,9 @@ function TimelineInterventionItem({
           style={{
             display: 'flex',
             gap: '10px',
-            padding: '12px 14px',
+            padding: '8px 8px',
             cursor: 'pointer',
-            minHeight: '44px',
+            
             alignItems: 'flex-start',
           }}
           onMouseEnter={(e) => {
@@ -113,15 +113,13 @@ function TimelineInterventionItem({
                 flexWrap: 'wrap',
                 alignItems: 'center',
                 gap: '6px',
-                marginBottom: '6px',
+                
               }}
             >
               <span className={isEducation ? 'timeline-intervention-pill timeline-intervention-pill--education' : 'timeline-intervention-pill'}>
                 {interventionLabel}
               </span>
-            </div>
-
-            <div
+                          <div
               style={{
                 fontSize: '14px',
                 fontWeight: 600,
@@ -131,7 +129,8 @@ function TimelineInterventionItem({
             >
               {entity.title}
             </div>
-            <div
+            </div>
+                        <div
               style={{
                 fontSize: '12px',
                 color: 'var(--text-secondary)',
@@ -139,17 +138,23 @@ function TimelineInterventionItem({
               }}
             >
               {entity.organization}
-            </div>
-            <div
+            
+              <span
               style={{
                 fontSize: '11px',
+                paddingLeft: '6px',
                 fontFamily: 'var(--font-geist-mono)',
                 color: 'var(--text-tertiary)',
                 marginTop: '3px',
               }}
             >
               {entity.dateRange.display}
+            </span>
             </div>
+
+
+
+
           </div>
 
           <ChevronRight
@@ -160,6 +165,7 @@ function TimelineInterventionItem({
               marginTop: '2px',
               transform: isExpanded ? 'rotate(90deg)' : 'none',
               transition: 'transform 0.15s ease-out',
+              
             }}
           />
         </div>

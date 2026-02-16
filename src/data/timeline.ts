@@ -459,6 +459,7 @@ export function buildConstellationData(): {
     shortLabel: entity.graphLabel,
     organization: entity.organization,
     startYear: entity.dateRange.startYear,
+    startDate: entity.dateRange.start,
     endYear: entity.dateRange.endYear,
     orgColor: entity.orgColor,
   }))

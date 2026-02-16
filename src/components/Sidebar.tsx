@@ -23,7 +23,6 @@ interface SidebarProps {
   activeSection: string
   onNavigate: (tileId: string) => void
   onSearchClick: () => void
-  forceCollapsed?: boolean
 }
 
 interface NavSection {
@@ -163,7 +162,7 @@ function AlertFlag({ alert }: AlertFlagProps) {
   )
 }
 
-export default function Sidebar({ activeSection, onNavigate, onSearchClick, forceCollapsed }: SidebarProps) {
+export default function Sidebar({ activeSection, onNavigate, onSearchClick }: SidebarProps) {
   const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches)
   const [isMobileExpanded, setIsMobileExpanded] = useState(false)
 
@@ -185,7 +184,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick, forc
     return () => mediaQuery.removeEventListener('change', listener)
   }, [])
 
-  const isExpanded = (isDesktop && !forceCollapsed) || isMobileExpanded
+  const isExpanded = isDesktop || isMobileExpanded
 
   const handleNavActivate = (tileId: string) => {
     onNavigate(tileId)
@@ -196,7 +195,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick, forc
 
   return (
     <>
-      {(!isDesktop || forceCollapsed) && isMobileExpanded && (
+      {!isDesktop && isMobileExpanded && (
         <button
           type="button"
           aria-label="Close sidebar navigation"
@@ -235,7 +234,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick, forc
         }}
         className={isExpanded ? 'pmr-scrollbar' : undefined}
       >
-        {(!isDesktop || forceCollapsed) && (
+        {!isDesktop && (
           <button
             type="button"
             aria-label={isExpanded ? 'Collapse sidebar navigation' : 'Expand sidebar navigation'}
