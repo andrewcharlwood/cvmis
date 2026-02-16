@@ -1,237 +1,165 @@
 {
-  "project": "Portfolio — Career Constellation Clinical Pathway Overhaul",
-  "branchName": "ralph/constellation-overhaul",
-  "description": "Transform the CareerConstellation D3 force graph from a prototype-quality visualisation into a polished clinical patient pathway diagram — reversed timeline, dynamic height sync, refined node styling, bidirectional hover highlighting, and muted skill nodes that reveal on interaction.",
+  "project": "Portfolio — Career Constellation Refinement",
+  "branchName": "ralph/constellation-refinement",
+  "description": "Visual and interaction refinements for the career constellation: improved skill visibility, viewport-proportional scaling, hover-based interaction, mobile accordion, 4 new timeline entries (roles + education), and org-colour-matched work experience cards.",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Reverse timeline direction to top = most recent",
-      "description": "As a visitor, I want the graph's vertical timeline to run top-to-bottom from 2025→2017 so it visually aligns with the reverse-chronological work experience cards in the adjacent column.",
+      "title": "Add Duty Pharmacy Manager and Pre-Reg Pharmacist roles + fix Pharmacy Manager colour",
+      "description": "As a visitor, I want to see the Duty Pharmacy Manager (2016-2017) and Pre-Registration Pharmacist (2015-2016) roles in the constellation, and the existing Pharmacy Manager should use Tesco red instead of teal.",
       "acceptanceCriteria": [
-        "yScale domain reversed: [maxYear, minYear] maps to [topPadding, height - bottomPadding] so 2025 is near the top and 2017 near the bottom",
-        "Role nodes appear at correct reversed year positions",
-        "Year labels along the timeline axis read top-to-bottom: 2025, 2024, ..., 2017",
-        "Skill nodes cluster around their linked roles at the correct vertical positions",
-        "Timeline vertical line, year dots, and horizontal guide lines all reflect the reversed scale",
-        "Screen reader description (srDescription) updated to mention reverse-chronological order",
+        "Add role node to constellation.ts: id 'duty-pharmacy-manager-2016', label 'Duty Pharmacy Manager', shortLabel 'Duty Pharm Mgr', organisation 'Tesco PLC', startYear 2016, endYear 2017, orgColor '#E53935'",
+        "Add role-skill links for duty-pharmacy-manager-2016: medicines-optimisation (0.8), data-analysis (0.5), excel (0.6), change-management (0.5), stakeholder-engagement (0.4)",
+        "Add consultation entry to consultations.ts for Duty Pharmacy Manager: org 'Tesco PLC', duration 'Aug 2016 – Oct 2017', location 'Great Yarmouth, Norfolk', achievements: service development leadership (NMS/asthma referrals), national clinical innovation (quality payments solution), clinical foundation building",
+        "Add role node to constellation.ts: id 'pre-reg-pharmacist-2015', label 'Pre-Registration Pharmacist', shortLabel 'Pre-Reg', organisation 'Paydens Pharmacy', startYear 2015, endYear 2016, orgColor '#66BB6A'",
+        "Add role-skill links for pre-reg-pharmacist-2015: medicines-optimisation (0.7), change-management (0.4), stakeholder-engagement (0.3)",
+        "Add consultation entry to consultations.ts for Pre-Reg Pharmacist: org 'Paydens Pharmacy', duration 'Jul 2015 – Jul 2016', location 'Tunbridge Wells & Ashford, Kent', achievements: PGD clinical service expansion (NRT, EHC, chlamydia), NMS audit improvement (under 10% to 50-60%), palliative care screening, operational learning",
+        "Update existing pharmacy-manager-2017 orgColor from '#00897B' to '#E53935' in both constellation.ts and consultations.ts",
+        "Screen reader description (buildScreenReaderDescription in CareerConstellation.tsx) automatically includes new roles since it iterates constellationNodes",
         "Typecheck passes (npm run typecheck)"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "In CareerConstellation.tsx, the yScale is defined at line ~153. Change .domain([minYear, maxYear]) to .domain([maxYear, minYear]). This reversal flows through all elements that use yScale. The buildScreenReaderDescription() function at line ~63 should also mention 'reverse-chronological order' in its output. Use the d3-viz skill for implementation."
+      "notes": "Follow existing patterns exactly. Current roles: interim-head-2025, deputy-head-2024, high-cost-drugs-2022, pharmacy-manager-2017. New roles slot chronologically below pharmacy-manager. In constellation.ts: add nodes to constellationNodes array (ConstellationNode with type: 'role'), add roleSkillMappings entries, add links to constellationLinks. In consultations.ts: add Consultation entries with id matching constellation node id. Consultation shape: { id, date, organization, orgColor, role, duration, isCurrent: false, history, examination: string[], plan: string[], codedEntries: CodedEntry[] }. Follow same narrative style as existing entries. For the Pharmacy Manager colour fix: search for '#00897B' in both files and replace with '#E53935'. buildScreenReaderDescription() is at module level in CareerConstellation.tsx (~line 63) and iterates constellationNodes automatically. Use the d3-viz skill."
     },
     {
       "id": "US-002",
-      "title": "Dynamic height matching with work experience column",
-      "description": "As a visitor, I want the constellation graph to fill the same vertical space as the work experience column so both columns appear balanced.",
+      "title": "Add UEA MPharm and Highworth A-Levels education entries",
+      "description": "As a visitor, I want to see the University of East Anglia MPharm degree (2011-2015) and Highworth Grammar School A-Levels (2009-2011) on the timeline as education entries.",
       "acceptanceCriteria": [
-        "Remove fixed DESKTOP_HEIGHT, TABLET_HEIGHT, MOBILE_HEIGHT constants from CareerConstellation.tsx",
-        "CareerConstellation accepts an optional containerHeight prop (number) for the target height",
-        "DashboardLayout measures the rendered height of the .chronology-stream element using a ref and ResizeObserver",
-        "DashboardLayout passes the measured height (or a sensible fallback) to CareerConstellation as containerHeight",
-        "Graph container uses containerHeight when available, with a minimum of 400px",
-        "On mobile (single-column layout where .pathway-columns is 1fr), the graph uses a standalone fallback height of 360px",
-        "The viewBox and all D3 scales update correctly when height changes",
-        "Typecheck passes (npm run typecheck)",
-        "Verify in browser: expand/collapse work experience cards and confirm graph height adjusts"
+        "Add node to constellation.ts: id 'uea-mpharm-2011', type 'role', label 'MPharm (Hons) 2:1', shortLabel 'MPharm', organisation 'University of East Anglia', startYear 2011, endYear 2015, orgColor '#7B2D8E'",
+        "Add role-skill links for uea-mpharm-2011: medicines-optimisation (0.5), data-analysis (0.3)",
+        "Add consultation entry to consultations.ts for MPharm: org 'University of East Anglia', duration '2011 – 2015', location 'Norwich', achievements: independent research project on drug delivery and cocrystals (75.1%, Distinction), 4th year OSCE 80%, President of UEA Pharmacy Society",
+        "Add node to constellation.ts: id 'highworth-alevels-2009', type 'role', label 'A-Levels: Maths A*, Chem B', shortLabel 'A-Levels', organisation 'Highworth Grammar School', startYear 2009, endYear 2011, orgColor '#9C27B0'",
+        "Add single link for highworth-alevels-2009: data-analysis (0.2)",
+        "Add consultation entry to consultations.ts for A-Levels: org 'Highworth Grammar School', duration '2009 – 2011', location 'Ashford, Kent', results: Mathematics A*, Chemistry B, Politics C",
+        "Education entries appear at the bottom of the timeline (2009-2015 range) below all professional roles",
+        "Typecheck passes (npm run typecheck)"
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "Add a ref to the .chronology-stream div in DashboardLayout. Use ResizeObserver to measure its offsetHeight. Pass it as a prop to CareerConstellation. Inside the constellation, use this prop in the dimensions state instead of the fixed getHeight() function. The getHeight() function can become the fallback for when no containerHeight is provided. CSS class .pathway-graph-sticky already has position:sticky — the height change should work within that. Use the d3-viz skill for implementation."
+      "passes": false,
+      "notes": "Education entries use type 'role' — the constellation treats them identically to work roles for layout. They have deliberately few skill connections (2 for UEA, 1 for Highworth) to keep the lower timeline clean. The yScale computes domain from min/max startYear of role nodes, so adding 2009 entries automatically extends the range. Follow exact same data patterns as US-001. Education consultations may use simpler codedEntries and adapted examination content (results rather than workplace achievements). The consultations array should be ordered reverse-chronologically (newest first) — add education entries at the end. Use the d3-viz skill."
     },
     {
       "id": "US-003",
-      "title": "Clinical pathway background and timeline structure",
-      "description": "As a visitor, I want the graph to look like a clinical patient pathway diagram — clean, precise, and institutional — matching the GP system dashboard aesthetic.",
+      "title": "Increase default skill visibility and reduce constellation column width",
+      "description": "As a visitor, I want skill nodes more visible by default so I can see the full constellation without interacting, and more horizontal space for work experience content.",
       "acceptanceCriteria": [
-        "Background: remove the radial gradient, use a clean fill matching var(--surface) (#FFFFFF) or very subtle var(--bg-dashboard) (#F0F5F4)",
-        "Add a subtle 1px border to the SVG container via the wrapping div: border 1px solid var(--border-light), border-radius var(--radius-sm)",
-        "Timeline axis: refined 1px vertical rule using var(--border) colour (#D4E0DE), not the current thick teal line",
-        "Year markers: small horizontal ticks (6-8px wide) extending right from the timeline, not floating dots",
-        "Year labels: font-family var(--font-geist-mono), font-size 10px, fill var(--text-tertiary) (#8DA8A5)",
-        "Horizontal guide lines: very subtle — stroke-opacity 0.25, stroke-dasharray '3 4' (dotted), using var(--border-light)",
-        "Remove the existing legend box from inside the SVG entirely (replacement comes in US-008)",
-        "All colours use CSS custom property values from the design system",
+        "In applyGraphHighlight resting state: skill circle fill-opacity changed from 0.2 to 0.35",
+        "In applyGraphHighlight active state: skill circle fill-opacity changed from 0.85 to 0.9",
+        "Unconnected node dimming changed from opacity 0.06 to opacity 0.15",
+        "Skill labels default opacity changed from 0 to 0.5 (partially visible at rest), fully visible at 1.0 when highlighted",
+        "Default link stroke-opacity increased from 0.08 to 0.15",
+        "Change .pathway-columns desktop grid in index.css from 'minmax(0, 1.15fr) minmax(0, 1.5fr)' to 'minmax(0, 1.85fr) minmax(0, 1fr)' — first column is work experience chronology, second is constellation graph",
+        "Constellation graph adapts to narrower container without clipping or overflow",
         "Typecheck passes (npm run typecheck)",
-        "Verify in browser — the graph background and structure should feel consistent with the rest of the dashboard tiles"
+        "Verify in browser: skills recognisable at a glance without hovering; work experience column visibly wider"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "Most changes are in the main useEffect that builds the SVG (starting around line 132). Remove the radialGradient defs and the rect that uses it. Replace with a simple rect fill. The legendGroup creation (lines ~221-265) should be removed entirely. The timeline vertical line (lines ~189-196) should change from stroke #A8C4BF / width 2 to the border token colour / width 1. Year dots (circle.year-dot) should become short horizontal ticks (line elements). Year guide lines should become dashed. Use the d3-viz skill for implementation."
+      "passes": false,
+      "notes": "Two independent changes in one story. Skill visibility: applyGraphHighlight in CareerConstellation.tsx has two branches — the 'no activeNodeId' resting state and the activeNodeId highlighted state. In the resting branch, change skill fill-opacity from 0.2 to 0.35, skill label opacity from 0 to 0.5, link stroke-opacity from 0.08 to 0.15. In the highlighted branch, change active skill fill-opacity from 0.85 to 0.9, dimmed node opacity from 0.06 to 0.15. Column width: in index.css @media (min-width: 1024px) for .pathway-columns, change grid-template-columns. The containerHeight/ResizeObserver system adapts the graph SVG automatically. Column order: first child is .chronology-stream (work experience), second is .pathway-graph-sticky (constellation). Use the d3-viz skill."
     },
     {
       "id": "US-004",
-      "title": "Role node redesign — clinical record pill badges",
-      "description": "As a visitor, I want role nodes to look like refined clinical record entries — rounded rectangle badges anchored to their timeline position.",
+      "title": "Viewport-proportional scaling for large screens",
+      "description": "As a visitor on a 1440p+ display, I want constellation elements to scale proportionally so they aren't tiny relative to the screen.",
       "acceptanceCriteria": [
-        "Role nodes rendered as rounded rectangles (pills): approximately 100px wide x 32px tall, with rx/ry 16px for pill shape",
-        "Each role node displays shortLabel text centred inside, using font-family var(--font-ui), weight 600, size 11px",
-        "Role node fill uses orgColor at 0.12 opacity, with a 1px border of orgColor at 0.4 opacity, and text in orgColor at full strength",
-        "A thin connector line (1px, var(--border) colour) links each role node horizontally back to the timeline axis at its year position",
-        "Role node hover state: border opacity increases to 0.7, shadow appears (approximate var(--shadow-sm))",
-        "Active/pinned role node: border becomes solid at full orgColor opacity, slightly stronger shadow",
-        "ROLE_RADIUS constant replaced with ROLE_WIDTH and ROLE_HEIGHT constants for the pill dimensions",
-        "Force simulation collision detection updated to use the pill dimensions (not circular radius)",
-        "Focus ring styling updated to surround the pill shape instead of the old circle",
+        "Compute scale factor: scaleFactor = Math.max(1, Math.min(1.6, viewportWidth / 1440)) — 1.0x at 1440px, up to 1.6x at 2560px+",
+        "Apply scale factor to SKILL_RADIUS_DEFAULT (7 → ~11), SKILL_RADIUS_ACTIVE (11 → ~18), ROLE_WIDTH (104 → ~166), ROLE_HEIGHT (32 → ~51)",
+        "Skill label font-size: base 11px minimum (up from 10px), scales proportionally up to ~18px at max scale",
+        "Role label font-size: base 12px minimum (up from 11px), scales proportionally up to ~19px at max scale",
+        "Year label font-size: base 11px minimum (up from 10px), scales proportionally",
+        "Padding, gaps, and force simulation parameters (charge, link distance, collision radius) scale proportionally with the factor",
+        "Mobile breakpoint (< 640px) is unaffected — scaling only applies at >= 1024px viewport width",
+        "Scale factor computed once per resize via the existing dimensions useEffect, not per render tick",
         "Typecheck passes (npm run typecheck)",
-        "Verify in browser — role nodes appear as labelled pill badges along the timeline"
+        "Verify in browser at 1440px and 2560px widths: elements clearly legible and well-proportioned"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "This changes role nodes from <circle> to <rect> with rounded corners. The nodeSelection code that filters d.type === 'role' (lines ~354-380) needs to append 'rect' instead of 'circle'. Position with x = -ROLE_WIDTH/2 and y = -ROLE_HEIGHT/2 so they centre on the force simulation position. The focus-ring can also become a rect. The text element stays largely the same but needs its positioning adjusted (no more dy offset needed if dominant-baseline is middle). The collision force for roles should use a radius roughly equal to Math.max(ROLE_WIDTH, ROLE_HEIGHT)/2 + padding. The connector line should go from the timeline X position to the left edge of the pill node. Use the d3-viz skill for implementation."
+      "passes": false,
+      "notes": "Compute scaleFactor in the dimensions useEffect that already handles containerHeight and resize. Use window.innerWidth (not container.clientWidth — known overflow issue on mobile). Create scaled constants: const scaledRoleWidth = Math.round(ROLE_WIDTH * scaleFactor), etc. Apply throughout D3 rendering where base constants are used. Force simulation parameters also scale: charge strength, link distance, collision radius. The isMobile check (window.innerWidth < 640) bypasses scaling entirely, using MOBILE_ constants as-is. The existing MOBILE_ROLE_WIDTH (80), MOBILE_SKILL_RADIUS_DEFAULT (6), MOBILE_SKILL_RADIUS_ACTIVE (9) remain unchanged. Store scaleFactor in a ref or state so D3 code can access it. Use the d3-viz skill."
     },
     {
       "id": "US-005",
-      "title": "Skill node redesign — muted default with reveal on interaction",
-      "description": "As a visitor, I want skill nodes to be visually subdued by default, becoming prominent only when a connected role or skill is hovered or clicked.",
+      "title": "Hover-to-highlight interaction on desktop",
+      "description": "As a desktop visitor, I want hovering a role to highlight connected skills and hovering away to reset, without needing to click to toggle.",
       "acceptanceCriteria": [
-        "Default (resting) state: small circles radius 7px, fill-opacity 0.2, no visible label (label opacity 0)",
-        "Skill node fill colours by domain: technical uses var(--accent) #0D6E6E, clinical uses var(--success) #059669, leadership uses var(--amber) #D97706",
-        "When a connected role is hovered/pinned: connected skill nodes transition to radius 11px, fill-opacity 0.85, labels fade in (opacity 0 → 1)",
-        "Skill labels: font-family var(--font-geist-mono), font-size 10px, fill var(--text-secondary) (#5B7A78)",
-        "When a skill node itself is hovered: that skill and all connected roles highlight, skill grows to full size with label visible",
-        "Link lines default state: opacity 0.08, colour var(--border-light) — barely visible",
-        "Link lines highlighted state: opacity 0.55, colour matching the skill's domain colour, stroke-width 1.5px",
-        "Unconnected nodes (not in the active highlight group) reduce to opacity 0.06 — nearly invisible",
-        "All transitions 150-200ms and respect prefers-reduced-motion (skip to final state)",
+        "On desktop (fine pointer via supportsCoarsePointer === false): hovering a role node highlights connected skills, shows labels, colorises links — same visual as current click behaviour",
+        "Moving mouse away from a role resets to default state (all nodes at baseline opacity per US-003 values)",
+        "Remove click-to-pin toggle behaviour on desktop — clicking a role node should NOT pin the highlight",
+        "Hovering a skill node still highlights that skill and its connected roles",
+        "pinnedNodeId state only set for touch/keyboard interactions, not desktop hover",
+        "Keyboard navigation still works: Tab focuses a node and highlights it, Enter/Space triggers detail action",
+        "On touch devices (coarse pointer): existing tap-to-pin behaviour preserved unchanged",
+        "No 'stuck' highlight states — hover on/off cycles cleanly",
         "Typecheck passes (npm run typecheck)",
-        "Verify in browser — graph looks clean and quiet at rest, informative on hover"
+        "Verify in browser: hover on/off roles cycles highlight cleanly with no stuck states"
       ],
       "priority": 5,
-      "passes": true,
-      "notes": "This modifies the applyGraphHighlight() function (line ~439) and the initial skill node rendering (lines ~382-403). The resting state setup happens when nodes are first created and in the 'no activeNodeId' branch of applyGraphHighlight. The highlighted state logic is in the activeNodeId branch. Key change: skill labels default to opacity 0 (not the current collision-based visibility), and only become visible via applyGraphHighlight when connected. The updateSkillLabelVisibility() function can be simplified or merged into applyGraphHighlight. The SKILL_RADIUS constant should be split into SKILL_RADIUS_DEFAULT (7) and SKILL_RADIUS_ACTIVE (11). Link line styling in the resting branch should use much lower opacity than current 0.45. Use the d3-viz skill for implementation."
+      "passes": false,
+      "notes": "The interaction handlers are in the D3 useEffect where mouseenter/mouseleave/click are attached to node groups. supportsCoarsePointer is a module-level window.matchMedia('(pointer: coarse)').matches check. For fine pointer (desktop): mouseenter calls applyGraphHighlight(nodeId) + fires onNodeHover(nodeId), mouseleave calls applyGraphHighlight(null) + fires onNodeHover(null). Remove the click handler's pin/unpin toggle for fine pointer. For coarse pointer (touch): keep existing tap-to-pin unchanged. The pinnedNodeId useState remains but only gets set on coarse pointer or keyboard interactions. The callbacksRef pattern prevents stale closures — use it for onNodeHover. The onNodeHover callback propagates to DashboardLayout for bidirectional highlighting (graph→timeline). Use the d3-viz skill."
     },
     {
       "id": "US-006",
-      "title": "Bidirectional hover — graph node highlights timeline card",
-      "description": "As a visitor, I want hovering a role node in the graph to highlight the corresponding work experience card in the timeline, creating a clear bidirectional link.",
+      "title": "Mobile accordion expansion for role details",
+      "description": "As a mobile visitor, I want tapping a role to expand an accordion below the constellation showing condensed role details, rather than opening a side panel.",
       "acceptanceCriteria": [
-        "CareerConstellation gains a new prop: onNodeHover?: (id: string | null) => void",
-        "Role node mouseenter fires onNodeHover(d.id), mouseleave fires onNodeHover(null)",
-        "DashboardLayout passes onNodeHover callback to CareerConstellation and stores result as highlightedRoleId state",
-        "WorkExperienceSubsection gains a new prop: highlightedRoleId?: string | null",
-        "When highlightedRoleId matches a RoleItem's consultation.id, that card shows a subtle highlight: border-color var(--accent-border), background rgba(10,128,128,0.03)",
-        "LastConsultationSubsection also gains highlightedRoleId prop and participates in the highlight system for the most recent role (consultations[0].id)",
-        "Highlight clears when mouse leaves both the card and graph node",
-        "On touch devices, tap-to-pin works: tapping a role pins the highlight in both graph and timeline",
-        "Existing onNodeHighlight (timeline → graph) continues to work alongside the new reverse direction",
+        "On touch devices (coarse pointer): first tap on a role highlights connected skills AND expands an accordion panel below the constellation SVG",
+        "Accordion shows condensed details: role title, organisation, date range, and top 3 key achievements from consultation.examination array",
+        "Accordion includes a 'Show more' button that reveals the full examination and plan arrays",
+        "Tapping a different role switches highlight and accordion content (auto-collapses 'Show more' back to summary)",
+        "Tapping the same role again or tapping empty space collapses the accordion and resets highlights",
+        "Accordion uses height-only animation, 200ms ease-out (matching existing tile expansion pattern)",
+        "No slide-out sidebar panel on mobile for role details",
+        "Tapping a skill node highlights it but does not open the accordion",
+        "Accordion hidden entirely on desktop (fine pointer)",
         "Typecheck passes (npm run typecheck)",
-        "Verify in browser — hover graph nodes and confirm timeline cards highlight; hover timeline cards and confirm graph highlights"
+        "Verify in browser at mobile viewport: tap role → accordion expands with details, tap again → collapses"
       ],
       "priority": 6,
-      "passes": true,
-      "notes": "This adds the reverse direction to the existing partial bidirectional system. Currently DashboardLayout has handleNodeHighlight which sets highlightedNodeId (timeline → graph). The new onNodeHover adds graph → timeline. Both pieces of state coexist. In WorkExperienceSubsection, add a style to the RoleItem wrapper div that applies when highlightedRoleId matches — a subtle border and background change. For LastConsultationSubsection, apply the same highlight logic to its outer wrapper. The touch/pin logic in CareerConstellation already handles pinnedNodeId — the new onNodeHover should also fire for pinned nodes so timeline cards stay highlighted."
+      "passes": false,
+      "notes": "New JSX inside CareerConstellation container div, below the SVG and HTML legend. Import consultations from '@/data/consultations'. When pinnedNodeId matches a consultation.id on a coarse pointer device, render the accordion. Use a local showMore state for the expand toggle. Consultation data provides: role (title), organization, duration, examination (string[] achievements), plan (string[] outcomes). Show first 3 examination items collapsed, all when expanded. Animation: use max-height + overflow hidden with CSS transition (200ms ease-out), or measure content height dynamically. Add click handler on SVG background rect to clear pinnedNodeId for 'tap elsewhere to close'. Hide accordion entirely when !supportsCoarsePointer. Style with the same font and spacing as WorkExperienceSubsection for consistency. Use the d3-viz skill."
     },
     {
       "id": "US-007",
-      "title": "Curved link lines between roles and skills",
-      "description": "As a visitor, I want the connection lines between roles and skills to be smooth curves rather than basic straight lines, matching a clinical pathway aesthetic.",
+      "title": "Colour-match work experience cards to constellation node colours",
+      "description": "As a visitor, I want work experience cards to use matching employer colours from their constellation nodes, creating a visual link between the card list and the graph.",
       "acceptanceCriteria": [
-        "Replace <line> elements with <path> elements for links",
-        "Use D3 curve generators (d3.curveBasis or d3.line().curve(d3.curveBasis)) to create smooth curves between source and target",
-        "Default link styling: 1px stroke, colour var(--border-light), opacity 0.08 — barely visible at rest",
-        "Highlighted link styling: 1.5px stroke, domain colour of the skill end, opacity proportional to link strength value (range 0.35-0.65)",
-        "The tick handler updates path d attributes instead of line x1/y1/x2/y2",
-        "Links animate smoothly between default and highlighted states (CSS transition on stroke, stroke-opacity, stroke-width)",
-        "Respect prefers-reduced-motion — skip transitions",
+        "Dot indicator on each work experience card uses consultation.orgColor instead of hardcoded '#0D6E6E'",
+        "Expanded card left border uses consultation.orgColor instead of var(--accent)",
+        "Bullet point dots in expanded detail use consultation.orgColor at 0.5 opacity instead of var(--accent)",
+        "Coded entry tags use consultation.orgColor for text and a lightened variant (rgba at 0.08 opacity) for background",
+        "'View full record' link uses consultation.orgColor instead of var(--accent)",
+        "Highlight background from graph uses rgba(r,g,b,0.03) of consultation.orgColor instead of hardcoded rgba(10,128,128,0.03)",
+        "Hover/expanded border uses consultation.orgColor variant instead of var(--accent-border)",
+        "CardHeader dot for 'WORK EXPERIENCE' section title remains teal (section accent, not per-card)",
+        "All colour changes maintain readable text contrast",
         "Typecheck passes (npm run typecheck)",
-        "Verify in browser — links are nearly invisible at rest and clearly trace pathways on hover"
+        "Verify in browser: NHS roles show blue-tinted cards, Tesco roles red-tinted, Paydens green, education purple"
       ],
       "priority": 7,
-      "passes": true,
-      "notes": "The linkSelection is created at lines ~340-345. Change from .join('line') to .join('path'). For the curve, generate a simple quadratic or cubic bezier path string in the tick handler: given source (sx,sy) and target (tx,ty), create a path like M sx,sy Q cx,cy tx,ty where cx,cy is a control point offset to create a gentle arc. A simple approach: control point at ((sx+tx)/2, sy) or ((sx+tx)/2, (sy+ty)/2 + offset). Alternatively use d3.linkHorizontal() or d3.linkVertical() which generate smooth curves between two points. The applyGraphHighlight function's link styling (lines ~465-482) needs updating from line attributes to path attributes — but stroke/stroke-opacity/stroke-width work the same on paths. Use the d3-viz skill for implementation."
+      "passes": false,
+      "notes": "All changes in WorkExperienceSubsection.tsx (~299 lines). consultation.orgColor already exists on each consultation object but is not currently used for card styling. Create a helper function hexToRgba(hex: string, opacity: number): string that converts hex to rgba — needed for tinted backgrounds and borders. Replace hardcoded values: '#0D6E6E' for dot (line ~82), 'rgba(10,128,128,0.03)' for highlight bg, 'var(--accent-border)' for border, 'var(--accent)' for links/text. Each RoleItem already receives its consultation — use consultation.orgColor. For coded entry tags: text in orgColor, bg in hexToRgba(orgColor, 0.08), border in hexToRgba(orgColor, 0.2). Also update LastConsultationSubsection in DashboardLayout.tsx if it has hardcoded teal colours. The WORK EXPERIENCE CardHeader dot stays teal. Use the d3-viz skill."
     },
     {
       "id": "US-008",
-      "title": "Compact domain legend as HTML below SVG",
-      "description": "As a visitor, I want a small unobtrusive legend explaining the domain colour coding, rendered as HTML below the graph.",
+      "title": "Re-tune force simulation for 8 timeline entries in narrower column",
+      "description": "As a developer, I need the force simulation to produce a clean layout with 8 entries (6 roles + 2 education) spanning 2009-2025 in the narrower ~35% column.",
       "acceptanceCriteria": [
-        "A compact single-line legend rendered as a React div below the SVG element, inside the CareerConstellation container",
-        "Legend shows three small coloured dots (6px circles) with labels: 'Technical', 'Clinical', 'Leadership' using the domain colours (var(--accent), var(--success), var(--amber))",
-        "Legend text: font-family var(--font-geist-mono), font-size 10px, colour var(--text-tertiary)",
-        "Items separated by subtle dot or pipe separators",
-        "Include hint text: 'Hover to explore connections' — same style, slightly more muted",
-        "Legend takes minimal vertical space (~24px total height)",
-        "Legend wraps gracefully on narrow screens (flex-wrap)",
+        "y-scale range accommodates 8 entries spanning 2009-2025 without excessive cramping",
+        "Timeline year labels show the full range from 2009 to 2025",
+        "Role/education nodes don't overlap each other on the timeline",
+        "Skill nodes distribute cleanly in available horizontal space to the right of role pills",
+        "Charge, collision, and link forces adjusted for additional nodes in narrower space",
+        "Links don't create an unreadable tangle — connections remain traceable",
+        "Education nodes at bottom (2009-2015) have fewer connections so lower portion stays clean",
+        "Graph works at mobile viewport widths (375px, 430px) with 8 entries",
         "Typecheck passes (npm run typecheck)",
-        "Verify in browser"
+        "Verify in browser at both desktop and mobile: all 8 entries visible, no overlaps, clean layout"
       ],
       "priority": 8,
-      "passes": true,
-      "notes": "This is pure React JSX added to the return block of CareerConstellation (after the SVG and before the closing container div). No D3 involved. Use inline styles consistent with the rest of the component, or simple Tailwind classes. The legend replaces the SVG-based legend that was removed in US-003. Position it as a flex row with gap: 12px, items centred vertically, padding: 6px 12px."
-    },
-    {
-      "id": "US-009",
-      "title": "Force simulation tuning for clinical layout",
-      "description": "As a developer, I want the D3 force simulation tuned so role nodes stay firmly anchored to timeline positions while skill nodes distribute cleanly to the right.",
-      "acceptanceCriteria": [
-        "Role nodes have very high forceY strength (0.95-1.0) and consistent forceX strength anchoring them at a fixed horizontal offset from the timeline",
-        "Skill nodes distribute in the space to the right of the role column, clustered near connected roles",
-        "Increase collision radius to prevent label overlap when skills are revealed on hover (account for SKILL_RADIUS_ACTIVE + label height)",
-        "Simulation alphaDecay tuned so graph stabilises within 1-2 seconds (or immediately for prefers-reduced-motion)",
-        "Boundary clamping keeps all nodes within the SVG viewport with adequate padding — role pill labels don't clip, skill labels don't overflow",
-        "On height changes (from US-002), simulation re-initialises without jarring jumps — preserve approximate positions",
-        "The charge force strength balanced to avoid nodes clustering too tightly or spreading too far",
-        "Typecheck passes (npm run typecheck)",
-        "Verify in browser — nodes appear organised and intentional, not randomly scattered"
-      ],
-      "priority": 9,
-      "passes": true,
-      "notes": "The simulation is configured at lines ~515-532. Key parameters to tune: forceX/forceY strengths for roles (increase to ~1.0), forceX/forceY for skills (keep at 0.15-0.25 for organic clustering), charge strength (currently -85, may need adjustment with new pill-shaped roles), collide radius (needs to account for pill width for roles, and active radius + label for skills), link distance (currently 56, may need increase with larger role nodes). The alphaDecay is currently 0.06 for animated mode — could increase to 0.08-0.1 for faster settling. For the reduced-motion path, the 220 ticks (line 580) may need adjustment. Use the d3-viz skill for implementation."
-    },
-    {
-      "id": "US-010",
-      "title": "Content audit — verify role data against CV source",
-      "description": "As the portfolio owner, I want all role titles, organisations, dates, and achievement bullets verified against the source CV documents.",
-      "acceptanceCriteria": [
-        "Cross-reference src/data/consultations.ts against References/CV_v4.md and References/Andy_Charlwood_CV_ATS_Optimised.pdf",
-        "All role titles match the CV exactly",
-        "All organisation names are consistent (e.g., 'NHS Norfolk & Waveney ICB' everywhere, 'Tesco PLC' not 'Tesco')",
-        "All date ranges are correct (start/end for each role matching CV)",
-        "Achievement bullets (examination arrays) are accurate — numbers, percentages, claims match CV source",
-        "constellation.ts role node data (labels, shortLabels, orgColors, years) is consistent with consultations.ts",
-        "Any discrepancies found are fixed",
-        "Intentional abbreviations (e.g., shortened bullet text) are documented in code comments only where truly necessary",
-        "Typecheck passes (npm run typecheck)"
-      ],
-      "priority": 10,
-      "passes": true,
-      "notes": "Read src/data/consultations.ts and compare field-by-field against References/CV_v4.md. The CV has 4 roles: Interim Head (May-Nov 2025), Deputy Head (Jul 2024-Present), High-Cost Drugs (May 2022-Jul 2024), Pharmacy Manager (Nov 2017-May 2022). Check that consultations.ts has the same number of entries with matching data. Also verify constellation.ts nodes match — particularly startYear/endYear values and organization names. Fix any mismatches in the data files."
-    },
-    {
-      "id": "US-011",
-      "title": "Accessibility — fix focusable buttons and tab order",
-      "description": "As a visitor using assistive technology, I want the constellation graph to be keyboard navigable with proper focus rings and screen reader support.",
-      "acceptanceCriteria": [
-        "Hidden accessibility buttons have pointerEvents: 'auto' (not 'none') so they are actually focusable and clickable",
-        "Tab order follows reverse-chronological sequence: role nodes from most recent to oldest, then skill nodes grouped by domain (technical → clinical → leadership)",
-        "Focus ring styling is visible: 2px solid var(--accent) with 2px offset, matching design system",
-        "aria-label on the SVG updated to mention 'clinical pathway' metaphor",
-        "All interactive states (hover highlight, pin) are achievable via keyboard (Enter/Space to activate)",
-        "prefers-reduced-motion is respected — all animations skip to final state",
-        "Typecheck passes (npm run typecheck)"
-      ],
-      "priority": 11,
-      "passes": true,
-      "notes": "The accessibility buttons are at lines ~661-705 in the JSX. The critical bug is pointerEvents: 'none' on line 688 — change to 'auto'. Also check the containing div at line 658 which also has pointerEvents: 'none' — the buttons inside should override with 'auto'. The constellationNodes.map ordering determines tab order — consider sorting the nodes array for this specific rendering (roles first sorted by startYear desc, then skills grouped by domain). The focus/blur handlers at lines 692-693 already exist and work with the D3 focus ring. The SVG aria-label at line 629 should be updated."
-    },
-    {
-      "id": "US-012",
-      "title": "Responsive behaviour — mobile and tablet fallback",
-      "description": "As a visitor on a smaller screen, I want the constellation graph to display appropriately when the columns stack vertically.",
-      "acceptanceCriteria": [
-        "On mobile/tablet (single-column .pathway-columns layout), the graph renders at a fixed height of 360-400px since no column to match",
-        "The graph simplifies on small screens: role pill labels may use shorter text, skill node default radius decreases slightly (6px)",
-        "Touch interactions work correctly: tap to pin a node, tap elsewhere to unpin",
-        "Graph content is not cropped or overflowing on narrow viewports (min-width handling via boundary clamping)",
-        "The HTML legend from US-008 wraps gracefully on narrow screens",
-        "Timeline axis position adjusts for narrower viewports (closer to left edge)",
-        "Typecheck passes (npm run typecheck)",
-        "Verify in browser at mobile viewport widths (375px, 430px)"
-      ],
-      "priority": 12,
       "passes": false,
-      "notes": "The current getHeight() function handles mobile with MOBILE_HEIGHT = 310. After US-002, the containerHeight prop drives the height on desktop. On mobile, detect that containerHeight is not being passed (or is invalid) and fall back to a fixed 360px. The CSS media query in index.css (line ~403) switches .pathway-columns to two-column at a certain breakpoint — below that, the graph is in a single-column stacked layout. The timelineX calculation (line 151) should account for narrow widths — Math.max(80, ...) to keep it accessible. Use the d3-viz skill for implementation."
+      "notes": "The yScale domain is computed from min/max startYear — adding 2009 entries extends it automatically. Key challenge: vertical spacing for 8 entries over 16 years. The 2015-2017 range has 3 entries close together (Pre-Reg 2015, Duty Pharm Mgr 2016, Pharmacy Manager 2017). May need increased topPadding/bottomPadding. Current force simulation params from prior overhaul: role forceY ~0.98, charge -120 (roles)/-55 (skills), link distance 72, collision ~52-65px for roles. With 8 entries in ~35% column (vs previous ~57%): consider reducing ROLE_WIDTH slightly for the narrower space, adjusting charge to allow tighter packing, ensuring skill nodes don't overflow horizontally. The viewport-proportional scaling from US-004 must also work with 8 entries. Mobile params (MOBILE_ROLE_WIDTH 80, charge -80/-35, link distance 48) need separate tuning for 8 entries in ~260px width. Test at 375px, 1440px, and 2560px. Use the d3-viz skill."
     }
   ]
 }

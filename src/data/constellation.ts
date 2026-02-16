@@ -23,6 +23,24 @@ export const roleSkillMappings: RoleSkillMapping[] = [
     ],
   },
   {
+    roleId: 'duty-pharmacy-manager-2016',
+    skillIds: [
+      'medicines-optimisation',
+      'data-analysis',
+      'excel',
+      'change-management',
+      'stakeholder-engagement',
+    ],
+  },
+  {
+    roleId: 'pre-reg-pharmacist-2015',
+    skillIds: [
+      'medicines-optimisation',
+      'change-management',
+      'stakeholder-engagement',
+    ],
+  },
+  {
     roleId: 'high-cost-drugs-2022',
     skillIds: [
       'medicines-optimisation',
@@ -78,7 +96,7 @@ export const roleSkillMappings: RoleSkillMapping[] = [
  * Includes both role nodes and skill nodes.
  */
 export const constellationNodes: ConstellationNode[] = [
-  // Role nodes (4 roles)
+  // Role nodes (6 roles)
   {
     id: 'pharmacy-manager-2017',
     type: 'role',
@@ -87,7 +105,27 @@ export const constellationNodes: ConstellationNode[] = [
     organization: 'Tesco PLC',
     startYear: 2017,
     endYear: 2022,
-    orgColor: '#00897B',
+    orgColor: '#E53935',
+  },
+  {
+    id: 'duty-pharmacy-manager-2016',
+    type: 'role',
+    label: 'Duty Pharmacy Manager',
+    shortLabel: 'Duty Pharm Mgr',
+    organization: 'Tesco PLC',
+    startYear: 2016,
+    endYear: 2017,
+    orgColor: '#E53935',
+  },
+  {
+    id: 'pre-reg-pharmacist-2015',
+    type: 'role',
+    label: 'Pre-Registration Pharmacist',
+    shortLabel: 'Pre-Reg',
+    organization: 'Paydens Pharmacy',
+    startYear: 2015,
+    endYear: 2016,
+    orgColor: '#66BB6A',
   },
   {
     id: 'high-cost-drugs-2022',
@@ -282,6 +320,18 @@ export const constellationLinks: ConstellationLink[] = [
   { source: 'pharmacy-manager-2017', target: 'change-management', strength: 0.6 },
   { source: 'pharmacy-manager-2017', target: 'budget-management', strength: 0.5 },
   { source: 'pharmacy-manager-2017', target: 'stakeholder-engagement', strength: 0.6 },
+
+  // Duty Pharmacy Manager 2016 → Skills (early operational role)
+  { source: 'duty-pharmacy-manager-2016', target: 'medicines-optimisation', strength: 0.8 },
+  { source: 'duty-pharmacy-manager-2016', target: 'data-analysis', strength: 0.5 },
+  { source: 'duty-pharmacy-manager-2016', target: 'excel', strength: 0.6 },
+  { source: 'duty-pharmacy-manager-2016', target: 'change-management', strength: 0.5 },
+  { source: 'duty-pharmacy-manager-2016', target: 'stakeholder-engagement', strength: 0.4 },
+
+  // Pre-Registration Pharmacist 2015 → Skills (foundational clinical role)
+  { source: 'pre-reg-pharmacist-2015', target: 'medicines-optimisation', strength: 0.7 },
+  { source: 'pre-reg-pharmacist-2015', target: 'change-management', strength: 0.4 },
+  { source: 'pre-reg-pharmacist-2015', target: 'stakeholder-engagement', strength: 0.3 },
 
   // High-Cost Drugs 2022 → Skills (technical + clinical pathway role)
   { source: 'high-cost-drugs-2022', target: 'medicines-optimisation', strength: 0.8 },
