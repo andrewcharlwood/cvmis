@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
 import { investigations } from '@/data/investigations'
@@ -155,33 +155,46 @@ function ProjectItem({ project, slideBasis, onClick }: ProjectItemProps) {
 
 export function ProjectsTile() {
   const { openPanel } = useDetailPanel()
+  const autoplayPlugin = useRef(
+    Autoplay({
+      delay: 3500,
+      playOnInit: false,
+      stopOnInteraction: false,
+      stopOnMouseEnter: true,
+      stopOnFocusIn: true,
+    }),
+  )
   const [viewportWidth, setViewportWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : 1200,
   )
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
+    typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : false,
+  )
 
-  const [emblaRef] = useEmblaCarousel(
+  const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       align: 'start',
       containScroll: 'trimSnaps',
       loop: true,
       dragFree: true,
     },
-    useMemo(
-      () =>
-        prefersReducedMotion
-          ? []
-          : [
-              Autoplay({
-                delay: 3500,
-                stopOnInteraction: false,
-                stopOnMouseEnter: true,
-                stopOnFocusIn: true,
-              }),
-            ],
-      [prefersReducedMotion],
-    ),
+    useMemo(() => [autoplayPlugin.current], []),
   )
+
+  useEffect(() => {
+    if (!emblaApi) {
+      return
+    }
+
+    if (prefersReducedMotion) {
+      autoplayPlugin.current.stop()
+      return
+    }
+
+    autoplayPlugin.current.play()
+  }, [emblaApi, prefersReducedMotion])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
