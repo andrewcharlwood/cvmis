@@ -158,7 +158,7 @@
         "Verify in browser at both desktop and mobile: all 8 entries visible, no overlaps, clean layout"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "The yScale domain is computed from min/max startYear — adding 2009 entries extends it automatically. Key challenge: vertical spacing for 8 entries over 16 years. The 2015-2017 range has 3 entries close together (Pre-Reg 2015, Duty Pharm Mgr 2016, Pharmacy Manager 2017). May need increased topPadding/bottomPadding. Current force simulation params from prior overhaul: role forceY ~0.98, charge -120 (roles)/-55 (skills), link distance 72, collision ~52-65px for roles. With 8 entries in ~35% column (vs previous ~57%): consider reducing ROLE_WIDTH slightly for the narrower space, adjusting charge to allow tighter packing, ensuring skill nodes don't overflow horizontally. The viewport-proportional scaling from US-004 must also work with 8 entries. Mobile params (MOBILE_ROLE_WIDTH 80, charge -80/-35, link distance 48) need separate tuning for 8 entries in ~260px width. Test at 375px, 1440px, and 2560px. Use the d3-viz skill."
     }
   ]

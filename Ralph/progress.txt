@@ -158,3 +158,33 @@
   - For hover effects on org-coloured links, use opacity change (0.7) instead of a separate --accent-hover variable, since each employer has a different base colour
   - The hover mouseenter/mouseleave pattern using parentElement!.style is used for border/shadow effects — it directly mutates the parent wrapper's inline styles
 ---
+
+## 2026-02-16 - US-008
+- Re-tuned force simulation parameters for 8 entries (6 roles + 2 education) spanning 2009-2025 in ~35% column
+- Increased MOBILE_FALLBACK_HEIGHT from 380 to 520 — 8 entries over 17 years need more vertical space on mobile
+- Reduced desktop sidePadding from 56*sf to 36*sf — frees horizontal space for skill nodes in narrow column
+- Reduced desktop roleGap from 80*sf to 56*sf — roles sit closer to timeline, more room for skills
+- Reduced desktop skillGap from 40*sf to 28*sf — skills start sooner after role pills
+- Reduced skill centroid offset from 60*sf to 40*sf — skills pulled closer to avoid right-edge overflow
+- Reduced skill seed radius from 50*sf to 35*sf — tighter initial positioning
+- Increased mobile charge: roles -80→-100, skills -35→-45 — stronger repulsion for better separation
+- Increased mobile link distance from 48 to 56 — more space between connected nodes
+- Increased mobile collision padding: roles 6→8, skills 10→14 — better overlap prevention
+- Increased collision iterations from 2 to 3 — more passes for cleaner overlap resolution
+- Increased skill forceX strength from 0.18 to 0.25 — pulls skills more towards center of available space
+- Increased desktop rightMargin from 40*sf to 32*sf — moderate boundary for skill labels
+- Added width-aware skill label truncation: maxLen 12 when SVG width < 500px (vs 16 at wider)
+- Increased mobile topPadding 32→36, bottomPadding 32→40 — breathing room at edges
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json, Ralph/progress.txt
+- Browser verified at 375px: all 8 entries visible, correct chronological order, acceptable overlap for mobile
+- Browser verified at 430px: better horizontal distribution, roles well-positioned
+- Browser verified at 1440px: roles cleanly positioned along timeline, skill labels slightly clipped at right edge (container overflow:hidden), circles fully visible
+- Browser verified at 2560px: excellent distribution, all labels visible, education nodes cleanly isolated at bottom
+- **Learnings for future iterations:**
+  - MOBILE_FALLBACK_HEIGHT must scale with the number of timeline entries — 380px was adequate for 4 entries but not for 8
+  - At 1440px, the ~340px column is fundamentally narrow for 21 skill nodes + labels. Some label clipping via overflow:hidden is an acceptable trade-off — circles are visible and labels show fully on hover
+  - Mobile role positioning drifts 1-2 years from exact position due to collision forces pushing close entries apart (2015-2017 has 3 entries). Chronological order is maintained, which is the priority
+  - collision.iterations(3) significantly improves overlap prevention over iterations(2) with 29 total nodes
+  - Skill forceX strength 0.25 (up from 0.18) keeps skills more centred in available space without over-constraining them
+  - The width < 500 check for skill label truncation targets the narrow desktop column specifically — mobile already uses its own 12-char max
+---
