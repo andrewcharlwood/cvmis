@@ -138,7 +138,7 @@
         "Verify in browser: NHS roles show blue-tinted cards, Tesco roles red-tinted, Paydens green, education purple"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "All changes in WorkExperienceSubsection.tsx (~299 lines). consultation.orgColor already exists on each consultation object but is not currently used for card styling. Create a helper function hexToRgba(hex: string, opacity: number): string that converts hex to rgba — needed for tinted backgrounds and borders. Replace hardcoded values: '#0D6E6E' for dot (line ~82), 'rgba(10,128,128,0.03)' for highlight bg, 'var(--accent-border)' for border, 'var(--accent)' for links/text. Each RoleItem already receives its consultation — use consultation.orgColor. For coded entry tags: text in orgColor, bg in hexToRgba(orgColor, 0.08), border in hexToRgba(orgColor, 0.2). Also update LastConsultationSubsection in DashboardLayout.tsx if it has hardcoded teal colours. The WORK EXPERIENCE CardHeader dot stays teal. Use the d3-viz skill."
     },
     {

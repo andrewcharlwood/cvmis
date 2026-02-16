@@ -55,6 +55,13 @@ const contentVariants = {
   },
 }
 
+function hexToRgba(hex: string, opacity: number): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r},${g},${b},${opacity})`
+}
+
 interface LastConsultationSubsectionProps {
   highlightedRoleId?: string | null
 }
@@ -114,8 +121,8 @@ function LastConsultationSubsection({ highlightedRoleId }: LastConsultationSubse
         marginTop: '24px',
         borderRadius: 'var(--radius-sm)',
         border: '1px solid',
-        borderColor: isHighlighted ? 'var(--accent-border)' : 'transparent',
-        background: isHighlighted ? 'rgba(10,128,128,0.03)' : 'transparent',
+        borderColor: isHighlighted ? hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.2) : 'transparent',
+        background: isHighlighted ? hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.03) : 'transparent',
         transition: 'border-color 150ms ease-out, background-color 150ms ease-out',
         padding: '8px',
         margin: '-8px',
@@ -142,7 +149,7 @@ function LastConsultationSubsection({ highlightedRoleId }: LastConsultationSubse
           transition: 'background-color 150ms ease-out',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'rgba(10,128,128,0.04)'
+          e.currentTarget.style.backgroundColor = hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.04)
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = 'transparent'
@@ -171,7 +178,7 @@ function LastConsultationSubsection({ highlightedRoleId }: LastConsultationSubse
         style={{
           fontSize: '15px',
           fontWeight: 600,
-          color: 'var(--accent)',
+          color: consultation.orgColor ?? 'var(--accent)',
           marginBottom: '12px',
         }}
       >
@@ -209,7 +216,7 @@ function LastConsultationSubsection({ highlightedRoleId }: LastConsultationSubse
                 width: '5px',
                 height: '5px',
                 borderRadius: '50%',
-                backgroundColor: 'var(--accent)',
+                backgroundColor: consultation.orgColor ?? 'var(--accent)',
                 opacity: 0.5,
               }}
             />
@@ -226,19 +233,19 @@ function LastConsultationSubsection({ highlightedRoleId }: LastConsultationSubse
           gap: '6px',
           fontSize: '13px',
           fontWeight: 500,
-          color: 'var(--accent)',
+          color: consultation.orgColor ?? 'var(--accent)',
           background: 'transparent',
           border: 'none',
           padding: '6px 0',
           minHeight: '44px',
           cursor: 'pointer',
-          transition: 'color 150ms ease-out',
+          transition: 'opacity 150ms ease-out',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.color = 'var(--accent-hover)'
+          e.currentTarget.style.opacity = '0.7'
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.color = 'var(--accent)'
+          e.currentTarget.style.opacity = '1'
         }}
         aria-label="View full consultation record"
       >

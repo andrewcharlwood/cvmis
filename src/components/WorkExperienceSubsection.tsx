@@ -7,6 +7,13 @@ import { useDetailPanel } from '@/contexts/DetailPanelContext'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+function hexToRgba(hex: string, opacity: number): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r},${g},${b},${opacity})`
+}
+
 interface RoleItemProps {
   consultation: typeof consultations[0]
   isExpanded: boolean
@@ -34,9 +41,9 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
   return (
     <div
       style={{
-        background: isHighlightedFromGraph ? 'rgba(10,128,128,0.03)' : 'var(--bg-dashboard)',
+        background: isHighlightedFromGraph ? hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.03) : 'var(--bg-dashboard)',
         borderRadius: 'var(--radius-sm)',
-        border: `1px solid ${isExpanded || isHighlightedFromGraph ? 'var(--accent-border)' : 'var(--border-light)'}`,
+        border: `1px solid ${isExpanded || isHighlightedFromGraph ? hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.2) : 'var(--border-light)'}`,
         transition: 'border-color 0.15s, box-shadow 0.15s, background-color 0.15s',
         overflow: 'hidden',
       }}
@@ -61,7 +68,7 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
         }}
         onMouseEnter={(e) => {
           if (!isExpanded) {
-            e.currentTarget.parentElement!.style.borderColor = 'var(--accent-border)'
+            e.currentTarget.parentElement!.style.borderColor = hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.2)
             e.currentTarget.parentElement!.style.boxShadow = 'var(--shadow-md)'
           }
         }}
@@ -72,14 +79,14 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
           }
         }}
       >
-        {/* Teal dot */}
+        {/* Org colour dot */}
         <div
           aria-hidden="true"
           style={{
             width: '9px',
             height: '9px',
             borderRadius: '50%',
-            background: '#0D6E6E',
+            background: consultation.orgColor ?? '#0D6E6E',
             flexShrink: 0,
             marginTop: '4px',
           }}
@@ -150,7 +157,7 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
                 padding: '0 12px 12px 30px',
                 borderTop: '1px solid var(--border-light)',
                 paddingTop: '12px',
-                borderLeft: '2px solid var(--accent)',
+                borderLeft: `2px solid ${consultation.orgColor ?? 'var(--accent)'}`,
                 marginLeft: '12px',
               }}
             >
@@ -185,7 +192,7 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
                         width: '4px',
                         height: '4px',
                         borderRadius: '50%',
-                        background: 'var(--accent)',
+                        background: consultation.orgColor ?? 'var(--accent)',
                         opacity: 0.5,
                       }}
                     />
@@ -211,9 +218,9 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
                       fontFamily: 'var(--font-mono)',
                       padding: '3px 8px',
                       borderRadius: '4px',
-                      background: 'var(--accent-light)',
-                      color: 'var(--accent)',
-                      border: '1px solid var(--accent-border)',
+                      background: hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.08),
+                      color: consultation.orgColor ?? 'var(--accent)',
+                      border: `1px solid ${hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.2)}`,
                     }}
                   >
                     {entry.code}: {entry.description}
@@ -233,7 +240,7 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
                   gap: '4px',
                   fontSize: '12px',
                   fontWeight: 500,
-                  color: 'var(--accent)',
+                  color: consultation.orgColor ?? 'var(--accent)',
                   background: 'transparent',
                   border: 'none',
                   padding: '4px 0',
@@ -241,10 +248,10 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
                   fontFamily: 'inherit',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'var(--accent-hover)'
+                  e.currentTarget.style.opacity = '0.7'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--accent)'
+                  e.currentTarget.style.opacity = '1'
                 }}
               >
                 View full record

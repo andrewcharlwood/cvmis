@@ -31,6 +31,8 @@
 - Constellation role nodes, skill mappings, and links are in constellation.ts — adding nodes there automatically extends yScale domain and screen reader description
 - Mobile accordion (coarse pointer): pinnedNodeId drives both graph highlight AND accordion visibility. Accordion only shows for role-type nodes (not skills)
 - SVG background rect has class `.bg-rect` — used for "tap elsewhere to close" handler on touch devices
+- consultation.orgColor is the source of per-employer colour for cards, dots, borders, and coded entries. Use hexToRgba(orgColor, opacity) for tinted variants
+- hexToRgba(hex, opacity) helper exists in both WorkExperienceSubsection.tsx and DashboardLayout.tsx for converting hex to rgba
 
 ## 2026-02-16 - US-001
 - Added Duty Pharmacy Manager (2016-2017, Tesco PLC) and Pre-Registration Pharmacist (2015-2016, Paydens Pharmacy) role nodes to constellation.ts
@@ -132,4 +134,27 @@
   - `accordionShowMore` state must reset on pinnedNodeId change to auto-collapse "show more" when switching roles
   - Not all consultations have >3 examination items — the "Show more" button only renders conditionally, and plan items are only shown when expanded
   - Browser testing for coarse pointer features requires touch emulation — Playwright's default Chromium reports fine pointer, so the accordion won't appear without explicit touch device emulation
+---
+
+## 2026-02-16 - US-007
+- Created hexToRgba(hex, opacity) helper function in both WorkExperienceSubsection.tsx and DashboardLayout.tsx
+- WorkExperienceSubsection.tsx: replaced all hardcoded teal/accent colour references with consultation.orgColor:
+  - Dot indicator: '#0D6E6E' → consultation.orgColor
+  - Highlight background: 'rgba(10,128,128,0.03)' → hexToRgba(orgColor, 0.03)
+  - Expanded/highlighted border: 'var(--accent-border)' → hexToRgba(orgColor, 0.2)
+  - Hover border: 'var(--accent-border)' → hexToRgba(orgColor, 0.2)
+  - Left border on expanded detail: 'var(--accent)' → orgColor
+  - Bullet dots: 'var(--accent)' → orgColor at 0.5 opacity
+  - Coded entry tags: bg hexToRgba(orgColor, 0.08), text orgColor, border hexToRgba(orgColor, 0.2)
+  - "View full record" link: 'var(--accent)' → orgColor, hover uses opacity 0.7 instead of accent-hover
+- DashboardLayout.tsx LastConsultationSubsection: same pattern applied:
+  - Highlight border/bg, hover bg, role title, bullet dots, "View full record" link all use consultation.orgColor
+- CardHeader dot for "WORK EXPERIENCE" section title remains teal (unchanged)
+- Files changed: src/components/WorkExperienceSubsection.tsx, src/components/DashboardLayout.tsx, Ralph/prd.json, Ralph/progress.txt
+- Browser verified: NHS roles show blue dots/borders, Tesco roles show red, Paydens shows green, education shows purple. Expanded Tesco card shows red left border, red bullet dots, and red-tinted coded entries
+- **Learnings for future iterations:**
+  - consultation.orgColor exists on every Consultation object — it's the single source for per-employer colour throughout the UI
+  - hexToRgba(hex, opacity) is needed in both WorkExperienceSubsection.tsx and DashboardLayout.tsx — not extracted to a shared utility since it's a small helper and only used in two files
+  - For hover effects on org-coloured links, use opacity change (0.7) instead of a separate --accent-hover variable, since each employer has a different base colour
+  - The hover mouseenter/mouseleave pattern using parentElement!.style is used for border/shadow effects — it directly mutates the parent wrapper's inline styles
 ---
