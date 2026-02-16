@@ -159,4 +159,51 @@ export const consultations: Consultation[] = [
       { code: 'PAL001', description: 'Palliative care: Community screening pathway' },
     ],
   },
+  {
+    id: 'uea-mpharm-2011',
+    date: '01 Sep 2011',
+    organization: 'University of East Anglia',
+    orgColor: '#7B2D8E',
+    role: 'MPharm (Hons) 2:1',
+    duration: '2011 — 2015',
+    isCurrent: false,
+    history: 'Completed four-year Master of Pharmacy degree at the University of East Anglia, building a strong foundation in pharmaceutical sciences, clinical pharmacy, and research methodology. Demonstrated academic excellence through a distinction-grade research project and active engagement in university life.',
+    examination: [
+      'Independent research project on drug delivery and cocrystals: 75.1% (Distinction)',
+      '4th year OSCE: 80%',
+      'President of UEA Pharmacy Society',
+    ],
+    plan: [
+      'Strong academic foundation in pharmaceutical sciences',
+      'Research skills developed through independent project work',
+      'Leadership experience through society presidency',
+    ],
+    codedEntries: [
+      { code: 'RES001', description: 'Research: Drug delivery & cocrystals (Distinction)' },
+      { code: 'SOC001', description: 'Leadership: UEA Pharmacy Society President' },
+    ],
+  },
+  {
+    id: 'highworth-alevels-2009',
+    date: '01 Sep 2009',
+    organization: 'Highworth Grammar School',
+    orgColor: '#9C27B0',
+    role: 'A-Levels',
+    duration: '2009 — 2011',
+    isCurrent: false,
+    history: 'Completed A-Level studies at Highworth Grammar School in Ashford, Kent, achieving strong results in mathematics and sciences that provided the academic foundation for pursuing pharmacy.',
+    examination: [
+      'Mathematics: A*',
+      'Chemistry: B',
+      'Politics: C',
+    ],
+    plan: [
+      'Strong mathematical foundation for data-driven career',
+      'Science grounding for pharmacy degree entry',
+    ],
+    codedEntries: [
+      { code: 'MATH01', description: 'Mathematics A*' },
+      { code: 'CHEM01', description: 'Chemistry B' },
+    ],
+  },
 ]

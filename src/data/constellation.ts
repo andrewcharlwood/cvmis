@@ -41,6 +41,19 @@ export const roleSkillMappings: RoleSkillMapping[] = [
     ],
   },
   {
+    roleId: 'uea-mpharm-2011',
+    skillIds: [
+      'medicines-optimisation',
+      'data-analysis',
+    ],
+  },
+  {
+    roleId: 'highworth-alevels-2009',
+    skillIds: [
+      'data-analysis',
+    ],
+  },
+  {
     roleId: 'high-cost-drugs-2022',
     skillIds: [
       'medicines-optimisation',
@@ -96,7 +109,7 @@ export const roleSkillMappings: RoleSkillMapping[] = [
  * Includes both role nodes and skill nodes.
  */
 export const constellationNodes: ConstellationNode[] = [
-  // Role nodes (6 roles)
+  // Role nodes (6 roles) + Education nodes (2)
   {
     id: 'pharmacy-manager-2017',
     type: 'role',
@@ -156,6 +169,28 @@ export const constellationNodes: ConstellationNode[] = [
     startYear: 2025,
     endYear: 2025,
     orgColor: '#005EB8',
+  },
+
+  // Education nodes
+  {
+    id: 'uea-mpharm-2011',
+    type: 'role',
+    label: 'MPharm (Hons) 2:1',
+    shortLabel: 'MPharm',
+    organization: 'University of East Anglia',
+    startYear: 2011,
+    endYear: 2015,
+    orgColor: '#7B2D8E',
+  },
+  {
+    id: 'highworth-alevels-2009',
+    type: 'role',
+    label: 'A-Levels: Maths A*, Chem B',
+    shortLabel: 'A-Levels',
+    organization: 'Highworth Grammar School',
+    startYear: 2009,
+    endYear: 2011,
+    orgColor: '#9C27B0',
   },
 
   // Skill nodes - Technical (8 skills)
@@ -332,6 +367,13 @@ export const constellationLinks: ConstellationLink[] = [
   { source: 'pre-reg-pharmacist-2015', target: 'medicines-optimisation', strength: 0.7 },
   { source: 'pre-reg-pharmacist-2015', target: 'change-management', strength: 0.4 },
   { source: 'pre-reg-pharmacist-2015', target: 'stakeholder-engagement', strength: 0.3 },
+
+  // UEA MPharm 2011 → Skills (foundational education)
+  { source: 'uea-mpharm-2011', target: 'medicines-optimisation', strength: 0.5 },
+  { source: 'uea-mpharm-2011', target: 'data-analysis', strength: 0.3 },
+
+  // Highworth A-Levels 2009 → Skills (mathematics foundation)
+  { source: 'highworth-alevels-2009', target: 'data-analysis', strength: 0.2 },
 
   // High-Cost Drugs 2022 → Skills (technical + clinical pathway role)
   { source: 'high-cost-drugs-2022', target: 'medicines-optimisation', strength: 0.8 },
