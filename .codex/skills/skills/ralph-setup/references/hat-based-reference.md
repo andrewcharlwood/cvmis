@@ -13,9 +13,9 @@ cli:
   backend: "claude"
 
 event_loop:
-  starting_event: "task.start"          # First event that kicks off the pipeline
+  starting_event: "work.start"          # First delegated event that kicks off the pipeline
   completion_promise: "LOOP_COMPLETE"   # String that signals completion
-  max_iterations: 100                   # Safety limit
+  max_iterations: 30                    # Start conservative, increase if needed
 
 hats:
   hat_name:
@@ -35,7 +35,9 @@ hats:
 - **triggers**: List of events that activate this hat. A hat runs when ANY of its trigger events fire.
 - **publishes**: List of events this hat emits when it completes its work.
 - **description**: Required short summary of the hat's purpose.
+- **reserved events**: Do not use `task.start` or `task.resume` as hat triggers. Use delegated events like `work.start`.
 - **instructions**: The prompt for this hat. Must be specific to the hat's role.
+- **terminal success rule**: Final hats should print `LOOP_COMPLETE` on success and should NOT publish success events.
 - Events flow forward through the pipeline. Avoid circular event chains.
 - The last hat in the pipeline should print LOOP_COMPLETE when the overall task is done.
 
@@ -50,14 +52,14 @@ cli:
   backend: "claude"
 
 event_loop:
-  starting_event: "task.start"
+  starting_event: "work.start"
   completion_promise: "LOOP_COMPLETE"
 
 hats:
   planner:
     name: "Planner"
     description: "Analyses requirements and writes an implementation plan."
-    triggers: ["task.start"]
+    triggers: ["work.start", "build.retry_needed"]
     publishes: ["plan.ready"]
     instructions: |
       You are the Planner. Read PROMPT.md to understand the task.
@@ -76,7 +78,7 @@ hats:
     name: "Builder"
     description: "Implements the plan and delivers working code."
     triggers: ["plan.ready"]
-    publishes: ["task.done"]
+    publishes: ["build.retry_needed"]
     instructions: |
       You are the Builder. Read PROMPT.md for the task and .ralph/plan.md
       for the implementation plan.
@@ -87,8 +89,10 @@ hats:
       3. Run tests after each significant change
       4. Update .ralph/plan.md to mark completed steps
 
-      When all success criteria from PROMPT.md are met and all tests pass,
-      print LOOP_COMPLETE.
+      If all success criteria from PROMPT.md are met and all tests pass,
+      print LOOP_COMPLETE and stop.
+
+      If blocked, emit build.retry_needed with specific blocker details.
 ```
 
 ### Pattern 2: Plan → Build → Review (3 Hats)
@@ -100,14 +104,14 @@ cli:
   backend: "claude"
 
 event_loop:
-  starting_event: "task.start"
+  starting_event: "work.start"
   completion_promise: "LOOP_COMPLETE"
 
 hats:
   planner:
     name: "Planner"
     description: "Creates/updates implementation plans based on task and review feedback."
-    triggers: ["task.start", "review.changes_requested"]
+    triggers: ["work.start", "review.changes_requested"]
     publishes: ["plan.ready"]
     instructions: |
       You are the Planner. Read PROMPT.md to understand the task.
@@ -135,7 +139,7 @@ hats:
     name: "Reviewer"
     description: "Validates quality and requirements, approving or requesting changes."
     triggers: ["build.done"]
-    publishes: ["review.approved", "review.changes_requested"]
+    publishes: ["review.changes_requested"]
     instructions: |
       You are the Reviewer. Read PROMPT.md for requirements.
 
@@ -161,14 +165,14 @@ cli:
   backend: "claude"
 
 event_loop:
-  starting_event: "task.start"
+  starting_event: "work.start"
   completion_promise: "LOOP_COMPLETE"
 
 hats:
   spec_writer:
     name: "Spec Writer"
     description: "Writes and updates the technical specification."
-    triggers: ["task.start", "verify.gaps_found"]
+    triggers: ["work.start", "verify.gaps_found"]
     publishes: ["spec.ready"]
     instructions: |
       You are the Spec Writer. Read PROMPT.md for the high-level task.
@@ -201,7 +205,7 @@ hats:
     name: "Verifier"
     description: "Checks implementation against the spec and success criteria."
     triggers: ["implementation.done"]
-    publishes: ["verify.passed", "verify.gaps_found"]
+    publishes: ["verify.gaps_found"]
     instructions: |
       You are the Verifier. Read .ralph/spec.md and PROMPT.md.
 
@@ -225,14 +229,14 @@ cli:
   backend: "claude"
 
 event_loop:
-  starting_event: "task.start"
+  starting_event: "work.start"
   completion_promise: "LOOP_COMPLETE"
 
 hats:
   test_writer:
     name: "Test Writer"
     description: "Creates failing tests that define expected behaviour."
-    triggers: ["task.start", "verify.tests_needed"]
+    triggers: ["work.start", "verify.tests_needed"]
     publishes: ["tests.ready"]
     instructions: |
       You are the Test Writer. Read PROMPT.md for requirements.
@@ -264,7 +268,7 @@ hats:
     name: "Verifier"
     description: "Confirms tests, coverage, and requirement completeness."
     triggers: ["implementation.done"]
-    publishes: ["verify.passed", "verify.tests_needed"]
+    publishes: ["verify.tests_needed"]
     instructions: |
       You are the Verifier. Read PROMPT.md for the full requirements.
 
@@ -329,7 +333,7 @@ Memories are useful for capturing lessons learned, recording decisions, and avoi
 ralph run --config hats.yml
 
 # With iteration limit
-ralph run --config hats.yml --max-iterations 50
+ralph run --config hats.yml --max-iterations 30
 
 # Resume interrupted session
 ralph run --config hats.yml --continue
@@ -339,7 +343,7 @@ ralph run --config hats.yml --continue
 
 **Too many hats.** If you have more than 5, you're probably overengineering. Each hat adds coordination overhead.
 
-**Circular event chains without an exit.** Every cycle must have a path to LOOP_COMPLETE. If planner → builder → reviewer → planner, the reviewer must sometimes emit completion instead of always cycling back.
+**Publishing success events from terminal hats.** Avoid `review.approved`/`verify.passed`-style terminal success events. Prefer `LOOP_COMPLETE` for success and reserve published events for rework paths only.
 
 **Hats that duplicate work.** If the builder is also doing planning, your planner hat is wasted.
 

@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
-import { TopBar } from './TopBar'
-import { SubNav } from './SubNav'
 import Sidebar from './Sidebar'
 import { CommandPalette } from './CommandPalette'
 import { DetailPanel } from './DetailPanel'
@@ -22,17 +20,6 @@ import { skills } from '@/data/skills'
 import type { PaletteAction } from '@/lib/search'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-const topbarVariants = {
-  hidden: prefersReducedMotion ? { y: 0, opacity: 1 } : { y: -48, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: prefersReducedMotion
-      ? { duration: 0 }
-      : { duration: 0.2, ease: 'easeOut' },
-  },
-}
 
 const sidebarVariants = {
   hidden: prefersReducedMotion ? { x: 0, opacity: 1 } : { x: -272, opacity: 0 },
@@ -279,17 +266,19 @@ export function DashboardLayout() {
     return () => observer.disconnect()
   }, [])
 
-  const handleSearchClick = () => {
-    setCommandPaletteOpen(true)
-  }
-
   const handlePaletteClose = useCallback(() => {
     setCommandPaletteOpen(false)
   }, [])
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleSectionClick = useCallback((_sectionId: string) => {
-    // SubNav handles scrolling internally
+  const handleSearchClick = useCallback(() => {
+    setCommandPaletteOpen(true)
+  }, [])
+
+  const scrollToSection = useCallback((tileId: string) => {
+    const tileEl = document.querySelector(`[data-tile-id="${tileId}"]`)
+    if (tileEl) {
+      tileEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }, [])
 
   // Constellation graph handlers
@@ -337,10 +326,7 @@ export function DashboardLayout() {
   const handlePaletteAction = useCallback((action: PaletteAction) => {
     switch (action.type) {
       case 'scroll': {
-        const tileEl = document.querySelector(`[data-tile-id="${action.tileId}"]`)
-        if (tileEl) {
-          tileEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        }
+        scrollToSection(action.tileId)
         break
       }
       case 'expand': {
@@ -370,48 +356,64 @@ export function DashboardLayout() {
         break
       }
     }
-  }, [openPanel])
+  }, [openPanel, scrollToSection])
 
   return (
     <div
       className="font-ui"
-      style={{ background: 'var(--bg-dashboard)', minHeight: '100vh' }}
+      style={{ background: 'var(--bg-dashboard)', height: '100vh', overflow: 'hidden' }}
     >
-      {/* TopBar — fixed at top */}
-      <motion.div initial="hidden" animate="visible" variants={topbarVariants}>
-        <TopBar onSearchClick={handleSearchClick} />
-      </motion.div>
+      <a
+        href="#main-content"
+        style={{
+          position: 'absolute',
+          top: '-48px',
+          left: 0,
+          background: 'var(--accent)',
+          color: '#FFFFFF',
+          padding: '8px 16px',
+          textDecoration: 'none',
+          zIndex: 120,
+          borderRadius: '0 0 4px 0',
+          fontSize: '14px',
+          fontWeight: 600,
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.top = '0'
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.top = '-48px'
+        }}
+      >
+        Skip to main content
+      </a>
 
-      {/* SubNav — sticky below TopBar */}
-      <SubNav activeSection={activeSection} onSectionClick={handleSectionClick} />
-
-      {/* Layout below TopBar + SubNav: Sidebar + Main */}
       <div
         style={{
           display: 'flex',
-          marginTop: 'calc(var(--topbar-height) + var(--subnav-height))',
-          height: 'calc(100vh - var(--topbar-height) - var(--subnav-height))',
+          height: '100%',
         }}
       >
-        {/* Sidebar — hidden on mobile/tablet, visible on desktop */}
         <motion.div
           initial="hidden"
           animate="visible"
           variants={sidebarVariants}
-          className="hidden lg:block"
           style={{ flexShrink: 0 }}
         >
-          <Sidebar />
+          <Sidebar
+            activeSection={activeSection}
+            onNavigate={scrollToSection}
+            onSearchClick={handleSearchClick}
+          />
         </motion.div>
 
-        {/* Main content — scrollable card grid */}
         <motion.main
           id="main-content"
           initial="hidden"
           animate="visible"
           variants={contentVariants}
           aria-label="Dashboard content"
-          className="pmr-scrollbar p-5 pb-10 md:p-7 md:pb-12 lg:px-8 lg:pt-7 lg:pb-12"
+          className="dashboard-main pmr-scrollbar p-5 pb-10 md:p-7 md:pb-12 lg:px-8 lg:pt-7 lg:pb-12"
           style={{
             flex: 1,
             overflowY: 'auto',

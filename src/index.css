@@ -124,8 +124,7 @@
   --border: #D4E0DE;
   --border-light: #E4EDEB;
   --sidebar-width: 304px;
-  --topbar-height: 56px;
-  --subnav-height: 42px;
+  --sidebar-rail-width: 64px;
   --radius-card: 8px;
   --radius-sm: 6px;
   --shadow-sm: 0 1px 2px rgba(26,43,42,0.05);
@@ -273,9 +272,26 @@ html {
   background: var(--text-tertiary);
 }
 
-/* SubNav horizontal scroll — hide scrollbar */
-.subnav-scroll::-webkit-scrollbar {
-  display: none;
+/* Dashboard main content offset for mobile sidebar rail */
+.dashboard-main {
+  margin-left: var(--sidebar-rail-width);
+}
+
+@media (min-width: 1024px) {
+  .dashboard-main {
+    margin-left: 0;
+  }
+}
+
+/* Sidebar control styles */
+.sidebar-control:hover {
+  background: rgba(10, 128, 128, 0.05) !important;
+  color: var(--accent) !important;
+}
+
+.sidebar-control:focus-visible {
+  outline: 2px solid rgba(13, 110, 110, 0.45);
+  outline-offset: 2px;
 }
 
 .metric-card:hover {
@@ -517,11 +533,6 @@ textarea:focus-visible {
   /* No pulse animation */
   .login-pulse-active {
     animation: none;
-  }
-
-  /* Instant SubNav transitions */
-  .subnav-scroll button {
-    transition: none !important;
   }
 
   /* Instant smooth scroll override */

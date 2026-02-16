@@ -1,11 +1,47 @@
-import { AlertTriangle, AlertCircle } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
+import {
+  AlertCircle,
+  AlertTriangle,
+  GraduationCap,
+  type LucideIcon,
+  Menu,
+  Pill,
+  Search,
+  UserRound,
+  Workflow,
+  Wrench,
+  X,
+} from 'lucide-react'
+import cvmisLogo from '../../cvmis-logo.svg'
 import { patient } from '@/data/patient'
 import { tags } from '@/data/tags'
 import { alerts } from '@/data/alerts'
 import type { Tag, Alert } from '@/types/pmr'
 
+interface SidebarProps {
+  activeSection: string
+  onNavigate: (tileId: string) => void
+  onSearchClick: () => void
+}
+
+interface NavSection {
+  id: string
+  label: string
+  tileId: string
+  Icon: LucideIcon
+}
+
+const navSections: NavSection[] = [
+  { id: 'overview', label: 'Overview', tileId: 'patient-summary', Icon: UserRound },
+  { id: 'projects', label: 'Projects', tileId: 'projects', Icon: Pill },
+  { id: 'experience', label: 'Experience', tileId: 'section-experience', Icon: Workflow },
+  { id: 'education', label: 'Education', tileId: 'section-education', Icon: GraduationCap },
+  { id: 'skills', label: 'Skills', tileId: 'section-skills', Icon: Wrench },
+]
+
 interface SectionTitleProps {
-  children: React.ReactNode
+  children: ReactNode
 }
 
 function SectionTitle({ children }: SectionTitleProps) {
@@ -40,7 +76,7 @@ interface TagPillProps {
 }
 
 function TagPill({ tag }: TagPillProps) {
-  const styles: Record<Tag['colorVariant'], React.CSSProperties> = {
+  const styles: Record<Tag['colorVariant'], CSSProperties> = {
     teal: {
       background: 'var(--accent-light)',
       color: 'var(--accent)',
@@ -82,7 +118,7 @@ interface AlertFlagProps {
 function AlertFlag({ alert }: AlertFlagProps) {
   const Icon = alert.icon === 'AlertTriangle' ? AlertTriangle : AlertCircle
 
-  const styles: Record<Alert['severity'], React.CSSProperties> = {
+  const styles: Record<Alert['severity'], CSSProperties> = {
     alert: {
       background: 'var(--alert-light)',
       color: 'var(--alert)',
@@ -126,308 +162,419 @@ function AlertFlag({ alert }: AlertFlagProps) {
   )
 }
 
-export default function Sidebar() {
+export default function Sidebar({ activeSection, onNavigate, onSearchClick }: SidebarProps) {
+  const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches)
+  const [isMobileExpanded, setIsMobileExpanded] = useState(false)
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 1024px)')
+    const updateDesktopState = (event: MediaQueryListEvent | MediaQueryList) => {
+      const desktopMode = event.matches
+      setIsDesktop(desktopMode)
+      if (desktopMode) {
+        setIsMobileExpanded(false)
+      }
+    }
+
+    updateDesktopState(mediaQuery)
+
+    const listener = (event: MediaQueryListEvent) => updateDesktopState(event)
+    mediaQuery.addEventListener('change', listener)
+
+    return () => mediaQuery.removeEventListener('change', listener)
+  }, [])
+
+  const isExpanded = isDesktop || isMobileExpanded
+
+  const handleNavActivate = (tileId: string) => {
+    onNavigate(tileId)
+    if (!isDesktop) {
+      setIsMobileExpanded(false)
+    }
+  }
+
   return (
-    <aside
-      style={{
-        width: 'var(--sidebar-width)',
-        minWidth: 'var(--sidebar-width)',
-        background: 'var(--sidebar-bg)',
-        borderRight: '1px solid var(--border)',
-        overflowY: 'auto',
-        padding: '24px 20px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '2px',
-      }}
-      className="pmr-scrollbar"
-    >
-      {/* PersonHeader Section */}
-      <div
+    <>
+      {!isDesktop && isMobileExpanded && (
+        <button
+          type="button"
+          aria-label="Close sidebar navigation"
+          onClick={() => setIsMobileExpanded(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(26,43,42,0.28)',
+            border: 'none',
+            zIndex: 108,
+            cursor: 'pointer',
+          }}
+        />
+      )}
+
+      <aside
+        id="sidebar-panel"
+        aria-label="Sidebar"
         style={{
-          borderBottom: '2px solid var(--accent)',
-          paddingBottom: '16px',
-          marginBottom: '10px',
+          position: isDesktop ? 'relative' : 'fixed',
+          top: 0,
+          left: 0,
+          bottom: 0,
+          width: isExpanded ? 'var(--sidebar-width)' : 'var(--sidebar-rail-width)',
+          minWidth: isExpanded ? 'var(--sidebar-width)' : 'var(--sidebar-rail-width)',
+          background: 'var(--sidebar-bg)',
+          borderRight: '1px solid var(--border)',
+          overflowY: isExpanded ? 'auto' : 'hidden',
+          overflowX: 'hidden',
+          padding: isExpanded ? '6px 16px' : '12px 8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+          transition: 'width 180ms ease-out, min-width 180ms ease-out, padding 180ms ease-out',
+          zIndex: isDesktop ? 'auto' : 110,
         }}
+        className={isExpanded ? 'pmr-scrollbar' : undefined}
       >
-        {/* Avatar */}
-        <div
-          style={{
-            width: '60px',
-            height: '60px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--accent), #0A8080)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#FFFFFF',
-            fontSize: '20px',
-            fontWeight: 700,
-            boxShadow: '0 2px 8px rgba(13,110,110,0.25)',
-            marginBottom: '12px',
-          }}
-        >
-          AC
-        </div>
-
-        {/* Name */}
-        <div
-          style={{
-            fontSize: '17px',
-            fontWeight: 700,
-            color: 'var(--text-primary)',
-            letterSpacing: '-0.01em',
-          }}
-        >
-          CHARLWOOD, Andrew
-        </div>
-
-        {/* Title */}
-        <div
-          style={{
-            fontSize: '13px',
-            fontFamily: 'Geist Mono, monospace',
-            fontWeight: 400,
-            color: 'var(--text-secondary)',
-            marginTop: '2px',
-          }}
-        >
-          Pharmacy Data Technologist
-        </div>
-
-        {/* Status badge */}
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '5px',
-            marginTop: '8px',
-            fontSize: '12px',
-            fontWeight: 500,
-            color: 'var(--success)',
-            background: 'var(--success-light)',
-            border: '1px solid var(--success-border)',
-            padding: '3px 9px',
-            borderRadius: '20px',
-          }}
-        >
-          <span
+        {!isDesktop && (
+          <button
+            type="button"
+            aria-label={isExpanded ? 'Collapse sidebar navigation' : 'Expand sidebar navigation'}
+            aria-expanded={isExpanded}
+            aria-controls="sidebar-panel"
+            onClick={() => setIsMobileExpanded((prev) => !prev)}
+            className="sidebar-control"
             style={{
-              width: '7px',
-              height: '7px',
-              borderRadius: '50%',
-              background: 'var(--success)',
-              animation: 'pulse 2s infinite',
-            }}
-            aria-hidden="true"
-          />
-          <span>{patient.badge}</span>
-        </div>
-
-        {/* Details grid */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr',
-            gap: '8px',
-            marginTop: '12px',
-          }}
-        >
-          {/* GPhC No. */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
+              width: '100%',
+              minHeight: '44px',
+              display: 'inline-flex',
               alignItems: 'center',
-              fontSize: '13px',
-              padding: '4px 0',
+              justifyContent: isExpanded ? 'space-between' : 'center',
+              gap: '8px',
+              border: '1px solid var(--border-light)',
+              background: 'var(--surface)',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--text-primary)',
+              padding: isExpanded ? '0 12px' : '0',
+              cursor: 'pointer',
             }}
           >
-            <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
-              GPhC No.
-            </span>
-            <span
+            {isExpanded && <span style={{ fontSize: '12px', fontWeight: 600 }}>Menu</span>}
+            {isExpanded ? <X size={17} strokeWidth={2.4} /> : <Menu size={18} strokeWidth={2.4} />}
+          </button>
+        )}
+
+        {isExpanded && (
+          <section style={{ borderBottom: '2px solid var(--accent)', paddingBottom: '16px' }}>
+            <div
               style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                gap: '6px',
+                marginBottom: '4px',
+                width: '100%',
+              }}
+            >
+              <img
+                src={cvmisLogo}
+                alt="CVMIS"
+                style={{
+                  width: '140px',
+                  height: 'auto',
+                  display: 'block',
+                }}
+              />
+              <div
+                style={{
+                  flex: 1,
+                  fontSize: '11px',
+                  color: 'var(--text-tertiary)',
+                  letterSpacing: '0.04em',
+                  lineHeight: 1.1,
+                  textAlign: 'center',
+                }}
+              >
+                CVMIS v1.0
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={onSearchClick}
+              className="sidebar-control"
+              aria-label="Search. Press Control plus K"
+              style={{
+                width: '100%',
+                minHeight: '44px',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+                background: 'var(--surface)',
+                color: 'var(--text-secondary)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '0 10px',
+                cursor: 'pointer',
+                marginBottom: '8px',
+              }}
+            >
+              <Search size={16} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} aria-hidden="true" />
+              <span style={{ flex: 1, textAlign: 'left', fontSize: '13px' }}>
+                Search
+              </span>
+              <kbd
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--text-tertiary)',
+                  background: 'var(--bg-dashboard)',
+                  border: '1px solid var(--border)',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  lineHeight: 1,
+                }}
+              >
+                Ctrl+K
+              </kbd>
+            </button>
+
+            <SectionTitle>Patient Data</SectionTitle>
+
+            <div
+              style={{
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, var(--accent), #0A8080)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#FFFFFF',
+                fontSize: '20px',
+                fontWeight: 700,
+                boxShadow: '0 2px 8px rgba(13,110,110,0.25)',
+                marginBottom: '12px',
+              }}
+            >
+              AC
+            </div>
+
+            <div
+              style={{
+                fontSize: '17px',
+                fontWeight: 700,
                 color: 'var(--text-primary)',
-                fontWeight: 500,
+                letterSpacing: '-0.01em',
+              }}
+            >
+              CHARLWOOD, Andrew
+            </div>
+
+            <div
+              style={{
+                fontSize: '13px',
                 fontFamily: 'Geist Mono, monospace',
-                fontSize: '12px',
-                letterSpacing: '0.12em',
+                fontWeight: 400,
+                color: 'var(--text-secondary)',
+                marginTop: '2px',
               }}
             >
-              {patient.nhsNumber.replace(/\s/g, '')}
-            </span>
-          </div>
+              Pharmacy Data Technologist
+            </div>
 
-          {/* Education */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              fontSize: '13px',
-              padding: '4px 0',
-            }}
-          >
-            <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
-              Education
-            </span>
-            <span
+            <div
               style={{
-                color: 'var(--text-primary)',
-                fontWeight: 500,
-                textAlign: 'right',
+                display: 'grid',
+                gridTemplateColumns: '1fr',
+                gap: '8px',
+                marginTop: '12px',
               }}
             >
-              {patient.qualification}
-            </span>
-          </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '13px',
+                  padding: '4px 0',
+                }}
+              >
+                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>GPhC No.</span>
+                <span
+                  style={{
+                    color: 'var(--text-primary)',
+                    fontWeight: 500,
+                    fontFamily: 'Geist Mono, monospace',
+                    fontSize: '12px',
+                    letterSpacing: '0.12em',
+                  }}
+                >
+                  {patient.nhsNumber.replace(/\s/g, '')}
+                </span>
+              </div>
 
-          {/* Location */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              fontSize: '13px',
-              padding: '4px 0',
-            }}
-          >
-            <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
-              Location
-            </span>
-            <span
-              style={{
-                color: 'var(--text-primary)',
-                fontWeight: 500,
-                textAlign: 'right',
-              }}
-            >
-              {patient.address}
-            </span>
-          </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '13px',
+                  padding: '4px 0',
+                }}
+              >
+                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>Education</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 500, textAlign: 'right' }}>
+                  {patient.qualification}
+                </span>
+              </div>
 
-          {/* Phone */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              fontSize: '13px',
-              padding: '4px 0',
-            }}
-          >
-            <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
-              Phone
-            </span>
-            <a
-              href={`tel:${patient.phone}`}
-              style={{
-                color: 'var(--accent)',
-                fontWeight: 500,
-                textDecoration: 'none',
-                textAlign: 'right',
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.textDecoration = 'underline')
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.textDecoration = 'none')
-              }
-            >
-              {patient.phone.replace(/(\d{5})(\d{6})/, '$1 $2')}
-            </a>
-          </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '13px',
+                  padding: '4px 0',
+                }}
+              >
+                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>Location</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 500, textAlign: 'right' }}>
+                  {patient.address}
+                </span>
+              </div>
 
-          {/* Email */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              fontSize: '13px',
-              padding: '4px 0',
-            }}
-          >
-            <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
-              Email
-            </span>
-            <a
-              href={`mailto:${patient.email}`}
-              style={{
-                color: 'var(--accent)',
-                fontWeight: 500,
-                textDecoration: 'none',
-                textAlign: 'right',
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.textDecoration = 'underline')
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.textDecoration = 'none')
-              }
-            >
-              {patient.email}
-            </a>
-          </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '13px',
+                  padding: '4px 0',
+                }}
+              >
+                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>Phone</span>
+                <a
+                  href={`tel:${patient.phone}`}
+                  style={{
+                    color: 'var(--accent)',
+                    fontWeight: 500,
+                    textDecoration: 'none',
+                    textAlign: 'right',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+                  onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+                >
+                  {patient.phone.replace(/(\d{5})(\d{6})/, '$1 $2')}
+                </a>
+              </div>
 
-          {/* Registered */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              fontSize: '13px',
-              padding: '4px 0',
-            }}
-          >
-            <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
-              Registered
-            </span>
-            <span
-              style={{
-                color: 'var(--text-primary)',
-                fontWeight: 500,
-                textAlign: 'right',
-              }}
-            >
-              {patient.registrationYear}
-            </span>
-          </div>
-        </div>
-      </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '13px',
+                  padding: '4px 0',
+                }}
+              >
+                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>Email</span>
+                <a
+                  href={`mailto:${patient.email}`}
+                  style={{
+                    color: 'var(--accent)',
+                    fontWeight: 500,
+                    textDecoration: 'none',
+                    textAlign: 'right',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+                  onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+                >
+                  {patient.email}
+                </a>
+              </div>
 
-      {/* Tags Section */}
-      <div style={{ padding: '16px 0 8px' }}>
-        <SectionTitle>Tags</SectionTitle>
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '5px',
-          }}
-        >
-          {tags.map((tag) => (
-            <TagPill key={tag.label} tag={tag} />
-          ))}
-        </div>
-      </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '13px',
+                  padding: '4px 0',
+                }}
+              >
+                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>Registered</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 500, textAlign: 'right' }}>
+                  {patient.registrationYear}
+                </span>
+              </div>
+            </div>
+          </section>
+        )}
 
-      {/* Alerts / Highlights Section */}
-      <div style={{ padding: '16px 0 8px' }}>
-        <SectionTitle>Alerts / Highlights</SectionTitle>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '6px',
-          }}
-        >
-          {alerts.map((alert, index) => (
-            <AlertFlag key={index} alert={alert} />
-          ))}
-        </div>
-      </div>
-    </aside>
+        <section>
+          {isExpanded && <SectionTitle>Navigation</SectionTitle>}
+          <nav aria-label="Sidebar navigation" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {navSections.map((section) => {
+              const isActive = activeSection === section.id
+              const Icon = section.Icon
+
+              return (
+                <button
+                  key={section.id}
+                  type="button"
+                  onClick={() => handleNavActivate(section.tileId)}
+                  aria-current={isActive ? 'page' : undefined}
+                  aria-label={!isExpanded ? section.label : undefined}
+                  className="sidebar-control"
+                  style={{
+                    minHeight: '44px',
+                    border: '1px solid',
+                    borderColor: isActive ? 'var(--accent-border)' : 'transparent',
+                    background: isActive ? 'var(--accent-light)' : 'transparent',
+                    color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                    borderRadius: 'var(--radius-sm)',
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: isExpanded ? 'flex-start' : 'center',
+                    gap: '10px',
+                    padding: isExpanded ? '0 10px' : '0',
+                    cursor: 'pointer',
+                    transition: 'background-color 150ms ease-out, color 150ms ease-out, border-color 150ms ease-out',
+                  }}
+                >
+                  <Icon size={17} strokeWidth={2.2} />
+                  {isExpanded && (
+                    <span style={{ fontSize: '14px', fontWeight: 600 }}>
+                      {section.label}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </nav>
+        </section>
+
+        {isExpanded && (
+          <>
+            <section style={{ paddingTop: '8px' }}>
+              <SectionTitle>Tags</SectionTitle>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                {tags.map((tag) => (
+                  <TagPill key={tag.label} tag={tag} />
+                ))}
+              </div>
+            </section>
+
+            <section style={{ padding: '8px 0 4px' }}>
+              <SectionTitle>Alerts / Highlights</SectionTitle>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {alerts.map((alert, index) => (
+                  <AlertFlag key={index} alert={alert} />
+                ))}
+              </div>
+            </section>
+          </>
+        )}
+      </aside>
+    </>
   )
 }

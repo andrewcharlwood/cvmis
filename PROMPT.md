@@ -1,83 +1,67 @@
-# Task: Sidebar-First Navigation Refactor (Remove Top Navbar/Subnav)
+# Task: Patient Pathway Graph Stability + Unified Experience/Education Data Model
 
-Refactor the dashboard so navigation is fully sidebar-driven, with clear recruiter-facing labels and robust responsive behavior. The current layout is still tied to an older navbar/subnav model and shows incorrect scroll behavior in the sidebar area.
+Refactor the patient-pathway style timeline/graph and related experience UI so interaction feels stable, data is consistent across all sections, and education is merged into the same primary timeline flow.
 
 ## Context
 
-Current implementation has separate top navigation (`TopBar`, `SubNav`) and a desktop-only sidebar. On upward scrolling in the sidebar, hidden space becomes visible in a way that implies layered layout offsets from the old top navbar/subnav structure.
+Current behavior has two major quality issues:
+- Hovering graph-related content appears to trigger graph-wide motion/jiggle, implying unnecessary re-rendering or unstable layout state.
+- Timeline dates shown in the graph do not match the dates shown in work-experience content.
+
+The layout/content model is also split in ways that make consistency harder:
+- Work and education data appear to be rendered through different pathways.
+- Education is duplicated via a separate section beneath work experience.
 
 ## Requirements
 
-- Remove top navbar/subnav from the rendered dashboard flow and migrate section navigation into the sidebar.
-- Replace section labels with recruiter-facing content labels (no GP/internal metaphors as labels):
-  - Overview
-  - Projects
-  - Experience
-  - Education
-  - Skills
-- Keep iconography that can still evoke the GP-system metaphor, but labels must match actual portfolio content.
-- Add a `Navigation` subheader area in the sidebar for section links.
-- Keep a separate `My Data` area above `Navigation` in expanded sidebar mode.
-- Ensure the sidebar no longer reveals hidden spacing/artifacts when scrolling upward.
-- Implement mobile sidebar behavior (currently missing):
-  - Sidebar is collapsed by default.
-  - A hamburger control appears at the top and toggles expanded/collapsed state.
-  - In collapsed mode, render a compact vertical rail with:
-    - hamburger control at the top
-    - the five section icons directly beneath for one-tap section jumping
-  - In expanded mode, reveal full sidebar content:
-    - `My Data` block
-    - `Navigation` links with icon + text labels
-    - tags, alerts, and highlights sections
-- Preserve or improve accessibility:
-  - Keyboard operable controls
-  - Correct `aria-*` labels for menu toggle and navigation regions
-  - Visible focus states
-- Preserve smooth section scrolling/anchor behavior from navigation actions.
-
-## Suggested GP-Metaphor Icon Mapping (labels remain recruiter-facing)
-
-Use these concrete icon targets (or closest equivalents from existing icon library):
-
-- Overview: `UserRound` (profile summary)
-- Projects: `Pill` (interventions/medications metaphor)
-- Experience: `Workflow` (pathway/Sankey metaphor)
-- Education: `GraduationCap` (training/education)
-- Skills: `Wrench` (capabilities/tools)
-
-Label text must stay recruiter-facing:
-- `Overview`, `Projects`, `Experience`, `Education`, `Skills`
+- Fix interaction stability:
+  - Hovering either a graph element OR its corresponding experience/education card must apply the same highlight behavior.
+  - Hover should not cause global graph jiggle/repositioning.
+- Diagnose and resolve date mismatch root cause:
+  - Determine whether mismatch is from render logic, duplicated data sources, or both.
+  - Deliver a fix so graph timeline dates match displayed card dates.
+- Create one source of truth for timeline entities (career + education):
+  - Include fields for full title, shortened graph label, date range, description/details, and skills list.
+  - Use this canonical dataset to drive graph nodes/edges and card rendering.
+- Skills integration:
+  - Aggregate skills from canonical entities.
+  - Feed the highest-frequency skills into sidebar tags.
+- Experience/Education presentation update:
+  - Remove the standalone work-experience subheader and existing role pill treatment.
+  - In the unified timeline list, career entries show a `Career Intervention` pill.
+  - Education entries remain in the same overall list/component flow but are visually right-aligned.
+  - Education entries include an `Education Intervention` pill inside each card.
+  - Remove the separate education section that currently sits below work experience.
 
 ## Likely Files In Scope
 
-- `src/components/DashboardLayout.tsx`
-- `src/components/Sidebar.tsx`
-- `src/components/SubNav.tsx`
-- `src/components/TopBar.tsx`
-- `src/index.css`
-- Any related hooks/types/styles needed for section activity and responsive state
+- `src/data/*` (or equivalent canonical data files)
+- `src/types/*` (shared timeline entity typing)
+- `src/components/*` for graph, timeline cards, sidebar tags, and experience/education sections
+- Any related hooks/utilities managing hover state, mapping, and aggregation
 
 ## Success Criteria
 
 All of the following must be true:
 
-- [ ] No top navbar/subnav is rendered in the final dashboard layout.
-- [ ] Sidebar contains the five required recruiter-facing nav labels under a `Navigation` subheader.
-- [ ] Expanded sidebar includes a distinct `My Data` area above `Navigation`.
-- [ ] Sidebar scrolling no longer exposes hidden top spacing/artifacts when scrolling upward.
-- [ ] Desktop navigation from sidebar correctly jumps/scrolls to each section.
-- [ ] On mobile, sidebar is collapsed by default with hamburger at top and five icon shortcuts visible.
-- [ ] On mobile expand, sidebar shows `My Data`, full navigation links (icon + text), and tags/alerts/highlights.
-- [ ] Navigation controls are keyboard accessible with appropriate ARIA semantics.
+- [ ] Hovering on graph items and corresponding cards produces the same highlight outcome.
+- [ ] Hover interactions do not cause full-graph jitter/repositioning artifacts.
+- [ ] Graph dates and card dates are consistent for every timeline entry.
+- [ ] A single canonical dataset powers both graph rendering and experience/education card content.
+- [ ] Each timeline entry supports title + short graph label + skills + date fields needed by all consumers.
+- [ ] Sidebar tags are sourced from aggregated canonical skills (most frequent first).
+- [ ] Career entries show `Career Intervention` pill treatment.
+- [ ] Education entries are visually right-aligned and show `Education Intervention` pill treatment.
+- [ ] Separate standalone education section below work experience is removed.
 - [ ] `npm run lint` passes.
 - [ ] `npm run typecheck` passes.
 - [ ] `npm run build` passes.
 
 ## Constraints
 
-- Use the existing project stack and conventions (TypeScript + React + current design language).
-- Do not reintroduce GP-style labels like "Significant Interventions" or "Patient Summary" for the sidebar nav text.
-- Keep changes focused on layout/navigation behavior; avoid unrelated refactors.
+- Use existing stack/patterns (TypeScript + React + current project conventions).
+- Keep changes focused on graph/timeline/data consistency and the requested UI restructuring.
+- Do not introduce unrelated visual/system-wide refactors.
 
 ## Status
 

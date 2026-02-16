@@ -3,9 +3,9 @@ cli:
 
 event_loop:
   prompt_file: "PROMPT.md"
-  starting_event: "task.start"
+  starting_event: "work.start"
   completion_promise: "LOOP_COMPLETE"
-  max_iterations: 50
+  max_iterations: 40
 
 backpressure:
   gates:
@@ -21,54 +21,61 @@ backpressure:
 
 hats:
   planner:
-    name: "Sidebar Workflow Planner"
-    description: "Plans the sidebar-first refactor and writes actionable implementation steps."
-    triggers: ["task.start", "review.changes_requested"]
+    name: "Pathway Planner"
+    description: "Diagnoses hover/timeline issues and plans a unified data model + UI update."
+    triggers: ["work.start", "review.changes_requested"]
     publishes: ["plan.ready"]
     instructions: |
       Read PROMPT.md first.
 
       Your role is planning only:
-      - Analyse current layout/nav implementation in the existing codebase.
-      - Create or update .ralph/plan.md with a concrete implementation plan.
-      - Include file-level changes, risks, and accessibility/responsive checks.
-      - If triggered by review.changes_requested, read .ralph/review.md and adapt the plan.
+      - Inspect the graph hover flow, timeline mapping logic, and work/education rendering.
+      - Determine whether date mismatch is a rendering bug, duplicated datasets, or both.
+      - Write/update .ralph/plan.md with concrete file-level steps.
+      - Define the target single source-of-truth schema for experience + education items.
+      - If triggered by review.changes_requested, read .ralph/review.md and revise the plan.
 
-      Do not write implementation code.
+      Do not implement code.
       Emit plan.ready when the plan is ready.
 
   builder:
-    name: "Sidebar Workflow Builder"
-    description: "Implements the sidebar, navigation, and responsive behavior changes."
+    name: "Pathway Builder"
+    description: "Implements graph interaction fixes, unified data flow, and pathway card layout updates."
     triggers: ["plan.ready"]
     publishes: ["build.done"]
     instructions: |
       Read PROMPT.md and .ralph/plan.md first.
 
-      Implement the planned sidebar-focused layout changes:
-      - Move top navigation responsibilities into the sidebar.
-      - Remove obsolete top navbar/subnav behavior from the rendered layout.
-      - Implement desktop and mobile sidebar behavior requested in PROMPT.md.
-      - Keep section labels aligned to actual recruiter-facing content.
-      - Ensure scroll behavior and anchor navigation are correct.
+      Implement the planned work end-to-end:
+      - Make hover interactions consistent between graph and related cards.
+      - Eliminate visual node jitter/repositioning caused by unnecessary re-renders.
+      - Align timeline dates with the same canonical data used by cards.
+      - Move to one source-of-truth dataset for role/education metadata and skills.
+      - Feed aggregated high-frequency skills into sidebar tag rendering.
+      - Apply the requested career/education card intervention-pill and alignment updates.
+      - Remove obsolete duplicate education section once unified card layout is in place.
 
-      Update .ralph/plan.md as work is completed.
-      Emit build.done when implementation is complete.
+      Keep project conventions intact and avoid unrelated refactors.
+      Update .ralph/plan.md as steps are completed.
+      Emit build.done exactly once when implementation is complete and lint/typecheck/build pass.
 
   reviewer:
-    name: "Sidebar Workflow Reviewer"
-    description: "Reviews implementation quality and validates all success criteria."
+    name: "Pathway Reviewer"
+    description: "Validates behavior, data consistency, and UI layout against PROMPT requirements."
     triggers: ["build.done"]
-    publishes: ["review.approved", "review.changes_requested"]
+    publishes: ["review.changes_requested"]
     instructions: |
-      Read PROMPT.md (and .ralph/plan.md if needed), then verify final behavior.
+      Read PROMPT.md (and .ralph/plan.md if needed), then review the final implementation.
 
-      Validate against all success criteria and project conventions:
-      - UX behavior (desktop + mobile)
-      - Navigation semantics and labels
-      - Accessibility and interaction quality
-      - Lint/typecheck/build status
+      Validate all success criteria:
+      - Hover parity across graph and cards
+      - No graph jitter/reflow artifacts on hover
+      - Timeline/card date consistency from one canonical data source
+      - Correct career/education card layout and intervention pills
+      - Removal of duplicate standalone education section
+      - Sidebar tag population from shared skill data
+      - Lint/typecheck/build passing
 
       Write findings to .ralph/review.md.
-      If any criteria fail, emit review.changes_requested with specific actionable feedback.
-      If all criteria pass, print LOOP_COMPLETE.
+      If anything is incomplete or incorrect, emit review.changes_requested with specific fixes.
+      If all criteria pass, print LOOP_COMPLETE and stop.

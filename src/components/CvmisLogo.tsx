@@ -10,7 +10,7 @@ interface CvmisLogoProps {
 
 // ── Animation timing constants ──────────────────────────────────────
 // Rise phase: all pills rise together from below
-const RISE_DURATION_MS = 2500           // duration of the upward rise (ms)
+const RISE_DURATION_MS = 1250           // duration of the upward rise (ms)
 const RISE_DURATION_S = RISE_DURATION_MS / 1000
 const RISE_OPACITY_DURATION_S = 0.25   // opacity fade-in during rise (s)
 const RISE_EASING: [number, number, number, number] = [0.33, 1, 0.68, 1]
@@ -18,11 +18,11 @@ const RISE_START_Y = 350               // initial Y offset (viewBox units)
 
 // Fan phase: left and right pills fan outward
 const FAN_DELAY_AFTER_RISE_MS = RISE_DURATION_MS - 100    // delay before fan begins (ms from mount)
-const FAN_DURATION_S = 1            // duration of fan-out (s)
+const FAN_DURATION_S = 2            // duration of fan-out (s)
 const FAN_EASING = 'cubic-bezier(0.34, 1.56, 0.64, 1)'
 const FAN_ROTATION_DEG = 55            // rotation angle for fanned pills (±degrees)
-const FAN_HORIZONTAL_PX = 10           // horizontal offset for fanned pills (±px)
-const FAN_RIGHT_STAGGER_S = 0.0       // stagger delay for right pill (s)
+const FAN_HORIZONTAL_PX = -10           // horizontal offset for fanned pills (±px)
+const FAN_RIGHT_STAGGER_S = 0       // stagger delay for right pill (s)
 
 // Total animation = rise delay + fan duration
 const TOTAL_ANIMATION_MS = FAN_DELAY_AFTER_RISE_MS + FAN_DURATION_S * 1000

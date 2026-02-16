@@ -164,7 +164,9 @@ When creating hats, follow these principles:
 
 **Each hat should have a single responsibility.** Don't create a hat that plans AND builds.
 
-**Events flow forward.** The event chain should be a clear pipeline: task.start → plan.ready → build.done → review.complete → task.done.
+**Events flow forward.** The event chain should be a clear pipeline: work.start → plan.ready → build.done → review (changes requested OR LOOP_COMPLETE).
+
+**Terminal hats should end, not publish success.** For the final validation/review hat, success should be `LOOP_COMPLETE` (no success event like `review.approved`), and only rework/failure events should be published.
 
 **Instructions should be specific to the hat's role.** The planner hat gets planning instructions, the builder gets building instructions.
 
