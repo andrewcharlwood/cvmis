@@ -37,7 +37,7 @@
         "Typecheck passes (npm run typecheck)"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Education entries use type 'role' — the constellation treats them identically to work roles for layout. They have deliberately few skill connections (2 for UEA, 1 for Highworth) to keep the lower timeline clean. The yScale computes domain from min/max startYear of role nodes, so adding 2009 entries automatically extends the range. Follow exact same data patterns as US-001. Education consultations may use simpler codedEntries and adapted examination content (results rather than workplace achievements). The consultations array should be ordered reverse-chronologically (newest first) — add education entries at the end. Use the d3-viz skill."
     },
     {
@@ -56,7 +56,7 @@
         "Verify in browser: skills recognisable at a glance without hovering; work experience column visibly wider"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Two independent changes in one story. Skill visibility: applyGraphHighlight in CareerConstellation.tsx has two branches — the 'no activeNodeId' resting state and the activeNodeId highlighted state. In the resting branch, change skill fill-opacity from 0.2 to 0.35, skill label opacity from 0 to 0.5, link stroke-opacity from 0.08 to 0.15. In the highlighted branch, change active skill fill-opacity from 0.85 to 0.9, dimmed node opacity from 0.06 to 0.15. Column width: in index.css @media (min-width: 1024px) for .pathway-columns, change grid-template-columns. The containerHeight/ResizeObserver system adapts the graph SVG automatically. Column order: first child is .chronology-stream (work experience), second is .pathway-graph-sticky (constellation). Use the d3-viz skill."
     },
     {

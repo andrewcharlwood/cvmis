@@ -407,7 +407,7 @@ html {
 /* Desktop: 2 columns */
 @media (min-width: 1024px) {
   .pathway-columns {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.5fr);
+    grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
     align-items: start;
     gap: 22px;
   }

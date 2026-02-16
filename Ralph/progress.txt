@@ -9,7 +9,7 @@
 - DashboardLayout manages constellation state: highlightedNodeId, pinnedNodeId via callbacks
 - Work experience data in src/data/consultations.ts, constellation-specific data in src/data/constellation.ts
 - CSS layout: .pathway-columns grid — first column is .chronology-stream (work experience), second is .pathway-graph-sticky (constellation graph)
-- Current grid: minmax(0, 1.15fr) minmax(0, 1.5fr) at desktop — work experience 43%, graph 57%
+- Current grid: minmax(0, 1.85fr) minmax(0, 1fr) at desktop — work experience ~65%, graph ~35%
 - containerHeight prop drives graph height on desktop; on mobile (viewport < 1024px) uses MOBILE_FALLBACK_HEIGHT (360px)
 - Use window.innerWidth for breakpoint checks, not container.clientWidth — the SVG container overflows on mobile
 - Design tokens in index.css :root — use var(--accent), var(--border-light), var(--text-tertiary), etc.
@@ -22,6 +22,8 @@
 - Bidirectional highlighting: highlightedNodeId (timeline→graph) and highlightedRoleId (graph→timeline)
 - Force simulation: role forceY ~0.98, charge -120/-55, link distance 72, collision ~52-65px roles
 - applyGraphHighlight is the single source of truth for all visual states (resting, highlighted, dimmed)
+- Resting state values (US-003): skill fill-opacity 0.35, skill label opacity 0.5, link stroke-opacity 0.15, dimmed node opacity 0.15, active skill fill-opacity 0.9
+- Initial D3 rendering values MUST match applyGraphHighlight resting values — initial stroke-opacity, fill-opacity, label opacity are set during node/link creation AND in the highlight function
 - Use the d3-viz skill for all D3 rendering stories
 - Consultation entries ordered reverse-chronologically (newest first) — new entries go at the end of the array
 - Constellation role nodes, skill mappings, and links are in constellation.ts — adding nodes there automatically extends yScale domain and screen reader description
@@ -38,4 +40,36 @@
   - buildScreenReaderDescription() iterates constellationNodes dynamically — no manual update needed when adding roles
   - The #00897B teal colour in index.css (:root --teal) is a generic design token, NOT the Tesco-specific colour — don't change it
   - Consultation.orgColor must match the constellation node orgColor for visual consistency between graph and cards
+---
+
+## 2026-02-16 - US-002
+- Added UEA MPharm (2011-2015, University of East Anglia, orgColor #7B2D8E) education node to constellation.ts
+- Added Highworth A-Levels (2009-2011, Highworth Grammar School, orgColor #9C27B0) education node to constellation.ts
+- Added roleSkillMappings: UEA → medicines-optimisation + data-analysis; Highworth → data-analysis
+- Added constellationLinks with strength values (0.5, 0.3 for UEA; 0.2 for Highworth)
+- Added consultation entries for both education entries to consultations.ts (at end of array, maintaining reverse-chronological order)
+- Education nodes use type 'role' — treated identically by the constellation layout engine
+- Updated role count comment to "6 roles + Education nodes (2)"
+- Files changed: src/data/constellation.ts, src/data/consultations.ts
+- **Learnings for future iterations:**
+  - Education entries use type 'role' and follow exact same data shape — no special handling needed
+  - yScale domain auto-extends from min/max startYear of role-type nodes, so adding 2009 entries extends the timeline automatically
+  - Education entries have deliberately few skill connections (2 for UEA, 1 for Highworth) per design to keep lower timeline clean
+  - Consultation entries go at end of array (reverse-chronological: newest first → oldest last)
+---
+
+## 2026-02-16 - US-003
+- Increased default skill node fill-opacity from 0.2 to 0.35 (initial render + applyGraphHighlight resting state)
+- Increased default skill label opacity from 0 to 0.5 (labels now partially visible at rest)
+- Increased default link stroke-opacity from 0.08 to 0.15
+- Increased active/highlighted skill fill-opacity from 0.85 to 0.9
+- Changed unconnected node dimming from 0.06 to 0.15 opacity
+- Updated non-active link stroke-opacity in highlighted branch from 0.08 to 0.15
+- Changed .pathway-columns desktop grid from 'minmax(0, 1.15fr) minmax(0, 1.5fr)' to 'minmax(0, 1.85fr) minmax(0, 1fr)' — work experience column now ~65%, constellation ~35%
+- Files changed: src/components/CareerConstellation.tsx, src/index.css
+- Browser verified: skills recognisable at a glance without hovering; work experience column visibly wider; constellation adapts to narrower container without clipping
+- **Learnings for future iterations:**
+  - Initial D3 rendering attributes (set during node/link creation) must stay in sync with applyGraphHighlight resting values — there are TWO places to update for each visual property
+  - The highlighted branch also has a fallback opacity for non-active links/labels — remember to update those too (3 places total: initial render, resting branch, highlighted branch fallback)
+  - The constellation ResizeObserver + containerHeight system handles narrower columns automatically — no explicit graph resize code needed
 ---

@@ -341,7 +341,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .attr('fill', 'none')
       .attr('stroke', 'var(--border-light)')
       .attr('stroke-width', 1)
-      .attr('stroke-opacity', 0.08)
+      .attr('stroke-opacity', 0.15)
       .style('transition', prefersReducedMotion
         ? 'none'
         : 'stroke 150ms ease, stroke-opacity 150ms ease, stroke-width 150ms ease'
@@ -410,7 +410,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .attr('r', srDefault)
       .attr('fill', d => domainColorMap[d.domain ?? 'technical'] ?? '#0D6E6E')
       .attr('stroke', 'none')
-      .attr('fill-opacity', 0.2)
+      .attr('fill-opacity', 0.35)
 
     nodeSelection.filter(d => d.type === 'skill')
       .append('text')
@@ -421,7 +421,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .attr('font-size', isMobile ? '9' : '10')
       .attr('font-family', 'var(--font-geist-mono)')
       .attr('pointer-events', 'none')
-      .attr('opacity', 0)
+      .attr('opacity', 0.5)
       .text(d => {
         const label = d.shortLabel ?? d.label
         const maxLen = isMobile ? 12 : 16
@@ -460,22 +460,22 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
           skillNodes.select('.node-circle')
             .transition().duration(dur)
             .attr('r', srDefault)
-            .attr('fill-opacity', 0.2)
+            .attr('fill-opacity', 0.35)
           skillNodes.select('.node-label')
             .transition().duration(dur)
-            .attr('opacity', 0)
+            .attr('opacity', 0.5)
         } else {
           skillNodes.select('.node-circle')
             .attr('r', srDefault)
-            .attr('fill-opacity', 0.2)
+            .attr('fill-opacity', 0.35)
           skillNodes.select('.node-label')
-            .attr('opacity', 0)
+            .attr('opacity', 0.5)
         }
 
         linkSelection
           .attr('stroke', 'var(--border-light)')
           .attr('stroke-width', 1)
-          .attr('stroke-opacity', 0.08)
+          .attr('stroke-opacity', 0.15)
 
         return
       }
@@ -483,7 +483,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       const connected = connectedMap.get(activeNodeId) ?? new Set()
       const isInGroup = (id: string) => id === activeNodeId || connected.has(id)
 
-      nodeSelection.style('opacity', d => isInGroup(d.id) ? '1' : '0.06')
+      nodeSelection.style('opacity', d => isInGroup(d.id) ? '1' : '0.15')
 
       nodeSelection.filter(d => d.type === 'role')
         .attr('filter', d => {
@@ -504,16 +504,16 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         skillNodes.select('.node-circle')
           .transition().duration(dur)
           .attr('r', d => isInGroup(d.id) ? srActive : srDefault)
-          .attr('fill-opacity', d => isInGroup(d.id) ? 0.85 : 0.2)
+          .attr('fill-opacity', d => isInGroup(d.id) ? 0.9 : 0.35)
         skillNodes.select('.node-label')
           .transition().duration(dur)
-          .attr('opacity', d => isInGroup(d.id) ? 1 : 0)
+          .attr('opacity', d => isInGroup(d.id) ? 1 : 0.5)
       } else {
         skillNodes.select('.node-circle')
           .attr('r', d => isInGroup(d.id) ? srActive : srDefault)
-          .attr('fill-opacity', d => isInGroup(d.id) ? 0.85 : 0.2)
+          .attr('fill-opacity', d => isInGroup(d.id) ? 0.9 : 0.35)
         skillNodes.select('.node-label')
-          .attr('opacity', d => isInGroup(d.id) ? 1 : 0)
+          .attr('opacity', d => isInGroup(d.id) ? 1 : 0.5)
       }
 
       linkSelection
@@ -533,7 +533,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
           if (src === activeNodeId || tgt === activeNodeId) {
             return Math.max(0.35, Math.min(0.65, l.strength * 0.55 + 0.2))
           }
-          return 0.08
+          return 0.15
         })
         .attr('stroke-width', l => {
           const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
