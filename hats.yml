@@ -1,0 +1,71 @@
+cli:
+  backend: "codex"
+
+event_loop:
+  prompt_file: "PROMPT.md"
+  starting_event: "task.start"
+  completion_promise: "LOOP_COMPLETE"
+  max_iterations: 50
+
+backpressure:
+  gates:
+    - name: "lint"
+      command: "npm run lint"
+      on_fail: "retry"
+    - name: "typecheck"
+      command: "npm run typecheck"
+      on_fail: "retry"
+    - name: "build"
+      command: "npm run build"
+      on_fail: "retry"
+
+hats:
+  planner:
+    name: "Sidebar Workflow Planner"
+    triggers: ["task.start", "review.changes_requested"]
+    publishes: ["plan.ready"]
+    instructions: |
+      Read PROMPT.md first.
+
+      Your role is planning only:
+      - Analyse current layout/nav implementation in the existing codebase.
+      - Create or update .ralph/plan.md with a concrete implementation plan.
+      - Include file-level changes, risks, and accessibility/responsive checks.
+      - If triggered by review.changes_requested, read .ralph/review.md and adapt the plan.
+
+      Do not write implementation code.
+      Emit plan.ready when the plan is ready.
+
+  builder:
+    name: "Sidebar Workflow Builder"
+    triggers: ["plan.ready"]
+    publishes: ["build.done"]
+    instructions: |
+      Read PROMPT.md and .ralph/plan.md first.
+
+      Implement the planned sidebar-focused layout changes:
+      - Move top navigation responsibilities into the sidebar.
+      - Remove obsolete top navbar/subnav behavior from the rendered layout.
+      - Implement desktop and mobile sidebar behavior requested in PROMPT.md.
+      - Keep section labels aligned to actual recruiter-facing content.
+      - Ensure scroll behavior and anchor navigation are correct.
+
+      Update .ralph/plan.md as work is completed.
+      Emit build.done when implementation is complete.
+
+  reviewer:
+    name: "Sidebar Workflow Reviewer"
+    triggers: ["build.done"]
+    publishes: ["review.approved", "review.changes_requested"]
+    instructions: |
+      Read PROMPT.md (and .ralph/plan.md if needed), then verify final behavior.
+
+      Validate against all success criteria and project conventions:
+      - UX behavior (desktop + mobile)
+      - Navigation semantics and labels
+      - Accessibility and interaction quality
+      - Lint/typecheck/build status
+
+      Write findings to .ralph/review.md.
+      If any criteria fail, emit review.changes_requested with specific actionable feedback.
+      If all criteria pass, print LOOP_COMPLETE.
