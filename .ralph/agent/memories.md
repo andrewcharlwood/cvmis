@@ -2,6 +2,10 @@
 
 ## Patterns
 
+### mem-1771284742-cc7f
+> Stage 1 canonical descriptive text foundation now exists in src/data/profile-content.ts with strict schema in src/types/profile-content.ts and typed selectors in src/lib/profile-content.ts; this is additive and preserves existing consumer behavior until migration checkpoints.
+<!-- tags: data, content, refactor | created: 2026-02-16 -->
+
 ### mem-1771245168-48e8
 > Canonical timeline data now lives in src/data/timeline.ts and legacy consultations/constellation exports are compatibility layers derived from it, removing duplicated date/year maintenance.
 <!-- tags: data, timeline, consistency | created: 2026-02-16 -->
@@ -29,6 +33,14 @@
 ## Decisions
 
 ## Fixes
+
+### mem-1771284167-9e36
+> failure: cmd=sed -n '1,260p' ralph/prompt.md, exit=2, error=No such file or directory, next=locate actual prompt path with rg --files and use correct casing/location
+<!-- tags: tooling, error-handling, ralph | created: 2026-02-16 -->
+
+### mem-1771284072-053c
+> failure: cmd=sed -n '1,260p' Ralph/PROMPT.md, exit=2, error=No such file or directory (path case mismatch), next=use lowercase path ralph/prompt.md
+<!-- tags: tooling, error-handling, ralph | created: 2026-02-16 -->
 
 ### mem-1771246458-9388
 > failure: cmd=rg -n "--font-mono\b|font-mono-dashboard|font-geist-mono|timeline-intervention|chronology|pathway" src/index.css, exit=2, error=pattern beginning with -- parsed as flag, next=use rg -n -- '<pattern>' <file>
