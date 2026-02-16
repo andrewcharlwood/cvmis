@@ -1,0 +1,23 @@
+# Ralph Progress — GP Clinical Record Depth Enhancement
+
+Branch: ralph/depth-enhancement
+Stories: 32 (US-001 through US-032)
+
+---
+
+## Status
+
+No iterations completed yet.
+2026-02-13 22:57 | PASS | US-001: Clean up unused legacy components and hooks | model=opus elapsed=01:58 tools=18
+2026-02-13 22:59 | PASS | US-002: Add new TypeScript types and CSS custom properties for depth features | model=sonnet elapsed=01:54 tools=11
+2026-02-13 23:03 | PASS | US-003: Create DetailPanelContext, DetailPanel component, and useFocusTrap hook | model=sonnet elapsed=03:39 tools=22
+2026-02-13 23:06 | PASS | US-004: Create SubNav component and useActiveSection hook | model=sonnet elapsed=02:54 tools=18
+2026-02-13 23:08 | PASS | US-005: Expand skills data from 5 to ~20 with three categories | model=sonnet elapsed=01:58 tools=11
+2026-02-13 23:10 | PASS | US-006: Add KPI story data and update 4th KPI | model=sonnet elapsed=01:59 tools=9
+2026-02-13 23:11 | PASS | US-007: Create education extras data file | model=sonnet elapsed=01:25 tools=10
+2026-02-13 23:15 | PASS | US-008: Restructure DashboardLayout with SubNav, new tile order, and DetailPanel | model=sonnet elapsed=03:10 tools=27
+2026-02-13 23:17 | PASS | US-009: Create constellation data mapping file | model=sonnet elapsed=02:20 tools=10
+2026-02-13 23:50 | PASS | US-011: Modify CoreSkillsTile: full width, categorised groups, panel triggers | model=opus elapsed=02:54 tools=22
+2026-02-13 23:52 | PASS | US-012: Modify ProjectsTile: half width, compact card grid, panel trigger | model=sonnet elapsed=02:16 tools=11
+2026-02-13 23:55 | PASS | US-013: Modify LastConsultationTile: add panel trigger | model=sonnet elapsed=02:20 tools=15
+2026-02-13 23:58 | PASS | US-014: Modify CareerActivityTile: panel triggers and hover preview | model=sonnet elapsed=02:49 tools=14

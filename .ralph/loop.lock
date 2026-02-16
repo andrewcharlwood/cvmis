@@ -1,5 +1,11 @@
 {
+<<<<<<< HEAD
   "pid": 864891,
   "started": "2026-02-16T10:14:58.914587907Z",
   "prompt": "[no prompt]"
+=======
+  "pid": 883596,
+  "started": "2026-02-16T10:42:01.108766214Z",
+  "prompt": "Ralph/PROMPT.md"
+>>>>>>> codex/kpi
 }

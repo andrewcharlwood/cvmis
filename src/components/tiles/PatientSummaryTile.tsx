@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { FileText, ChevronRight } from 'lucide-react'
 import { CardHeader } from '../Card'
 import { ParentSection } from '../ParentSection'
@@ -12,26 +12,20 @@ const colorMap: Record<KPI['colorVariant'], string> = {
   teal: '#0D6E6E',
 }
 
-const KPI_COACHMARK_KEY = 'kpi-evidence-coachmark-dismissed-v1'
-
 interface MetricCardProps {
   kpi: KPI
-  showCoachmark?: boolean
-  onOpen: () => void
 }
 
-function MetricCard({ kpi, showCoachmark = false, onOpen }: MetricCardProps) {
+function MetricCard({ kpi }: MetricCardProps) {
   const { openPanel } = useDetailPanel()
 
   const handleClick = () => {
-    onOpen()
     openPanel({ type: 'kpi', kpi })
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
-      onOpen()
       openPanel({ type: 'kpi', kpi })
     }
   }
@@ -39,7 +33,7 @@ function MetricCard({ kpi, showCoachmark = false, onOpen }: MetricCardProps) {
   const buttonStyles: React.CSSProperties = {
     width: '100%',
     textAlign: 'left',
-    padding: '20px',
+    padding: '16px 16px 14px',
     background: 'var(--surface)',
     border: '1px solid var(--border-light)',
     borderRadius: 'var(--radius-sm)',
@@ -48,11 +42,11 @@ function MetricCard({ kpi, showCoachmark = false, onOpen }: MetricCardProps) {
     position: 'relative',
     display: 'flex',
     flexDirection: 'column',
-    gap: '2px',
+    gap: 0,
   }
 
   const valueStyles: React.CSSProperties = {
-    fontSize: '34px',
+    fontSize: '30px',
     fontWeight: 700,
     letterSpacing: '-0.02em',
     lineHeight: 1.2,
@@ -60,85 +54,62 @@ function MetricCard({ kpi, showCoachmark = false, onOpen }: MetricCardProps) {
   }
 
   const labelStyles: React.CSSProperties = {
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: 500,
     color: 'var(--text-primary)',
     marginTop: '4px',
   }
 
   const subStyles: React.CSSProperties = {
-    fontSize: '12px',
+    fontSize: '11px',
     color: 'var(--text-tertiary)',
     fontFamily: 'var(--font-geist-mono)',
     marginTop: '2px',
   }
 
   return (
-    <div className={showCoachmark ? 'kpi-card-coachmark-target' : undefined} style={{ position: 'relative' }}>
-      {showCoachmark && (
-        <div className="kpi-coachmark" role="status" aria-live="polite">
-          Open any metric to see evidence
-        </div>
-      )}
-      <button
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
-        style={buttonStyles}
-        className={`metric-card ${showCoachmark ? 'metric-card-pulse' : ''}`}
-        aria-label={`${kpi.label}: ${kpi.value}. Click to view details.`}
+    <button
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      style={buttonStyles}
+      className="metric-card"
+      aria-label={`${kpi.label}: ${kpi.value}. Click to view details.`}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          top: '12px',
+          right: '12px',
+          color: 'var(--accent)',
+          opacity: 0.85,
+        }}
+        aria-hidden="true"
       >
-        <div
-          style={{
-            position: 'absolute',
-            top: '14px',
-            right: '14px',
-            color: 'var(--accent)',
-            opacity: 0.85,
-          }}
-          aria-hidden="true"
-        >
-          <FileText size={14} />
-        </div>
-        <div style={valueStyles}>{kpi.value}</div>
-        <div style={labelStyles}>{kpi.label}</div>
-        <div style={subStyles}>{kpi.sub}</div>
-        <div
-          style={{
-            marginTop: '10px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--accent)',
-            fontFamily: 'var(--font-geist-mono)',
-          }}
-        >
-          Click to view evidence
-          <ChevronRight size={13} />
-        </div>
-      </button>
-    </div>
+        <FileText size={13} />
+      </div>
+      <div style={valueStyles}>{kpi.value}</div>
+      <div style={labelStyles}>{kpi.label}</div>
+      <div style={subStyles}>{kpi.sub}</div>
+      <div
+        style={{
+          marginTop: '8px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '5px',
+          fontSize: '11px',
+          fontWeight: 600,
+          color: 'var(--accent)',
+          fontFamily: 'var(--font-geist-mono)',
+        }}
+      >
+        Click to view evidence
+        <ChevronRight size={12} />
+      </div>
+    </button>
   )
 }
 
 export function PatientSummaryTile() {
-  const [showCoachmark, setShowCoachmark] = useState(false)
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const hasDismissed = window.localStorage.getItem(KPI_COACHMARK_KEY) === '1'
-    if (!hasDismissed) {
-      setShowCoachmark(true)
-    }
-  }, [])
-
-  const handleMetricOpen = () => {
-    if (!showCoachmark) return
-    setShowCoachmark(false)
-    window.localStorage.setItem(KPI_COACHMARK_KEY, '1')
-  }
-
   const profileTextStyles: React.CSSProperties = {
     fontSize: '15px',
     lineHeight: '1.65',
@@ -147,7 +118,8 @@ export function PatientSummaryTile() {
 
   const kpiGridStyles: React.CSSProperties = {
     display: 'grid',
-    gap: '16px',
+    gap: '10px',
+    gridTemplateColumns: '1fr',
   }
 
   return (
@@ -165,20 +137,22 @@ export function PatientSummaryTile() {
 
       {/* Latest Results subsection */}
       <div style={{ marginTop: '28px' }}>
-        <CardHeader dotColor="teal" title="LATEST RESULTS (CLICK TO VIEW FULL REFERENCE RANGE)" rightText="Updated May 2025" />
-        <p
-          style={{
-            margin: '0 0 12px 0',
-            fontSize: '12px',
-            color: 'var(--text-secondary)',
-            fontFamily: 'var(--font-geist-mono)',
-          }}
-        >
-          Select a metric to inspect methodology, impact, and outcomes.
-        </p>
-        <div className="grid-cols-1 xs:grid-cols-2" style={kpiGridStyles}>
-          {kpis.map((kpi, index) => (
-            <MetricCard key={kpi.id} kpi={kpi} onOpen={handleMetricOpen} showCoachmark={showCoachmark && index === 0} />
+        <div className="latest-results-header">
+          <CardHeader dotColor="teal" title="LATEST RESULTS (CLICK TO VIEW FULL REFERENCE RANGE)" rightText="Updated May 2025" />
+          <p
+            style={{
+              margin: 0,
+              fontSize: '12px',
+              color: 'var(--text-secondary)',
+              fontFamily: 'var(--font-geist-mono)',
+            }}
+          >
+            Select a metric to inspect methodology, impact, and outcomes.
+          </p>
+        </div>
+        <div className="latest-results-grid" style={kpiGridStyles}>
+          {kpis.map((kpi) => (
+            <MetricCard key={kpi.id} kpi={kpi} />
           ))}
         </div>
       </div>
