@@ -247,25 +247,68 @@ export function groupBySection(items: PaletteItem[]): Array<{ section: PaletteSe
 export function buildEmbeddingTexts(): Array<{ id: string; text: string }> {
   const texts: Array<{ id: string; text: string }> = []
 
-  // Consultations (Experience)
+  // Consultations (Experience) — enriched with plan outcomes, employer classification, clinical specialties
   consultations.forEach((c) => {
+    const isNHS = c.organization.includes('NHS') || c.organization.includes('ICB')
+    const employer = isNHS
+      ? `NHS employer: ${c.organization}`
+      : `Private sector employer: ${c.organization} (not NHS)`
     const examBullets = c.examination.join('. ')
+    const planOutcomes = c.plan.join('. ')
     const codedDescriptions = c.codedEntries.map(e => e.description).join('. ')
+
+    // Role-specific enrichment for clinical specialties and methodology
+    let roleContext = ''
+    if (c.id === 'high-cost-drugs-2022') {
+      roleContext = ' Clinical specialties covered: rheumatology, ophthalmology (wet AMD, DMO, RVO), dermatology, gastroenterology, neurology, and migraine. Wrote most of the system\'s high-cost drug pathways, implementing NICE technology appraisals while balancing legal requirements against financial costs and local clinical preferences.'
+    } else if (c.id === 'deputy-head-2024') {
+      roleContext = ' Created dm+d medicines data table integrating all dictionary of medicines and devices products with standardised strengths, morphine equivalents, and Anticholinergic Burden scoring — single source of truth for all medicines analytics. Supported tirzepatide commissioning (NICE TA1026) with financial projections and authored executive paper advocating primary care model, driving system shift to GP-led delivery.'
+    } else if (c.id === 'interim-head-2025') {
+      roleContext = ' Built Python switching algorithm using real-world GP prescribing data to identify patients eligible for cost-effective alternatives — compressed months of manual analysis into 3 days. Created novel GP payment system linking incentive rewards to prescribing savings.'
+    } else if (c.id === 'pharmacy-manager-2017') {
+      roleContext = ' Community pharmacy role at Tesco PLC, a private sector employer. Served as Local Pharmaceutical Committee (LPC) representative for Norfolk. Full HR responsibilities including recruitment, performance management, grievances.'
+    }
+
     texts.push({
       id: `exp-${c.id}`,
-      text: `${c.role} at ${c.organization}, ${c.duration}. ${c.history} Key achievements: ${examBullets}. ${codedDescriptions}.`,
+      text: `${c.role} at ${c.organization}, ${c.duration}. ${employer}. ${c.history} Key achievements: ${examBullets}. Outcomes: ${planOutcomes}. ${codedDescriptions}.${roleContext}`,
     })
   })
 
-  // Skills
+  // Skills — enriched with role context and practical application
+  const skillContextMap: Record<string, string> = {
+    'data-analysis': 'Applied across NHS medicines optimisation, identifying £14.6M efficiency programme. Used for prescribing pattern analysis, budget forecasting, and population health analytics serving 1.2M people.',
+    'python': 'Used to build switching algorithms (14,000 patients, £2.6M savings), controlled drug monitoring systems, Blueteq form automation, and Sankey chart visualisation tools. Self-taught.',
+    'sql': 'Core tool for patient-level analytics, dm+d data integration, and transforming practice-level data to patient-level SQL analysis. Used across all NHS data roles.',
+    'power-bi': 'Built PharMetrics interactive dashboard tracking £220M prescribing budget. Created dashboards used by 200+ clinicians and commissioners across Norfolk & Waveney ICB.',
+    'javascript-typescript': 'Used for web development including this portfolio website. Built with React, TypeScript, and Vite.',
+    'excel': 'Used for financial modelling, data validation, and ad-hoc analysis. Foundational tool across all roles from community pharmacy to NHS ICB.',
+    'algorithm-design': 'Designed patient switching algorithm and automated incentive scheme analysis. Applied to real-world GP prescribing data at population scale.',
+    'data-pipelines': 'Built automated data processing pipelines for medicines analytics, enabling self-serve models for team data fluency.',
+    'medicines-optimisation': 'Core domain expertise spanning community pharmacy through to NHS ICB-level population health. Led efficiency programmes worth £14.6M+.',
+    'population-health': 'Leading population health analytics for 1.2M people across Norfolk & Waveney ICS. Developing patient-level datasets from real-world GP prescribing data.',
+    'nice-ta': 'Led NICE technology appraisal implementation across high-cost drug pathways. Covered rheumatology, ophthalmology, dermatology, gastroenterology, neurology, and migraine.',
+    'health-economics': 'Financial modelling for DOAC switching programmes, tirzepatide commissioning, and pharmaceutical rebate negotiations.',
+    'clinical-pathways': 'Wrote most of the Norfolk & Waveney ICB high-cost drug pathways. Created Sankey chart tool for patient pathway visualisation and trust compliance auditing.',
+    'controlled-drugs': 'Built Python-based population-scale monitoring system calculating oral morphine equivalents (OME) across all opioid prescriptions. Enables high-risk patient identification and potential diversion detection.',
+    'budget-management': 'Managed £220M NHS prescribing budget with sophisticated forecasting models, variance analysis, and monthly financial reporting to the ICB executive team.',
+    'stakeholder-engagement': 'Presented to Chief Medical Officer bimonthly. Engaged with GP practices, trusts, commissioners, and pharmaceutical companies across the integrated care system.',
+    'pharma-negotiation': 'Renegotiated pharmaceutical rebate terms ahead of patent expiry, securing improved commercial position for the ICB.',
+    'team-development': 'Improved team data fluency through training and documentation. Supervised staff through NVQ3 to pharmacy technician registration. Created national induction training at Tesco.',
+    'change-management': 'Completed NHS Mary Seacole Programme (2018, 78%). Led transformation to patient-level SQL analytics and self-serve analytical models.',
+    'financial-modelling': 'Built interactive DOAC switching dashboard with rebate mechanics, workforce constraints, and patent expiry timelines. Financial projections for tirzepatide commissioning.',
+    'executive-comms': 'Authored executive papers for ICB board including tirzepatide commissioning advocacy. Presented evidence-based recommendations to CMO bimonthly.',
+  }
+
   skills.forEach((skill) => {
+    const context = skillContextMap[skill.id] ?? ''
     texts.push({
       id: `skill-${skill.id}`,
-      text: `${skill.name} is a ${skill.category.toLowerCase()} skill used ${skill.frequency.toLowerCase()}, with ${skill.proficiency}% proficiency and ${skill.yearsOfExperience} years of experience since ${skill.startYear}.`,
+      text: `${skill.name} is a ${skill.category.toLowerCase()} skill used ${skill.frequency.toLowerCase()}, with ${skill.proficiency}% proficiency and ${skill.yearsOfExperience} years of experience since ${skill.startYear}. ${context}`,
     })
   })
 
-  // KPI-backed Achievements
+  // KPI-backed Achievements — enriched with full story context and outcomes
   const achievementMap: Array<{ id: string; title: string; subtitle: string; kpiId: string }> = [
     { id: 'ach-0', title: '£14.6M Efficiency Savings Identified', subtitle: 'Data-driven prescribing interventions', kpiId: 'savings' },
     { id: 'ach-1', title: '£220M Budget Oversight', subtitle: 'Full analytical accountability to ICB board', kpiId: 'budget' },
@@ -275,26 +318,40 @@ export function buildEmbeddingTexts(): Array<{ id: string; text: string }> {
 
   achievementMap.forEach((entry) => {
     const kpi = kpis.find(k => k.id === entry.kpiId)
-    const storyContext = kpi?.story
-      ? ` ${kpi.story.context} ${kpi.story.role} Outcomes: ${kpi.story.outcomes.join('. ')}.`
-      : ''
+    const explanation = kpi?.explanation ?? ''
+    const storyParts: string[] = []
+    if (kpi?.story) {
+      storyParts.push(kpi.story.context)
+      storyParts.push(kpi.story.role)
+      if (kpi.story.period) storyParts.push(`Period: ${kpi.story.period}.`)
+      storyParts.push(`Outcomes: ${kpi.story.outcomes.join('. ')}.`)
+    }
     texts.push({
       id: entry.id,
-      text: `Achievement: ${entry.title}. ${entry.subtitle}. ${kpi?.explanation ?? ''}${storyContext}`,
+      text: `Achievement: ${entry.title}. ${entry.subtitle}. ${explanation} ${storyParts.join(' ')}`,
     })
   })
 
-  // Investigations (Active Projects)
+  // Investigations (Active Projects) — enriched with role context and cross-references
+  const projectContextMap: Record<string, string> = {
+    'inv-pharmetrics': 'Built during Deputy Head role at NHS Norfolk & Waveney ICB. Provides self-serve analytics for budget holders across the integrated care system. Live at medicines.charlwood.xyz.',
+    'inv-switching-algorithm': 'Built during Interim Head role at NHS Norfolk & Waveney ICB. Uses real-world GP prescribing data to auto-identify patients on expensive drugs suitable for cost-effective alternatives. Compressed months of manual analysis into 3 days. Includes novel GP payment system linking incentive rewards to prescribing savings.',
+    'inv-blueteq-gen': 'Built during High-Cost Drugs & Interface Pharmacist role at NHS Norfolk & Waveney ICB. Automates prior approval form creation for high-cost drug pathways spanning rheumatology, ophthalmology, dermatology, gastroenterology, neurology, and migraine.',
+    'inv-cd-monitoring': 'Built during Deputy Head role at NHS Norfolk & Waveney ICB. Calculates oral morphine equivalents (OME) across all opioid prescriptions at population scale. Enables previously impossible population-level controlled drug analysis. Related to controlled drugs skill.',
+    'inv-sankey-tool': 'Built during High-Cost Drugs & Interface Pharmacist role at NHS Norfolk & Waveney ICB. Visualises patient journeys through high-cost drug pathways. Enables trust-level compliance auditing across multiple clinical specialties.',
+  }
+
   investigations.forEach((inv) => {
     const techList = inv.techStack.join(', ')
     const resultList = inv.results.join('. ')
+    const context = projectContextMap[inv.id] ?? ''
     texts.push({
       id: `proj-${inv.id}`,
-      text: `Project: ${inv.name}. ${inv.methodology} Tech stack: ${techList}. Results: ${resultList}.`,
+      text: `Project: ${inv.name} (${inv.status}, ${inv.requestedYear}). ${inv.methodology} Tech stack: ${techList}. Results: ${resultList}. ${context}`,
     })
   })
 
-  // Education
+  // Education — enriched with research grades and specific subject details
   const educationItems: Array<{ id: string; docId: string; fallbackTitle: string; fallbackSub: string }> = [
     { id: 'edu-0', docId: 'doc-mary-seacole', fallbackTitle: 'NHS Leadership Academy — Mary Seacole Programme', fallbackSub: 'NHS Leadership Academy · 2018' },
     { id: 'edu-1', docId: 'doc-mpharm', fallbackTitle: 'MPharm (Hons) — 2:1', fallbackSub: 'University of East Anglia · 2011–2015' },
@@ -306,10 +363,11 @@ export function buildEmbeddingTexts(): Array<{ id: string; text: string }> {
     const doc = documents.find(d => d.id === entry.docId)
     if (doc) {
       const research = doc.researchDetail ? ` Research: ${doc.researchDetail}.` : ''
+      const researchGrade = doc.researchGrade ? ` Research grade: ${doc.researchGrade}.` : ''
       const classification = doc.classification ? ` Classification: ${doc.classification}.` : ''
       texts.push({
         id: entry.id,
-        text: `Education: ${doc.title}. ${doc.type} from ${doc.institution ?? doc.source}, ${doc.duration ?? doc.date}.${classification}${research} ${doc.notes ?? ''}`,
+        text: `Education: ${doc.title}. ${doc.type} from ${doc.institution ?? doc.source}, ${doc.duration ?? doc.date}.${classification}${research}${researchGrade} ${doc.notes ?? ''}`,
       })
     } else {
       texts.push({

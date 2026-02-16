@@ -351,7 +351,7 @@
         "Typecheck passes"
       ],
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "notes": "This combines the PRD's US-005 (enrich texts) and US-006 (regenerate embeddings) since they must happen together. Review what buildEmbeddingTexts() currently produces and identify gaps — the benchmark questions highlight what's missing (e.g., clinical specialties, methodology detail, dm+d context, employer classification). After modifying the texts, run npm run generate-embeddings to regenerate. Verify the embedding count matches before and after."
     },
     {
