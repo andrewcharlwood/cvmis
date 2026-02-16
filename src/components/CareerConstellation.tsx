@@ -6,6 +6,7 @@ import type { ConstellationNode } from '@/types/pmr'
 interface CareerConstellationProps {
   onRoleClick: (id: string) => void
   onSkillClick: (id: string) => void
+  onNodeHover?: (id: string | null) => void
   highlightedNodeId?: string | null
   containerHeight?: number | null
 }
@@ -89,6 +90,7 @@ function buildScreenReaderDescription(): string {
 const CareerConstellation: React.FC<CareerConstellationProps> = ({
   onRoleClick,
   onSkillClick,
+  onNodeHover,
   highlightedNodeId,
   containerHeight,
 }) => {
@@ -96,13 +98,13 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const simulationRef = useRef<d3.Simulation<SimNode, SimLink> | null>(null)
   const highlightGraphRef = useRef<((activeNodeId: string | null) => void) | null>(null)
-  const callbacksRef = useRef({ onRoleClick, onSkillClick })
+  const callbacksRef = useRef({ onRoleClick, onSkillClick, onNodeHover })
   const [dimensions, setDimensions] = useState({ width: 800, height: MIN_HEIGHT })
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null)
   const [pinnedNodeId, setPinnedNodeId] = useState<string | null>(null)
   const [nodeButtonPositions, setNodeButtonPositions] = useState<Record<string, { x: number; y: number }>>({})
 
-  callbacksRef.current = { onRoleClick, onSkillClick }
+  callbacksRef.current = { onRoleClick, onSkillClick, onNodeHover }
 
   const handleNodeKeyDown = useCallback((e: React.KeyboardEvent, nodeId: string, nodeType: 'role' | 'skill') => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -506,21 +508,30 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     nodeSelection.on('mouseenter', function(_event, d) {
       if (supportsCoarsePointer) return
       applyGraphHighlight(d.id)
+      if (d.type === 'role') {
+        callbacksRef.current.onNodeHover?.(d.id)
+      }
     })
 
     nodeSelection.on('mouseleave', function() {
       if (supportsCoarsePointer) return
       applyGraphHighlight(highlightedNodeId ?? pinnedNodeId)
+      callbacksRef.current.onNodeHover?.(pinnedNodeId)
     })
 
     nodeSelection.on('click', function(_event, d) {
       if (supportsCoarsePointer && pinnedNodeId !== d.id) {
         setPinnedNodeId(d.id)
         applyGraphHighlight(d.id)
+        if (d.type === 'role') {
+          callbacksRef.current.onNodeHover?.(d.id)
+        }
         return
       }
 
-      setPinnedNodeId(prev => prev === d.id ? null : d.id)
+      const newPinned = pinnedNodeId === d.id ? null : d.id
+      setPinnedNodeId(newPinned)
+      callbacksRef.current.onNodeHover?.(d.type === 'role' ? newPinned : null)
 
       if (d.type === 'role') {
         callbacksRef.current.onRoleClick(d.id)

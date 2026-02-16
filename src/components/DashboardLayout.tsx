@@ -55,9 +55,14 @@ const contentVariants = {
   },
 }
 
-function LastConsultationSubsection() {
+interface LastConsultationSubsectionProps {
+  highlightedRoleId?: string | null
+}
+
+function LastConsultationSubsection({ highlightedRoleId }: LastConsultationSubsectionProps) {
   const { openPanel } = useDetailPanel()
   const consultation = consultations[0]
+  const isHighlighted = highlightedRoleId === consultation.id
 
   const handleOpenPanel = () => {
     openPanel({ type: 'consultation', consultation })
@@ -104,7 +109,18 @@ function LastConsultationSubsection() {
   }
 
   return (
-    <div style={{ marginTop: '24px' }}>
+    <div
+      style={{
+        marginTop: '24px',
+        borderRadius: 'var(--radius-sm)',
+        border: '1px solid',
+        borderColor: isHighlighted ? 'var(--accent-border)' : 'transparent',
+        background: isHighlighted ? 'rgba(10,128,128,0.03)' : 'transparent',
+        transition: 'border-color 150ms ease-out, background-color 150ms ease-out',
+        padding: '8px',
+        margin: '-8px',
+      }}
+    >
       <CardHeader dotColor="green" title="LAST CONSULTATION" rightText="Most recent role" />
 
       <div
@@ -236,6 +252,7 @@ function LastConsultationSubsection() {
 export function DashboardLayout() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null)
+  const [highlightedRoleId, setHighlightedRoleId] = useState<string | null>(null)
   const [chronologyHeight, setChronologyHeight] = useState<number | null>(null)
   const chronologyRef = useRef<HTMLDivElement>(null)
   const activeSection = useActiveSection()
@@ -291,6 +308,10 @@ export function DashboardLayout() {
 
   const handleNodeHighlight = useCallback((id: string | null) => {
     setHighlightedNodeId(id)
+  }, [])
+
+  const handleNodeHover = useCallback((id: string | null) => {
+    setHighlightedRoleId(id)
   }, [])
 
   // Global Ctrl+K listener to open command palette
@@ -428,12 +449,12 @@ export function DashboardLayout() {
 
                   <div className="chronology-item">
                     <span className="chronology-badge">Role</span>
-                    <LastConsultationSubsection />
+                    <LastConsultationSubsection highlightedRoleId={highlightedRoleId} />
                   </div>
 
                   <div className="chronology-item">
                     <span className="chronology-badge">Role</span>
-                    <WorkExperienceSubsection onNodeHighlight={handleNodeHighlight} />
+                    <WorkExperienceSubsection onNodeHighlight={handleNodeHighlight} highlightedRoleId={highlightedRoleId} />
                   </div>
 
                   <div className="chronology-item" data-tile-id="section-education">
@@ -445,6 +466,7 @@ export function DashboardLayout() {
                   <CareerConstellation
                     onRoleClick={handleRoleClick}
                     onSkillClick={handleSkillClick}
+                    onNodeHover={handleNodeHover}
                     highlightedNodeId={highlightedNodeId}
                     containerHeight={chronologyHeight}
                   />

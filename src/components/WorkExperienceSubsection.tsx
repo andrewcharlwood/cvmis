@@ -10,12 +10,13 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 interface RoleItemProps {
   consultation: typeof consultations[0]
   isExpanded: boolean
+  isHighlightedFromGraph: boolean
   onToggle: () => void
   onViewFull: () => void
   onHighlight?: (id: string | null) => void
 }
 
-function RoleItem({ consultation, isExpanded, onToggle, onViewFull, onHighlight }: RoleItemProps) {
+function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, onViewFull, onHighlight }: RoleItemProps) {
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -33,10 +34,10 @@ function RoleItem({ consultation, isExpanded, onToggle, onViewFull, onHighlight 
   return (
     <div
       style={{
-        background: 'var(--bg-dashboard)',
+        background: isHighlightedFromGraph ? 'rgba(10,128,128,0.03)' : 'var(--bg-dashboard)',
         borderRadius: 'var(--radius-sm)',
-        border: `1px solid ${isExpanded ? 'var(--accent-border)' : 'var(--border-light)'}`,
-        transition: 'border-color 0.15s, box-shadow 0.15s',
+        border: `1px solid ${isExpanded || isHighlightedFromGraph ? 'var(--accent-border)' : 'var(--border-light)'}`,
+        transition: 'border-color 0.15s, box-shadow 0.15s, background-color 0.15s',
         overflow: 'hidden',
       }}
       onMouseEnter={() => onHighlight?.(consultation.id)}
@@ -259,9 +260,10 @@ function RoleItem({ consultation, isExpanded, onToggle, onViewFull, onHighlight 
 
 interface WorkExperienceSubsectionProps {
   onNodeHighlight?: (id: string | null) => void
+  highlightedRoleId?: string | null
 }
 
-export function WorkExperienceSubsection({ onNodeHighlight }: WorkExperienceSubsectionProps) {
+export function WorkExperienceSubsection({ onNodeHighlight, highlightedRoleId }: WorkExperienceSubsectionProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const { openPanel } = useDetailPanel()
 
@@ -285,6 +287,7 @@ export function WorkExperienceSubsection({ onNodeHighlight }: WorkExperienceSubs
             key={c.id}
             consultation={c}
             isExpanded={expandedId === c.id}
+            isHighlightedFromGraph={highlightedRoleId === c.id}
             onToggle={() => handleToggle(c.id)}
             onViewFull={() => handleViewFull(c)}
             onHighlight={onNodeHighlight}
