@@ -396,3 +396,23 @@
   - System prompt no longer depends on `buildEmbeddingTexts()` — the CV context is hardcoded. This means prompt content and embedding texts can diverge (prompt is optimised for Q&A, embeddings for semantic search)
   - When the prompt is close to the 8KB limit, trim verbose connecting phrases and redundant qualifiers first — the specific facts and numbers are what matter for accuracy
 ---
+
+## 2026-02-16 - US-017
+- Improved Response Rules in system prompt (`src/lib/llm.ts`) with numbered, clearer behavioral instructions:
+  1. Explicit "I don't have that information" phrasing for missing data
+  2. Stronger employer distinction instruction with "Never conflate the two"
+  3. Aggregation instruction broadened to include "projects" alongside tools/skills/achievements
+  4. Explicit prohibition on "approximately" and "around" when exact figures exist
+  5. Adaptive length instruction: thorough for list/detail questions, concise for simple ones
+- Lowered temperature from 0.7 to 0.4 for more consistent factual responses
+- Increased max_tokens from 512 to 800 to avoid truncating detailed answers
+- Preserved [ITEMS: ...] suffix instruction unchanged
+- Mirrored identical changes in `scripts/benchmark.ts` (prompt, temperature defaults, max_tokens defaults)
+- Typecheck (0 errors), lint (0 errors), production build passes
+- Files changed: `src/lib/llm.ts`, `scripts/benchmark.ts`
+- **Learnings for future iterations:**
+  - Numbered rules in system prompts tend to be followed more reliably by LLMs than bullet points
+  - Temperature 0.4 is a good balance for factual Q&A — low enough for consistency, high enough to avoid repetitive phrasing
+  - The benchmark script's `callLLM()` uses default params `temperature = 0.4, maxTokens = 800` — these match production. The scoring call overrides temperature to 0 for deterministic scoring
+  - The adaptive length rule ("thorough for detailed questions, concise for simple ones") replaces the fixed "2-4 sentences" rule — this should improve scores on questions requiring enumeration
+---

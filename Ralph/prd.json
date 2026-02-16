@@ -333,7 +333,7 @@
         "Typecheck passes"
       ],
       "priority": 17,
-      "passes": false,
+      "passes": true,
       "notes": "These are behavioral instructions that go in the Rules section of the system prompt. Keep them concise — LLMs follow shorter, clearer rules better than long paragraphs. Consider: '1. Distinguish NHS employment (May 2022–present, ICB) from private sector (Tesco PLC). 2. When asked about tools/skills across career, aggregate from ALL roles. 3. Cite specific numbers, dates, and outcomes — never say approximate when exact figures are available. 4. If the answer isn't in the context, say so clearly.' Temperature and maxTokens are set in the API request config, not the prompt."
     },
     {

@@ -96,13 +96,11 @@ Domain: [skill-medicines-optimisation] Medicines Optimisation (9yr, 95%), [skill
 Leadership: [skill-budget-management] Budget Management (1yr, 90%), [skill-stakeholder-engagement] Stakeholder Engagement (3yr, 88%), [skill-pharma-negotiation] Pharmaceutical Negotiation (1yr, 82%), [skill-team-development] Team Development (8yr, 85%), [skill-change-management] Change Management (7yr, 80%), [skill-financial-modelling] Financial Modelling (1yr, 78%), [skill-executive-comms] Executive Communication (1yr, 85%)
 
 ## Response Rules
-- Answer ONLY from the data above. Never invent facts, roles, dates, or achievements.
-- Distinguish NHS employment (May 2022 onwards, all at Norfolk & Waveney ICB) from private sector (Tesco PLC, Nov 2017–May 2022, community pharmacy).
-- When asked about tools, skills, or achievements across Andy's career, aggregate from ALL roles — do not limit to one role.
-- Cite specific numbers, dates, and outcomes when available. Never say "approximately" when exact figures exist in the data.
-- If the answer is not in the data, say so honestly.
-- Do not fabricate URLs, email addresses, or contact details.
-- Be concise: 2-4 sentences unless the question requires a longer answer.
+1. Answer ONLY from the data above. If the answer is not in the data, say "I don't have that information" — never invent facts, roles, dates, achievements, URLs, or contact details.
+2. Distinguish NHS employment (May 2022–present, all at Norfolk & Waveney ICB) from private sector (Tesco PLC, Nov 2017–May 2022, community pharmacy). Never conflate the two.
+3. When asked broad questions about tools, skills, projects, or achievements across Andy's career, aggregate from ALL roles — do not limit your answer to one position.
+4. Cite exact numbers, dates, percentages, and outcomes. Never say "approximately" or "around" when exact figures exist in the data.
+5. For detailed or list-based questions, give a thorough answer covering all relevant items. For simple questions, be concise (2-4 sentences).
 
 ## Item References
 End your response with a single line listing relevant item IDs from the square-bracketed IDs above:
@@ -117,8 +115,8 @@ function buildRequestBody(
   return {
     model: LLM_MODEL,
     stream: true,
-    temperature: 0.7,
-    max_tokens: 512,
+    temperature: 0.4,
+    max_tokens: 800,
     messages: [
       { role: 'system', content: systemPrompt },
       ...messages.map((msg) => ({
