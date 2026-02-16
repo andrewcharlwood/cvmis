@@ -95,3 +95,18 @@
   - Math.round() wraps all scaled values to avoid sub-pixel rendering artifacts
   - Accessibility overlay buttons in the React JSX also need scaling — they use base constants directly, not the D3-scoped variables
 ---
+
+## 2026-02-16 - US-005
+- Changed mouseenter handler: on desktop (supportsCoarsePointer === false), calls applyGraphHighlight(d.id) + onNodeHover(d.id) for hover-to-highlight
+- Changed mouseleave handler: resets to highlightedNodeId ?? null (external timeline state or resting), NOT pinnedNodeId
+- Changed click handler: desktop clicks only fire detail callbacks (onRoleClick/onSkillClick), no pin toggle
+- Touch (coarse pointer) retains tap-to-pin toggle unchanged inside click handler
+- pinnedNodeId state only set/cleared for touch interactions
+- Files changed: src/components/CareerConstellation.tsx
+- Browser verified: hover on "Interim Head" → 12 connected skills at fill-opacity 0.9, 9 dimmed at opacity 0.15; hover off → all reset to resting (fill-opacity 0.35, label opacity 0.5); desktop click → no pin state
+- **Learnings for future iterations:**
+  - D3 mouseenter/mouseleave events require dispatchEvent() in Playwright headless — native page.hover() on SVG <g> elements doesn't reliably trigger D3 handlers
+  - Role rect fill-opacity 0.12 IS the resting state (initialized at line 384), not a dimmed state — don't confuse with skill resting at 0.35
+  - mouseleave should reset to highlightedNodeId (external prop) not pinnedNodeId — on desktop there is no pin, so fallback is null (resting)
+  - The supportsCoarsePointer guard at top of each handler cleanly separates desktop/touch paths without duplicating the handler
+---

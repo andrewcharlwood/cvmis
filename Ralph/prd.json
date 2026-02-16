@@ -96,7 +96,7 @@
         "Verify in browser: hover on/off roles cycles highlight cleanly with no stuck states"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "The interaction handlers are in the D3 useEffect where mouseenter/mouseleave/click are attached to node groups. supportsCoarsePointer is a module-level window.matchMedia('(pointer: coarse)').matches check. For fine pointer (desktop): mouseenter calls applyGraphHighlight(nodeId) + fires onNodeHover(nodeId), mouseleave calls applyGraphHighlight(null) + fires onNodeHover(null). Remove the click handler's pin/unpin toggle for fine pointer. For coarse pointer (touch): keep existing tap-to-pin unchanged. The pinnedNodeId useState remains but only gets set on coarse pointer or keyboard interactions. The callbacksRef pattern prevents stale closures — use it for onNodeHover. The onNodeHover callback propagates to DashboardLayout for bidirectional highlighting (graph→timeline). Use the d3-viz skill."
     },
     {

@@ -561,24 +561,25 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
     nodeSelection.on('mouseleave', function() {
       if (supportsCoarsePointer) return
-      applyGraphHighlight(highlightedNodeId ?? pinnedNodeId)
-      callbacksRef.current.onNodeHover?.(pinnedNodeId)
+      applyGraphHighlight(highlightedNodeId ?? null)
+      callbacksRef.current.onNodeHover?.(null)
     })
 
     nodeSelection.on('click', function(_event, d) {
-      if (supportsCoarsePointer && pinnedNodeId !== d.id) {
-        setPinnedNodeId(d.id)
-        applyGraphHighlight(d.id)
-        if (d.type === 'role') {
-          callbacksRef.current.onNodeHover?.(d.id)
+      if (supportsCoarsePointer) {
+        // Touch: tap-to-pin toggle
+        if (pinnedNodeId === d.id) {
+          setPinnedNodeId(null)
+          applyGraphHighlight(null)
+          callbacksRef.current.onNodeHover?.(null)
+        } else {
+          setPinnedNodeId(d.id)
+          applyGraphHighlight(d.id)
+          callbacksRef.current.onNodeHover?.(d.type === 'role' ? d.id : null)
         }
-        return
       }
 
-      const newPinned = pinnedNodeId === d.id ? null : d.id
-      setPinnedNodeId(newPinned)
-      callbacksRef.current.onNodeHover?.(d.type === 'role' ? newPinned : null)
-
+      // Fire detail callbacks for both desktop and touch
       if (d.type === 'role') {
         callbacksRef.current.onRoleClick(d.id)
       } else {
