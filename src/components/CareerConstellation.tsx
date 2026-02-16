@@ -12,13 +12,18 @@ interface CareerConstellationProps {
 }
 
 const MIN_HEIGHT = 400
-const MOBILE_FALLBACK_HEIGHT = 360
+const MOBILE_FALLBACK_HEIGHT = 380
 
+// Desktop defaults — mobile overrides computed in the D3 effect
 const ROLE_WIDTH = 104
 const ROLE_HEIGHT = 32
 const ROLE_RX = 16
 const SKILL_RADIUS_DEFAULT = 7
 const SKILL_RADIUS_ACTIVE = 11
+
+const MOBILE_ROLE_WIDTH = 80
+const MOBILE_SKILL_RADIUS_DEFAULT = 6
+const MOBILE_SKILL_RADIUS_ACTIVE = 9
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const supportsCoarsePointer = window.matchMedia('(pointer: coarse)').matches
@@ -143,6 +148,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     if (!svgRef.current) return
 
     const { width, height } = dimensions
+    // Use viewport width for responsive breakpoint — container.clientWidth overflows on mobile
+    const isMobile = window.innerWidth < 640
 
     if (simulationRef.current) {
       simulationRef.current.stop()
@@ -154,10 +161,19 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     const minYear = Math.min(...years)
     const maxYear = Math.max(...years)
 
-    const topPadding = 46
-    const bottomPadding = 46
-    const sidePadding = 56
-    const timelineX = Math.max(100, Math.min(160, width * 0.18))
+    // Responsive layout parameters
+    const rw = isMobile ? MOBILE_ROLE_WIDTH : ROLE_WIDTH
+    const rh = ROLE_HEIGHT
+    const rrx = ROLE_RX
+    const srDefault = isMobile ? MOBILE_SKILL_RADIUS_DEFAULT : SKILL_RADIUS_DEFAULT
+    const srActive = isMobile ? MOBILE_SKILL_RADIUS_ACTIVE : SKILL_RADIUS_ACTIVE
+
+    const topPadding = isMobile ? 32 : 46
+    const bottomPadding = isMobile ? 32 : 46
+    const sidePadding = isMobile ? 20 : 56
+    const timelineX = isMobile
+      ? Math.max(60, width * 0.16)
+      : Math.max(100, Math.min(160, width * 0.18))
 
     const yScale = d3.scaleLinear()
       .domain([maxYear, minYear])
@@ -231,10 +247,10 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .data(tickYears)
       .join('text')
       .attr('class', 'year-label')
-      .attr('x', timelineX - 12)
+      .attr('x', timelineX - (isMobile ? 8 : 12))
       .attr('y', d => yScale(d) + 4)
       .attr('text-anchor', 'end')
-      .attr('font-size', '10')
+      .attr('font-size', isMobile ? '9' : '10')
       .attr('font-family', 'var(--font-geist-mono)')
       .attr('fill', 'var(--text-tertiary)')
       .text(d => d)
@@ -249,7 +265,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     const roleOrder = [...roleNodes].sort((a, b) => (a.startYear ?? 0) - (b.startYear ?? 0))
     const roleInitialMap = new Map<string, { x: number; y: number }>()
     // Consistent horizontal offset for all role nodes — anchored right of timeline
-    const roleX = Math.min(width - sidePadding - ROLE_WIDTH / 2, timelineX + 80 + ROLE_WIDTH / 2)
+    const roleGap = isMobile ? 40 : 80
+    const roleX = Math.min(width - sidePadding - rw / 2, timelineX + roleGap + rw / 2)
 
     roleOrder.forEach((role) => {
       roleInitialMap.set(role.id, {
@@ -281,11 +298,12 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         .filter(Boolean) as Array<{ x: number; y: number }>
 
       // Skill centroid: offset right of roles into the available distribution space
-      const skillSpaceStart = roleX + ROLE_WIDTH / 2 + 40
+      const skillGap = isMobile ? 20 : 40
+      const skillSpaceStart = roleX + rw / 2 + skillGap
       const skillSpaceMid = (skillSpaceStart + width - sidePadding) / 2
       const centroid = linkedRolePositions.length > 0
         ? {
-          x: Math.max(skillSpaceStart, linkedRolePositions.reduce((sum, p) => sum + p.x, 0) / linkedRolePositions.length + 60),
+          x: Math.max(skillSpaceStart, linkedRolePositions.reduce((sum, p) => sum + p.x, 0) / linkedRolePositions.length + (isMobile ? 30 : 60)),
           y: linkedRolePositions.reduce((sum, p) => sum + p.y, 0) / linkedRolePositions.length,
         }
         : { x: skillSpaceMid, y: height * 0.5 }
@@ -297,7 +315,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
           ? Math.PI * 1.35
           : Math.PI * 0.05
       const angle = domainBaseAngle + ((hash % 360) * Math.PI / 180) * 0.18
-      const radius = 50 + (hash % 50)
+      const radius = (isMobile ? 25 : 50) + (hash % (isMobile ? 25 : 50))
 
       const seededX = centroid.x + Math.cos(angle) * radius
       const seededY = centroid.y + Math.sin(angle) * radius
@@ -339,11 +357,11 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     nodeSelection.filter(d => d.type === 'role')
       .append('rect')
       .attr('class', 'focus-ring')
-      .attr('x', -ROLE_WIDTH / 2 - 3)
-      .attr('y', -ROLE_HEIGHT / 2 - 3)
-      .attr('width', ROLE_WIDTH + 6)
-      .attr('height', ROLE_HEIGHT + 6)
-      .attr('rx', ROLE_RX + 2)
+      .attr('x', -rw / 2 - 3)
+      .attr('y', -rh / 2 - 3)
+      .attr('width', rw + 6)
+      .attr('height', rh + 6)
+      .attr('rx', rrx + 2)
       .attr('fill', 'none')
       .attr('stroke', 'transparent')
       .attr('stroke-width', 2)
@@ -351,33 +369,37 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     nodeSelection.filter(d => d.type === 'role')
       .append('rect')
       .attr('class', 'node-circle')
-      .attr('x', -ROLE_WIDTH / 2)
-      .attr('y', -ROLE_HEIGHT / 2)
-      .attr('width', ROLE_WIDTH)
-      .attr('height', ROLE_HEIGHT)
-      .attr('rx', ROLE_RX)
+      .attr('x', -rw / 2)
+      .attr('y', -rh / 2)
+      .attr('width', rw)
+      .attr('height', rh)
+      .attr('rx', rrx)
       .attr('fill', d => d.orgColor ?? 'var(--accent)')
       .attr('fill-opacity', 0.12)
       .attr('stroke', d => d.orgColor ?? 'var(--accent)')
       .attr('stroke-opacity', 0.4)
       .attr('stroke-width', 1)
 
+    const mobileLabelMaxLen = 10
     nodeSelection.filter(d => d.type === 'role')
       .append('text')
       .attr('class', 'node-label')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
       .attr('fill', d => d.orgColor ?? 'var(--accent)')
-      .attr('font-size', '11')
+      .attr('font-size', isMobile ? '10' : '11')
       .attr('font-weight', '600')
       .attr('font-family', 'var(--font-ui)')
       .attr('pointer-events', 'none')
-      .text(d => d.shortLabel ?? d.label.slice(0, 12))
+      .text(d => {
+        const label = d.shortLabel ?? d.label.slice(0, 12)
+        return isMobile && label.length > mobileLabelMaxLen ? `${label.slice(0, mobileLabelMaxLen - 1)}…` : label
+      })
 
     nodeSelection.filter(d => d.type === 'skill')
       .append('circle')
       .attr('class', 'focus-ring')
-      .attr('r', SKILL_RADIUS_ACTIVE + 3)
+      .attr('r', srActive + 3)
       .attr('fill', 'none')
       .attr('stroke', 'transparent')
       .attr('stroke-width', 2)
@@ -385,7 +407,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     nodeSelection.filter(d => d.type === 'skill')
       .append('circle')
       .attr('class', 'node-circle')
-      .attr('r', SKILL_RADIUS_DEFAULT)
+      .attr('r', srDefault)
       .attr('fill', d => domainColorMap[d.domain ?? 'technical'] ?? '#0D6E6E')
       .attr('stroke', 'none')
       .attr('fill-opacity', 0.2)
@@ -394,15 +416,16 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .append('text')
       .attr('class', 'node-label')
       .attr('text-anchor', 'middle')
-      .attr('dy', SKILL_RADIUS_ACTIVE + 14)
+      .attr('dy', srActive + 14)
       .attr('fill', 'var(--text-secondary)')
-      .attr('font-size', '10')
+      .attr('font-size', isMobile ? '9' : '10')
       .attr('font-family', 'var(--font-geist-mono)')
       .attr('pointer-events', 'none')
       .attr('opacity', 0)
       .text(d => {
         const label = d.shortLabel ?? d.label
-        return label.length > 16 ? `${label.slice(0, 15)}…` : label
+        const maxLen = isMobile ? 12 : 16
+        return label.length > maxLen ? `${label.slice(0, maxLen - 1)}…` : label
       })
 
     const roleConnectors = connectorGroup.selectAll('line.role-connector')
@@ -436,14 +459,14 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         if (dur > 0) {
           skillNodes.select('.node-circle')
             .transition().duration(dur)
-            .attr('r', SKILL_RADIUS_DEFAULT)
+            .attr('r', srDefault)
             .attr('fill-opacity', 0.2)
           skillNodes.select('.node-label')
             .transition().duration(dur)
             .attr('opacity', 0)
         } else {
           skillNodes.select('.node-circle')
-            .attr('r', SKILL_RADIUS_DEFAULT)
+            .attr('r', srDefault)
             .attr('fill-opacity', 0.2)
           skillNodes.select('.node-label')
             .attr('opacity', 0)
@@ -480,14 +503,14 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       if (dur > 0) {
         skillNodes.select('.node-circle')
           .transition().duration(dur)
-          .attr('r', d => isInGroup(d.id) ? SKILL_RADIUS_ACTIVE : SKILL_RADIUS_DEFAULT)
+          .attr('r', d => isInGroup(d.id) ? srActive : srDefault)
           .attr('fill-opacity', d => isInGroup(d.id) ? 0.85 : 0.2)
         skillNodes.select('.node-label')
           .transition().duration(dur)
           .attr('opacity', d => isInGroup(d.id) ? 1 : 0)
       } else {
         skillNodes.select('.node-circle')
-          .attr('r', d => isInGroup(d.id) ? SKILL_RADIUS_ACTIVE : SKILL_RADIUS_DEFAULT)
+          .attr('r', d => isInGroup(d.id) ? srActive : srDefault)
           .attr('fill-opacity', d => isInGroup(d.id) ? 0.85 : 0.2)
         skillNodes.select('.node-label')
           .attr('opacity', d => isInGroup(d.id) ? 1 : 0)
@@ -561,11 +584,11 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .alpha(0.65)
       .alphaDecay(prefersReducedMotion ? 0.28 : 0.08)
       .force('charge', d3.forceManyBody<SimNode>().strength(d =>
-        d.type === 'role' ? -120 : -55
+        d.type === 'role' ? (isMobile ? -80 : -120) : (isMobile ? -35 : -55)
       ))
       .force('link', d3.forceLink<SimNode, SimLink>(links)
         .id(d => d.id)
-        .distance(72)
+        .distance(isMobile ? 48 : 72)
         .strength(d => (d as SimLink).strength * 0.5))
       .force('x', d3.forceX<SimNode>(d => d.homeX).strength(d => d.type === 'role' ? 1.0 : 0.18))
       .force('y', d3.forceY<SimNode>(d => {
@@ -575,22 +598,23 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         return d.homeY
       }).strength(d => d.type === 'role' ? 0.98 : 0.18))
       .force('collide', d3.forceCollide<SimNode>(d =>
-        d.type === 'role' ? Math.max(ROLE_WIDTH, ROLE_HEIGHT) / 2 + 10 : SKILL_RADIUS_ACTIVE + 16
+        d.type === 'role' ? Math.max(rw, rh) / 2 + (isMobile ? 6 : 10) : srActive + (isMobile ? 10 : 16)
       ).iterations(2))
 
     simulationRef.current = simulation
 
     // Padding for skill label text below the node (radius + gap + line height)
-    const skillBottomPadding = SKILL_RADIUS_ACTIVE + 14 + 12
+    const skillBottomPadding = srActive + 14 + 12
+    const rightMargin = isMobile ? 16 : 40
 
     const renderTick = () => {
       nodes.forEach(d => {
         if (d.type === 'role') {
-          d.x = Math.max(ROLE_WIDTH / 2 + 6, Math.min(width - ROLE_WIDTH / 2 - 6, d.x))
-          d.y = Math.max(ROLE_HEIGHT / 2 + topPadding, Math.min(height - ROLE_HEIGHT / 2 - bottomPadding, d.y))
+          d.x = Math.max(rw / 2 + 6, Math.min(width - rw / 2 - 6, d.x))
+          d.y = Math.max(rh / 2 + topPadding, Math.min(height - rh / 2 - bottomPadding, d.y))
         } else {
-          d.x = Math.max(SKILL_RADIUS_ACTIVE + 6, Math.min(width - SKILL_RADIUS_ACTIVE - 40, d.x))
-          d.y = Math.max(SKILL_RADIUS_ACTIVE + topPadding, Math.min(height - skillBottomPadding, d.y))
+          d.x = Math.max(srActive + 6, Math.min(width - srActive - rightMargin, d.x))
+          d.y = Math.max(srActive + topPadding, Math.min(height - skillBottomPadding, d.y))
         }
       })
 
@@ -609,7 +633,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       roleConnectors
         .attr('x1', timelineX)
         .attr('y1', d => d.y)
-        .attr('x2', d => d.x - ROLE_WIDTH / 2)
+        .attr('x2', d => d.x - rw / 2)
         .attr('y2', d => d.y)
 
       const nextNodePositions: Record<string, { x: number; y: number }> = {}
@@ -785,7 +809,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
             : `${node.startYear}-present`
 
           const position = nodeButtonPositions[node.id] ?? { x: dimensions.width * 0.5, y: dimensions.height * 0.5 }
-          const buttonWidth = node.type === 'role' ? ROLE_WIDTH : 34
+          const mobileBtn = window.innerWidth < 640
+          const buttonWidth = node.type === 'role' ? (mobileBtn ? MOBILE_ROLE_WIDTH : ROLE_WIDTH) : 34
           const buttonHeight = node.type === 'role' ? ROLE_HEIGHT : 34
 
           return (

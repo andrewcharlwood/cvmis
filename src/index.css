@@ -367,6 +367,12 @@ html {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
+  min-width: 0;
+}
+
+.pathway-graph-sticky {
+  min-width: 0;
+  overflow: hidden;
 }
 
 .chronology-stream {
