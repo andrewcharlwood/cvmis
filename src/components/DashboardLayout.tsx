@@ -382,28 +382,61 @@ export function DashboardLayout() {
 
             {/* Patient Pathway — parent section with constellation graph + subsections */}
             <ParentSection title="Patient Pathway" tileId="patient-pathway">
-              <CareerConstellation
-                onRoleClick={handleRoleClick}
-                onSkillClick={handleSkillClick}
-                highlightedNodeId={highlightedNodeId}
-              />
-
-              {/* Last Consultation subsection */}
-              <LastConsultationSubsection />
-
-              {/* Two-column experience/skills grid */}
-              <div className="pathway-columns" style={{ marginTop: '24px' }}>
-                <div data-tile-id="section-experience">
-                  <WorkExperienceSubsection onNodeHighlight={handleNodeHighlight} />
+              <div className="pathway-columns">
+                <div className="pathway-graph-sticky">
+                  <CareerConstellation
+                    onRoleClick={handleRoleClick}
+                    onSkillClick={handleSkillClick}
+                    highlightedNodeId={highlightedNodeId}
+                  />
                 </div>
-                <div data-tile-id="section-skills">
-                  <RepeatMedicationsSubsection onNodeHighlight={handleNodeHighlight} />
+
+                <div className="chronology-stream" data-tile-id="section-experience">
+                  <div
+                    style={{
+                      marginBottom: '14px',
+                      padding: '10px 12px',
+                      border: '1px solid var(--border-light)',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'var(--bg-dashboard)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: '11px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        color: 'var(--text-tertiary)',
+                        marginBottom: '4px',
+                        fontFamily: 'var(--font-geist-mono)',
+                      }}
+                    >
+                      Clinical Record Stream
+                    </div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                      Chronological role and education entries. Select items to inspect full records.
+                    </div>
+                  </div>
+
+                  <div className="chronology-item">
+                    <span className="chronology-badge">Role</span>
+                    <LastConsultationSubsection />
+                  </div>
+
+                  <div className="chronology-item">
+                    <span className="chronology-badge">Role</span>
+                    <WorkExperienceSubsection onNodeHighlight={handleNodeHighlight} />
+                  </div>
+
+                  <div className="chronology-item" data-tile-id="section-education">
+                    <span className="chronology-badge">Education</span>
+                    <EducationSubsection />
+                  </div>
                 </div>
               </div>
 
-              {/* Education subsection */}
-              <div data-tile-id="section-education">
-                <EducationSubsection />
+              <div data-tile-id="section-skills" style={{ marginTop: '22px' }}>
+                <RepeatMedicationsSubsection onNodeHighlight={handleNodeHighlight} />
               </div>
             </ParentSection>
           </div>
