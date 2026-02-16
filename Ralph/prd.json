@@ -119,7 +119,7 @@
         "Verify in browser — hover graph nodes and confirm timeline cards highlight; hover timeline cards and confirm graph highlights"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "This adds the reverse direction to the existing partial bidirectional system. Currently DashboardLayout has handleNodeHighlight which sets highlightedNodeId (timeline → graph). The new onNodeHover adds graph → timeline. Both pieces of state coexist. In WorkExperienceSubsection, add a style to the RoleItem wrapper div that applies when highlightedRoleId matches — a subtle border and background change. For LastConsultationSubsection, apply the same highlight logic to its outer wrapper. The touch/pin logic in CareerConstellation already handles pinnedNodeId — the new onNodeHover should also fire for pinned nodes so timeline cards stay highlighted."
     },
     {

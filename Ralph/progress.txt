@@ -72,6 +72,9 @@
 - Skill nodes use SKILL_RADIUS_DEFAULT (7) for resting state and SKILL_RADIUS_ACTIVE (11) for highlighted state — controlled via applyGraphHighlight, not CSS transitions (SVG `r` doesn't transition via CSS)
 - Skill labels default to opacity 0 and are shown/hidden via D3 transitions in applyGraphHighlight — the old updateSkillLabelVisibility collision-based approach was removed
 - Link lines use var(--border-light) at opacity 0.08 for resting state — highlighted links use the skill's domain colour from domainColorMap with strength-proportional opacity
+- Bidirectional highlighting uses two independent state vars in DashboardLayout: highlightedNodeId (timeline→graph) and highlightedRoleId (graph→timeline)
+- callbacksRef pattern in CareerConstellation prevents stale closures — always add new callbacks there
+- LastConsultationSubsection is defined inline in DashboardLayout.tsx, not a separate file
 ---
 
 ## 2026-02-16 - US-005
@@ -89,4 +92,20 @@
   - The applyGraphHighlight function is the single source of truth for all visual states (resting, highlighted, dimmed) — keep all styling logic there, not split between initial rendering and highlight
   - D3 transition on a selection that already has a pending transition interrupts it — this is fine for hover interactions where the latest state wins
   - domainColorMap hex values are needed for D3 attrs (can't use CSS custom properties for computed color values in stroke/fill of highlighted links)
+---
+
+## 2026-02-16 - US-006
+- Added `onNodeHover?: (id: string | null) => void` prop to CareerConstellation — fires on role node mouseenter/mouseleave and pin/unpin
+- Added `highlightedRoleId` state in DashboardLayout, wired via `handleNodeHover` callback
+- WorkExperienceSubsection receives `highlightedRoleId` prop; RoleItem shows subtle teal border + background tint when matched
+- LastConsultationSubsection receives `highlightedRoleId` prop; outer wrapper shows border/background highlight for consultations[0]
+- Existing timeline→graph direction (`onNodeHighlight` / `highlightedNodeId`) continues working alongside new reverse direction
+- Touch/pin: clicking/tapping a role node fires `onNodeHover` with the pinned role ID, keeping timeline card highlighted while pinned
+- Files changed: src/components/CareerConstellation.tsx, src/components/DashboardLayout.tsx, src/components/WorkExperienceSubsection.tsx
+- **Learnings for future iterations:**
+  - The bidirectional system uses two separate state variables: `highlightedNodeId` (timeline→graph) and `highlightedRoleId` (graph→timeline) — they coexist independently in DashboardLayout
+  - `callbacksRef` pattern in CareerConstellation avoids stale closure issues — add new callbacks there (e.g., `onNodeHover`) alongside existing ones
+  - For highlight styling on timeline cards, use `border: 1px solid transparent` as default with padding/margin compensation to prevent layout shift when highlighting activates
+  - LastConsultationSubsection is defined inline in DashboardLayout.tsx, not as a separate file — props must be threaded through the local function definition
+  - D3 mouseenter events on SVG `<g>` elements require direct mouse interaction with the SVG, not the React button overlay layer
 ---
