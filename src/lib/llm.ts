@@ -5,20 +5,20 @@ export interface ChatMessage {
   content: string
 }
 
-export const GEMINI_MODEL = 'gemini-3-flash-preview'
-export const GEMINI_DISPLAY_NAME = 'Gemini 3 Flash'
+export const LLM_MODEL = 'z-ai/glm-5'
+export const LLM_DISPLAY_NAME = 'GLM-5'
 
-const GEMINI_API_BASE = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}`
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 function getApiKey(): string | undefined {
-  return import.meta.env.VITE_GEMINI_API_KEY as string | undefined
+  return import.meta.env.VITE_OPEN_ROUTER_API_KEY as string | undefined
 }
 
-export function isGeminiAvailable(): boolean {
+export function isLLMAvailable(): boolean {
   return !!getApiKey()
 }
 
-function buildSystemPrompt(): string {
+export function buildSystemPrompt(): string {
   const texts = buildEmbeddingTexts()
   const cvContent = texts.map((t) => `[${t.id}] ${t.text}`).join('\n')
 
@@ -45,20 +45,18 @@ function buildRequestBody(
   messages: ChatMessage[],
   systemPrompt: string,
 ): object {
-  const contents = messages.map((msg) => ({
-    role: msg.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: msg.content }],
-  }))
-
   return {
-    system_instruction: {
-      parts: [{ text: systemPrompt }],
-    },
-    contents,
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 512,
-    },
+    model: LLM_MODEL,
+    stream: true,
+    temperature: 0.7,
+    max_tokens: 512,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...messages.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      })),
+    ],
   }
 }
 
@@ -67,23 +65,25 @@ export async function* sendChatMessage(
 ): AsyncGenerator<string> {
   const apiKey = getApiKey()
   if (!apiKey) {
-    throw new Error('Gemini API key not configured')
+    throw new Error('LLM API key not configured')
   }
 
   const systemPrompt = buildSystemPrompt()
   const body = buildRequestBody(messages, systemPrompt)
 
-  const response = await fetch(
-    `${GEMINI_API_BASE}:streamGenerateContent?alt=sse&key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+  const response = await fetch(OPENROUTER_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': window.location.origin,
+      'X-Title': 'Andy Charlwood Portfolio',
     },
-  )
+    body: JSON.stringify(body),
+  })
 
   if (!response.ok) {
-    throw new Error(`Gemini API error: ${response.status}`)
+    throw new Error(`LLM API error: ${response.status}`)
   }
 
   const reader = response.body?.getReader()
@@ -102,7 +102,6 @@ export async function* sendChatMessage(
       buffer += decoder.decode(value, { stream: true })
 
       const lines = buffer.split('\n')
-      // Keep the last potentially incomplete line in the buffer
       buffer = lines.pop() ?? ''
 
       for (const line of lines) {
@@ -114,7 +113,7 @@ export async function* sendChatMessage(
 
         try {
           const parsed = JSON.parse(jsonStr)
-          const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text
+          const text = parsed?.choices?.[0]?.delta?.content
           if (text) {
             yield text
           }
@@ -130,7 +129,7 @@ export async function* sendChatMessage(
       if (jsonStr && jsonStr !== '[DONE]') {
         try {
           const parsed = JSON.parse(jsonStr)
-          const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text
+          const text = parsed?.choices?.[0]?.delta?.content
           if (text) {
             yield text
           }

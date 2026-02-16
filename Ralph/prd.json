@@ -273,11 +273,7 @@
         "Verify in browser: chat opens, sends a message, streams a response correctly"
       ],
       "priority": 14,
-<<<<<<< Updated upstream
       "passes": true,
-      "notes": "The current API base is 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash'. Change the model segment to 'gemini-3-flash-preview'. The API path structure (v1beta/models/{model}:streamGenerateContent) should be the same. Verify that gemini-3-flash-preview is the correct model ID — check Google AI Studio or the API docs. For the display name, use a human-friendly string like 'Gemini 3 Flash' (not the full model ID). The constant should be defined at the top of gemini.ts and exported for use in ChatWidget."
-=======
-      "passes": false,
       "notes": "OpenRouter uses the OpenAI-compatible format. Key differences from Gemini: (1) Auth via Bearer token header, not URL param. (2) System prompt is a message with role:'system', not a separate system_instruction field. (3) Streaming SSE data lines contain {choices:[{delta:{content:'...'}}]}, not candidates[0].content.parts[0].text. (4) The [DONE] sentinel is the same. (5) Add headers: 'HTTP-Referer': window.location.origin, 'X-Title': 'Andy Charlwood Portfolio'. The buildSystemPrompt() function and its content stay the same — only the API transport changes. The buildRequestBody() function needs the most changes."
     },
     {
@@ -375,7 +371,6 @@
       "priority": 19,
       "passes": false,
       "notes": "This is the iterative loop. In a single Ralph iteration, run the benchmark, review results, and if needed make targeted improvements to the system prompt in llm.ts. Focus on structural fixes: if Q7 (clinical specialties) fails, ensure the system prompt lists specialties under the relevant role — this helps ALL specialty questions, not just Q7. If the benchmark takes too many iterations, focus on getting the most impactful improvements in and document remaining gaps. The anti-benchmaxing rules apply: no hardcoded answers, no question-specific prompt clauses."
->>>>>>> Stashed changes
     }
   ]
 }

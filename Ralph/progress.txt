@@ -18,12 +18,14 @@
 - `loadEmbeddings()` and `paletteMap` (Map<id, PaletteItem>) are precomputed via `useMemo` — no re-computation on each search
 - ChatWidget is mounted in DashboardLayout alongside CommandPalette and DetailPanel — z-index 90 (below command palette z-1000)
 - `prefersReducedMotion` pattern: read `window.matchMedia` at module level, use in framer-motion variants to skip animation
-- ChatWidget stores messages as `Array<{ role: 'user' | 'assistant', content: string }>` — same shape as LLM message format, ready for Gemini integration
+- ChatWidget stores messages as `Array<{ role: 'user' | 'assistant', content: string }>` — same shape as LLM message format
 - ChatWidget `isOpen` state controls both panel visibility and button icon (MessageCircle ↔ X) — panel rendering handled by AnimatePresence
-- `src/lib/gemini.ts` exports `sendChatMessage(messages)` (async generator), `isGeminiAvailable()`, `parseItemIds(text)`, `stripItemsSuffix(text)` — ChatMessage type is `{ role: 'user' | 'assistant', content: string }`
-- Gemini API uses SSE streaming: POST to `:streamGenerateContent?alt=sse&key=KEY`, parse `data:` lines as JSON, extract `candidates[0].content.parts[0].text`
-- System prompt built from `buildEmbeddingTexts()` — instructs model to end responses with `[ITEMS: id1, id2, id3]` for portfolio item linking
-- `isGeminiAvailable()` checks `import.meta.env.VITE_GEMINI_API_KEY` — when missing, chat panel shows "unavailable" message but button remains visible
+- `src/lib/llm.ts` exports `sendChatMessage(messages)` (async generator), `isLLMAvailable()`, `buildSystemPrompt()`, `parseItemIds(text)`, `stripItemsSuffix(text)`, `LLM_MODEL`, `LLM_DISPLAY_NAME` — ChatMessage type is `{ role: 'user' | 'assistant', content: string }`
+- LLM API uses OpenRouter (OpenAI-compatible): POST to `https://openrouter.ai/api/v1/chat/completions` with `stream: true`, auth via `Authorization: Bearer` header, parse SSE `data:` lines as JSON, extract `choices[0].delta.content`
+- System prompt sent as `role: 'system'` message (first in messages array), built from `buildEmbeddingTexts()` — instructs model to end responses with `[ITEMS: id1, id2, id3]` for portfolio item linking
+- `isLLMAvailable()` checks `import.meta.env.VITE_OPEN_ROUTER_API_KEY` — when missing, chat panel shows "unavailable" message but button remains visible
+- OpenRouter requires `HTTP-Referer` and `X-Title` headers — set to `window.location.origin` and `'Andy Charlwood Portfolio'` respectively
+- Model is `z-ai/glm-5` (set in `LLM_MODEL` constant in `llm.ts`)
 - Assistant messages store item IDs as `<!--ITEMS:id1,id2-->` HTML comment suffix for US-010 to parse — `getDisplayText()` strips this before rendering
 - Conversation history capped at 10 messages (`MAX_HISTORY`), metadata stripped before sending to API
 - Icon/color mappings (`iconByType`, `iconColorStyles`) live in `src/lib/palette-icons.ts` — shared between CommandPalette and ChatWidget
@@ -311,4 +313,34 @@
   - Prefixing CV data with `[item-id]` in the system prompt makes ID references more reliable — model can directly see and copy IDs rather than inferring from patterns
   - Concrete examples in format instructions (e.g., `[ITEMS: exp-nhs-nwicb, skill-python]`) are more reliable than generic placeholders (`[ITEMS: id1, id2]`)
   - The `GEMINI_MODEL` and `GEMINI_DISPLAY_NAME` constants in `gemini.ts` are already exported and used by `ChatWidget.tsx` — single source of truth for model identity
+---
+
+## 2026-02-16 - US-014
+- Renamed `src/lib/gemini.ts` → `src/lib/llm.ts` via `git mv`
+- Rewrote `llm.ts` for OpenRouter API (OpenAI-compatible format):
+  - API endpoint: `https://openrouter.ai/api/v1/chat/completions`
+  - Model: `z-ai/glm-5` (exported as `LLM_MODEL`)
+  - Display name: `GLM-5` (exported as `LLM_DISPLAY_NAME`)
+  - Auth: `Authorization: Bearer` header using `VITE_OPEN_ROUTER_API_KEY` env var
+  - Added `HTTP-Referer` and `X-Title` headers per OpenRouter docs
+  - System prompt sent as `role: 'system'` message (first in messages array) instead of Gemini's `system_instruction` field
+  - SSE streaming parses `choices[0].delta.content` instead of Gemini's `candidates[0].content.parts[0].text`
+  - No `'model'` role mapping needed — OpenRouter uses `'assistant'` directly
+  - Request body uses `max_tokens` (OpenAI format) instead of `maxOutputTokens` (Gemini format)
+- Renamed `isGeminiAvailable()` → `isLLMAvailable()`, updated all call sites in `ChatWidget.tsx`
+- Updated all imports: `ChatWidget.tsx` now imports from `@/lib/llm` instead of `@/lib/gemini`
+- Renamed `GEMINI_DISPLAY_NAME` → `LLM_DISPLAY_NAME` and updated ChatWidget header display
+- `buildSystemPrompt()` now exported (was private) for use by benchmark script in US-015
+- Fixed merge conflict in `Ralph/prd.json` (resolved to keep OpenRouter migration stories US-014–US-019)
+- `parseItemIds()` and `stripItemsSuffix()` unchanged — response format spec is the same
+- Typecheck (0 errors), lint (0 new errors), production build all pass
+- Files changed: `src/lib/gemini.ts` → `src/lib/llm.ts` (renamed + rewritten), `src/components/ChatWidget.tsx`, `Ralph/prd.json`
+- **Learnings for future iterations:**
+  - OpenRouter uses OpenAI-compatible format: `messages` array with `role: 'system'|'user'|'assistant'`, `choices[0].delta.content` for streaming
+  - Gemini's `system_instruction` field → OpenRouter's first message with `role: 'system'`
+  - Gemini's `'model'` role → OpenRouter's `'assistant'` role (no mapping needed since ChatMessage already uses 'assistant')
+  - OpenRouter requires `HTTP-Referer` and `X-Title` headers — use `window.location.origin` for referer
+  - `VITE_OPEN_ROUTER_API_KEY` replaces `VITE_GEMINI_API_KEY` — update `.env` file accordingly
+  - `buildSystemPrompt()` is now exported from `llm.ts` — benchmark script (US-015) can import it directly instead of duplicating the logic
+  - The benchmark script (`scripts/benchmark.ts`) still uses the old Gemini API — needs separate migration in US-015
 ---
