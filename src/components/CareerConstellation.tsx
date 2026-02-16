@@ -159,20 +159,10 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .domain([maxYear, minYear])
       .range([topPadding, height - bottomPadding])
 
-    // Defs with subtle radial gradient
-    const defs = svg.append('defs')
-    const gradient = defs.append('radialGradient')
-      .attr('id', 'constellation-bg')
-      .attr('cx', '45%')
-      .attr('cy', '40%')
-      .attr('r', '75%')
-    gradient.append('stop').attr('offset', '0%').attr('stop-color', '#F2F7F6')
-    gradient.append('stop').attr('offset', '100%').attr('stop-color', '#FAFCFB')
-
     svg.append('rect')
       .attr('width', width)
       .attr('height', height)
-      .attr('fill', 'url(#constellation-bg)')
+      .attr('fill', 'var(--surface)')
       .attr('rx', 6)
 
     // Timeline guides and subtle era lanes
@@ -187,28 +177,30 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .attr('x2', width - sidePadding)
       .attr('y1', d => yScale(d))
       .attr('y2', d => yScale(d))
-      .attr('stroke', '#D5E3E0')
-      .attr('stroke-opacity', d => roleNodes.some(r => r.startYear === d) ? 0.9 : 0.38)
-      .attr('stroke-width', d => roleNodes.some(r => r.startYear === d) ? 1.2 : 1)
+      .attr('stroke', 'var(--border-light)')
+      .attr('stroke-opacity', 0.25)
+      .attr('stroke-width', 1)
+      .attr('stroke-dasharray', '3 4')
 
     timelineGroup.append('line')
       .attr('x1', timelineX)
       .attr('x2', timelineX)
       .attr('y1', topPadding - 12)
       .attr('y2', height - bottomPadding + 12)
-      .attr('stroke', '#A8C4BF')
-      .attr('stroke-width', 2)
-      .attr('stroke-opacity', 0.8)
+      .attr('stroke', 'var(--border)')
+      .attr('stroke-width', 1)
 
-    timelineGroup.selectAll('circle.year-dot')
+    timelineGroup.selectAll('line.year-tick')
       .data(tickYears)
-      .join('circle')
-      .attr('class', 'year-dot')
-      .attr('cx', timelineX)
-      .attr('cy', d => yScale(d))
-      .attr('r', d => roleNodes.some(r => r.startYear === d) ? 3.2 : 2)
-      .attr('fill', '#6A8E88')
-      .attr('fill-opacity', d => roleNodes.some(r => r.startYear === d) ? 0.8 : 0.35)
+      .join('line')
+      .attr('class', 'year-tick')
+      .attr('x1', timelineX)
+      .attr('x2', d => timelineX + (roleNodes.some(r => r.startYear === d) ? 8 : 6))
+      .attr('y1', d => yScale(d))
+      .attr('y2', d => yScale(d))
+      .attr('stroke', 'var(--border)')
+      .attr('stroke-width', 1)
+      .attr('stroke-opacity', d => roleNodes.some(r => r.startYear === d) ? 0.8 : 0.4)
 
     timelineGroup.selectAll('text.year-label')
       .data(tickYears)
@@ -219,55 +211,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       .attr('text-anchor', 'end')
       .attr('font-size', '10')
       .attr('font-family', 'var(--font-geist-mono)')
-      .attr('fill', '#6F8F8A')
+      .attr('fill', 'var(--text-tertiary)')
       .text(d => d)
-
-    // Compact legend
-    const legendX = width - sidePadding - 190
-    const legendY = 16
-    const legendGroup = svg.append('g').attr('class', 'constellation-legend')
-      .attr('transform', `translate(${Math.max(12, legendX)}, ${legendY})`)
-
-    legendGroup.append('rect')
-      .attr('width', 182)
-      .attr('height', 64)
-      .attr('rx', 6)
-      .attr('fill', 'rgba(255,255,255,0.72)')
-      .attr('stroke', '#D8E6E3')
-
-    legendGroup.append('circle')
-      .attr('cx', 12)
-      .attr('cy', 16)
-      .attr('r', 5)
-      .attr('fill', '#0D6E6E')
-    legendGroup.append('text')
-      .attr('x', 24)
-      .attr('y', 20)
-      .attr('font-size', '11')
-      .attr('fill', '#3A5F5A')
-      .attr('font-family', 'var(--font-geist-mono)')
-      .text('Roles (timeline anchored)')
-
-    legendGroup.append('circle')
-      .attr('cx', 12)
-      .attr('cy', 34)
-      .attr('r', 4)
-      .attr('fill', '#D97706')
-    legendGroup.append('text')
-      .attr('x', 24)
-      .attr('y', 38)
-      .attr('font-size', '11')
-      .attr('fill', '#3A5F5A')
-      .attr('font-family', 'var(--font-geist-mono)')
-      .text('Skills (linked clusters)')
-
-    legendGroup.append('text')
-      .attr('x', 12)
-      .attr('y', 56)
-      .attr('font-size', '10')
-      .attr('fill', '#5E7F7B')
-      .attr('font-family', 'var(--font-geist-mono)')
-      .text('Tap/click a node to pin links')
 
     // Prepare data with deterministic initial positions
     const links: SimLink[] = constellationLinks.map(l => ({
@@ -621,6 +566,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       style={{
         width: '100%',
         borderRadius: 'var(--radius-sm)',
+        border: '1px solid var(--border-light)',
         overflow: 'hidden',
         position: 'relative',
       }}
