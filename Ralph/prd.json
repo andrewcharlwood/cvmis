@@ -315,7 +315,7 @@
         "Typecheck passes"
       ],
       "priority": 16,
-      "passes": false,
+      "passes": true,
       "notes": "The current system prompt uses buildEmbeddingTexts() which gives one paragraph per palette item — good for embeddings but too compressed for detailed Q&A. The enriched prompt should read more like a structured CV with full bullet points. Source content from References/CV_v4.md — read the file to extract all detail. Consider structuring as: ## Profile (personal statement), ## Career History (each role as ### with bullets), ## Education (each qualification), ## Projects (each project with tech and outcomes). Keep it well-structured with markdown headers — LLMs parse this better than flat text."
     },
     {

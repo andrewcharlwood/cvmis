@@ -370,3 +370,29 @@
   - For Node.js scripts, use a static URL for `HTTP-Referer` header (e.g., `'https://andycharlwood.co.uk'`) since `window.location` isn't available
   - The benchmark script's `buildSystemPrompt()` should be kept in sync with `llm.ts` manually — if one changes, update the other (US-016/US-017 will modify the production prompt)
 ---
+
+## 2026-02-16 - US-016
+- Rewrote `buildSystemPrompt()` in `src/lib/llm.ts` with full CV context from `References/CV_v4.md`
+- Replaced `buildEmbeddingTexts()` approach (one-paragraph-per-item) with structured CV format:
+  - Profile section with professional summary
+  - Career History with full achievement bullets per role, clinical specialties, methodology details
+  - Projects with tech stack and outcomes
+  - Education with grades, subjects, research topics, classifications
+  - Skills in compact format with years and proficiency
+- NHS employment (May 2022+, all at Norfolk & Waveney ICB) explicitly distinguished from private sector (Tesco PLC)
+- Clinical specialties listed under High-Cost Drugs role: rheumatology, ophthalmology (wet AMD, DMO, RVO), dermatology, gastroenterology, neurology, migraine
+- dm+d integration details, switching algorithm methodology, tirzepatide commissioning context all included
+- Mary Seacole Programme: 2018, 78%, NHS Leadership Academy
+- A-Levels: Mathematics A*, Chemistry B, Politics C — Highworth Grammar School 2009–2011
+- System prompt is 7,982 bytes (under 8KB limit)
+- Removed `buildEmbeddingTexts` import from llm.ts (no longer needed)
+- Mirrored identical prompt in `scripts/benchmark.ts` (with comment noting manual sync requirement)
+- Removed `buildEmbeddingTexts` import from benchmark.ts
+- Typecheck (0 errors), lint (0 errors), production build all pass
+- Files changed: `src/lib/llm.ts`, `scripts/benchmark.ts`
+- **Learnings for future iterations:**
+  - The structured CV format (markdown headers + bullets per role) is more effective for LLM Q&A than one-paragraph-per-palette-item — LLMs parse structured markdown better
+  - Item IDs are embedded in section headers (e.g., `### [exp-deputy-head-2024]`) rather than as line prefixes — cleaner format that still allows the model to reference IDs
+  - System prompt no longer depends on `buildEmbeddingTexts()` — the CV context is hardcoded. This means prompt content and embedding texts can diverge (prompt is optimised for Q&A, embeddings for semantic search)
+  - When the prompt is close to the 8KB limit, trim verbose connecting phrases and redundant qualifiers first — the specific facts and numbers are what matter for accuracy
+---
