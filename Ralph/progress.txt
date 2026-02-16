@@ -124,3 +124,17 @@
   - CSS transitions work on SVG `<path>` stroke properties, so no D3 `.transition()` needed for link highlight animations (unlike `r` attribute which requires D3 transitions)
   - The tick handler generates the `d` attribute string directly — simpler than using `d3.line().curve()` since we only need two-point curves
 ---
+
+## 2026-02-16 - US-008
+- Added compact HTML legend below SVG inside CareerConstellation container
+- Legend shows three 6px coloured dots with labels: Technical (var(--accent)), Clinical (var(--success)), Leadership (var(--amber))
+- Items separated by middle dot (·) separators using var(--border) colour
+- Includes "Hover to explore connections" hint text at slightly reduced opacity (0.7)
+- Uses font-family var(--font-geist-mono), font-size 10px, colour var(--text-tertiary)
+- flex-wrap enabled for graceful narrowing on small screens
+- Files changed: src/components/CareerConstellation.tsx, Ralph/prd.json
+- **Learnings for future iterations:**
+  - The legend is pure React JSX — no D3 involved. Placed between the SVG and the screen reader description paragraph inside the container div
+  - Using React.Fragment with the `.map()` allows conditional separator rendering (skip before first item) without extra wrapper divs
+  - The container div's overflow:hidden clips the legend's border-radius corners cleanly
+---

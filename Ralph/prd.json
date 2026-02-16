@@ -157,7 +157,7 @@
         "Verify in browser"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "This is pure React JSX added to the return block of CareerConstellation (after the SVG and before the closing container div). No D3 involved. Use inline styles consistent with the rest of the component, or simple Tailwind classes. The legend replaces the SVG-based legend that was removed in US-003. Position it as a flex row with gap: 12px, items centred vertically, padding: 6px 12px."
     },
     {
