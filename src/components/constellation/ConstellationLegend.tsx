@@ -3,13 +3,14 @@ import { supportsCoarsePointer } from './constants'
 
 interface ConstellationLegendProps {
   isTouch: boolean
+  domainCounts?: Record<string, number>
 }
 
-export const ConstellationLegend: React.FC<ConstellationLegendProps> = ({ isTouch }) => {
+export const ConstellationLegend: React.FC<ConstellationLegendProps> = ({ isTouch, domainCounts }) => {
   const items = [
-    { label: 'Technical', color: 'var(--accent)' },
-    { label: 'Clinical', color: 'var(--success)' },
-    { label: 'Leadership', color: 'var(--amber)' },
+    { label: 'Technical', domain: 'technical', color: 'var(--accent)' },
+    { label: 'Clinical', domain: 'clinical', color: 'var(--success)' },
+    { label: 'Leadership', domain: 'leadership', color: 'var(--amber)' },
   ]
 
   return (
@@ -42,7 +43,7 @@ export const ConstellationLegend: React.FC<ConstellationLegendProps> = ({ isTouc
                 flexShrink: 0,
               }}
             />
-            {item.label}
+            {item.label}{domainCounts?.[item.domain] != null ? ` (${domainCounts[item.domain]})` : ''}
           </span>
         </React.Fragment>
       ))}

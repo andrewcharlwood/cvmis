@@ -116,6 +116,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
   const linkSelectionRef = useRef<d3.Selection<SVGPathElement, import('./types').SimLink, SVGGElement, unknown> | null>(null)
   const connectedMapRef = useRef<Map<string, Set<string>>>(new Map())
 
+  const skillRestRadiiRef = useRef<Map<string, number>>(new Map())
+
   const { applyGraphHighlight } = useConstellationHighlight({
     nodeSelectionRef,
     linkSelectionRef,
@@ -123,6 +125,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     srDefault,
     srActive,
     nodesRef,
+    skillRestRadii: skillRestRadiiRef.current,
   })
 
   highlightGraphRef.current = applyGraphHighlight
@@ -148,6 +151,9 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     linkSelectionRef.current = sim.linkSelectionRef.current
     if (sim.connectedMap.size > 0) {
       connectedMapRef.current = sim.connectedMap
+    }
+    if (sim.skillRestRadii.size > 0) {
+      skillRestRadiiRef.current = sim.skillRestRadii
     }
   })
 
@@ -185,27 +191,27 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
   }, [focusedNodeId])
 
   const handleNodeKeyDown = useCallback((e: React.KeyboardEvent, nodeId: string, nodeType: 'role' | 'skill') => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      setPinnedNodeId(nodeId)
-      pinnedNodeIdRef.current = nodeId
-      highlightGraphRef.current?.(nodeId)
-      if (nodeType === 'role') {
-        onNodeHover?.(nodeId)
-      } else {
-        onNodeHover?.(resolveRoleFallback())
-      }
-      if (nodeType === 'role') {
-        onRoleClick(nodeId)
-      } else {
-        onSkillClick(nodeId)
-      }
-    }
+    if (e.key !== 'Enter' && e.key !== ' ') return
+    e.preventDefault()
+    setPinnedNodeId(nodeId)
+    pinnedNodeIdRef.current = nodeId
+    highlightGraphRef.current?.(nodeId)
+    onNodeHover?.(nodeType === 'role' ? nodeId : resolveRoleFallback())
+    ;(nodeType === 'role' ? onRoleClick : onSkillClick)(nodeId)
   }, [onRoleClick, onSkillClick, onNodeHover, resolveRoleFallback, setPinnedNodeId, pinnedNodeIdRef])
 
   // Pinned career entity for mobile accordion
   const pinnedRoleNode = pinnedNodeId ? constellationNodes.find(n => n.id === pinnedNodeId && n.type === 'role') : null
   const pinnedCareerEntity = pinnedRoleNode ? careerEntityById.get(pinnedRoleNode.id) ?? null : null
+  const domainCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    constellationNodes.filter(n => n.type === 'skill').forEach(n => {
+      const d = n.domain ?? 'technical'
+      counts[d] = (counts[d] ?? 0) + 1
+    })
+    return counts
+  }, [])
+
   const showAccordion = supportsCoarsePointer && pinnedCareerEntity !== null
 
   return (
@@ -229,7 +235,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         style={{ display: 'block' }}
       />
 
-      <ConstellationLegend isTouch={supportsCoarsePointer} />
+      <ConstellationLegend isTouch={supportsCoarsePointer} domainCounts={domainCounts} />
 
       <MobileAccordion
         pinnedCareerEntity={pinnedCareerEntity}

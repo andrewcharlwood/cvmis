@@ -15,8 +15,29 @@ export const MOBILE_LABEL_MAX_LEN = 10
 export const HIGHLIGHT_DIM_OPACITY = 0.15
 export const SKILL_REST_OPACITY = 0.35
 export const SKILL_ACTIVE_OPACITY = 0.9
-export const LINK_REST_OPACITY = 0.15
 export const LABEL_REST_OPACITY = 0.5
+
+// Link visual params
+export const LINK_BASE_WIDTH = 0.5
+export const LINK_STRENGTH_WIDTH_FACTOR = 1.5
+export const LINK_BASE_OPACITY = 0.08
+export const LINK_STRENGTH_OPACITY_FACTOR = 0.12
+export const LINK_HIGHLIGHT_BASE_WIDTH = 1
+export const LINK_HIGHLIGHT_STRENGTH_WIDTH_FACTOR = 2
+export const LINK_BEZIER_VERTICAL_OFFSET = 0.15
+
+// Skill node visual params
+export const SKILL_STROKE_WIDTH = 1
+export const SKILL_STROKE_OPACITY = 0.4
+export const SKILL_SIZE_ROLE_FACTOR = 0.8
+export const SKILL_GLOW_STD_DEVIATION = 2.5
+
+// Entry animation
+export const ENTRY_GUIDE_FADE_MS = 200
+export const ENTRY_ROLE_STAGGER_MS = 80
+export const ENTRY_ROLE_DURATION_MS = 300
+export const ENTRY_SKILL_STAGGER_MS = 30
+export const ENTRY_SKILL_DURATION_MS = 250
 
 // Domain color map
 export const DOMAIN_COLOR_MAP: Record<string, string> = {

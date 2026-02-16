@@ -1,7 +1,21 @@
 import { useRef, useCallback } from 'react'
 import type * as d3 from 'd3'
-import { DOMAIN_COLOR_MAP, prefersReducedMotion } from '@/components/constellation/constants'
+import {
+  DOMAIN_COLOR_MAP, prefersReducedMotion,
+  LINK_BASE_WIDTH, LINK_STRENGTH_WIDTH_FACTOR,
+  LINK_BASE_OPACITY, LINK_STRENGTH_OPACITY_FACTOR,
+  LINK_HIGHLIGHT_BASE_WIDTH, LINK_HIGHLIGHT_STRENGTH_WIDTH_FACTOR,
+  SKILL_STROKE_OPACITY,
+} from '@/components/constellation/constants'
 import type { SimNode, SimLink } from '@/components/constellation/types'
+
+function getSkillDomainColor(link: SimLink, nodes: SimNode[]): string {
+  const tgtId = typeof link.target === 'string' ? link.target : (link.target as SimNode).id
+  const srcId = typeof link.source === 'string' ? link.source : (link.source as SimNode).id
+  const skillId = nodes.find(n => n.id === tgtId)?.type === 'skill' ? tgtId : srcId
+  const skillNode = nodes.find(n => n.id === skillId)
+  return DOMAIN_COLOR_MAP[skillNode?.domain ?? 'technical'] ?? '#0D6E6E'
+}
 
 export function useConstellationHighlight(deps: {
   nodeSelectionRef: React.MutableRefObject<d3.Selection<SVGGElement, SimNode, SVGGElement, unknown> | null>
@@ -10,6 +24,7 @@ export function useConstellationHighlight(deps: {
   srDefault: number
   srActive: number
   nodesRef: React.MutableRefObject<SimNode[]>
+  skillRestRadii?: Map<string, number>
 }) {
   const highlightGraphRef = useRef<((activeNodeId: string | null) => void) | null>(null)
 
@@ -18,7 +33,7 @@ export function useConstellationHighlight(deps: {
     const linkSelection = deps.linkSelectionRef.current
     if (!nodeSelection || !linkSelection) return
 
-    const { srDefault, srActive, connectedMap } = deps
+    const { srDefault, srActive, connectedMap, skillRestRadii } = deps
     const nodes = deps.nodesRef.current
     const dur = prefersReducedMotion ? 0 : 180
 
@@ -28,30 +43,36 @@ export function useConstellationHighlight(deps: {
       nodeSelection.filter(d => d.type === 'role')
         .attr('filter', null)
         .select('.node-circle')
+        .attr('fill-opacity', null)
         .attr('stroke-opacity', 0.4)
         .attr('stroke-width', 1)
 
       const skillNodes = nodeSelection.filter(d => d.type === 'skill')
+      const getRestRadius = (d: SimNode) => skillRestRadii?.get(d.id) ?? srDefault
       if (dur > 0) {
         skillNodes.select('.node-circle')
           .transition().duration(dur)
-          .attr('r', srDefault)
+          .attr('r', d => getRestRadius(d))
           .attr('fill-opacity', 0.35)
+          .attr('filter', null)
+          .attr('stroke-opacity', SKILL_STROKE_OPACITY)
         skillNodes.select('.node-label')
           .transition().duration(dur)
           .attr('opacity', 0.5)
       } else {
         skillNodes.select('.node-circle')
-          .attr('r', srDefault)
+          .attr('r', d => getRestRadius(d))
           .attr('fill-opacity', 0.35)
+          .attr('filter', null)
+          .attr('stroke-opacity', SKILL_STROKE_OPACITY)
         skillNodes.select('.node-label')
           .attr('opacity', 0.5)
       }
 
       linkSelection
-        .attr('stroke', 'var(--border-light)')
-        .attr('stroke-width', 1)
-        .attr('stroke-opacity', 0.15)
+        .attr('stroke', l => getSkillDomainColor(l, nodes))
+        .attr('stroke-width', l => LINK_BASE_WIDTH + l.strength * LINK_STRENGTH_WIDTH_FACTOR)
+        .attr('stroke-opacity', l => LINK_BASE_OPACITY + l.strength * LINK_STRENGTH_OPACITY_FACTOR)
 
       return
     }
@@ -68,26 +89,36 @@ export function useConstellationHighlight(deps: {
         return null
       })
       .select('.node-circle')
+      .attr('fill-opacity', d => d.id === activeNodeId ? 0.25 : null)
       .attr('stroke-opacity', d => {
         if (d.id === activeNodeId) return 1
         if (connected.has(d.id)) return 0.7
         return 0.4
       })
-      .attr('stroke-width', d => d.id === activeNodeId ? 1.5 : 1)
+      .attr('stroke-width', d => d.id === activeNodeId ? 2 : 1)
 
     const skillNodes = nodeSelection.filter(d => d.type === 'skill')
+    const getRestRadius = (d: SimNode) => skillRestRadii?.get(d.id) ?? srDefault
+    const getActiveRadius = (d: SimNode) => {
+      const roleCount = (skillRestRadii?.get(d.id) ?? srDefault) - srDefault
+      return srActive + roleCount
+    }
     if (dur > 0) {
       skillNodes.select('.node-circle')
         .transition().duration(dur)
-        .attr('r', d => isInGroup(d.id) ? srActive : srDefault)
+        .attr('r', d => isInGroup(d.id) ? getActiveRadius(d) : getRestRadius(d))
         .attr('fill-opacity', d => isInGroup(d.id) ? 0.9 : 0.35)
+        .attr('filter', d => isInGroup(d.id) ? `url(#glow-${d.domain ?? 'technical'})` : null)
+        .attr('stroke-opacity', d => isInGroup(d.id) ? 0.8 : SKILL_STROKE_OPACITY)
       skillNodes.select('.node-label')
         .transition().duration(dur)
         .attr('opacity', d => isInGroup(d.id) ? 1 : 0.5)
     } else {
       skillNodes.select('.node-circle')
-        .attr('r', d => isInGroup(d.id) ? srActive : srDefault)
+        .attr('r', d => isInGroup(d.id) ? getActiveRadius(d) : getRestRadius(d))
         .attr('fill-opacity', d => isInGroup(d.id) ? 0.9 : 0.35)
+        .attr('filter', d => isInGroup(d.id) ? `url(#glow-${d.domain ?? 'technical'})` : null)
+        .attr('stroke-opacity', d => isInGroup(d.id) ? 0.8 : SKILL_STROKE_OPACITY)
       skillNodes.select('.node-label')
         .attr('opacity', d => isInGroup(d.id) ? 1 : 0.5)
     }
@@ -101,7 +132,7 @@ export function useConstellationHighlight(deps: {
           const skillNode = nodes.find(n => n.id === skillId)
           return DOMAIN_COLOR_MAP[skillNode?.domain ?? 'technical'] ?? '#0D6E6E'
         }
-        return 'var(--border-light)'
+        return getSkillDomainColor(l, nodes)
       })
       .attr('stroke-opacity', l => {
         const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
@@ -109,13 +140,15 @@ export function useConstellationHighlight(deps: {
         if (src === activeNodeId || tgt === activeNodeId) {
           return Math.max(0.35, Math.min(0.65, l.strength * 0.55 + 0.2))
         }
-        return 0.15
+        return LINK_BASE_OPACITY + l.strength * LINK_STRENGTH_OPACITY_FACTOR
       })
       .attr('stroke-width', l => {
         const src = typeof l.source === 'string' ? l.source : (l.source as SimNode).id
         const tgt = typeof l.target === 'string' ? l.target : (l.target as SimNode).id
-        if (src === activeNodeId || tgt === activeNodeId) return 1.5
-        return 1
+        if (src === activeNodeId || tgt === activeNodeId) {
+          return LINK_HIGHLIGHT_BASE_WIDTH + l.strength * LINK_HIGHLIGHT_STRENGTH_WIDTH_FACTOR
+        }
+        return LINK_BASE_WIDTH + l.strength * LINK_STRENGTH_WIDTH_FACTOR
       })
   }, [deps])
 

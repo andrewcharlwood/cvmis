@@ -7,6 +7,13 @@ import {
   MOBILE_ROLE_WIDTH, MOBILE_LABEL_MAX_LEN,
   MOBILE_SKILL_RADIUS_DEFAULT, MOBILE_SKILL_RADIUS_ACTIVE,
   DOMAIN_COLOR_MAP, prefersReducedMotion,
+  LINK_BASE_WIDTH, LINK_STRENGTH_WIDTH_FACTOR,
+  LINK_BASE_OPACITY, LINK_STRENGTH_OPACITY_FACTOR,
+  LINK_BEZIER_VERTICAL_OFFSET,
+  SKILL_STROKE_WIDTH, SKILL_STROKE_OPACITY, SKILL_SIZE_ROLE_FACTOR,
+  SKILL_GLOW_STD_DEVIATION,
+  ENTRY_GUIDE_FADE_MS, ENTRY_ROLE_STAGGER_MS, ENTRY_ROLE_DURATION_MS,
+  ENTRY_SKILL_STAGGER_MS, ENTRY_SKILL_DURATION_MS,
 } from '@/components/constellation/constants'
 import type { SimNode, SimLink, LayoutParams } from '@/components/constellation/types'
 
@@ -40,6 +47,7 @@ export function useForceSimulation(
   const nodeSelectionRef = useRef<d3.Selection<SVGGElement, SimNode, SVGGElement, unknown> | null>(null)
   const linkSelectionRef = useRef<d3.Selection<SVGPathElement, SimLink, SVGGElement, unknown> | null>(null)
   const connectedMapRef = useRef<Map<string, Set<string>>>(new Map())
+  const skillRestRadiiRef = useRef<Map<string, number>>(new Map())
   const layoutParamsRef = useRef<LayoutParams | null>(null)
   const [nodeButtonPositions, setNodeButtonPositions] = useState<Record<string, { x: number; y: number }>>({})
 
@@ -113,6 +121,33 @@ export function useForceSimulation(
       .attr('dx', 0).attr('dy', 2)
       .attr('stdDeviation', 3)
       .attr('flood-color', 'rgba(26,43,42,0.12)')
+
+    // Glow filters per domain
+    Object.entries(DOMAIN_COLOR_MAP).forEach(([domain]) => {
+      const glow = defs.append('filter')
+        .attr('id', `glow-${domain}`)
+        .attr('x', '-50%').attr('y', '-50%')
+        .attr('width', '200%').attr('height', '200%')
+      glow.append('feGaussianBlur')
+        .attr('in', 'SourceGraphic')
+        .attr('stdDeviation', SKILL_GLOW_STD_DEVIATION)
+        .attr('result', 'blur')
+      const merge = glow.append('feMerge')
+      merge.append('feMergeNode').attr('in', 'blur')
+      merge.append('feMergeNode').attr('in', 'SourceGraphic')
+    })
+
+    // Role gradient defs
+    const uniqueOrgColors = [...new Set(constellationNodes.filter(n => n.type === 'role').map(n => n.orgColor ?? 'var(--accent)'))]
+    uniqueOrgColors.forEach((color, i) => {
+      const grad = defs.append('linearGradient')
+        .attr('id', `role-grad-${i}`)
+        .attr('x1', '0%').attr('y1', '0%')
+        .attr('x2', '100%').attr('y2', '0%')
+      grad.append('stop').attr('offset', '0%').attr('stop-color', color).attr('stop-opacity', 0.08)
+      grad.append('stop').attr('offset', '100%').attr('stop-color', color).attr('stop-opacity', 0.18)
+    })
+    const orgColorGradientMap = new Map(uniqueOrgColors.map((c, i) => [c, `url(#role-grad-${i})`]))
 
     // Timeline guides
     const timelineGroup = svg.append('g').attr('class', 'timeline-guides')
@@ -230,6 +265,17 @@ export function useForceSimulation(
     })
     connectedMapRef.current = connectedMap
 
+    // Compute skill rest radii (size encoding by connected role count)
+    const skillRestRadii = new Map<string, number>()
+    nodes.filter(n => n.type === 'skill').forEach(n => {
+      const roleCount = connectedMap.get(n.id)?.size ?? 0
+      skillRestRadii.set(n.id, srDefault + roleCount * SKILL_SIZE_ROLE_FACTOR)
+    })
+    skillRestRadiiRef.current = skillRestRadii
+
+    // Node-by-id lookup for link domain color resolution
+    const nodeById = new Map(constellationNodes.map(n => [n.id, n]))
+
     // Create SVG groups
     const linkGroup = svg.append('g').attr('class', 'links')
     const connectorGroup = svg.append('g').attr('class', 'connectors')
@@ -239,9 +285,12 @@ export function useForceSimulation(
       .data(links)
       .join('path')
       .attr('fill', 'none')
-      .attr('stroke', 'var(--border-light)')
-      .attr('stroke-width', 1)
-      .attr('stroke-opacity', 0.15)
+      .attr('stroke', d => {
+        const skillNode = nodeById.get(d.target as string) ?? nodeById.get(d.source as string)
+        return DOMAIN_COLOR_MAP[skillNode?.domain ?? 'technical'] ?? '#0D6E6E'
+      })
+      .attr('stroke-width', d => LINK_BASE_WIDTH + d.strength * LINK_STRENGTH_WIDTH_FACTOR)
+      .attr('stroke-opacity', d => LINK_BASE_OPACITY + d.strength * LINK_STRENGTH_OPACITY_FACTOR)
       .style('transition', prefersReducedMotion
         ? 'none'
         : 'stroke 150ms ease, stroke-opacity 150ms ease, stroke-width 150ms ease'
@@ -279,8 +328,7 @@ export function useForceSimulation(
       .attr('width', rw)
       .attr('height', rh)
       .attr('rx', rrx)
-      .attr('fill', d => d.orgColor ?? 'var(--accent)')
-      .attr('fill-opacity', 0.12)
+      .attr('fill', d => orgColorGradientMap.get(d.orgColor ?? 'var(--accent)') ?? d.orgColor ?? 'var(--accent)')
       .attr('stroke', d => d.orgColor ?? 'var(--accent)')
       .attr('stroke-opacity', 0.4)
       .attr('stroke-width', 1)
@@ -312,10 +360,12 @@ export function useForceSimulation(
     nodeSelection.filter(d => d.type === 'skill')
       .append('circle')
       .attr('class', 'node-circle')
-      .attr('r', srDefault)
+      .attr('r', d => skillRestRadii.get(d.id) ?? srDefault)
       .attr('fill', d => DOMAIN_COLOR_MAP[d.domain ?? 'technical'] ?? '#0D6E6E')
-      .attr('stroke', 'none')
       .attr('fill-opacity', 0.35)
+      .attr('stroke', d => DOMAIN_COLOR_MAP[d.domain ?? 'technical'] ?? '#0D6E6E')
+      .attr('stroke-width', SKILL_STROKE_WIDTH)
+      .attr('stroke-opacity', SKILL_STROKE_OPACITY)
 
     nodeSelection.filter(d => d.type === 'skill')
       .append('text')
@@ -386,7 +436,7 @@ export function useForceSimulation(
           const sy = (d.source as SimNode).y
           const tx = (d.target as SimNode).x
           const ty = (d.target as SimNode).y
-          const cx = (sx + tx) / 2
+          const cx = (sx + tx) / 2 + (ty - sy) * LINK_BEZIER_VERTICAL_OFFSET
           return `M${sx},${sy} Q${cx},${sy} ${tx},${ty}`
         })
 
@@ -425,6 +475,77 @@ export function useForceSimulation(
       options.applyHighlight(options.resolveGraphFallback())
     }
 
+    // Entry animation: set initial hidden state for non-reduced-motion
+    if (!prefersReducedMotion) {
+      timelineGroup.attr('opacity', 0)
+      linkSelection.attr('opacity', 0)
+      nodeSelection.filter(d => d.type === 'role').attr('opacity', 0)
+      nodeSelection.filter(d => d.type === 'skill')
+        .attr('opacity', 0)
+        .select('.node-circle').attr('r', 0)
+      roleConnectors.attr('opacity', 0)
+    }
+
+    let entryAnimationRan = false
+    const maybeRunEntryAnimation = () => {
+      if (entryAnimationRan || prefersReducedMotion) return
+      if (simulation.alpha() > 0.05) return
+      entryAnimationRan = true
+
+      const roleCount = nodes.filter(n => n.type === 'role').length
+      const skillCount = constellationNodes.filter(n => n.type === 'skill').length
+
+      // Timeline guides fade in
+      timelineGroup.transition().duration(ENTRY_GUIDE_FADE_MS).attr('opacity', 1)
+
+      // Role nodes staggered
+      nodeSelection.filter(d => d.type === 'role')
+        .transition()
+        .delay((_d, i) => ENTRY_GUIDE_FADE_MS + i * ENTRY_ROLE_STAGGER_MS)
+        .duration(ENTRY_ROLE_DURATION_MS)
+        .attr('opacity', 1)
+
+      // Role connectors follow their roles
+      roleConnectors
+        .transition()
+        .delay((_d, i) => ENTRY_GUIDE_FADE_MS + i * ENTRY_ROLE_STAGGER_MS)
+        .duration(ENTRY_ROLE_DURATION_MS)
+        .attr('opacity', 1)
+
+      // Skill nodes scale up
+      const roleAnimEnd = ENTRY_GUIDE_FADE_MS + roleCount * ENTRY_ROLE_STAGGER_MS + ENTRY_ROLE_DURATION_MS
+      nodeSelection.filter(d => d.type === 'skill')
+        .transition()
+        .delay((_d, i) => roleAnimEnd + i * ENTRY_SKILL_STAGGER_MS)
+        .duration(ENTRY_SKILL_DURATION_MS)
+        .attr('opacity', 1)
+
+      nodeSelection.filter(d => d.type === 'skill')
+        .select('.node-circle')
+        .transition()
+        .delay((_d, i) => roleAnimEnd + i * ENTRY_SKILL_STAGGER_MS)
+        .duration(ENTRY_SKILL_DURATION_MS)
+        .attr('r', d => skillRestRadii.get(d.id) ?? srDefault)
+
+      // Links draw on via stroke-dashoffset
+      const skillAnimEnd = roleAnimEnd + skillCount * ENTRY_SKILL_STAGGER_MS + ENTRY_SKILL_DURATION_MS
+      linkSelection
+        .each(function () {
+          const length = (this as SVGPathElement).getTotalLength()
+          d3.select(this)
+            .attr('stroke-dasharray', `${length} ${length}`)
+            .attr('stroke-dashoffset', length)
+        })
+        .attr('opacity', 1)
+        .transition()
+        .delay((_d, i) => skillAnimEnd + i * 15)
+        .duration(300)
+        .attr('stroke-dashoffset', 0)
+        .on('end', function () {
+          d3.select(this).attr('stroke-dasharray', null).attr('stroke-dashoffset', null)
+        })
+    }
+
     if (prefersReducedMotion) {
       simulation.stop()
       for (let i = 0; i < 150; i++) {
@@ -432,7 +553,10 @@ export function useForceSimulation(
       }
       renderTick()
     } else {
-      simulation.on('tick', renderTick)
+      simulation.on('tick', () => {
+        renderTick()
+        maybeRunEntryAnimation()
+      })
     }
 
     return () => {
@@ -448,6 +572,7 @@ export function useForceSimulation(
     nodeButtonPositions,
     layoutParams: layoutParamsRef.current,
     connectedMap: connectedMapRef.current,
+    skillRestRadii: skillRestRadiiRef.current,
   }
 }
 
