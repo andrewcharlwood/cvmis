@@ -6,11 +6,10 @@ import { CommandPalette } from './CommandPalette'
 import { DetailPanel } from './DetailPanel'
 import { CardHeader } from './Card'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
-import { EducationSubsection } from './EducationSubsection'
 import { ProjectsTile } from './tiles/ProjectsTile'
 import { ParentSection } from './ParentSection'
 import CareerConstellation from './CareerConstellation'
-import { WorkExperienceSubsection } from './WorkExperienceSubsection'
+import { TimelineInterventionsSubsection } from './TimelineInterventionsSubsection'
 import { RepeatMedicationsSubsection } from './RepeatMedicationsSubsection'
 import { ChatWidget } from './ChatWidget'
 import { useActiveSection } from '@/hooks/useActiveSection'
@@ -457,18 +456,11 @@ export function DashboardLayout() {
                   </div>
 
                   <div className="chronology-item">
-                    <span className="chronology-badge">Role</span>
                     <LastConsultationSubsection highlightedRoleId={highlightedRoleId} />
                   </div>
 
                   <div className="chronology-item">
-                    <span className="chronology-badge">Role</span>
-                    <WorkExperienceSubsection onNodeHighlight={handleNodeHighlight} highlightedRoleId={highlightedRoleId} />
-                  </div>
-
-                  <div className="chronology-item" data-tile-id="section-education">
-                    <span className="chronology-badge">Education</span>
-                    <EducationSubsection />
+                    <TimelineInterventionsSubsection onNodeHighlight={handleNodeHighlight} highlightedRoleId={highlightedRoleId} />
                   </div>
                 </div>
                 <div className="pathway-graph-sticky">

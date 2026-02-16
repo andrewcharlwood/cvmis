@@ -3,6 +3,32 @@ export interface CodedEntry {
   description: string
 }
 
+export type TimelineEntityKind = 'career' | 'education'
+
+export interface TimelineEntityDateRange {
+  start: string
+  end: string | null
+  display: string
+  startYear: number
+  endYear: number | null
+}
+
+export interface TimelineEntity {
+  id: string
+  kind: TimelineEntityKind
+  title: string
+  graphLabel: string
+  organization: string
+  orgColor: string
+  dateRange: TimelineEntityDateRange
+  description: string
+  details: string[]
+  skills: string[]
+  outcomes?: string[]
+  codedEntries?: CodedEntry[]
+  skillStrengths?: Record<string, number>
+}
+
 export interface Consultation {
   id: string
   date: string
@@ -175,6 +201,11 @@ export interface ConstellationLink {
   source: string
   target: string
   strength: number
+}
+
+export interface RoleSkillMapping {
+  roleId: string
+  skillIds: string[]
 }
 
 // Detail panel content union

@@ -1,117 +1,120 @@
-# Sidebar-First Navigation Refactor Plan
+# Patient Pathway Graph Stability + Unified Timeline Plan
 
 ## Scope
-Refactor dashboard navigation so section jumping is sidebar-driven across desktop and mobile, remove rendered TopBar/SubNav from dashboard flow, and eliminate offset/scroll artifacts caused by legacy top-nav layout assumptions.
+Refactor pathway graph + timeline cards so career and education are rendered from one canonical dataset, hover behavior is shared and stable, and sidebar tags are derived from canonical skills frequency.
 
-## Current State Findings
-- `src/components/DashboardLayout.tsx` still renders `TopBar` + `SubNav` and offsets the main flex layout by `--topbar-height` and `--subnav-height`.
-- `src/components/Sidebar.tsx` has profile/tags/alerts but no section navigation and no mobile collapse/expand behavior.
-- `src/components/SubNav.tsx` contains section jump logic and labels (including disallowed recruiter label mismatch: `Significant Interventions`).
-- `src/hooks/useActiveSection.ts` maps section IDs to outdated tile keys (`core-skills`, `career-activity`, `education`) that do not reflect current `data-tile-id` anchors in `DashboardLayout.tsx`.
+## Root-Cause Findings
+- Hover jiggle source: `CareerConstellation` re-creates the full SVG and force simulation whenever `highlightedNodeId` changes because the main D3 effect depends on `[dimensions, highlightedNodeId, pinnedNodeId]` (`src/components/CareerConstellation.tsx`).
+- Date mismatch source: duplicated timeline/date models across:
+  - `consultations` (`date` and `duration` strings) in `src/data/consultations.ts`
+  - `constellationNodes` (`startYear`/`endYear`) in `src/data/constellation.ts`
+  - education card details built separately from `documents` in `src/components/EducationSubsection.tsx`
+- Experience/education split source: `DashboardLayout` renders `WorkExperienceSubsection` and `EducationSubsection` as separate blocks (`src/components/DashboardLayout.tsx`), so hover wiring and pill treatment are inconsistent by design.
+- Sidebar tags source mismatch: tags are static in `src/data/tags.ts` and consumed directly in `src/components/Sidebar.tsx`, not derived from actual timeline entities.
 
-## Implementation Plan
+## Target Canonical Model
+Define a single timeline entity type in `src/types/pmr.ts` and canonical data module in `src/data/timeline.ts`.
 
-### 1) Make DashboardLayout sidebar-first and remove top-nav render path
-File: `src/components/DashboardLayout.tsx`
-- Remove imports/usages of `TopBar` and `SubNav` from rendered output.
-- Remove topbar/subnav animation variants and dead section-click handler tied to SubNav.
-- Rework root layout to a single full-height flex shell with no `marginTop` or `calc(100vh - topbar/subnav)` offsets.
-- Keep main content scroll container behavior and anchor IDs unchanged (`data-tile-id` values remain jump targets).
-- Pass navigation support props to sidebar (active section + section click callback) so jumping logic lives in sidebar.
+Required per-entry fields:
+- `id: string`
+- `kind: 'career' | 'education'`
+- `title: string` (full card title)
+- `graphLabel: string` (short node label)
+- `organization: string`
+- `orgColor: string`
+- `dateRange: { start: string; end: string | null; display: string; startYear: number; endYear: number | null }`
+- `description: string`
+- `details: string[]` (card bullets)
+- `skills: string[]` (skill IDs for graph links + aggregation)
 
-### 2) Add recruiter-facing sidebar navigation + mobile rail/drawer behavior
-File: `src/components/Sidebar.tsx`
-- Introduce a canonical nav config array with required order/labels and icon mapping:
-  - `overview` / `UserRound` / tile `patient-summary`
-  - `projects` / `Pill` / tile `projects`
-  - `experience` / `Workflow` / tile `section-experience`
-  - `education` / `GraduationCap` / tile `section-education`
-  - `skills` / `Wrench` / tile `section-skills`
-- Add `Navigation` subsection with buttons/links for the five sections (icon + text in expanded mode).
-- Keep a separate `My Data` subsection above `Navigation` in expanded mode (profile block remains here).
-- Implement mobile-first collapse model:
-  - Default mobile state collapsed.
-  - Top hamburger control toggles expanded/collapsed.
-  - Collapsed mobile rail renders hamburger + five icon-only jump controls.
-  - Expanded mobile state renders full sidebar content (`My Data`, `Navigation`, tags, alerts/highlights).
-- Preserve desktop expanded behavior (full content visible), with nav included.
-- Ensure controls are keyboard operable and include ARIA semantics:
-  - toggle button: `aria-label`, `aria-expanded`, `aria-controls`
-  - nav region: semantic `<nav aria-label="Sidebar navigation">`
-  - current section indicator via `aria-current="page"` (or equivalent) on active nav item.
-- Add visible focus styles for nav/toggle controls (via class or inline style).
+Derived selectors/utilities in `src/data/timeline.ts`:
+- `timelineEntities` (canonical array, sorted reverse-chronological)
+- `buildConstellationData()` => role nodes + links from canonical entities + skills catalog
+- `getTopTimelineSkills(limit)` => ordered skills by descending frequency for sidebar tags
 
-### 3) Move section scroll/jump logic from SubNav into sidebar callbacks
-Files: `src/components/DashboardLayout.tsx`, `src/components/Sidebar.tsx`
-- Implement shared `scrollToSection(tileId)` callback in layout, passed to sidebar.
-- Use smooth `scrollIntoView({ behavior: 'smooth', block: 'start' })` to preserve existing behavior.
-- Keep compatibility with command palette actions that already target `data-tile-id` anchors.
+## File-Level Implementation Plan
+1. Add canonical types/data and migrate existing records.
+- Files: `src/types/pmr.ts`, new `src/data/timeline.ts`, optionally thin compatibility exports from `src/data/consultations.ts`/`src/data/constellation.ts`.
+- Action: move career + education entries into `timelineEntities`; stop hand-maintained duplicate date fields.
 
-### 4) Fix active-section tracking for sidebar highlighting
-File: `src/hooks/useActiveSection.ts`
-- Update `sectionTileMap` to match current tile IDs:
-  - `patient-summary -> overview`
-  - `projects -> projects`
-  - `section-experience -> experience`
-  - `section-education -> education`
-  - `section-skills -> skills`
-- Verify observer root behavior still works with new scroll container; if needed, scope observer root to main scroll area for robust active-state transitions.
+2. Refactor graph data construction to consume canonical entities only.
+- Files: `src/data/constellation.ts` (or replace with derived module), `src/components/CareerConstellation.tsx`.
+- Action: remove hard-coded role node years/labels from graph source and generate from canonical date ranges.
 
-### 5) CSS cleanup for removed top-nav assumptions and mobile sidebar ergonomics
-File: `src/index.css`
-- Remove/retire unused `--topbar-height` and `--subnav-height` dependencies in layout styles if no longer referenced.
-- Add any small utility classes needed for sidebar rail widths, expanded panel widths, and focus-visible outlines.
-- Keep scrollbar styling but ensure no hidden top space appears in sidebar when scrolling (layout should no longer rely on inherited top offsets).
-- Remove stale subnav-only selectors if no longer used.
+3. Stabilize hover interaction and remove graph-wide re-init on hover.
+- File: `src/components/CareerConstellation.tsx`.
+- Action:
+  - Split graph init/layout effect from highlight-only effect.
+  - Keep simulation/SVG creation dependent on dimensions/data only.
+  - Apply highlight updates imperatively via ref without rebuilding nodes/forces.
+  - Keep `onNodeHover` contract for role nodes; ensure null reset on leave/touch clear.
 
-### 6) Handle obsolete components intentionally
-Files: `src/components/SubNav.tsx`, `src/components/TopBar.tsx`
-- Leave components in tree initially if safer for atomic refactor, but ensure they are not rendered.
-- Optional cleanup pass can remove dead exports/importers after behavior is stable.
+4. Unify timeline card rendering (career + education in one flow).
+- Files: replace `src/components/WorkExperienceSubsection.tsx` and `src/components/EducationSubsection.tsx` usage with a unified list component (new `src/components/TimelineInterventionsSubsection.tsx` or equivalent), update `src/components/DashboardLayout.tsx`.
+- Action:
+  - Remove standalone work-experience subheader and old role pill treatment.
+  - Render both kinds in one chronological list.
+  - Career cards: `Career Intervention` pill.
+  - Education cards: right-aligned card layout + `Education Intervention` pill inside each card.
+  - Remove separate education block under work experience.
 
-## Risks and Mitigations
-- Risk: Active section highlighting may flicker if observer root mismatches scroll container.
-  - Mitigation: test with long scroll and set observer root to main content container if required.
-- Risk: Mobile sidebar overlay/rail can obstruct content interaction.
-  - Mitigation: define clear z-index layering and width; ensure collapsed rail is narrow and predictable.
-- Risk: Accessibility regressions on icon-only controls.
-  - Mitigation: explicit `aria-label`s, visible focus ring, keyboard toggle and section activation checks.
-- Risk: Existing GP metaphor wording leaks into navigation labels.
-  - Mitigation: hardcode recruiter-facing nav labels exactly as required.
+5. Unify graph/card highlight source of truth.
+- Files: `src/components/DashboardLayout.tsx`, unified timeline component, `src/components/CareerConstellation.tsx`.
+- Action:
+  - Replace split `highlightedNodeId`/`highlightedRoleId` with one active timeline entry ID for role-type entities.
+  - Hovering graph role node highlights matching card; hovering matching card highlights graph node.
+  - Keep click behavior opening detail panel by entity kind.
 
-## Verification Checklist (Builder must execute)
-- Functional:
-  - No `TopBar`/`SubNav` rendered in dashboard flow.
-  - Sidebar shows `My Data` then `Navigation` with labels: Overview, Projects, Experience, Education, Skills.
-  - Desktop sidebar jump controls scroll to correct sections.
-  - Mobile default is collapsed rail (hamburger + five icons).
-  - Mobile expanded view shows My Data + full Navigation + tags + alerts/highlights.
-  - Sidebar upward scroll no longer reveals top spacing artifact.
-- Accessibility:
-  - Toggle and nav controls keyboard operable.
-  - Correct ARIA on toggle/nav regions and active item.
-  - Focus-visible indicators are apparent for interactive sidebar controls.
-- Build quality gates:
-  - `npm run lint`
-  - `npm run typecheck`
-  - `npm run build`
+6. Feed sidebar tags from canonical skill aggregation.
+- Files: `src/components/Sidebar.tsx`, `src/data/tags.ts` (remove static dependency or convert to fallback only), `src/data/timeline.ts`.
+- Action:
+  - Compute top N frequent skills from `timelineEntities.skills`.
+  - Map aggregated skills to existing `Tag` shape with deterministic color-variant mapping.
 
-## Suggested Execution Order
-1. `DashboardLayout` structural refactor (remove top-nav render and offset math).
-2. Sidebar API + nav/mobile UI implementation.
-3. Active-section hook mapping corrections.
-4. CSS cleanup and focus styles.
-5. Verification and quality gates.
+7. Regression sweep + quality gates.
+- Files: `src/components/CommandPalette.tsx`, `src/lib/search.ts` only if section IDs/labels or timeline references need consistency updates.
+- Action: ensure route/anchor labels still work after removing separate education section.
 
-## Builder Status (2026-02-16)
-- [x] `DashboardLayout` now renders a full-height sidebar-first shell; `TopBar` and `SubNav` are no longer rendered.
-- [x] Sidebar now owns section navigation with labels: Overview, Projects, Experience, Education, Skills.
-- [x] Expanded sidebar includes distinct `My Data` section above `Navigation`.
-- [x] Mobile sidebar defaults to collapsed rail (hamburger + icon shortcuts) and expands to full content panel.
-- [x] Sidebar/main layout no longer depends on topbar/subnav offsets, removing the hidden top spacing artifact source.
-- [x] Active section mapping updated for current tile IDs in `useActiveSection`.
-- [x] Accessibility semantics added for toggle and nav controls (`aria-label`, `aria-expanded`, `aria-controls`, `aria-current`), with visible focus styling.
-- [x] Quality gates run:
-  - `npm run lint` (passes with 2 pre-existing warnings in context files)
-  - `npm run typecheck` (pass)
-  - `npm run build` (pass)
+## Build/Verification Checklist
+- Hovering graph node and corresponding card produce identical highlight result.
+- Hover no longer causes graph jitter/repositioning.
+- Graph timeline date ranges and card date ranges match for every entry.
+- Canonical timeline dataset is the only source for career + education cards and graph role nodes/links.
+- Sidebar tags are generated from canonical skill frequencies (descending).
+- Career entries show `Career Intervention`; education entries are right-aligned with `Education Intervention`.
+- Separate education section below experience is removed.
+- `npm run lint`
+- `npm run typecheck`
+- `npm run build`
+
+## Runtime Task Mapping
+- `task-1771244841-616d`: canonical model/data unification
+- `task-1771244841-cb07`: graph stability + shared hover lifecycle
+- `task-1771244841-2f8e`: unified career/education timeline presentation
+- `task-1771244841-9748`: sidebar tag aggregation + quality gates
+
+## Progress Updates
+- 2026-02-16: Completed `task-1771244841-616d`.
+  - Added canonical timeline schema (`TimelineEntity`, `TimelineEntityDateRange`, `TimelineEntityKind`) in `src/types/pmr.ts`.
+  - Added `src/data/timeline.ts` as source-of-truth for timeline entities, including `timelineEntities`, `timelineConsultations`, `buildConstellationData()`, and `getTopTimelineSkills()`.
+  - Replaced static duplicated `consultations` and `constellation` datasets with compatibility exports derived from canonical timeline data.
+  - Validation run: `npm run lint`, `npm run typecheck`, `npm run build` all passed (warnings only).
+- 2026-02-16: Completed `task-1771244841-cb07`.
+  - Refactored `src/components/CareerConstellation.tsx` so the D3 initialization/simulation effect depends only on `dimensions` rather than hover/pin state.
+  - Added ref-backed highlight target tracking (`highlightedNodeIdRef`, `pinnedNodeIdRef`) so hover and pin changes update styling without tearing down/recreating the SVG simulation.
+  - Updated pointer/touch handlers and render tick highlight fallback to read from refs, preserving graph-card hover sync while eliminating hover-driven graph reinitialization jitter.
+  - Validation run: `npm run lint`, `npm run typecheck`, `npm run build` all passed (same pre-existing warnings only).
+- 2026-02-16: Completed `task-1771244841-2f8e`.
+  - Added `src/components/TimelineInterventionsSubsection.tsx` to render career + education entries in one canonical timeline flow sourced from `timelineEntities`.
+  - Replaced separate `WorkExperienceSubsection` + `EducationSubsection` blocks in `src/components/DashboardLayout.tsx` with unified timeline rendering; removed standalone education section beneath work experience.
+  - Removed legacy chronology "Role/Education" badge pills around the split sections, and added per-card intervention pills:
+    - Career cards show `Career Intervention`.
+    - Education cards show `Education Intervention`.
+  - Added right-aligned treatment for education cards in `src/index.css` via `.timeline-intervention-item--education`.
+  - Preserved graph/card hover parity by keeping existing `onNodeHighlight` + `highlightedRoleId` wiring across unified cards.
+  - Validation run: `npm run lint`, `npm run typecheck`, `npm run build` all passed (same pre-existing warnings only).
+- 2026-02-16: Completed `task-1771244841-9748`.
+  - Replaced static sidebar tags in `src/data/tags.ts` with canonical aggregation via `getTopTimelineSkills()`, preserving deterministic ordering (most frequent skills first) and mapping to existing tag color variants.
+  - Kept sidebar rendering path unchanged in `src/components/Sidebar.tsx` so tags now automatically follow canonical timeline skill frequencies.
+  - Validation run: `npm run lint`, `npm run typecheck`, `npm run build`, `npm audit --omit=dev` passed (`eslint` retains the same 2 pre-existing react-refresh warnings).
+  - Repository check confirmed no automated test/spec files are currently present under `src/`.

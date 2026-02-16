@@ -1,9 +1,9 @@
 import type { Tag } from '@/types/pmr'
+import { getTopTimelineSkills } from '@/data/timeline'
 
-export const tags: Tag[] = [
-  { label: 'Pharmacist', colorVariant: 'teal' },
-  { label: 'Data Lead', colorVariant: 'teal' },
-  { label: 'NHS', colorVariant: 'teal' },
-  { label: 'Population Health', colorVariant: 'amber' },
-  { label: 'BI & Analytics', colorVariant: 'green' },
-]
+const tagColorVariants: Tag['colorVariant'][] = ['teal', 'green', 'amber']
+
+export const tags: Tag[] = getTopTimelineSkills().map((skill, index) => ({
+  label: skill.label,
+  colorVariant: tagColorVariants[index % tagColorVariants.length],
+}))

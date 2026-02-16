@@ -106,6 +106,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
   const simulationRef = useRef<d3.Simulation<SimNode, SimLink> | null>(null)
   const highlightGraphRef = useRef<((activeNodeId: string | null) => void) | null>(null)
   const callbacksRef = useRef({ onRoleClick, onSkillClick, onNodeHover })
+  const highlightedNodeIdRef = useRef<string | null>(highlightedNodeId ?? null)
+  const pinnedNodeIdRef = useRef<string | null>(null)
   const [dimensions, setDimensions] = useState({ width: 800, height: MIN_HEIGHT, scaleFactor: 1 })
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null)
   const [pinnedNodeId, setPinnedNodeId] = useState<string | null>(null)
@@ -150,6 +152,14 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
     return () => observer.disconnect()
   }, [containerHeight])
+
+  useEffect(() => {
+    highlightedNodeIdRef.current = highlightedNodeId ?? null
+  }, [highlightedNodeId])
+
+  useEffect(() => {
+    pinnedNodeIdRef.current = pinnedNodeId
+  }, [pinnedNodeId])
 
   useEffect(() => {
     const svg = d3.select(svgRef.current)
@@ -559,6 +569,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     svg.select('.bg-rect').on('click', () => {
       if (supportsCoarsePointer) {
         setPinnedNodeId(null)
+        pinnedNodeIdRef.current = null
         applyGraphHighlight(null)
         callbacksRef.current.onNodeHover?.(null)
       }
@@ -574,19 +585,21 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
 
     nodeSelection.on('mouseleave', function() {
       if (supportsCoarsePointer) return
-      applyGraphHighlight(highlightedNodeId ?? null)
+      applyGraphHighlight(highlightedNodeIdRef.current ?? pinnedNodeIdRef.current)
       callbacksRef.current.onNodeHover?.(null)
     })
 
     nodeSelection.on('click', function(_event, d) {
       if (supportsCoarsePointer) {
         // Touch: tap-to-pin toggle
-        if (pinnedNodeId === d.id) {
+        if (pinnedNodeIdRef.current === d.id) {
           setPinnedNodeId(null)
+          pinnedNodeIdRef.current = null
           applyGraphHighlight(null)
           callbacksRef.current.onNodeHover?.(null)
         } else {
           setPinnedNodeId(d.id)
+          pinnedNodeIdRef.current = d.id
           applyGraphHighlight(d.id)
           callbacksRef.current.onNodeHover?.(d.type === 'role' ? d.id : null)
         }
@@ -680,7 +693,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         return prev
       })
 
-      applyGraphHighlight(highlightedNodeId ?? pinnedNodeId)
+      applyGraphHighlight(highlightedNodeIdRef.current ?? pinnedNodeIdRef.current)
     }
 
     if (prefersReducedMotion) {
@@ -696,7 +709,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     return () => {
       simulation.stop()
     }
-  }, [dimensions, highlightedNodeId, pinnedNodeId])
+  }, [dimensions])
 
   useEffect(() => {
     if (!svgRef.current) return

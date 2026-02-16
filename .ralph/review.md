@@ -1,34 +1,34 @@
-# Sidebar-First Navigation Refactor Review
+# Pathway Reviewer - Final Validation
 
-## Outcome
-Approved.
+## Verdict
+Approved. All requested success criteria are met.
 
-## Success Criteria Validation
-- [x] No top navbar/subnav is rendered in the final dashboard layout.
-  - Verified `DashboardLayout` no longer imports/renders `TopBar` or `SubNav` (`src/components/DashboardLayout.tsx`).
-- [x] Sidebar contains the five required recruiter-facing nav labels under a `Navigation` subheader.
-  - Verified labels: `Overview`, `Projects`, `Experience`, `Education`, `Skills` under `SectionTitle` = `Navigation` (`src/components/Sidebar.tsx`).
-- [x] Expanded sidebar includes a distinct `My Data` area above `Navigation`.
-  - Verified `My Data` section is rendered before Navigation in expanded mode (`src/components/Sidebar.tsx`).
-- [x] Sidebar scrolling no longer exposes hidden top spacing/artifacts when scrolling upward.
-  - Verified old top/subnav offset coupling removed from layout flow; main content is now a full-height flex region with sidebar-driven structure (`src/components/DashboardLayout.tsx`, `src/index.css`).
-- [x] Desktop navigation from sidebar correctly jumps/scrolls to each section.
-  - Verified `onNavigate` targets `data-tile-id` anchors and uses smooth `scrollIntoView` (`src/components/DashboardLayout.tsx`, `src/components/Sidebar.tsx`).
-- [x] On mobile, sidebar is collapsed by default with hamburger at top and five icon shortcuts visible.
-  - Verified mobile defaults to collapsed (`isMobileExpanded=false`) and renders hamburger + icon-only nav rail (`src/components/Sidebar.tsx`).
-- [x] On mobile expand, sidebar shows `My Data`, full navigation links (icon + text), and tags/alerts/highlights.
-  - Verified expanded mode conditionally renders all required blocks (`src/components/Sidebar.tsx`).
-- [x] Navigation controls are keyboard accessible with appropriate ARIA semantics.
-  - Verified interactive controls are native buttons, include `aria-expanded`, `aria-controls`, `aria-label`, and `aria-current`, plus focus-visible styling (`src/components/Sidebar.tsx`, `src/index.css`).
-- [x] `npm run lint` passes.
-  - Passes with 2 pre-existing warnings only (`react-refresh/only-export-components` in context files).
-- [x] `npm run typecheck` passes.
-- [x] `npm run build` passes.
+## Findings
+No blocking issues found.
 
-## Validation Commands
-- `npm run lint`
-- `npm run typecheck`
-- `npm run build`
+## Criteria Validation
+- Hover parity across graph and cards: **Pass**
+  - Card hover drives graph highlight via `onNodeHighlight` -> `highlightedNodeId` -> `CareerConstellation` highlight effect.
+  - Graph hover drives card highlight via `onNodeHover` -> `highlightedRoleId` consumed by timeline cards.
+- Hover jitter/reflow artifacts: **Pass**
+  - D3 initialization effect in `CareerConstellation` depends on `dimensions` only.
+  - Highlight updates are decoupled via refs/effect (`highlightGraphRef`) and no longer recreate simulation.
+- Timeline/card date consistency from one canonical source: **Pass**
+  - Canonical entities are defined in `src/data/timeline.ts`.
+  - `consultations` and constellation role/edge data are compatibility layers derived from canonical timeline entities.
+- Unified career/education card flow and pills: **Pass**
+  - `TimelineInterventionsSubsection` renders one ordered list from `timelineEntities`.
+  - Career entries show `Career Intervention` pill.
+  - Education entries show `Education Intervention` pill and right-aligned layout class.
+- Standalone duplicate education section removed: **Pass**
+  - `DashboardLayout` uses unified timeline subsection; separate education subsection path is removed.
+- Sidebar tags from canonical skill aggregation: **Pass**
+  - `src/data/tags.ts` derives tags from `getTopTimelineSkills()` (most frequent first).
+- Quality gates: **Pass**
+  - `npm run lint`: pass (2 existing warnings, 0 errors)
+  - `npm run typecheck`: pass
+  - `npm run build`: pass
 
 ## Notes
-- Build emits existing non-blocking warnings for large chunks and `onnxruntime-web` eval usage; no blocking errors.
+- Validation for "no jitter" is based on lifecycle/code-path inspection plus successful build gates.
+- Existing non-blocking warnings remain in context providers (`react-refresh/only-export-components`).

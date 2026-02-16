@@ -2,6 +2,10 @@
 
 ## Patterns
 
+### mem-1771245168-48e8
+> Canonical timeline data now lives in src/data/timeline.ts and legacy consultations/constellation exports are compatibility layers derived from it, removing duplicated date/year maintenance.
+<!-- tags: data, timeline, consistency | created: 2026-02-16 -->
+
 ### mem-1771239841-81ef
 > ProjectsTile responsive layout now uses cards-per-view width calc plus flex gap instead of slide padding to prevent overflow/cropping across breakpoints.
 <!-- tags: ui, carousel, responsive | created: 2026-02-16 -->
@@ -25,6 +29,14 @@
 ## Decisions
 
 ## Fixes
+
+### mem-1771245621-03a4
+> failure: cmd=rg --files src/components | rg -E 'WorkExperienceSubsection|EducationSubsection|DashboardLayout|Timeline|CareerConstellation', exit=2, error=used grep-style -E on ripgrep causing encoding parse error, next=use plain regex pattern with rg or escape patterns correctly
+<!-- tags: tooling, error-handling, search | created: 2026-02-16 -->
+
+### mem-1771245355-b355
+> failure: cmd=cat >> .ralph/agent/scratchpad.md <<EOF ..., exit=127, error=unquoted heredoc caused backtick command substitution (e.g. CareerConstellation not found), next=use quoted heredoc delimiter <<'EOF' when appending markdown with backticks
+<!-- tags: tooling, error-handling, ralph | created: 2026-02-16 -->
 
 ### mem-1771239420-0b3f
 > failure: cmd=sed -n '1,220p' Ralph/PROMPT.md and sed -n '1,220p' .ralph/agent/scratchpad.md, exit=2, error=path mismatch (Ralph/prompt.md is lowercase) and missing scratchpad file, next=use correct lowercase prompt path and recreate scratchpad before proceeding

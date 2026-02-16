@@ -403,6 +403,41 @@ html {
   border: 1px solid var(--accent-border);
 }
 
+.timeline-intervention-item {
+  width: 100%;
+}
+
+.timeline-intervention-item--education {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.timeline-intervention-item--education > div {
+  width: min(100%, 94%);
+}
+
+.timeline-intervention-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-family: var(--font-geist-mono);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-light);
+  border: 1px solid var(--accent-border);
+}
+
+.timeline-intervention-pill--education {
+  color: #6B21A8;
+  background: rgba(124, 58, 237, 0.1);
+  border-color: rgba(124, 58, 237, 0.28);
+}
+
 /* Desktop: 2 columns */
 @media (min-width: 1024px) {
   .pathway-columns {
