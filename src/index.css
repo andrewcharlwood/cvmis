@@ -204,26 +204,6 @@ body {
   animation: fadeIn 200ms ease-out forwards;
 }
 
-@keyframes kpiPulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(10, 128, 128, 0.12);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(10, 128, 128, 0);
-  }
-}
-
-@keyframes coachmarkIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -314,29 +294,32 @@ html {
   transform: translateY(0) scale(0.992);
 }
 
-.metric-card-pulse {
-  animation: kpiPulse 1.8s ease-out infinite;
+.latest-results-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
 
-.kpi-card-coachmark-target {
-  margin-top: 24px;
+.latest-results-header > div {
+  margin-bottom: 0 !important;
 }
 
-.kpi-coachmark {
-  position: absolute;
-  top: -28px;
-  left: 0;
-  z-index: 2;
-  padding: 4px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  font-family: var(--font-geist-mono);
-  color: var(--accent);
-  background: rgba(10, 128, 128, 0.1);
-  border: 1px solid var(--accent-border);
-  animation: coachmarkIn 180ms ease-out;
+.latest-results-grid {
+  margin-top: 12px;
+}
+
+@media (min-width: 768px) {
+  .latest-results-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .latest-results-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
 }
 
 /* Dashboard card grid responsive — mobile-first */
