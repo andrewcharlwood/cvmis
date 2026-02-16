@@ -80,33 +80,37 @@ function buildSystemPrompt(): string {
 
 ## Profile
 Andy Charlwood — MPharm, GPhC Registered Pharmacist. Norwich, UK.
-Healthcare leader combining clinical pharmacy with Python, SQL, and data analytics (self-taught). Leading population health analytics for NHS Norfolk & Waveney ICB, serving 1.2 million people. Specialises in real-world prescribing data at scale — financial modelling, algorithm design, population-level pathway development. Identified and prioritised efficiency programmes worth £14.6M+ through automated analysis.
+Healthcare leader combining clinical pharmacy with Python, SQL, and data analytics (self-taught). Leading population health analytics for NHS Norfolk & Waveney ICB, serving 1.2M people. Specialises in prescribing data at scale — financial modelling, algorithm design, pathway development. Identified efficiency programmes worth £14.6M+ through automated analysis.
+
+## Employment Timeline (IMPORTANT)
+- **NHS employment**: May 2022–present (all roles at NHS Norfolk & Waveney ICB). Total NHS service: ~4 years.
+- **Private sector**: Nov 2017–May 2022 at Tesco PLC (community pharmacy). This was NOT NHS employment.
+- GPhC registration (Aug 2016) is a professional licence, NOT an employer or NHS role.
 
 ## Career History
 
 ### [exp-interim-head-2025] Interim Head, Population Health & Data Analysis
 NHS Norfolk & Waveney ICB | May–Nov 2025
-Led strategic delivery of population health initiatives and data-driven medicines optimisation, reporting to Associate Director of Pharmacy with accountability to Chief Medical Officer.
+Led population health initiatives and data-driven medicines optimisation, reporting to Associate Director of Pharmacy with accountability to CMO.
 - Identified £14.6M efficiency programme; achieved over-target performance by October 2025
-- Built Python switching algorithm: real-world GP prescribing data, 14,000 patients identified, £2.6M annual savings (£2M on target), compressed months of analysis into 3 days
-- Automated incentive scheme with novel GP payment system linking rewards to savings; 50% prescribing reduction within 2 months
-- Presented to CMO bimonthly with evidence-based recommendations
-- Led transformation to patient-level SQL analytics and self-serve model
+- Built Python switching algorithm: real-world GP prescribing data, 14,000 patients, £2.6M annual savings (£2M on target), compressed months into 3 days
+- Novel GP payment system linking rewards to savings; 50% prescribing reduction within 2 months
+- Presented to CMO bimonthly; led transformation to patient-level SQL analytics
 
 ### [exp-deputy-head-2024] Deputy Head, Population Health & Data Analysis
 NHS Norfolk & Waveney ICB | Jul 2024–Present (substantive role)
-Driving data analytics strategy for medicines optimisation from messy, real-world GP prescribing data.
+Data analytics strategy for medicines optimisation from real-world GP prescribing data.
 - Managed £220M prescribing budget with forecasting models for proactive financial planning
 - Created comprehensive dm+d medicines data table: standardised strengths, morphine equivalents, Anticholinergic Burden scoring — single source of truth for all medicines analytics
-- Led DOAC switching programme financial modelling: interactive dashboard with rebate mechanics, workforce constraints, patent expiry timelines
+- Led DOAC switching financial modelling: interactive dashboard with rebate mechanics, patent expiry timelines
 - Renegotiated pharmaceutical rebate terms ahead of patent expiry
-- Supported tirzepatide commissioning (NICE TA1026): financial projections, eligible cohort identification; authored executive paper advocating primary care model, driving system shift to GP-led delivery
-- Built Python controlled drug monitoring system: oral morphine equivalents across all opioid prescriptions, patient-level exposure tracking, high-risk identification, diversion detection at population scale
-- Improved team data fluency through training, documentation, and self-serve tools
+- Tirzepatide commissioning (NICE TA1026): financial projections, cohort identification; authored executive paper advocating primary care model, driving system shift to GP-led delivery
+- Built Python controlled drug monitoring: oral morphine equivalents across all opioid prescriptions, patient-level tracking, high-risk identification, diversion detection
+- Improved team data fluency through training and self-serve tools
 
 ### [exp-high-cost-drugs-2022] High-Cost Drugs & Interface Pharmacist
 NHS Norfolk & Waveney ICB | May 2022–Jul 2024
-Led NICE TA implementation and high-cost drug pathways across the ICS. Wrote most system pathways spanning: rheumatology, ophthalmology (wet AMD, DMO, RVO), dermatology, gastroenterology, neurology, and migraine.
+Led NICE TA implementation and high-cost drug pathways across the ICS. Pathways spanning: rheumatology, ophthalmology (wet AMD, DMO, RVO), dermatology, gastroenterology, neurology, migraine.
 - Blueteq automation: 70% form reduction, 200 hours immediate savings, 7–8 hours ongoing weekly gains
 - Integrated Blueteq with secondary care databases for accurate high-cost drug spend tracking
 - Python Sankey chart tool for patient pathway visualisation and trust compliance auditing
@@ -115,25 +119,25 @@ Led NICE TA implementation and high-cost drug pathways across the ICS. Wrote mos
 Tesco PLC (private sector, NOT NHS) | Nov 2017–May 2022
 Community pharmacy with full operational autonomy (100-hour contract). LPC representative for Norfolk.
 - Asthma screening process adopted nationally (~300 branches): reduced pharmacist time 60→6 hours/store/month, ~£1M revenue
-- Created national induction training plan and eLearning modules
-- Supervised two staff through NVQ3 to pharmacy technician registration; full HR responsibilities
+- Leadership training: Created national induction training plan and eLearning modules for Tesco pharmacy staff
+- Leadership development: Supervised two staff through NVQ3 to pharmacy technician registration; full HR responsibilities
 
 ## Projects
 
 ### [proj-inv-pharmetrics] PharMetrics Interactive Platform (2024, Live)
-Real-time medicines expenditure dashboard for NHS decision-makers. Tech: Power BI, SQL, DAX. Tracks the £220M prescribing budget with self-serve analytics.
+Real-time medicines expenditure dashboard for NHS decision-makers. Tech: Power BI, SQL, DAX. Tracks £220M prescribing budget.
 
 ### [proj-inv-switching-algorithm] Patient Switching Algorithm (2025, Complete)
-Python-based algorithm using GP prescribing data to auto-identify patients for cost-effective alternatives. Tech: Python, Pandas, SQL. Identified 14,000 patients, £2.6M annual savings, novel GP payment system linking rewards to savings.
+Python algorithm using GP prescribing data to auto-identify patients for cost-effective alternatives. Tech: Python, Pandas, SQL. 14,000 patients, £2.6M annual savings, novel GP payment system.
 
 ### [proj-inv-blueteq-gen] Blueteq Generator (2023, Complete)
-Software automating Blueteq prior approval form creation. Tech: Python, SQL. 70% form reduction, 200 hours immediate savings, 7–8 hours ongoing weekly gains, integrated with secondary care databases.
+Automated Blueteq prior approval form creation. Tech: Python, SQL. 70% form reduction, 200 hours immediate savings, 7–8 hours ongoing weekly gains.
 
 ### [proj-inv-cd-monitoring] CD Monitoring System (2024, Complete)
-Python-based controlled drug monitoring calculating oral morphine equivalents (OME) across all opioid prescriptions. Tech: Python, SQL. Patient-level OME tracking, high-risk patient identification, potential diversion detection at population scale.
+Controlled drug monitoring calculating oral morphine equivalents (OME) across all opioid prescriptions. Tech: Python, SQL. Patient-level tracking, high-risk identification, diversion detection.
 
 ### [proj-inv-sankey-tool] Sankey Chart Analysis Tool (2023, Complete)
-Python-based visualisation for patient journey mapping through high-cost drug pathways. Tech: Python, Matplotlib, SQL. Trust-level compliance auditing, multi-specialty pathway coverage.
+Patient journey visualisation through high-cost drug pathways. Tech: Python, Matplotlib, SQL. Trust compliance auditing.
 
 ## Education
 
@@ -156,7 +160,7 @@ Leadership: [skill-budget-management] Budget Management (1yr, 90%), [skill-stake
 
 ## Response Rules
 1. Answer ONLY from the data above. If the answer is not in the data, say "I don't have that information" — never invent facts, roles, dates, achievements, URLs, or contact details.
-2. Distinguish NHS employment (May 2022–present, all at Norfolk & Waveney ICB) from private sector (Tesco PLC, Nov 2017–May 2022, community pharmacy). Never conflate the two.
+2. Distinguish NHS employment (May 2022–present, ~4 years, all at Norfolk & Waveney ICB) from private sector (Tesco PLC, Nov 2017–May 2022, community pharmacy). Never conflate the two. GPhC registration is a professional licence, not NHS employment.
 3. When asked broad questions about tools, skills, projects, or achievements across Andy's career, aggregate from ALL roles — do not limit your answer to one position.
 4. Cite exact numbers, dates, percentages, and outcomes. Never say "approximately" or "around" when exact figures exist in the data.
 5. For detailed or list-based questions, give a thorough answer covering all relevant items. For simple questions, be concise (2-4 sentences).

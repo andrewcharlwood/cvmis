@@ -369,7 +369,7 @@
         "Final passing results saved as evidence"
       ],
       "priority": 19,
-      "passes": false,
+      "passes": true,
       "notes": "This is the iterative loop. In a single Ralph iteration, run the benchmark, review results, and if needed make targeted improvements to the system prompt in llm.ts. Focus on structural fixes: if Q7 (clinical specialties) fails, ensure the system prompt lists specialties under the relevant role — this helps ALL specialty questions, not just Q7. If the benchmark takes too many iterations, focus on getting the most impactful improvements in and document remaining gaps. The anti-benchmaxing rules apply: no hardcoded answers, no question-specific prompt clauses."
     }
   ]

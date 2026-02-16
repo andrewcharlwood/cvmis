@@ -1,0 +1,92 @@
+{
+  "iteration": 1,
+  "timestamp": "2026-02-16T00:54:27.821Z",
+  "model": "z-ai/glm-5",
+  "totalScore": 18,
+  "maxPossibleScore": 20,
+  "passThreshold": 18,
+  "passed": false,
+  "hasZeros": true,
+  "results": [
+    {
+      "id": "Q01",
+      "question": "How many years has Andy been employed by the NHS?",
+      "expectedAnswer": "Approximately 3-4 years. Andy's NHS employment started in May 2022 when he joined NHS Norfolk and Waveney ICB. His previous role at Tesco PLC was in the private sector, not the NHS.",
+      "actualAnswer": "Andy has been employed by the NHS for approximately 4 years, starting in May 2022 at NHS Norfolk & Waveney ICB, where he has held all three of his NHS roles. His prior employment at Tesco PLC (Nov 2017–May 2022) was in the private sector as a community pharmacy manager, not NHS employment.\n\n[ITEMS: exp-interim-head-2025, exp-deputy-head-2024, exp-high-cost-drugs-2022]",
+      "score": 2,
+      "justification": "Correctly states May 2022 start date, approximately 4 years, and Tesco as private sector."
+    },
+    {
+      "id": "Q02",
+      "question": "What was Andy's involvement with tirzepatide?",
+      "expectedAnswer": "Andy supported commissioning of NICE TA1026 (tirzepatide). He authored the initial executive paper advocating a primary care delivery model over specialist provider, which drove a system shift to GP-led model.",
+      "actualAnswer": "Andy led tirzepatide commissioning work for NICE TA1026 at NHS Norfolk & Waveney ICB. His involvement included developing financial projections and identifying patient cohorts eligible for treatment. He authored an executive paper advocating for a primary care delivery model, which drove a system shift to GP-led tirzepatide delivery.\n\n[ITEMS: exp-deputy-head-2024]",
+      "score": 2,
+      "justification": "Covers all key facts: NICE TA1026, executive paper, primary care model, and GP-led delivery."
+    },
+    {
+      "id": "Q03",
+      "question": "What specific tools and software has Andy built?",
+      "expectedAnswer": "Andy has built 5 notable projects: a patient switching algorithm (Python, 14000 patients, £2.6M savings), a Blueteq generator for high-cost drug forms, a controlled drugs monitoring system, a Sankey chart tool for visualising patient flows, and PharMetrics — a Power BI analytics dashboard.",
+      "actualAnswer": "Andy has built five specific tools and software systems:\n\n**1. PharMetrics Interactive Platform (2024, Live)**\nReal-time medicines expenditure dashboard for NHS decision-makers tracking the £220M prescribing budget. Built with Power BI, SQL, and DAX.\n\n**2. Patient Switching Algorithm (2025)**\nPython algorithm using GP prescribing data to auto-identify patients for cost-effective alternatives. Processes data for 14,000 patients, delivering £2.6M annual savings. Built with Python, Pandas, and SQL. Compressed months of work into 3 days.\n\n**3. Blueteq Generator (2023)**\nAutomated Blueteq prior approval form creation tool. Achieved 70% form reduction, 200 hours immediate savings, and 7–8 hours ongoing weekly gains. Built with Python and SQL.\n\n**4. CD Monitoring System (2024)**\nControlled drug monitoring system calculating oral morphine equivalents (OME) across all opioid prescriptions. Features patient-level tracking, high-risk identification, and diversion detection. Built with Python and SQL.\n\n**5. Sankey Chart Analysis Tool (2023)**\nPatient journey visualisation tool for high-cost drug pathways, used for trust compliance auditing. Built with Python, Matplotlib, and SQL.\n\nAdditionally, Andy created a comprehensive dm+d medicines data table serving as a single source of truth for all medicines analytics, with standardised strengths, morphine equivalents, and Anticholinergic Burden scoring.\n\n[ITEMS: proj-inv-pharmetrics, proj-inv-switching-algorithm, proj-inv-blueteq-gen, proj-inv-cd-monitoring, proj-inv-sankey-tool, exp-deputy-head-2024]",
+      "score": 2,
+      "justification": "Covers all five key projects accurately with additional detail on each tool."
+    },
+    {
+      "id": "Q04",
+      "question": "What were Andy's A-level subjects and grades?",
+      "expectedAnswer": "Andy achieved Mathematics A*, Chemistry B, and Politics C at Highworth Grammar School between 2009-2011.",
+      "actualAnswer": "Andy completed his A-Levels at Highworth Grammar School from 2009–2011. His subjects and grades were: Mathematics A*, Chemistry B, and Politics C.\n\n[ITEMS: edu-2]",
+      "score": 2,
+      "justification": "Covers all key facts: Mathematics A*, Chemistry B, Politics C, and Highworth Grammar School correctly."
+    },
+    {
+      "id": "Q05",
+      "question": "Was Andy's Tesco role part of the NHS?",
+      "expectedAnswer": "No. Andy's role at Tesco PLC was in the private sector as a community pharmacist. Tesco PLC is a private employer. He was an LPC representative during this time.",
+      "actualAnswer": "No, Andy's Tesco role was not part of the NHS. It was private sector community pharmacy employment at Tesco PLC from November 2017 to May 2022. Andy's NHS employment began in May 2022 at NHS Norfolk & Waveney ICB.\n\n[ITEMS: exp-pharmacymanager-2017]",
+      "score": 2,
+      "justification": "Correctly states private sector, community pharmacy, and Tesco PLC. Minor omission of LPC representative detail."
+    },
+    {
+      "id": "Q06",
+      "question": "How did the patient switching algorithm work?",
+      "expectedAnswer": "It was Python-based and used real-world GP prescribing data to auto-identify patients eligible for cost-effective medication alternatives. It compressed months of manual work into 3 days, covered 14,000 patients, and identified £2.6M in savings.",
+      "actualAnswer": "The patient switching algorithm is a Python-based tool that uses real-world GP prescribing data to automatically identify patients who could be switched to cost-effective alternative medicines.\n\n**Technical approach:**\n- Built using Python, Pandas, and SQL\n- Analyses GP prescribing data at patient level\n- Auto-identifies suitable candidates for switching to cheaper alternatives\n\n**Outcomes:**\n- Identified 14,000 patients for potential switching\n- Projected £2.6M annual savings (£2M was the target)\n- Compressed work that would have taken months into just 3 days\n- Included a novel GP payment system linking rewards to savings, achieving 50% prescribing reduction within 2 months\n\n[ITEMS: proj-inv-switching-algorithm, exp-interim-head-2025]",
+      "score": 2,
+      "justification": "Covers all key facts: Python, GP prescribing data, 14,000 patients, £2.6M savings, and 3 days timeline."
+    },
+    {
+      "id": "Q07",
+      "question": "What clinical specialties has Andy worked across?",
+      "expectedAnswer": "Andy has worked across rheumatology, ophthalmology (wet AMD, DMO, RVO), dermatology, gastroenterology, neurology, and migraine through his high-cost drugs role.",
+      "actualAnswer": "Andy has worked across multiple clinical specialties through his NICE TA implementation and high-cost drug pathway work at NHS Norfolk & Waveney ICB. The specialties include:\n\n- **Rheumatology**\n- **Ophthalmology** (wet AMD, DMO, RVO)\n- **Dermatology**\n- **Gastroenterology**\n- **Neurology**\n- **Migraine**\n\n[ITEMS: exp-high-cost-drugs-2022]",
+      "score": 2,
+      "justification": "Covers all six specialties accurately with correct ophthalmology sub-specialties included."
+    },
+    {
+      "id": "Q08",
+      "question": "What is Andy's experience with the dm+d?",
+      "expectedAnswer": "Andy created a comprehensive medicines data table integrating all dm+d products with standardised strengths, morphine equivalents, and Anticholinergic Burden scoring, serving as a single source of truth.",
+      "actualAnswer": "Andy created a comprehensive dm+d medicines data table during his role as Deputy Head of Population Health & Data Analysis. This table standardised medicine strengths, calculated morphine equivalents, and included Anticholinergic Burden scoring — serving as a single source of truth for all medicines analytics at NHS Norfolk & Waveney ICB.\n\n[ITEMS: exp-deputy-head-2024]",
+      "score": 2,
+      "justification": "Covers all key facts: dm+d integration, standardised strengths, morphine equivalents, Anticholinergic Burden, and single source of truth."
+    },
+    {
+      "id": "Q09",
+      "question": "What budget does Andy manage and how?",
+      "expectedAnswer": "Andy manages a £220M prescribing budget using forecasting models, variance analysis, and financial reporting to the executive team, enabling proactive financial planning.",
+      "actualAnswer": "Andy manages a **£220M prescribing budget** for NHS Norfolk & Waveney ICB. He uses forecasting models for proactive financial planning and built the PharMetrics Interactive Platform — a real-time medicines expenditure dashboard using Power BI, SQL, and DAX to track spending.\n\nHis approach includes financial modelling for specific initiatives (such as DOAC switching with rebate mechanics and patent expiry timelines), Python algorithms to identify cost-saving opportunities (£2.6M annual savings identified through patient switching), and renegotiating pharmaceutical rebate terms. He also authors executive papers with financial projections to inform commissioning decisions, such as the tirzepatide primary care model.\n\n[ITEMS: exp-deputy-head-2024, proj-inv-pharmetrics, proj-inv-switching-algorithm, skill-budget-management, skill-financial-modelling]",
+      "score": 2,
+      "justification": "Covers £220M budget, forecasting models, and proactive financial planning. Missing variance analysis but no errors."
+    },
+    {
+      "id": "Q10",
+      "question": "What leadership training does Andy have?",
+      "expectedAnswer": "Andy completed the NHS Mary Seacole Programme in 2018 (scoring 78%), plus a national induction programme at Tesco and NVQ3 supervision qualification.",
+      "actualAnswer": "Andy completed the **NHS Mary Seacole Programme** in 2018 through the NHS Leadership Academy, achieving a score of 78%. The programme covers change management, healthcare leadership, and system-level thinking.\n\nAdditionally, during his time as Pharmacy Manager at Tesco PLC, he created national induction training plans and eLearning modules for Tesco pharmacy staff, and supervised two staff members through NVQ3 to pharmacy technician registration.\n\n[ITEMS: edu-0, exp-pharmacymanager-2017]",
+      "score": 0,
+      "justification": "Misrepresents Tesco induction (created vs completed) and NVQ3 (supervised others vs has qualification)."
+    }
+  ]
+}

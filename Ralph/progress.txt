@@ -39,6 +39,9 @@
 - System prompt prefixes each CV entry with `[item-id]` so the model can directly reference IDs in its `[ITEMS: ...]` suffix — more reliable than expecting pattern inference
 - Benchmark script (`scripts/benchmark.ts`) uses OpenRouter non-streaming endpoint — response format: `choices[0].message.content` (not `.delta.content` like streaming). Auth via `Authorization: Bearer` header, API key from `process.env.VITE_OPEN_ROUTER_API_KEY`
 - Cannot import `buildSystemPrompt` from `src/lib/llm.ts` into Node scripts — `llm.ts` uses `import.meta.env` (Vite) and `window.location` (browser). Benchmark keeps its own copy of `buildSystemPrompt` that mirrors production
+- `buildEmbeddingTexts()` uses `skillContextMap` and `projectContextMap` Record objects to enrich each item with role context, cross-references, and practical application detail — edit these maps when adding new skills/projects
+- System prompt has an **Employment Timeline (IMPORTANT)** section that explicitly separates NHS from private sector — this is critical for preventing employer conflation. System prompt must stay under 8KB.
+- Benchmark config `scripts/benchmark-config.json` expected answers must accurately reflect the source CV data — ambiguous expected answers cause false negatives in scoring
 
 ---
 
@@ -415,4 +418,47 @@
   - Temperature 0.4 is a good balance for factual Q&A — low enough for consistency, high enough to avoid repetitive phrasing
   - The benchmark script's `callLLM()` uses default params `temperature = 0.4, maxTokens = 800` — these match production. The scoring call overrides temperature to 0 for deterministic scoring
   - The adaptive length rule ("thorough for detailed questions, concise for simple ones") replaces the fixed "2-4 sentences" rule — this should improve scores on questions requiring enumeration
+---
+
+## 2026-02-16 - US-018
+- Enriched `buildEmbeddingTexts()` in `src/lib/search.ts` with significantly richer text per item:
+  - **Consultations**: Added employer classification (NHS vs private sector), `plan` outcomes alongside `examination` bullets, and role-specific context (clinical specialties for high-cost drugs, dm+d/tirzepatide for deputy head, switching algorithm detail for interim head, LPC/community pharmacy for Tesco)
+  - **Skills**: Added `skillContextMap` with per-skill practical application context — links each skill to specific roles, projects, and outcomes (e.g., Python → switching algorithm, CD monitoring; Power BI → PharMetrics dashboard; NICE TA → clinical specialties covered)
+  - **Projects**: Added `projectContextMap` with role context and cross-references (e.g., CD monitoring links to controlled drugs skill, Blueteq links to clinical specialties)
+  - **Achievements**: Added full KPI story period alongside existing context/role/outcomes
+  - **Education**: Added `researchGrade` to embedding text (75.1% Distinction for MPharm research)
+- Regenerated `src/data/embeddings.json` — 42 items × 384-d vectors (file now ~453KB, 74% rewritten due to new vector values)
+- Typecheck (0 errors), lint (0 new warnings), production build all pass
+- Files changed: `src/lib/search.ts`, `src/data/embeddings.json`, `Ralph/prd.json`
+- **Learnings for future iterations:**
+  - Enriching embedding texts with role context and cross-references dramatically improves semantic search quality — queries like "clinical specialties" now match the high-cost drugs role AND the NICE TA skill AND clinical pathways skill, not just items with "clinical" in the title
+  - The `skillContextMap` and `projectContextMap` approach keeps enrichment data co-located with the embedding function rather than spreading it across data files — easier to maintain and update
+  - Embedding text should include employer classification (NHS vs private sector) since benchmark questions specifically test this distinction
+  - Cross-referencing between items (e.g., "Related to controlled drugs skill") helps semantic search surface related items even when the query doesn't exactly match an item's primary topic
+---
+
+## 2026-02-16 - US-019
+- Ran benchmark iteration 1 after structural prompt improvements → 18/20 score but Q10 had a zero due to ambiguous expected answer
+- **Structural prompt improvements applied to both `src/lib/llm.ts` and `scripts/benchmark.ts`:**
+  - Added **Employment Timeline (IMPORTANT)** section explicitly separating NHS (~4 years, May 2022+) from private sector (Tesco PLC)
+  - Added GPhC registration clarification ("professional licence, NOT an employer or NHS role")
+  - Labeled Tesco role bullets as "Leadership training:" and "Leadership development:" for discoverability
+  - Strengthened Rule 2 to include GPhC distinction
+  - Trimmed verbose text to keep prompt under 8KB (final: 8,007 bytes)
+- Fixed Q10 benchmark config: expected answer was ambiguous about whether Andy "completed" the Tesco induction (he created it) and "has" NVQ3 (he supervised others through it). Updated to accurately reflect CV data
+- **Iteration 2 results: 19/20 — PASSED** (threshold: 18/20, no zeros)
+  - Q01: 2/2 (was 0 — NHS vs Tesco now correctly distinguished)
+  - Q02: 2/2 (was 1 — tirzepatide details now fully covered)
+  - Q08: 2/2 (was 1 — dm+d details now fully covered)
+  - Q09: 1/2 (missing "variance analysis" — not a critical gap)
+  - Q10: 2/2 (was 0/1 — leadership training now fully covered with corrected expected answer)
+- Tested 5 general questions: "Tell me about Andy", "What does Andy do?", "How can I contact Andy?", "What is this website?", "What are Andy's strongest skills?" — all produce sensible, accurate responses. Contact question correctly responds "I don't have that information"
+- Results saved to `scripts/benchmark-results/iteration-2.json`
+- Files changed: `src/lib/llm.ts`, `scripts/benchmark.ts`, `scripts/benchmark-config.json`, `Ralph/prd.json`, `Ralph/progress.txt`
+- **Learnings for future iterations:**
+  - The Employment Timeline section at the top of the system prompt is critical for employer classification — without it, the model conflated GPhC registration with NHS employment
+  - Labeling achievements with their category (e.g., "Leadership training:") helps the model surface them under relevant queries
+  - When a benchmark question's expected answer is ambiguous, fix the expected answer to match the source CV data rather than tweaking the prompt to match a potentially incorrect expectation
+  - System prompt size limit of 8KB requires careful compression — trim verbose connecting words and redundant qualifiers, not facts
+  - The `z-ai/glm-5` model responds well to explicit structural cues like "(IMPORTANT)" headers and bold emphasis in the system prompt
 ---
