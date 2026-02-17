@@ -1,7 +1,6 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import type { Phase } from './types'
 import { BootSequence } from './components/BootSequence'
-import { ECGAnimation } from './components/ECGAnimation'
 import { LoginScreen } from './components/LoginScreen'
 import { DashboardLayout } from './components/DashboardLayout'
 import { AccessibilityProvider } from './contexts/AccessibilityContext'
@@ -46,13 +45,12 @@ function SkipButton({ onSkip }: { onSkip: () => void }) {
 
 function App() {
   const [phase, setPhase] = useState<Phase>('pmr')
-  const cursorPositionRef = useRef<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
     initModel()
   }, [])
 
-  const skipToLogin = () => setPhase('login')
+  const skipToDashboard = () => setPhase('pmr')
 
   return (
     <AccessibilityProvider>
@@ -66,17 +64,9 @@ function App() {
 
         {phase === 'boot' && (
           <BootSequence
-            onComplete={() => setPhase('ecg')}
-            onCursorPositionReady={(pos) => { cursorPositionRef.current = pos }}
+            onComplete={() => setPhase('login')}
           />
         )}
-
-        {phase === 'ecg' && (
-          <ECGAnimation
-            onComplete={() => setPhase('login')}
-            startPosition={cursorPositionRef.current}
-          />
-       )}
 
         {(phase === 'login' || phase === 'pmr') && (
           <DetailPanelProvider>
@@ -88,8 +78,8 @@ function App() {
           <LoginScreen onComplete={() => setPhase('pmr')} />
         )}
 
-        {(phase === 'boot' || phase === 'ecg') && (
-          <SkipButton onSkip={skipToLogin} />
+        {phase === 'boot' && (
+          <SkipButton onSkip={skipToDashboard} />
         )}
       </div>
     </AccessibilityProvider>

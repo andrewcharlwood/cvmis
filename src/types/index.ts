@@ -1,1 +1,1 @@
-export type Phase = 'boot' | 'ecg' | 'login' | 'pmr'
+export type Phase = 'boot' | 'login' | 'pmr'

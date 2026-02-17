@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useLayoutEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // =============================================================================
@@ -26,7 +26,7 @@ interface BootConfig {
     holdAfterComplete: number
     fadeOutDuration: number
     cursorShrinkDuration: number
-    ecgStartDelay: number
+    completionDelay: number
   }
   colors: {
     bright: string
@@ -37,7 +37,6 @@ interface BootConfig {
 
 interface BootSequenceProps {
   onComplete: () => void
-  onCursorPositionReady?: (position: { x: number; y: number }) => void
 }
 
 interface TypedSegment {
@@ -91,7 +90,7 @@ const BOOT_CONFIG: BootConfig = {
     holdAfterComplete: 1000,
     fadeOutDuration: 600,
     cursorShrinkDuration: 600,
-    ecgStartDelay: 0,
+    completionDelay: 0,
   },
   colors: COLORS,
 }
@@ -194,14 +193,12 @@ const TOTAL_CHARS = TYPED_LINES.reduce((sum, l) => sum + l.totalChars, 0)
 // Main Component
 // =============================================================================
 
-export function BootSequence({ onComplete, onCursorPositionReady }: BootSequenceProps) {
+export function BootSequence({ onComplete }: BootSequenceProps) {
   const [typedCount, setTypedCount] = useState(0)
   const [phase, setPhase] = useState<'typing' | 'holding' | 'fading' | 'done'>('typing')
   const [isVisible, setIsVisible] = useState(true)
-  const cursorRef = useRef<HTMLSpanElement>(null)
   const cursorAnchorRef = useRef<HTMLSpanElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const cursorCapturedRef = useRef(false)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [cursorPos, setCursorPos] = useState<{ left: number; top: number } | null>(null)
 
@@ -209,17 +206,6 @@ export function BootSequence({ onComplete, onCursorPositionReady }: BootSequence
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
     : false
 
-  // Capture cursor position for ECG handoff
-  const captureCursorPosition = useCallback(() => {
-    if (cursorRef.current && onCursorPositionReady && !cursorCapturedRef.current) {
-      const rect = cursorRef.current.getBoundingClientRect()
-      onCursorPositionReady({
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2,
-      })
-      cursorCapturedRef.current = true
-    }
-  }, [onCursorPositionReady])
 
   // Typing engine — runs as a self-scheduling setTimeout chain
   useEffect(() => {
@@ -267,18 +253,16 @@ export function BootSequence({ onComplete, onCursorPositionReady }: BootSequence
     }
   }, [typedCount, phase, reducedMotion])
 
-  // Hold phase: capture cursor, then start fading
+  // Hold phase: then start fading
   useEffect(() => {
     if (phase !== 'holding') return
-
-    captureCursorPosition()
 
     const fadeTimer = setTimeout(() => {
       setPhase('fading')
     }, BOOT_CONFIG.timing.holdAfterComplete)
 
     return () => clearTimeout(fadeTimer)
-  }, [phase, captureCursorPosition])
+  }, [phase])
 
   // Fade phase: wait for animations to finish, then complete
   useEffect(() => {
@@ -293,7 +277,7 @@ export function BootSequence({ onComplete, onCursorPositionReady }: BootSequence
       setIsVisible(false)
       setPhase('done')
       onComplete()
-    }, longestFade + BOOT_CONFIG.timing.ecgStartDelay)
+    }, longestFade + BOOT_CONFIG.timing.completionDelay)
 
     return () => clearTimeout(completeTimer)
   }, [phase, onComplete])
@@ -354,7 +338,7 @@ export function BootSequence({ onComplete, onCursorPositionReady }: BootSequence
           spans.push(
             <span
               key={segIdx}
-              className={phase === 'holding' ? 'ecg-seed-dot animate-seed-pulse' : 'ecg-seed-dot'}
+              className={phase === 'holding' ? 'boot-seed-dot animate-seed-pulse' : 'boot-seed-dot'}
               style={{ color: seg.color, fontWeight: seg.bold ? 700 : 400 }}
             >
               {visibleText}
@@ -411,7 +395,7 @@ export function BootSequence({ onComplete, onCursorPositionReady }: BootSequence
                 spans.push(
                   <span
                     key={segIdx}
-                    className={seg.isSeedDot ? 'ecg-seed-dot' : undefined}
+                    className={seg.isSeedDot ? 'boot-seed-dot' : undefined}
                     style={{ color: seg.color, fontWeight: seg.bold ? 700 : 400 }}
                   >
                     {seg.text}
@@ -469,7 +453,6 @@ export function BootSequence({ onComplete, onCursorPositionReady }: BootSequence
             {/* Cursor rendered outside fading wrapper — shrinks independently */}
             {cursorPos && phase !== 'done' && (
               <span
-                ref={cursorRef}
                 className="absolute animate-blink"
                 style={{
                   left: cursorPos.left,
