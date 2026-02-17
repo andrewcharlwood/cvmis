@@ -4,151 +4,52 @@
 - **Total src lines:** 13,242
 - **Recorded:** 2026-02-17
 
-## Current Iteration: Phase 2.2
+## Current Iteration: Phase 3.3
 
-Audit complete. Three consolidation targets identified at 3+ occurrences. One data inconsistency to fix.
+### Phase 3.3 — Review large components for extraction opportunities
 
----
+#### Analysis Summary
 
-### Phase 2.2 — Audit and consolidate repeated patterns
+Analysed all 7 components over 400 lines. Applied the objective's filter: "only extract where it genuinely reduces complexity — not arbitrary line-count reduction. Prioritise sections with own state/effects."
 
-#### Change 1: Create `src/lib/theme-colors.ts` — centralise color maps
+| Component | Lines | State | Effects | Verdict |
+|-----------|-------|-------|---------|---------|
+| ECGAnimation | 687 | 0 (refs) | 1 | SKIP — monolithic canvas animation, helpers already at module scope |
+| ChatWidget | 644 | 4 | 2 | SKIP — state tightly coupled to rendering, sub-components would need 6+ props |
+| Sidebar | 573 | 2 | 1 | SKIP — already has 3 internal sub-components, further splits are cosmetic |
+| BootSequence | 498 | 4 | 5 | SKIP — tightly-coupled timing chain, buildTypedLines already at module scope |
+| DashboardLayout | 493 | 5 | 3 | **EXTRACT** — `LastConsultationSubsection` is a standalone component (191 lines) |
+| CommandPalette | 456 | 3 | 5 | SKIP — results rendering depends heavily on parent state |
+| LoginScreen | 450 | 11 | 4 | SKIP — 11 states are one coordinated animation, splitting adds prop-drilling |
 
-**Why:** Four files define identical/overlapping color maps. Two project status maps are inconsistent (bug).
+#### Why only one extraction
 
-**New file: `src/lib/theme-colors.ts`**
-```ts
-/** Semantic dot/accent colors used across Card, DetailPanel, KPIs */
-export const DOT_COLORS = {
-  teal: '#0D6E6E',
-  amber: '#D97706',
-  green: '#059669',
-  alert: '#DC2626',
-  purple: '#7C3AED',
-} as const
+The remaining 6 components share a common trait: their state and rendering are **tightly coupled**. Extracting JSX into sub-components would require passing most parent state as props, which moves complexity rather than reducing it. Canvas-based animations (ECG, Boot) and orchestrated timing sequences (Login) are inherently monolithic.
 
-export type DotColorName = keyof typeof DOT_COLORS
+`LastConsultationSubsection` is the exception: it's already a separate function with its own interface, uses only context (`useDetailPanel`) and one prop (`highlightedRoleId`), and has no dependency on DashboardLayout's state.
 
-/** KPI color variants (subset of DOT_COLORS) */
-export const KPI_COLORS: Record<'green' | 'amber' | 'teal', string> = {
-  green: DOT_COLORS.green,
-  amber: DOT_COLORS.amber,
-  teal: DOT_COLORS.teal,
-}
+#### Changes
 
-/** Project/investigation status colors */
-export const PROJECT_STATUS_COLORS: Record<'Complete' | 'Ongoing' | 'Live', string> = {
-  Complete: '#059669',
-  Ongoing: '#D97706',
-  Live: '#0D6E6E',
-}
+1. **Create `src/components/LastConsultationCard.tsx`** (~195 lines)
+   - Move `LastConsultationSubsection` function (lines 44-235) from DashboardLayout.tsx
+   - Move its interface `LastConsultationSubsectionProps` (lines 40-42)
+   - Move its imports: `ChevronRight` from lucide-react, `CardHeader` from `./Card`, `useDetailPanel` from context, `timelineConsultations` from data, `hexToRgba`/`DEFAULT_ORG_COLOR` from utils/theme-colors
+   - Rename export to `LastConsultationCard` (component name matches file)
+   - Export as named export
 
-/** Default org color fallback when consultation.orgColor is undefined */
-export const DEFAULT_ORG_COLOR = '#0D6E6E'
-```
+2. **Update `src/components/DashboardLayout.tsx`**
+   - Remove `LastConsultationSubsection` function and its interface (lines 40-235, ~196 lines)
+   - Remove now-unused imports: `ChevronRight` from lucide-react (if only used by LastConsultation)
+   - Add import: `{ LastConsultationCard } from './LastConsultationCard'`
+   - Update JSX usage: `<LastConsultationSubsection` → `<LastConsultationCard`
+   - Note: `hexToRgba`, `DEFAULT_ORG_COLOR`, `CardHeader` may still be needed by DashboardLayout itself — check before removing
 
-**Note on project status inconsistency:** ProjectsTile has `Ongoing: '#0D6E6E'` (teal) and `Live: '#059669'` (green), while ProjectDetail has `Ongoing: '#D97706'` (amber) and `Live: '#0D6E6E'` (teal). The ProjectDetail version is more semantically correct (Ongoing=amber=warning, Live=teal=active, Complete=green=success). Use the **ProjectDetail** mapping as canonical.
-
-**Files to update:**
-
-1. **`src/components/Card.tsx`** (line 46-52)
-   - Remove `const dotColorMap` (6 lines)
-   - Import `DOT_COLORS` from `@/lib/theme-colors`
-   - Use `DOT_COLORS[dotColor]` instead of `dotColorMap[dotColor]`
-
-2. **`src/components/DetailPanel.tsx`** (line 64-70)
-   - Remove `const dotColorValueMap` (7 lines)
-   - Import `DOT_COLORS` from `@/lib/theme-colors`
-   - Use `DOT_COLORS[dotColor]` instead of `dotColorValueMap[dotColor]`
-
-3. **`src/components/tiles/PatientSummaryTile.tsx`** (line 10-14)
-   - Remove `const colorMap` (5 lines)
-   - Import `KPI_COLORS` from `@/lib/theme-colors`
-   - Use `KPI_COLORS[kpi.colorVariant]` instead of `colorMap[kpi.colorVariant]`
-
-4. **`src/components/detail/KPIDetail.tsx`** (line 8-12)
-   - Remove local `colorMap` (5 lines)
-   - Import `KPI_COLORS` from `@/lib/theme-colors`
-   - Use `KPI_COLORS[kpi.colorVariant]`
-
-5. **`src/components/tiles/ProjectsTile.tsx`** (line 7-11)
-   - Remove `const statusColorMap` (5 lines)
-   - Import `PROJECT_STATUS_COLORS` from `@/lib/theme-colors`
-   - Use `PROJECT_STATUS_COLORS[project.status]` (fixes color values to match ProjectDetail)
-
-6. **`src/components/detail/ProjectDetail.tsx`** (line 8-12)
-   - Remove `const statusColorMap` (5 lines)
-   - Import `PROJECT_STATUS_COLORS` from `@/lib/theme-colors`
-   - Use `PROJECT_STATUS_COLORS[investigation.status]`
-
-#### Change 2: Add `DEFAULT_ORG_COLOR` to `src/lib/theme-colors.ts`
-
-**Why:** `consultation.orgColor ?? '#0D6E6E'` appears 9 times across 2 files.
-
-**Files to update:**
-
-7. **`src/components/WorkExperienceSubsection.tsx`** (lines 36, 38, 63, 81, 213, 215)
-   - Import `DEFAULT_ORG_COLOR` from `@/lib/theme-colors`
-   - Replace all 6 instances of `consultation.orgColor ?? '#0D6E6E'` → `consultation.orgColor ?? DEFAULT_ORG_COLOR`
-
-8. **`src/components/DashboardLayout.tsx`** (lines 105, 106, 133)
-   - Import `DEFAULT_ORG_COLOR` from `@/lib/theme-colors`
-   - Replace all 3 instances of `consultation.orgColor ?? '#0D6E6E'` → `consultation.orgColor ?? DEFAULT_ORG_COLOR`
-
-#### Change 3: Add `motionSafeTransition()` to `src/lib/utils.ts`
-
-**Why:** The pattern `prefersReducedMotion ? { duration: 0 } : { duration, ease, delay }` appears 7 times.
-
-**Add to `src/lib/utils.ts`:**
-```ts
-/** Returns a framer-motion transition that respects prefers-reduced-motion */
-export function motionSafeTransition(
-  duration: number,
-  ease: string = 'easeOut',
-  delay: number = 0
-): { duration: number; ease?: string; delay?: number } {
-  if (prefersReducedMotion) return { duration: 0 }
-  return { duration, ease, ...(delay ? { delay } : {}) }
-}
-```
-
-**Files to update:**
-
-9. **`src/components/DashboardLayout.tsx`** (lines 27-29, 37-39)
-   - Import `motionSafeTransition` from `@/lib/utils`
-   - Replace 2 inline ternaries
-
-10. **`src/components/WorkExperienceSubsection.tsx`** (lines 141-143)
-    - Import `motionSafeTransition` from `@/lib/utils`
-    - Replace 1 inline ternary
-
-11. **`src/components/ChatWidget.tsx`** (lines 32-34, 45-47)
-    - Import `motionSafeTransition` from `@/lib/utils`
-    - Replace 2 inline ternaries
-
-12. **`src/components/TimelineInterventionsSubsection.tsx`** (lines 174-176)
-    - Import `motionSafeTransition` from `@/lib/utils`
-    - Replace 1 inline ternary
-
-13. **`src/components/constellation/MobileAccordion.tsx`** (line 26)
-    - Import `motionSafeTransition` from `@/lib/utils`
-    - Replace 1 inline ternary
-
-### What was audited and NOT extracted (with reasons)
-
-- **Shadow `rgba(26,43,42,...)`**: 15+ occurrences but already partially covered by CSS vars; remaining inline usages are in varied contexts (D3 attributes, dynamic JS). Low ROI.
-- **Breakpoint `window.innerWidth < 640`**: Only 3 occurrences, trivially clear inline, in different execution contexts (hook, D3, component).
-- **Date formatting**: Only 2 occurrences.
-- **Section heading styles**: Slightly varied across components (letterSpacing differs, marginBottom differs).
-
-### Verification
-- `npm run lint` — no unused imports, no duplicate definitions
-- `npm run typecheck` — all imports resolve, types match
-- `npm run build` — clean build
-- `grep -r "dotColorMap\|dotColorValueMap" src/` — zero matches (removed)
-- `grep -r "statusColorMap" src/` — zero matches (removed)
-- `grep -r "orgColor ?? '#0D6E6E'" src/` — zero matches (replaced with constant)
-- `grep "prefersReducedMotion ? { duration: 0 }" src/` — zero matches (replaced with utility)
+#### Verification
+- `npm run lint` — no errors
+- `npm run typecheck` — all imports resolve
+- `npm run build` — clean
+- DashboardLayout reduced from ~493 to ~300 lines
+- `LastConsultationSubsection` no longer defined in DashboardLayout.tsx
 
 ---
 
@@ -168,11 +69,20 @@ export function motionSafeTransition(
 - [x] 2.2 — Audit and consolidate other repeated patterns ✅
 
 ### Phase 3: Component Simplification
-- [ ] 3.1 — Extract shared ExpandableCard component
-- [ ] 3.2 — Simplify detail panel components
-- [ ] 3.3 — Review large components for extraction opportunities
+- [x] 3.1 — Extract shared ExpandableCard component ✅
+- [x] 3.2 — Simplify detail panel components ✅
+- [x] 3.3 — Review large components for extraction opportunities ✅
 
 ### Phase 4: Final Cleanup
-- [ ] 4.1 — Remove dead code and unused exports
-- [ ] 4.2 — Final validation and baseline comparison
-- [ ] 4.3 — Re-enable boot/ECG/login sequence
+- [x] 4.1 — Remove dead code and unused exports ✅
+- [x] 4.2 — Final validation and baseline comparison ✅
+- [x] 4.3 — Re-enable boot/ECG/login sequence ✅
+
+## Final Results
+
+- **Baseline:** 13,242 lines
+- **Final:** 12,140 lines
+- **Reduction:** -1,102 lines (8.3%)
+- **lint:** 0 errors, 5 pre-existing warnings
+- **typecheck:** clean
+- **build:** clean

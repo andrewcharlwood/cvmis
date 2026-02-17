@@ -12,6 +12,12 @@ export const skills: SkillMedication[] = [
     category: 'Technical',
     status: 'Active',
     icon: 'BarChart3',
+    prescribingHistory: [
+      { year: 2016, description: 'Started: Prescribing data analysis in community pharmacy' },
+      { year: 2018, description: 'Increased: Population-level data interpretation' },
+      { year: 2022, description: 'Advanced: Real-world GP prescribing data at scale' },
+      { year: 2024, description: 'Current: ICS-wide analytics strategy development' },
+    ],
   },
   {
     id: 'python',
@@ -23,6 +29,13 @@ export const skills: SkillMedication[] = [
     category: 'Technical',
     status: 'Active',
     icon: 'Code2',
+    prescribingHistory: [
+      { year: 2017, description: 'Started: Self-taught for data analysis automation' },
+      { year: 2019, description: 'Increased: Dashboard development, data pipeline work' },
+      { year: 2022, description: 'Specialist use: Blueteq automation, Sankey analysis tools' },
+      { year: 2024, description: 'Advanced: Switching algorithm (14,000 patients), CD monitoring' },
+      { year: 2025, description: 'Current: Population-level analytics, incentive scheme automation' },
+    ],
   },
   {
     id: 'sql',
@@ -34,6 +47,13 @@ export const skills: SkillMedication[] = [
     category: 'Technical',
     status: 'Active',
     icon: 'Database',
+    prescribingHistory: [
+      { year: 2017, description: 'Started: Basic querying for prescribing analysis' },
+      { year: 2019, description: 'Increased: Complex joins, data transformation' },
+      { year: 2022, description: 'Advanced: Patient-level analytics, dm+d integration' },
+      { year: 2024, description: 'Specialist: Comprehensive medicines data table development' },
+      { year: 2025, description: 'Current: Population health data infrastructure' },
+    ],
   },
   {
     id: 'power-bi',
@@ -45,6 +65,12 @@ export const skills: SkillMedication[] = [
     category: 'Technical',
     status: 'Active',
     icon: 'PieChart',
+    prescribingHistory: [
+      { year: 2019, description: 'Started: Dashboard creation for team reporting' },
+      { year: 2021, description: 'Increased: DAX measures, data modelling' },
+      { year: 2024, description: 'Advanced: PharMetrics real-time expenditure dashboard' },
+      { year: 2025, description: 'Current: DOAC switching scenario model, executive reporting' },
+    ],
   },
   {
     id: 'javascript-typescript',
@@ -56,6 +82,11 @@ export const skills: SkillMedication[] = [
     category: 'Technical',
     status: 'Active',
     icon: 'FileCode2',
+    prescribingHistory: [
+      { year: 2020, description: 'Started: Web development for personal projects' },
+      { year: 2022, description: 'Increased: React dashboard components' },
+      { year: 2024, description: 'Current: CV/portfolio development, interactive tools' },
+    ],
   },
   {
     id: 'excel',
@@ -78,6 +109,11 @@ export const skills: SkillMedication[] = [
     category: 'Technical',
     status: 'Active',
     icon: 'GitBranch',
+    prescribingHistory: [
+      { year: 2022, description: 'Started: Basic automation logic for form generation' },
+      { year: 2024, description: 'Increased: Controlled drug monitoring calculations' },
+      { year: 2025, description: 'Current: Patient switching algorithm (14,000 identified)' },
+    ],
   },
   {
     id: 'data-pipelines',
@@ -89,6 +125,11 @@ export const skills: SkillMedication[] = [
     category: 'Technical',
     status: 'Active',
     icon: 'Workflow',
+    prescribingHistory: [
+      { year: 2022, description: 'Started: ETL processes for Blueteq integration' },
+      { year: 2024, description: 'Increased: dm+d standardisation, morphine conversions' },
+      { year: 2025, description: 'Current: ICS-wide data infrastructure' },
+    ],
   },
 
   // Healthcare Domain (6 skills)
@@ -102,6 +143,12 @@ export const skills: SkillMedication[] = [
     category: 'Domain',
     status: 'Active',
     icon: 'Pill',
+    prescribingHistory: [
+      { year: 2016, description: 'Started: Community pharmacy clinical services' },
+      { year: 2018, description: 'Increased: MUR/NMS delivery optimisation' },
+      { year: 2022, description: 'Advanced: ICS-level optimisation strategy' },
+      { year: 2025, description: 'Current: £14.6M efficiency programme delivery' },
+    ],
   },
   {
     id: 'population-health',
@@ -113,6 +160,11 @@ export const skills: SkillMedication[] = [
     category: 'Domain',
     status: 'Active',
     icon: 'Users',
+    prescribingHistory: [
+      { year: 2022, description: 'Started: GP prescribing data analysis' },
+      { year: 2024, description: 'Increased: 1.2M population coverage' },
+      { year: 2025, description: 'Current: ICS-wide health inequality analysis' },
+    ],
   },
   {
     id: 'nice-ta',
@@ -124,6 +176,11 @@ export const skills: SkillMedication[] = [
     category: 'Domain',
     status: 'Active',
     icon: 'FileCheck',
+    prescribingHistory: [
+      { year: 2022, description: 'Started: High-cost drug pathway development' },
+      { year: 2023, description: 'Increased: Multi-specialty pathway authoring' },
+      { year: 2024, description: 'Current: Tirzepatide (TA1026) commissioning' },
+    ],
   },
   {
     id: 'health-economics',
@@ -135,6 +192,11 @@ export const skills: SkillMedication[] = [
     category: 'Domain',
     status: 'Active',
     icon: 'TrendingUp',
+    prescribingHistory: [
+      { year: 2023, description: 'Started: Financial scenario modelling' },
+      { year: 2024, description: 'Increased: Rebate negotiation, DOAC switching analysis' },
+      { year: 2025, description: 'Current: Efficiency programme prioritisation' },
+    ],
   },
   {
     id: 'clinical-pathways',
@@ -146,6 +208,11 @@ export const skills: SkillMedication[] = [
     category: 'Domain',
     status: 'Active',
     icon: 'Route',
+    prescribingHistory: [
+      { year: 2022, description: 'Started: Rheumatology, ophthalmology pathway design' },
+      { year: 2023, description: 'Increased: Dermatology, gastroenterology, neurology' },
+      { year: 2024, description: 'Current: System-wide pathway governance' },
+    ],
   },
   {
     id: 'controlled-drugs',
@@ -157,6 +224,11 @@ export const skills: SkillMedication[] = [
     category: 'Domain',
     status: 'Active',
     icon: 'ShieldAlert',
+    prescribingHistory: [
+      { year: 2024, description: 'Started: OME calculation system development' },
+      { year: 2024, description: 'Increased: Population-scale monitoring capability' },
+      { year: 2025, description: 'Current: High-risk patient identification, diversion detection' },
+    ],
   },
 
   // Strategic & Leadership (7 skills)
@@ -170,6 +242,11 @@ export const skills: SkillMedication[] = [
     category: 'Leadership',
     status: 'Active',
     icon: 'Banknote',
+    prescribingHistory: [
+      { year: 2024, description: 'Started: £220M prescribing budget oversight' },
+      { year: 2024, description: 'Increased: Forecasting model development' },
+      { year: 2025, description: 'Current: Proactive financial planning, pressure identification' },
+    ],
   },
   {
     id: 'stakeholder-engagement',
@@ -181,6 +258,11 @@ export const skills: SkillMedication[] = [
     category: 'Leadership',
     status: 'Active',
     icon: 'Handshake',
+    prescribingHistory: [
+      { year: 2022, description: 'Started: Clinical lead engagement across care sectors' },
+      { year: 2024, description: 'Increased: Executive communication, CMO presentations' },
+      { year: 2025, description: 'Current: System-level programme board reporting' },
+    ],
   },
   {
     id: 'pharma-negotiation',
@@ -192,6 +274,10 @@ export const skills: SkillMedication[] = [
     category: 'Leadership',
     status: 'Active',
     icon: 'MessageSquare',
+    prescribingHistory: [
+      { year: 2024, description: 'Started: Rebate terms renegotiation' },
+      { year: 2024, description: 'Current: Improved commercial position for ICB' },
+    ],
   },
   {
     id: 'team-development',
@@ -203,6 +289,11 @@ export const skills: SkillMedication[] = [
     category: 'Leadership',
     status: 'Active',
     icon: 'UserPlus',
+    prescribingHistory: [
+      { year: 2017, description: 'Started: NVQ3 supervision to technician registration' },
+      { year: 2019, description: 'Increased: National induction training development' },
+      { year: 2024, description: 'Current: Data fluency training, self-serve tools' },
+    ],
   },
   {
     id: 'change-management',

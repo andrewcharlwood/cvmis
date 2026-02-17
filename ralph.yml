@@ -1,10 +1,10 @@
 cli:
-  backend: "codex"
+  backend: "claude"
 
 event_loop:
   prompt_file: "Ralph/PROMPT.md"
   completion_promise: "LOOP_COMPLETE"
-  max_iterations: 60
+  max_iterations: 50
 
 backpressure:
   gates:

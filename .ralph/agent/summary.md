@@ -1,8 +1,8 @@
 # Loop Summary
 
-**Status:** Stopped: max iterations reached
-**Iterations:** 3
-**Duration:** 1m 2s
+**Status:** Completed successfully
+**Iterations:** 27
+**Duration:** 55m 41s
 
 ## Tasks
 
@@ -14,4 +14,4 @@ _No events recorded._
 
 ## Final Commit
 
-6605966: feat: add canonical profile content schema and access helpers
+01a48ce: fix: re-enable boot sequence after refactor
