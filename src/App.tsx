@@ -44,7 +44,7 @@ function SkipButton({ onSkip }: { onSkip: () => void }) {
 }
 
 function App() {
-  const [phase, setPhase] = useState<Phase>('pmr')
+  const [phase, setPhase] = useState<Phase>('boot')
 
   useEffect(() => {
     initModel()
