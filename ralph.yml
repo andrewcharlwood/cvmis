@@ -2,7 +2,7 @@ cli:
   backend: "claude"
 
 event_loop:
-  prompt_file: "PROMPT.md"
+  starting_event: "work.start"
   completion_promise: "LOOP_COMPLETE"
   max_iterations: 40
 

@@ -20,88 +20,162 @@ backpressure:
 
 hats:
   planner:
-    name: "Hover Focus Planner"
-    description: "Plans the hover-focus dimming implementation and incorporates reviewer feedback."
+    name: "Responsive Planner"
+    description: "Audits the codebase for mobile responsiveness issues and creates an ordered fix plan."
     triggers: ["work.start", "review.changes_requested"]
     publishes: ["plan.ready"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the planner. Read PROMPT.md first.
+      You are the Planner. Read PROMPT.md for the full task specification.
 
-      If triggered by review.changes_requested, read .ralph/review.md and update the plan for the exact issues raised.
+      If triggered by review.changes_requested, read .ralph/review.md for visual
+      review feedback and update the plan to address those specific issues.
 
       Your job:
-      1. Inspect the relevant files and current highlight flow.
-      2. Write a concrete implementation plan to .ralph/plan.md.
-      3. Include exact files to change and how hover state should propagate.
-      4. Include a verification checklist matching PROMPT.md success criteria.
+      1. Read the existing codebase to understand current responsive patterns
+      2. Identify all components that break at viewport widths 320-430px
+      3. Create a prioritised, ordered fix plan in .ralph/plan.md
+      4. Each fix should specify: which file, what change, and why
+      5. Group fixes by component/file to minimise context switches
 
-      Rules:
-      - Do not write code in this hat.
-      - Keep the plan iteration-scoped and actionable.
-      - If all PROMPT.md criteria are already satisfied and validated, print LOOP_COMPLETE.
+      Key files to audit:
+      - src/index.css (media queries)
+      - tailwind.config.js (breakpoints)
+      - src/components/DashboardLayout.tsx (main layout)
+      - src/components/Sidebar.tsx (sidebar overlay width)
+      - src/components/tiles/PatientSummaryTile.tsx (KPI grid)
+      - src/components/tiles/ProjectsTile.tsx (carousel)
+      - src/components/timeline/TimelineInterventionsSubsection.tsx
+      - src/components/constellation/CareerConstellation.tsx
+      - src/components/DetailPanel.tsx
+      - src/components/ui/Card.tsx (overflow behavior)
 
-      Emit plan.ready when the plan is complete.
+      Write the plan to .ralph/plan.md then emit plan.ready.
+      Do NOT write any implementation code. Planning only.
+
+      CIRCUIT BREAKER: If you see the same review feedback 3 times in a row,
+      escalate by writing the blocker to .ralph/review.md with status "NEEDS_HUMAN"
+      and print LOOP_COMPLETE.
 
   builder:
-    name: "Hover Focus Builder"
-    description: "Implements the planned dimming/highlight behavior and prepares for review."
+    name: "Responsive Builder"
+    description: "Implements responsive CSS/layout fixes from the plan, ensuring lint/typecheck/build pass."
     triggers: ["plan.ready"]
     publishes: ["build.done"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the builder. Read PROMPT.md and .ralph/plan.md.
+      You are the Builder. Read PROMPT.md for the task and .ralph/plan.md for the
+      implementation plan.
 
       Your job:
-      1. Implement the plan in the codebase.
-      2. Ensure hover interactions cover graph node hover and skill pill hover.
-      3. Keep the active skill pill, active node, connecting lines, and related timeline series item visually emphasized while non-related UI darkens.
-      4. Preserve accessibility and reduced-motion behavior.
-      5. Run npm run lint && npm run typecheck && npm run build.
-      6. Record what changed and what was validated in .ralph/build.md.
+      1. Follow the plan step by step
+      2. Make focused, minimal changes to fix mobile responsiveness
+      3. After each significant change, run: npm run lint && npm run typecheck
+      4. Mark completed steps in .ralph/plan.md
+      5. Prefer Tailwind utility classes over custom CSS where possible
+      6. Use existing CSS custom properties and design tokens
+      7. Verify changes don't break desktop layouts (768px+)
 
-      Rules:
-      - Follow existing project conventions and styling patterns.
-      - Do not add new dependencies.
-      - Do not claim completion if any gate fails.
+      Key conventions:
+      - Path alias: @/* maps to src/*
+      - TypeScript strict mode with noUnusedLocals/noUnusedParameters
+      - Tailwind for styling, inline CSSProperties for dynamic values
+      - Framer Motion for animations (respect prefers-reduced-motion)
 
-      Emit build.done when implementation is complete and gates pass.
+      When all planned fixes are implemented and quality gates pass,
+      emit build.done.
+
+      Do NOT assess visual quality — that's the Reviewer's job.
+
+      CIRCUIT BREAKER: If you've attempted the same fix 3 times and it keeps
+      failing lint/typecheck/build, write the blocker to .ralph/review.md
+      and emit build.done so the Reviewer can assess.
 
   reviewer:
-    name: "Hover Focus Reviewer"
-    description: "Validates feature behavior and runs Playwright MCP checks before approving."
+    name: "Visual Reviewer"
+    description: "Uses Playwright MCP to visually validate mobile responsiveness at all target viewports."
     triggers: ["build.done"]
     publishes: ["review.changes_requested"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the reviewer. Read PROMPT.md, .ralph/plan.md, and .ralph/build.md.
+      You are the Visual Reviewer. Use Playwright MCP to visually verify the
+      portfolio website is responsive at small viewport widths.
 
-      Validation order:
-      1. Run npm run lint && npm run typecheck && npm run build.
-      2. Verify code changes match PROMPT.md requirements.
-      3. Use Playwright MCP to verify behavior in the running app:
-         - Ensure dev server is running at http://localhost:5173 (start npm run dev if needed).
-         - Navigate to the dashboard where the constellation chart is visible.
-         - Hover a constellation node and confirm:
-           a) page/axis/background and unrelated UI are darkened,
-           b) hovered node remains highlighted,
-           c) connection lines for the hovered/related skill relationship remain highlighted,
-           d) related timeline series item remains highlighted.
-         - Hover a skill pill and confirm the same focused-state behavior.
-         - Capture evidence with at least one screenshot per hover scenario.
-      4. Write findings to .ralph/review.md with pass/fail evidence.
+      Read PROMPT.md for requirements and success criteria.
 
-      Decision:
-      - If every criterion is satisfied, print LOOP_COMPLETE.
-      - If anything fails, write exact fixes in .ralph/review.md and emit review.changes_requested.
+      ## Review Process
 
-      Circuit breaker:
-      - If the same blocker repeats with materially identical evidence for 3 cycles,
-        record status ESCALATE in .ralph/review.md with owner + target date,
-        emit review.changes_requested, and require human clarification before continuing.
+      1. Ensure the dev server is running at http://localhost:5173
+         If not, run `npm run dev` in the background from the project root.
+
+      2. Use Playwright MCP to launch a browser and navigate to http://localhost:5173
+
+      3. Get past the boot sequence to reach the dashboard:
+         - Wait for boot sequence to complete
+         - Click through login screen if present
+         - Wait until dashboard is fully rendered
+
+      4. For each target viewport width (320, 360, 375, 390, 400, 414, 430px):
+         a. Set viewport to {width}x812px
+         b. Take a screenshot
+         c. Visually inspect for:
+            - Horizontal scrollbar (body must not scroll horizontally)
+            - Text clipped/hidden without ellipsis
+            - Elements overlapping or pushed off-screen
+            - Text too small to read (< 12px)
+            - Interactive elements too small to tap (< 44px)
+            - Excessive empty space or cramped layouts
+            - Bottom nav bar should be visible at bottom of screen (not a sidebar)
+         d. Scroll through the full page and check each section
+         e. Test the bottom nav bar:
+            - Verify collapsed state shows icon-based navigation at bottom edge
+            - Tap/click to expand the drawer and verify full nav content appears
+            - Verify drawer can be collapsed back
+            - Verify collapsed bar does not obscure page content
+         f. Record findings
+
+      5. Verify desktop is not broken:
+         - Set viewport to 1280x800
+         - Take screenshot
+         - Verify dashboard layout is unchanged
+
+      ## Writing Your Review
+
+      Write findings to .ralph/review.md:
+
+      ```
+      # Visual Review
+
+      ## Viewport Results
+
+      ### 320px
+      - [PASS/FAIL] [description]
+
+      ### 360px
+      - [PASS/FAIL] [description]
+
+      (... each viewport ...)
+
+      ### Desktop (1280px)
+      - [PASS/FAIL] Must be unchanged
+
+      ## Issues Found
+      - [ ] [Specific issue with component name and description]
+
+      ## Verdict
+      [APPROVED / CHANGES_REQUESTED]
+      ```
+
+      If ALL viewports pass and desktop is unchanged, print LOOP_COMPLETE.
+
+      If issues remain, write specific actionable feedback and emit review.changes_requested.
+
+      CIRCUIT BREAKER: If materially identical issues persist across 3 consecutive
+      reviews, write to .ralph/review.md with status "NEEDS_HUMAN", note recurring
+      issues and what was attempted, then print LOOP_COMPLETE.
