@@ -56,7 +56,7 @@ export const documents: Document[] = [
     classification: '75.1% (Distinction)',
     institution: 'University of East Anglia, Norwich',
     duration: '2014 — 2015',
-    researchDetail: 'Final year research project investigating cocrystal formation for improved drug delivery properties. Awarded Distinction grade.',
+    researchDetail: 'Final year research project on drug delivery and cocrystals. Awarded Distinction grade.',
     notes: 'Part of MPharm degree, contributing to final classification.',
   },
 ]

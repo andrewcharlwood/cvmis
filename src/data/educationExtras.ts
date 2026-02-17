@@ -8,7 +8,7 @@ export const educationExtras: EducationExtra[] = [
       'Secretary & Vice-President of UEA Ultimate Frisbee',
       'Publicity Officer for UEA Alzheimer\'s Society',
     ],
-    researchDescription: 'Final year research project investigating cocrystal formation for improved drug delivery properties. Awarded Distinction grade (75.1%).',
+    researchDescription: 'Independent research project on drug delivery and cocrystals. Awarded Distinction grade (75.1%).',
     osceScore: '80%',
   },
   {
