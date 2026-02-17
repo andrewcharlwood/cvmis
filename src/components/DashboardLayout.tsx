@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import Sidebar from './Sidebar'
+import { MobileBottomNav } from './MobileBottomNav'
 import { CommandPalette } from './CommandPalette'
 import { DetailPanel } from './DetailPanel'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
@@ -11,6 +12,7 @@ import { RepeatMedicationsSubsection } from './RepeatMedicationsSubsection'
 import { LastConsultationCard } from './LastConsultationCard'
 import { ChatWidget } from './ChatWidget'
 import { useActiveSection } from '@/hooks/useActiveSection'
+import { useIsMobileNav } from '@/hooks/useIsMobileNav'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { timelineConsultations, timelineEntities } from '@/data/timeline'
 import { skills } from '@/data/skills'
@@ -41,6 +43,7 @@ export function DashboardLayout() {
   const [highlightedRoleId, setHighlightedRoleId] = useState<string | null>(null)
   const [chronologyHeight, setChronologyHeight] = useState<number | null>(null)
   const [constellationReady, setConstellationReady] = useState(false)
+  const isMobileNav = useIsMobileNav()
   const chronologyRef = useRef<HTMLDivElement>(null)
   const patientSummaryRef = useRef<HTMLDivElement>(null)
   const activeSection = useActiveSection()
@@ -250,18 +253,20 @@ export function DashboardLayout() {
           height: '100%',
         }}
       >
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={sidebarVariants}
-          style={{ flexShrink: 0, height: '100%' }}
-        >
-          <Sidebar
-            activeSection={activeSection}
-            onNavigate={scrollToSection}
-            onSearchClick={handleSearchClick}
-          />
-        </motion.div>
+        {!isMobileNav && (
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={sidebarVariants}
+            style={{ flexShrink: 0, height: '100%' }}
+          >
+            <Sidebar
+              activeSection={activeSection}
+              onNavigate={scrollToSection}
+              onSearchClick={handleSearchClick}
+            />
+          </motion.div>
+        )}
 
         <motion.main
           id="main-content"
@@ -269,10 +274,11 @@ export function DashboardLayout() {
           animate="visible"
           variants={contentVariants}
           aria-label="Dashboard content"
-          className="dashboard-main pmr-scrollbar p-5 pb-10 md:p-7 md:pb-12 lg:px-8 lg:pt-7 lg:pb-12"
+          className="dashboard-main pmr-scrollbar p-3 xs:p-5 pb-10 md:p-7 md:pb-12 lg:px-8 lg:pt-7 lg:pb-12"
           style={{
             flex: 1,
             overflowY: 'auto',
+            paddingBottom: isMobileNav ? 'calc(56px + env(safe-area-inset-bottom) + 16px)' : undefined,
           }}
         >
           <div className="dashboard-grid">
@@ -330,6 +336,13 @@ export function DashboardLayout() {
 
       {/* Floating chat widget */}
       <ChatWidget onAction={handlePaletteAction} />
+
+      {/* Mobile bottom navigation */}
+      <MobileBottomNav
+        activeSection={activeSection}
+        onNavigate={scrollToSection}
+        onSearchClick={handleSearchClick}
+      />
     </div>
   )
 }

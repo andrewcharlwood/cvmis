@@ -591,6 +591,46 @@ textarea:focus-visible {
   }
 }
 
+/* ===== MOBILE RESPONSIVE FIXES (<600px) ===== */
+@media (max-width: 599px) {
+  .dashboard-main {
+    margin-left: 0;
+  }
+}
+
+/* ===== SMALL VIEWPORT FIXES (<480px) ===== */
+@media (max-width: 479px) {
+  .card-base {
+    padding: 16px !important;
+  }
+
+  .chronology-item {
+    padding: 8px 8px 10px;
+  }
+}
+
+/* KPI grid — responsive columns */
+.kpi-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 359px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Detail panel responsive padding */
+@media (max-width: 479px) {
+  .detail-panel [data-panel-body] {
+    padding: 16px !important;
+  }
+
+  .detail-panel [data-panel-header] {
+    padding: 16px !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* Disable pulse animation on status badge dot */
   @keyframes pulse {

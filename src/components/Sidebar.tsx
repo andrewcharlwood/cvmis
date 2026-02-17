@@ -11,6 +11,7 @@ import {
   Wrench,
   X,
 } from 'lucide-react'
+import { useIsMobileNav } from '@/hooks/useIsMobileNav'
 import { CvmisLogo } from './CvmisLogo'
 import { PhoneCaptcha } from './PhoneCaptcha'
 import { patient } from '@/data/patient'
@@ -163,6 +164,7 @@ function AlertFlag({ alert }: AlertFlagProps) {
 export default function Sidebar({ activeSection, onNavigate, onSearchClick }: SidebarProps) {
   const sidebarCopy = getSidebarCopy()
   const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches)
+  const isMobileNav = useIsMobileNav()
   const [isMobileExpanded, setIsMobileExpanded] = useState(false)
 
   useEffect(() => {
@@ -180,7 +182,9 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
     const listener = (event: MediaQueryListEvent) => updateDesktopState(event)
     mediaQuery.addEventListener('change', listener)
 
-    return () => mediaQuery.removeEventListener('change', listener)
+    return () => {
+      mediaQuery.removeEventListener('change', listener)
+    }
   }, [])
 
   const isExpanded = isDesktop || isMobileExpanded
@@ -191,6 +195,8 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
       setIsMobileExpanded(false)
     }
   }
+
+  if (isMobileNav) return null
 
   return (
     <>

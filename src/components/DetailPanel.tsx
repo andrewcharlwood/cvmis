@@ -129,6 +129,7 @@ export function DetailPanel() {
       >
         {/* Header */}
         <div
+          data-panel-header=""
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -199,6 +200,7 @@ export function DetailPanel() {
 
         {/* Body (scrollable) */}
         <div
+          data-panel-body=""
           style={{
             flex: 1,
             overflowY: 'auto',

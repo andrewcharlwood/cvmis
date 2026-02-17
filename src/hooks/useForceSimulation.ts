@@ -42,6 +42,7 @@ function fractionalYear(node: { startDate?: string; startYear?: number }): numbe
 }
 
 function getHeight(width: number, containerHeight?: number | null): number {
+  if (width < 480) return 380
   if (width < 768) return 520
   if (containerHeight && containerHeight > 0) return Math.max(400, containerHeight)
   return 400

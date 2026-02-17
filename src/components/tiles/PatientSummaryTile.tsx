@@ -44,7 +44,7 @@ function MetricCard({ kpi }: MetricCardProps) {
   }
 
   const valueStyles: React.CSSProperties = {
-    fontSize: '30px',
+    fontSize: 'clamp(22px, 6vw, 30px)',
     fontWeight: 700,
     letterSpacing: '-0.02em',
     lineHeight: 1.2,
@@ -121,7 +121,6 @@ export function PatientSummaryTile() {
   const kpiGridStyles: React.CSSProperties = {
     display: 'grid',
     gap: '10px',
-    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
   }
 
   return (
@@ -144,7 +143,7 @@ export function PatientSummaryTile() {
             {latestResultsCopy.helperText}
           </p>
         </div>
-        <div className="latest-results-grid" style={kpiGridStyles}>
+        <div className="kpi-grid latest-results-grid" style={kpiGridStyles}>
           {kpis.map((kpi) => (
             <MetricCard key={kpi.id} kpi={kpi} />
           ))}

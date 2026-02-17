@@ -13,6 +13,7 @@ import { buildPaletteData } from '@/lib/search'
 import type { PaletteItem, PaletteAction } from '@/lib/search'
 import { iconByType, iconColorStyles } from '@/lib/palette-icons'
 import { prefersReducedMotion, motionSafeTransition } from '@/lib/utils'
+import { useIsMobileNav } from '@/hooks/useIsMobileNav'
 
 const MAX_HISTORY = 10
 
@@ -52,6 +53,7 @@ interface ChatWidgetProps {
 }
 
 export function ChatWidget({ onAction }: ChatWidgetProps) {
+  const isMobileNav = useIsMobileNav()
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
@@ -610,8 +612,9 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
         variants={buttonVariants}
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label={isOpen ? 'Close chat' : 'Open chat'}
-        className={`fixed z-[90] cursor-pointer flex items-center justify-center bottom-4 right-4 h-10 w-10 md:bottom-6 md:right-6 md:h-12 md:w-12${isOpen ? ' max-md:!hidden' : ''}`}
+        className={`fixed z-[101] cursor-pointer flex items-center justify-center bottom-4 right-4 h-10 w-10 md:bottom-6 md:right-6 md:h-12 md:w-12${isOpen ? ' max-md:!hidden' : ''}`}
         style={{
+          bottom: isMobileNav ? 'calc(56px + env(safe-area-inset-bottom) + 16px)' : undefined,
           borderRadius: '50%',
           border: 'none',
           background: 'var(--accent)',

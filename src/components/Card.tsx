@@ -28,7 +28,7 @@ export function Card({ children, full, className, tileId }: CardProps) {
   return (
     <article
       style={baseStyles}
-      className={className}
+      className={['card-base', className].filter(Boolean).join(' ')}
       data-tile-id={tileId}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

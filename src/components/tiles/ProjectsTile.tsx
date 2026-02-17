@@ -318,9 +318,8 @@ export function ProjectsCarousel() {
   }, [prefersReducedMotion, viewportWidth])
 
   const cardsPerView = useMemo(() => {
-    if (viewportWidth < 768) {
-      return 2
-    }
+    if (viewportWidth < 480) return 1
+    if (viewportWidth < 768) return 2
     return 4
   }, [viewportWidth])
 
@@ -332,15 +331,10 @@ export function ProjectsCarousel() {
   }, [cardsPerView, viewportWidth])
 
   const cardMinHeight = useMemo(() => {
-    if (viewportWidth < 640) {
-      return 168
-    }
-    if (viewportWidth < 1024) {
-      return 182
-    }
-    if (viewportWidth < 1440) {
-      return 196
-    }
+    if (viewportWidth < 480) return 148
+    if (viewportWidth < 640) return 168
+    if (viewportWidth < 1024) return 182
+    if (viewportWidth < 1440) return 196
     return 214
   }, [viewportWidth])
 
