@@ -27,6 +27,9 @@ export interface TimelineEntity {
   outcomes?: string[]
   codedEntries?: CodedEntry[]
   skillStrengths?: Record<string, number>
+  band?: string
+  contextNote?: string
+  employmentBasis?: string
 }
 
 export interface Consultation {
@@ -37,6 +40,9 @@ export interface Consultation {
   role: string
   duration: string
   isCurrent: boolean
+  band?: string
+  contextNote?: string
+  employmentBasis?: string
   history: string
   examination: string[]
   plan: string[]
@@ -59,7 +65,10 @@ export interface Investigation {
   methodology: string
   results: string[]
   techStack: string[]
+  skills?: string[]
   externalUrl?: string
+  demoUrl?: string
+  thumbnail?: string
 }
 
 export type DocumentType = 'Certificate' | 'Registration' | 'Results' | 'Research'
@@ -122,7 +131,6 @@ export interface SkillMedication {
   frequency: string
   startYear: number
   yearsOfExperience: number
-  proficiency: number
   category: 'Technical' | 'Domain' | 'Leadership'
   status: 'Active' | 'Historical'
   icon: string

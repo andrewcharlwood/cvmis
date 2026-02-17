@@ -26,7 +26,7 @@ function cosineSimilarity(a: number[], b: number[]): number {
 export function semanticSearch(
   queryEmbedding: number[],
   embeddings: EmbeddingEntry[],
-  threshold = 0.3
+  threshold = 0.15
 ): SearchResult[] {
   return embeddings
     .map(entry => ({

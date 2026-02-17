@@ -23,6 +23,9 @@ const timelineEntitySeeds: TimelineEntity[] = [
       startYear: 2025,
       endYear: 2025,
     },
+    band: '8c',
+    employmentBasis: 'Temporary',
+    contextNote: 'Temporary promotion · Returned to substantive post following organisational restructuring',
     description: 'Led strategic delivery of population health initiatives and data-driven medicines optimisation across Norfolk & Waveney ICS, reporting to Associate Director of Pharmacy with presentation accountability to Chief Medical Officer and system-level programme boards. Responsible for setting analytical priorities, directing the efficiency programme, and ensuring evidence-based recommendations reached executive decision-makers. Returned to substantive Deputy Head role following commencement of ICB-wide organisational consultation.',
     details: [
       'Identified and prioritised a £14.6M efficiency programme through comprehensive prescribing data analysis, targeting the highest-value, lowest-risk interventions across the integrated care system',
@@ -85,6 +88,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
       startYear: 2024,
       endYear: null,
     },
+    band: '8b',
     description: 'Driving data analytics strategy for medicines optimisation, developing bespoke datasets and analytical frameworks from messy, real-world GP prescribing data to identify efficiency opportunities and address health inequalities across the integrated care system.',
     details: [
       'Managed £220M prescribing budget with sophisticated forecasting models identifying cost pressures and enabling proactive financial planning for ICB board reporting',
@@ -142,7 +146,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
   {
     id: 'high-cost-drugs-2022',
     kind: 'career',
-    title: 'High-Cost Drugs & Interface Pharmacist',
+    title: 'High-Cost Drug Pharmacist',
     graphLabel: 'HCD Pharm',
     organization: 'NHS Norfolk & Waveney ICB',
     orgColor: '#005EB8',
@@ -153,6 +157,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
       startYear: 2022,
       endYear: 2024,
     },
+    band: '8a',
     description: 'Led implementation of NICE technology appraisals and high-cost drug pathways across the ICS. Wrote most of the system\'s high-cost drug pathways spanning rheumatology, ophthalmology (wet AMD, DMO, RVO), dermatology, gastroenterology, neurology, and migraine — balancing legal requirements to implement TAs against financial costs and local clinical preferences. Engaged clinical leads across all sectors of care to agree pathways and secure system-wide adoption.',
     details: [
       'Developed software automating Blueteq prior authorisation form creation: 70% reduction in required forms, 200 hours immediate savings, and ongoing 7 to 8 hours weekly efficiency gains',
@@ -430,6 +435,9 @@ function mapTimelineToConsultation(entity: TimelineEntity): Consultation {
     role: entity.title,
     duration: entity.dateRange.display,
     isCurrent: entity.dateRange.end === null,
+    band: entity.band,
+    contextNote: entity.contextNote,
+    employmentBasis: entity.employmentBasis,
     history: entity.description,
     examination: entity.details,
     plan: entity.outcomes ?? [],

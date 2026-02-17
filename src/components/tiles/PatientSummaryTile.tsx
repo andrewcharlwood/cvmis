@@ -7,6 +7,7 @@ import type { KPI } from '@/types/pmr'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { getLatestResultsCopy, getProfileSectionTitle, getProfileSummaryText } from '@/lib/profile-content'
 import { KPI_COLORS } from '@/lib/theme-colors'
+import { ProjectsCarousel } from './ProjectsTile'
 
 interface MetricCardProps {
   kpi: KPI
@@ -120,7 +121,7 @@ export function PatientSummaryTile() {
   const kpiGridStyles: React.CSSProperties = {
     display: 'grid',
     gap: '10px',
-    gridTemplateColumns: '1fr',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
   }
 
   return (
@@ -149,6 +150,9 @@ export function PatientSummaryTile() {
           ))}
         </div>
       </div>
+
+      {/* Projects carousel */}
+      <ProjectsCarousel />
     </ParentSection>
   )
 }

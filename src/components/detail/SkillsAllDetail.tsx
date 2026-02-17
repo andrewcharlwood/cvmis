@@ -40,7 +40,7 @@ export function SkillsAllDetail({ category }: SkillsAllDetailProps) {
     label,
     skills: skills
       .filter((s) => s.category === id)
-      .sort((a, b) => b.proficiency - a.proficiency),
+      .sort((a, b) => b.yearsOfExperience - a.yearsOfExperience),
   }))
 
   const handleSkillClick = (skill: SkillMedication) => {
@@ -198,46 +198,6 @@ function SkillRow({ skill, yearsSuffix, onClick }: SkillRowProps) {
         >
           {skill.frequency} · {skill.yearsOfExperience} {yearsSuffix}
         </div>
-      </div>
-
-      {/* Proficiency */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          flexShrink: 0,
-        }}
-      >
-        <div
-          style={{
-            width: '40px',
-            height: '4px',
-            backgroundColor: 'var(--border-light)',
-            borderRadius: '2px',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              width: `${skill.proficiency}%`,
-              height: '100%',
-              backgroundColor: skill.proficiency >= 90 ? 'var(--success)' : skill.proficiency >= 75 ? 'var(--accent)' : 'var(--amber)',
-              borderRadius: '2px',
-            }}
-          />
-        </div>
-        <span
-          style={{
-            fontSize: '10px',
-            fontFamily: '"Geist Mono", monospace',
-            color: 'var(--text-tertiary)',
-            minWidth: '28px',
-            textAlign: 'right',
-          }}
-        >
-          {skill.proficiency}%
-        </span>
       </div>
 
       {/* Chevron */}

@@ -43,53 +43,113 @@ function TimelineInterventionItem({
       onMouseEnter={() => onHighlight?.(entity.id)}
       onMouseLeave={() => onHighlight?.(null)}
       renderHeader={() => (
-        <>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-          >
-            <span className={isEducation ? 'timeline-intervention-pill timeline-intervention-pill--education' : 'timeline-intervention-pill'}>
-              {interventionLabel}
-            </span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+          <div style={{ minWidth: 0 }}>
             <div
               style={{
-                fontSize: '14px',
-                fontWeight: 600,
-                color: 'var(--text-primary)',
-                lineHeight: 1.3,
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                gap: '6px',
               }}
             >
-              {entity.title}
+              <span className={isEducation ? 'timeline-intervention-pill timeline-intervention-pill--education' : 'timeline-intervention-pill'}>
+                {interventionLabel}
+              </span>
+              <div
+                style={{
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  lineHeight: 1.3,
+                }}
+              >
+                {entity.title}
+              </div>
+            </div>
+            <div
+              style={{
+                fontSize: '12px',
+                color: 'var(--text-secondary)',
+                marginTop: '2px',
+              }}
+            >
+              {entity.organization}
+              <span
+                style={{
+                  fontSize: '11px',
+                  paddingLeft: '6px',
+                  fontFamily: 'var(--font-geist-mono)',
+                  color: 'var(--text-tertiary)',
+                  marginTop: '3px',
+                }}
+              >
+                {entity.dateRange.display}
+              </span>
             </div>
           </div>
-          <div
-            style={{
-              fontSize: '12px',
-              color: 'var(--text-secondary)',
-              marginTop: '2px',
-            }}
-          >
-            {entity.organization}
-            <span
+          {(entity.band || entity.employmentBasis) && (
+            <div
               style={{
-                fontSize: '11px',
-                paddingLeft: '6px',
-                fontFamily: 'var(--font-geist-mono)',
-                color: 'var(--text-tertiary)',
-                marginTop: '3px',
+                display: 'flex',
+                flexShrink: 0,
+                alignItems: 'center',
+                gap: '5px',
               }}
             >
-              {entity.dateRange.display}
-            </span>
-          </div>
-        </>
+              {entity.band && (
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontFamily: 'var(--font-geist-mono)',
+                    padding: '2px 6px',
+                    borderRadius: '3px',
+                    background: hexToRgba(entity.orgColor, 0.1),
+                    color: entity.orgColor,
+                    border: `1px solid ${hexToRgba(entity.orgColor, 0.25)}`,
+                    lineHeight: 1.4,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Band {entity.band.toUpperCase()}
+                </span>
+              )}
+              {entity.employmentBasis && (
+                <span
+                  title={entity.contextNote}
+                  style={{
+                    fontSize: '10px',
+                    padding: '2px 6px',
+                    borderRadius: '3px',
+                    background: 'rgba(245, 158, 11, 0.1)',
+                    color: '#b45309',
+                    border: '1px solid rgba(245, 158, 11, 0.25)',
+                    cursor: 'default',
+                    lineHeight: 1.4,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {entity.employmentBasis}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       )}
       renderBody={() => (
         <>
+          {entity.contextNote && (
+            <div
+              style={{
+                fontSize: '12px',
+                fontStyle: 'italic',
+                color: 'var(--text-tertiary)',
+                marginBottom: '10px',
+              }}
+            >
+              {entity.contextNote}
+            </div>
+          )}
           <ul
             style={{
               listStyle: 'none',

@@ -56,12 +56,12 @@ export function buildPaletteData(): PaletteItem[] {
   skills.forEach((skill) => {
     items.push({
       id: `skill-${skill.id}`,
-      title: `${skill.name} \u2014 ${skill.proficiency}%`,
+      title: skill.name,
       subtitle: `${skill.frequency} \u00b7 Since ${skill.startYear} \u00b7 ${skill.category}`,
       section: 'Core Skills',
       iconVariant: 'green',
       iconType: 'skill',
-      keywords: `${skill.name.toLowerCase()} ${skill.proficiency} ${skill.frequency.toLowerCase()} ${skill.category.toLowerCase()}`,
+      keywords: `${skill.name.toLowerCase()} ${skill.frequency.toLowerCase()} ${skill.category.toLowerCase()}`,
       action: { type: 'panel', panelContent: { type: 'skill', skill } },
     })
   })
@@ -236,7 +236,7 @@ export function buildEmbeddingTexts(): Array<{ id: string; text: string }> {
     const context = skillContextMap[skill.id] ?? ''
     texts.push({
       id: `skill-${skill.id}`,
-      text: `${skill.name} is a ${skill.category.toLowerCase()} skill used ${skill.frequency.toLowerCase()}, with ${skill.proficiency}% proficiency and ${skill.yearsOfExperience} years of experience since ${skill.startYear}. ${context}`,
+      text: `${skill.name} is a ${skill.category.toLowerCase()} skill used ${skill.frequency.toLowerCase()}, with ${skill.yearsOfExperience} years of experience since ${skill.startYear}. ${context}`,
     })
   })
 

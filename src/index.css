@@ -332,7 +332,9 @@ html {
     justify-content: space-between;
     gap: 12px;
   }
+}
 
+@media (min-width: 1024px) {
   .latest-results-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   }
@@ -341,7 +343,7 @@ html {
 /* Dashboard card grid responsive — mobile-first */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
 }
 
@@ -486,6 +488,12 @@ html {
   }
 }
 
+/* ===== CONSTELLATION FULLSCREEN ANIMATION ===== */
+@keyframes constellation-fullscreen-in {
+  from { transform: scale(0.95); opacity: 0.8; }
+  to { transform: scale(1); opacity: 1; }
+}
+
 /* ===== FOCUS VISIBLE STYLES (WCAG Compliance) ===== */
 /* Default focus ring for all focusable elements */
 *:focus-visible {
@@ -539,11 +547,26 @@ textarea:focus-visible {
   width: var(--panel-wide);
 }
 
+/* Desktop: cap panel width at 33% */
+@media (min-width: 1025px) {
+  .detail-panel[data-width="narrow"],
+  .detail-panel[data-width="wide"] {
+    max-width: 33vw;
+  }
+}
+
 /* Mobile: both narrow and wide become full-width */
 @media (max-width: 767px) {
   .detail-panel[data-width="narrow"],
   .detail-panel[data-width="wide"] {
     width: 100vw;
+  }
+}
+
+/* Hide skill tags on project cards at mobile */
+@media (max-width: 639px) {
+  .skills-tags {
+    display: none !important;
   }
 }
 
@@ -568,6 +591,12 @@ textarea:focus-visible {
   @keyframes backdrop-fade-in {
     from { opacity: 1; }
     to { opacity: 1; }
+  }
+
+  /* Instant constellation fullscreen */
+  @keyframes constellation-fullscreen-in {
+    from { transform: none; opacity: 1; }
+    to { transform: none; opacity: 1; }
   }
 
   /* Static login spinner indicator */

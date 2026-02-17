@@ -1,0 +1,2593 @@
+<script>
+  let currentStep = 'start';
+  let answers = {
+      ethnicity: null,
+      bmi: null,
+      comorbidities: {
+          ascvd: false,
+          hypertension: false,
+          dyslipidaemia: false,
+          osa: false,
+          diabetes: false
+      },
+      previousAttempts: null
+  };
+  let bmiMethod = 'calculate';
+  let unitSystem = 'metric';
+  let ageBasedIneligible = false;
+
+  const steps = ['start', 'age', 'ethnicity', 'bmi', 'comorbidities', 'previousAttempts', 'result'];
+
+  const COHORT_START_DATES = {
+      cohort1: new Date('2025-06-23'),
+      cohort2: new Date('2026-06-23'),
+      cohort3: new Date('2027-03-23')
+  };
+
+  const COHORT_TIMEFRAMES = {
+      cohort1: 'summer 2025',
+      cohort2: 'summer 2026',
+      cohort3: 'spring 2027'
+  };
+
+  function getAdjustedBmiThreshold(threshold) {
+      const lowerThresholdEthnicities = ['south_asian', 'chinese', 'other_asian', 'middle_eastern', 'black_african', 'african_caribbean'];
+      if (answers.ethnicity && lowerThresholdEthnicities.includes(answers.ethnicity)) {
+          return threshold - 2.5;
+      }
+      return threshold;
+  }
+
+  function countQualifyingComorbidities() {
+      return Object.values(answers.comorbidities).filter(Boolean).length;
+  }
+
+  function lbsToKg(lbs) {
+      return lbs * 0.453592;
+  }
+
+  function feetInchesToCm(feet, inches) {
+      const totalInches = (feet * 12) + inches;
+      return totalInches * 2.54;
+  }
+
+  function switchBmiMethod(method) {
+      bmiMethod = method;
+
+      const calculateTab = document.getElementById('calculate-tab');
+      const manualTab = document.getElementById('manual-tab');
+      const calculatorMode = document.getElementById('calculator-mode');
+      const manualMode = document.getElementById('manual-mode');
+
+      if (method === 'calculate') {
+          calculateTab.className = 'bmi-tab active';
+          manualTab.className = 'bmi-tab';
+          calculatorMode.style.display = 'block';
+          manualMode.style.display = 'none';
+          calculatorMode.className = 'fade-in';
+      } else {
+          calculateTab.className = 'bmi-tab';
+          manualTab.className = 'bmi-tab active';
+          calculatorMode.style.display = 'none';
+          manualMode.style.display = 'block';
+          manualMode.className = 'fade-in';
+      }
+
+      updateBmiDisplay();
+      updateUI();
+  }
+
+  function handleToggleKeydown(event, toggleId) {
+      if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          toggleUnits();
+      }
+  }
+
+  function toggleUnits() {
+      unitSystem = unitSystem === 'metric' ? 'imperial' : 'metric';
+
+      const toggle = document.getElementById('unit-toggle');
+      const toggleImperial = document.getElementById('unit-toggle-imperial');
+      const metricInputs = document.getElementById('metric-inputs');
+      const imperialInputs = document.getElementById('imperial-inputs');
+      const metricLabelInMetricView = document.querySelector('#metric-inputs #metric-label');
+      const imperialLabelInMetricView = document.querySelector('#metric-inputs #imperial-label');
+      const metricLabelInImperialView = document.querySelector('#imperial-inputs .compact-unit-labels span:first-child');
+      const imperialLabelInImperialView = document.querySelector('#imperial-inputs .compact-unit-labels span:last-child');
+
+
+      if (unitSystem === 'imperial') {
+          toggle.classList.add('active');
+          toggle.setAttribute('aria-checked', 'true');
+          if (toggleImperial) {
+              toggleImperial.classList.add('active');
+              toggleImperial.setAttribute('aria-checked', 'true');
+          }
+
+          if(metricLabelInMetricView) metricLabelInMetricView.classList.remove('active');
+          if(imperialLabelInMetricView) imperialLabelInMetricView.classList.add('active');
+
+          metricInputs.style.display = 'none';
+          imperialInputs.style.display = 'block';
+
+          document.getElementById('weight-input').value = '';
+          document.getElementById('height-input').value = '';
+      } else {
+          toggle.classList.remove('active');
+          toggle.setAttribute('aria-checked', 'false');
+          if (toggleImperial) {
+              toggleImperial.classList.remove('active');
+              toggleImperial.setAttribute('aria-checked', 'false');
+          }
+
+          if(metricLabelInImperialView) metricLabelInImperialView.classList.add('active');
+          if(imperialLabelInImperialView) imperialLabelInImperialView.classList.remove('active');
+
+          metricInputs.style.display = 'block';
+          imperialInputs.style.display = 'none';
+
+          document.getElementById('weight-lbs-input').value = '';
+          document.getElementById('height-ft-input').value = '';
+          document.getElementById('height-in-input').value = '';
+      }
+
+      updateBmiDisplay();
+      updateUI();
+  }
+
+  function handleBmiInput() {
+      const inputs = document.querySelectorAll('#calculator-mode .modern-input');
+      inputs.forEach(input => {
+          input.value = input.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+
+          input.classList.remove('error', 'success');
+          if (input.value && parseFloat(input.value) > 0) {
+              input.classList.add('success');
+          } else if (input.value && parseFloat(input.value) <= 0 && input.value !== '') {
+              input.classList.add('error');
+          }
+      });
+
+      updateBmiDisplay();
+      updateUI();
+  }
+
+  function handleManualBmiInput() {
+      const input = document.getElementById('manual-bmi-input');
+
+      input.value = input.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+      const value = input.value;
+
+      input.classList.remove('error', 'success');
+      if (value && parseFloat(value) > 0) {
+          input.classList.add('success');
+          answers.bmi = parseFloat(value);
+      } else if (value && parseFloat(value) <= 0 && value !== '') {
+          input.classList.add('error');
+          answers.bmi = null;
+      } else {
+          answers.bmi = null;
+      }
+
+      updateBmiDisplay();
+      updateUI();
+  }
+
+  function calculateBmiFromInputs() {
+      let weight, height;
+
+      if (unitSystem === 'metric') {
+          weight = parseFloat(document.getElementById('weight-input').value) || 0;
+          height = parseFloat(document.getElementById('height-input').value) || 0;
+      } else {
+          const weightLbs = parseFloat(document.getElementById('weight-lbs-input').value) || 0;
+          const feet = parseFloat(document.getElementById('height-ft-input').value) || 0;
+          const inches = parseFloat(document.getElementById('height-in-input').value) || 0;
+
+          weight = lbsToKg(weightLbs);
+          height = feetInchesToCm(feet, inches);
+      }
+
+      if (weight > 0 && height > 0) {
+          const heightInMeters = height / 100;
+          const bmi = weight / (heightInMeters * heightInMeters);
+          return parseFloat(bmi.toFixed(1));
+      }
+
+      return null;
+  }
+
+  function getBmiCategory(bmi) {
+      if (bmi < 18.5) return { category: 'Underweight', class: 'underweight' };
+      if (bmi < 25) return { category: 'Normal weight', class: 'normal' };
+      if (bmi < 30) return { category: 'Overweight', class: 'overweight' };
+      if (bmi < 35) return { category: 'Obese', class: 'obese' };
+      return { category: 'Severely obese', class: 'obese' };
+  }
+
+  function updateBmiDisplay() {
+      const resultCard = document.getElementById('bmi-result');
+      const bmiDisplay = document.getElementById('bmi-display');
+      const categoryDisplay = document.getElementById('bmi-category');
+
+      let bmi = null;
+
+      if (bmiMethod === 'calculate') {
+          bmi = calculateBmiFromInputs();
+          if (bmi) {
+              answers.bmi = bmi;
+              const manualBmiInputField = document.getElementById('manual-bmi-input');
+              if (manualBmiInputField) manualBmiInputField.value = bmi;
+          } else {
+              answers.bmi = null;
+          }
+      } else {
+          const manualBmiInputField = document.getElementById('manual-bmi-input');
+          if (manualBmiInputField && manualBmiInputField.value) {
+              bmi = parseFloat(manualBmiInputField.value);
+              answers.bmi = bmi > 0 ? bmi : null;
+          } else {
+              answers.bmi = null;
+          }
+      }
+
+
+      if (answers.bmi && answers.bmi > 0) {
+          const categoryInfo = getBmiCategory(answers.bmi);
+
+          bmiDisplay.textContent = answers.bmi;
+          categoryDisplay.textContent = categoryInfo.category;
+
+          resultCard.className = `bmi-result-card show ${categoryInfo.class}`;
+          resultCard.style.display = 'block';
+      } else {
+          bmiDisplay.textContent = '--';
+          categoryDisplay.textContent = 'BMI Category';
+          resultCard.className = 'bmi-result-card';
+          resultCard.style.display = 'none';
+          if (bmiMethod === 'calculate') {
+              answers.bmi = null;
+          }
+      }
+      updateUI();
+  }
+
+  function showStep(stepName) {
+      steps.forEach(step => {
+          const element = document.getElementById(`step-${step}`);
+          if (element) {
+              element.classList.add('hidden');
+          }
+      });
+
+      const currentElement = document.getElementById(`step-${stepName}`);
+      if (currentElement) {
+          currentElement.classList.remove('hidden');
+          if (currentElement.scrollTop > 0) {
+              currentElement.scrollTop = 0;
+          } else if (document.querySelector('.calculator-container').scrollTop > 0) {
+              document.querySelector('.calculator-container').scrollTop = 0;
+          }
+      }
+
+      currentStep = stepName;
+
+      if (stepName === 'result') {
+          updateResult();
+      }
+
+      updateProgressBar();
+  }
+
+  function startAssessment() {
+      showStep('age');
+  }
+
+  function goToNextStep() {
+      if (currentStep === 'age' && ageBasedIneligible) {
+          showStep('result');
+          return;
+      }
+
+      const currentIndex = steps.indexOf(currentStep);
+      if (currentIndex < steps.length - 1) {
+          showStep(steps[currentIndex + 1]);
+      }
+  }
+
+  function goToPrevStep() {
+      const currentIndex = steps.indexOf(currentStep);
+      if (currentIndex > 0) {
+          showStep(steps[currentIndex - 1]);
+      }
+  }
+
+  function resetForm() {
+      answers = {
+          ethnicity: null,
+          bmi: null,
+          comorbidities: {
+              ascvd: false,
+              hypertension: false,
+              dyslipidaemia: false,
+              osa: false,
+              diabetes: false
+          },
+          previousAttempts: null
+      };
+      bmiMethod = 'calculate';
+      unitSystem = 'metric';
+      ageBasedIneligible = false;
+
+      document.querySelectorAll('input').forEach(input => {
+          if (input.type === 'radio' || input.type === 'checkbox') {
+              input.checked = false;
+          } else {
+              input.value = '';
+              input.classList.remove('error', 'success');
+          }
+      });
+
+      switchBmiMethod('calculate');
+      const unitToggle = document.getElementById('unit-toggle');
+      const unitToggleImperial = document.getElementById('unit-toggle-imperial');
+      if (unitSystem === 'imperial') {
+          toggleUnits();
+      } else {
+          if (unitToggle) unitToggle.classList.remove('active');
+          if (unitToggleImperial) unitToggleImperial.classList.remove('active');
+          document.getElementById('metric-inputs').style.display = 'block';
+          document.getElementById('imperial-inputs').style.display = 'none';
+          const metricLabelInMetricView = document.querySelector('#metric-inputs #metric-label');
+          const imperialLabelInMetricView = document.querySelector('#metric-inputs #imperial-label');
+          if(metricLabelInMetricView) metricLabelInMetricView.classList.add('active');
+          if(imperialLabelInMetricView) imperialLabelInMetricView.classList.remove('active');
+      }
+
+
+      document.getElementById('bmi-result').style.display = 'none';
+      document.getElementById('bmi-display').textContent = '--';
+      document.getElementById('bmi-category').textContent = 'BMI Category';
+
+
+      document.getElementById('age-select').value = "";
+      document.getElementById('ethnicity-select').value = "";
+      document.getElementById('attempts-select').value = "";
+
+      const conditionCountEl = document.getElementById('condition-count');
+      if(conditionCountEl) conditionCountEl.textContent = '0';
+
+      updateUI();
+      showStep('start');
+  }
+
+  function handleAgeChange() {
+      const selectElement = document.getElementById('age-select');
+      const selectedValue = selectElement.value;
+      const nextBtn = document.getElementById('age-next-btn');
+
+      if (selectedValue) {
+          if (selectedValue === 'under18') {
+              ageBasedIneligible = true;
+          } else {
+              ageBasedIneligible = false;
+              answers.age = selectedValue;
+          }
+          nextBtn.disabled = false;
+      } else {
+          nextBtn.disabled = true;
+      }
+  }
+
+  function handleEthnicityChange() {
+      const selectElement = document.getElementById('ethnicity-select');
+      const selectedValue = selectElement.value;
+      if (selectedValue) {
+          answers.ethnicity = selectedValue;
+      } else {
+          answers.ethnicity = null;
+      }
+      updateUI();
+  }
+
+  function handleComorbidityChange() {
+      const checkboxes = document.querySelectorAll('input[name="comorbidities"]');
+
+      Object.keys(answers.comorbidities).forEach(key => {
+          answers.comorbidities[key] = false;
+      });
+
+      checkboxes.forEach((checkbox) => {
+          if(checkbox.checked) {
+              answers.comorbidities[checkbox.value] = true;
+          }
+      });
+
+      updateUI();
+  }
+
+  function handlePreviousAttemptsChange() {
+      const selectElement = document.getElementById('attempts-select');
+      const selectedValue = selectElement.value;
+
+      if (selectedValue) {
+          answers.previousAttempts = selectedValue === 'true';
+          updateUI();
+      }
+  }
+
+  function handleBmiSubmit() {
+      if (answers.bmi && answers.bmi > 0) {
+          goToNextStep();
+      } else {
+          alert('Please enter or calculate a valid BMI value before continuing.');
+      }
+  }
+
+  function updateUI() {
+      const ethnicityNote = document.getElementById('ethnicity-note');
+      const ethnicityNextBtn = document.getElementById('ethnicity-next-btn');
+
+      if (ethnicityNote && ethnicityNextBtn) {
+          const lowerThresholdEthnicities = ['south_asian', 'chinese', 'other_asian', 'middle_eastern', 'black_african', 'african_caribbean'];
+
+          if (answers.ethnicity && lowerThresholdEthnicities.includes(answers.ethnicity)) {
+              ethnicityNote.classList.remove('hidden');
+          } else {
+              ethnicityNote.classList.add('hidden');
+          }
+
+          ethnicityNextBtn.disabled = answers.ethnicity === null;
+      }
+
+      const bmiNextBtn = document.getElementById('bmi-next-btn');
+      if (bmiNextBtn) {
+          bmiNextBtn.disabled = !(answers.bmi && answers.bmi > 0);
+      }
+
+      const conditionCountEl = document.getElementById('condition-count');
+      if (conditionCountEl) {
+          const newCount = countQualifyingComorbidities();
+          if (conditionCountEl.textContent !== newCount.toString()) {
+              conditionCountEl.style.transform = 'scale(1.2)';
+              setTimeout(() => {
+                  conditionCountEl.textContent = newCount;
+                  conditionCountEl.style.transform = 'scale(1)';
+              }, 100);
+          }
+      }
+
+      const attemptsNextBtn = document.getElementById('attempts-next-btn');
+      if (attemptsNextBtn) {
+          attemptsNextBtn.disabled = answers.previousAttempts === null;
+      }
+
+      updateTimelineBMI();
+
+      if (currentStep === 'result') {
+          updateResult();
+      }
+  }
+
+  function updateTimelineBMI() {
+      const timelineBmi1 = document.getElementById('timeline-bmi-1');
+      const timelineBmi2a = document.getElementById('timeline-bmi-2a');
+      const timelineBmi2b = document.getElementById('timeline-bmi-2b');
+      const timelineBmi3 = document.getElementById('timeline-bmi-3');
+
+      if(timelineBmi1) timelineBmi1.textContent = getAdjustedBmiThreshold(40);
+      if(timelineBmi2a) timelineBmi2a.textContent = getAdjustedBmiThreshold(35);
+      if(timelineBmi2b) timelineBmi2b.textContent = getAdjustedBmiThreshold(39.9);
+      if(timelineBmi3) timelineBmi3.textContent = getAdjustedBmiThreshold(40);
+  }
+
+  function updateResult() {
+      const resultContent = document.getElementById('result-content');
+      const printDate = document.getElementById('print-date');
+
+      if (printDate) {
+          printDate.textContent = new Date().toLocaleDateString('en-GB');
+      }
+
+      if (ageBasedIneligible) {
+          let html = '<div class="result-box warning">';
+          html += '<h3>You are not eligible for tirzepatide (Mounjaro)</h3>';
+          html += '<div style="margin-top: 16px;">';
+          html += '<p><strong>Age:</strong> You must be over the age of 18 to be eligible for NHS weight loss medications.</p>';
+          html += '<p style="margin-top: 12px;">Please speak with your GP or healthcare provider about appropriate weight management support for your age group.</p>';
+          html += '</div>';
+          html += '</div>';
+          resultContent.innerHTML = html;
+          document.querySelector('.timeline-box').style.display = 'none';
+          return;
+      }
+
+      const eligibilityResult = determineEligibilityAndCohort();
+      const comorbidityCount = countQualifyingComorbidities();
+      const selectedConditions = getSelectedConditions();
+
+      const timelineBox = document.querySelector('.timeline-box');
+      if (timelineBox) {
+          if (eligibilityResult.eligible && eligibilityResult.isActive) {
+              timelineBox.style.display = 'none';
+          } else {
+              timelineBox.style.display = 'block';
+          }
+      }
+
+      let resultClass = 'warning';
+      if (eligibilityResult.eligible) {
+          if (eligibilityResult.isActive) {
+              resultClass = 'success';
+          } else {
+              resultClass = 'orange';
+          }
+      }
+
+
+      let html = '<div class="result-box ' + resultClass + '">';
+      html += '<h3>';
+      if (eligibilityResult.eligible) {
+          if (eligibilityResult.isActive) {
+              html += 'You may be eligible for tirzepatide';
+          } else {
+              html += 'You may be eligible for tirzepatide in the future';
+          }
+      } else {
+          html += 'You may not currently be eligible for tirzepatide (Mounjaro)';
+      }
+      html += '</h3>';
+      html += '<div style="margin-top: 16px;">';
+
+
+      html += '<p><strong>BMI:</strong> ' + (answers.bmi || 'Not provided');
+      if (answers.ethnicity && ['south_asian', 'chinese', 'other_asian', 'middle_eastern', 'black_african', 'african_caribbean'].includes(answers.ethnicity)) {
+          html += ' (adjusted thresholds apply for your ethnic background).';
+      } else {
+          html += '.';
+      }
+      html += '</p>';
+
+      html += '<p><strong>Qualifying conditions:</strong> You have ' + comorbidityCount + ' out of 5 qualifying conditions.</p>';
+
+      if (answers.previousAttempts === false) {
+          html += '<p><strong>Previous Weight Loss Attempts:</strong> You indicated you have not made serious attempts to lose weight through lifestyle changes. NHS guidelines require this before prescribing weight loss medication.</p>';
+      } else if (answers.previousAttempts === true) {
+          html += '<p><strong>Previous Weight Loss Attempts:</strong> You indicated you have made serious attempts to lose weight through lifestyle changes.</p>';
+      }
+
+
+      if (selectedConditions.length > 0) {
+          html += '<div class="selected-conditions">';
+          html += '<h4>Your Selected Qualifying Conditions:</h4>';
+          html += '<ul class="condition-list">';
+          selectedConditions.forEach(condition => {
+              html += '<li>' + condition + '</li>';
+          });
+          html += '</ul>';
+          html += '</div>';
+      }
+
+
+      if (eligibilityResult.eligible) {
+          html += '<div class="cohort-info">';
+          html += '<p><strong>Cohort ' + eligibilityResult.cohort + ' - ' + eligibilityResult.year + '</strong></p>';
+          html += '<p style="margin-top: 8px;">';
+          html += 'You may meet the criteria for ' + eligibilityResult.year + ' with ' + comorbidityCount + ' qualifying ';
+          html += 'conditions and a BMI of ' + answers.bmi + '.';
+          html += '</p>';
+          html += '<p style="margin-top: 8px;">';
+
+          if (eligibilityResult.isActive) {
+              html += '<strong>Next steps:</strong> Speak with your GP about your weight management ';
+              html += 'options. Access to tirzepatide is subject to the phased rollout ';
+              html += 'and local service capacity.';
+          } else {
+              html += '<strong>Expected timeframe:</strong> From ' + eligibilityResult.timeframe + '<br>';
+              html += '<strong>Next steps:</strong> You may be eligible from this timeframe. Access will be subject to the phased rollout ';
+              html += 'and local service capacity. Discuss with your GP after this time if appropriate.';
+          }
+
+          html += '</p>';
+          html += '</div>';
+      } else if (!eligibilityResult.eligible && answers.previousAttempts === true) {
+          html += '<div class="cohort-info" style="border-color: #FFB81C;">';
+          html += '<p style="font-weight: 500;">Potential future eligibility (based on timeline):</p>';
+          let potentialShown = false;
+
+          if (comorbidityCount >= 4 && answers.bmi >= getAdjustedBmiThreshold(35) && answers.bmi < getAdjustedBmiThreshold(40)) {
+              html += '<p style="margin-top: 4px;">• With ' + comorbidityCount + ' conditions and BMI ' + answers.bmi + ', you might meet criteria for Year 2 (2026/27).</p>';
+              potentialShown = true;
+          }
+          if (comorbidityCount >= 3 && answers.bmi >= getAdjustedBmiThreshold(40)) {
+              html += '<p style="margin-top: 4px;">• With ' + comorbidityCount + ' conditions and BMI ' + answers.bmi + ', you might meet criteria for Year 3 (2027/28) if not Year 1.</p>';
+              potentialShown = true;
+          }
+          if (!potentialShown) {
+              html += '<p style="margin-top: 4px;">Based on your current BMI and number of conditions, you do not appear to meet the criteria for the phased rollout timeline. Please discuss other weight management options with your GP.</p>';
+          }
+          html += '</div>';
+      }
+
+
+      html += '</div>';
+      html += '</div>';
+
+      resultContent.innerHTML = html;
+  }
+
+
+  function determineEligibilityAndCohort() {
+      const hasMadePreviousAttempts = answers.previousAttempts;
+      const comorbidityCount = countQualifyingComorbidities();
+      const bmi = answers.bmi;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); 
+
+      if (!bmi || bmi <=0) {
+          return { eligible: false, cohort: null, year: null, isActive: false };
+      }
+
+      if (hasMadePreviousAttempts === false) {
+          return { eligible: false, cohort: null, year: null, reason: "previousAttempts", isActive: false };
+      }
+
+      const year1BmiThreshold = getAdjustedBmiThreshold(40);
+      if (comorbidityCount >= 4 && bmi >= year1BmiThreshold && hasMadePreviousAttempts) {
+          const isActive = today >= COHORT_START_DATES.cohort1;
+          return {
+              eligible: true,
+              cohort: "1",
+              year: "Year 1 (2025/26)",
+              isActive: isActive,
+              timeframe: COHORT_TIMEFRAMES.cohort1
+          };
+      }
+
+      const year2LowerBmi = getAdjustedBmiThreshold(34.99);
+      const year2UpperBmi = getAdjustedBmiThreshold(39.9);
+      if (comorbidityCount >= 4 && bmi >= year2LowerBmi && bmi <= year2UpperBmi && hasMadePreviousAttempts) {
+          const isActive = today >= COHORT_START_DATES.cohort2;
+          return {
+              eligible: true,
+              cohort: "2",
+              year: "Year 2 (2026/27)",
+              isActive: isActive,
+              timeframe: COHORT_TIMEFRAMES.cohort2
+          };
+      }
+
+      const year3BmiThreshold = getAdjustedBmiThreshold(40);
+      if (comorbidityCount === 3 && bmi >= year3BmiThreshold && hasMadePreviousAttempts) {
+          const isActive = today >= COHORT_START_DATES.cohort3;
+          return {
+              eligible: true,
+              cohort: "3",
+              year: "Year 3 (2027/28)",
+              isActive: isActive,
+              timeframe: COHORT_TIMEFRAMES.cohort3
+          };
+      }
+
+      return { eligible: false, cohort: null, year: null, isActive: false };
+  }
+
+
+  function updateProgressBar() {
+      const currentStepIndex = steps.indexOf(currentStep);
+      const totalProgressSteps = 5;
+
+      let progressPercentage = 0;
+
+      if (currentStep === 'start') {
+          progressPercentage = 0;
+      } else if (currentStep === 'result' || ageBasedIneligible) {
+          progressPercentage = 100;
+      } else {
+          const progressOrder = ['age', 'ethnicity', 'bmi', 'comorbidities', 'previousAttempts'];
+          const progressStepIndex = progressOrder.indexOf(currentStep);
+          if (progressStepIndex !== -1) {
+              progressPercentage = ((progressStepIndex ) / totalProgressSteps) * 100;
+          }
+      }
+
+      const progressBarFill = document.getElementById('progress-bar-fill');
+      const progressPercentageElement = document.getElementById('progress-percentage');
+
+      if (progressBarFill) {
+          progressBarFill.style.width = `${Math.max(0, Math.min(100, progressPercentage))}%`;
+      }
+      if (progressPercentageElement) {
+          progressPercentageElement.textContent = `${Math.round(Math.max(0, Math.min(100, progressPercentage)))}%`;
+      }
+  }
+
+  function getSelectedConditions() {
+      const conditionMap = {
+          'ascvd': 'Heart disease',
+          'hypertension': 'High blood pressure',
+          'dyslipidaemia': 'High cholesterol',
+          'osa': 'Obstructive sleep apnoea',
+          'diabetes': 'Type 2 diabetes'
+      };
+
+      const selectedConditions = [];
+      for (const [key, value] of Object.entries(answers.comorbidities)) {
+          if (value) {
+              selectedConditions.push(conditionMap[key]);
+          }
+      }
+      return selectedConditions;
+  }
+
+  function printResults() {
+      window.print();
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+      updateUI();
+      updateProgressBar();
+
+      switchBmiMethod('calculate');
+      if (unitSystem === 'imperial') {
+          toggleUnits();
+      } else {
+          const unitToggle = document.getElementById('unit-toggle');
+          if (unitToggle) unitToggle.classList.remove('active');
+          document.getElementById('metric-inputs').style.display = 'block';
+          document.getElementById('imperial-inputs').style.display = 'none';
+          const metricLabelInMetricView = document.querySelector('#metric-inputs #metric-label');
+          const imperialLabelInMetricView = document.querySelector('#metric-inputs #imperial-label');
+          if(metricLabelInMetricView) metricLabelInMetricView.classList.add('active');
+          if(imperialLabelInMetricView) imperialLabelInMetricView.classList.remove('active');
+      }
+      updateBmiDisplay();
+  });
+</script>
+<style>
+  .tirzepatide-calculator-widget {
+
+    --primary-color: #005EB8;
+    --secondary-color: #41B6E6;
+    --brand-white: #ffffff;
+    --border-color: #d1d5db;
+    --text-primary: #231f20;
+    --success-color: #009639;
+    --warning-color: #FFB81C;
+    --error-color: #DA291C;
+
+
+    box-sizing: border-box;
+    font-family: Arial, sans-serif !important;
+    line-height: 1.6 !important;
+    color: #231f20 !important;
+    background-color: #f8fafc !important;
+    padding: 0px !important;
+
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif !important;
+    }
+
+
+    input,
+    button,
+    textarea,
+    select {
+      font-family: Arial, sans-serif !important;
+      font-size: 16px !important;
+      line-height: 1.6 !important;
+    }
+
+
+    ul,
+    ol {
+      list-style-type: disc !important;
+      margin-left: 20px !important;
+    }
+
+
+    * {
+      line-height: inherit !important;
+    }
+  }
+
+
+  .tirzepatide-calculator-widget .calculator-container {
+    max-width: 800px;
+    min-height: 750px;
+    margin: 0 auto;
+    border: 4px solid var(--primary-color);
+    background: var(--brand-white);
+    margin-bottom: 0px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 94, 184, 0.1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+
+  .tirzepatide-calculator-widget .header {
+    background: #005EB8 !important;
+    color: white !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0px;
+    margin-bottom: 0px;
+    padding: 20px 32px;
+  }
+
+  .tirzepatide-calculator-widget .header-content {
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+    .tirzepatide-calculator-widget .header-logo-container {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin: 0px;
+      margin-left: 0;
+    }
+
+  .tirzepatide-calculator-widget .header-title {
+    font-size: 24px !important;
+    line-height: 1 !important;
+    letter-spacing: -0.025em;
+    padding: 0 !important;
+    font-weight: normal !important;
+    margin: 0 !important;
+    color: white !important;
+    font-family: Arial, sans-serif !important;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .tirzepatide-calculator-widget .header-title:hover {
+    opacity: 0.85;
+  }
+
+  .tirzepatide-calculator-widget .header-title:active {
+    opacity: 0.7;
+  }
+
+
+  .tirzepatide-calculator-widget .content {
+    padding: 0 8px 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tirzepatide-calculator-widget .step-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--brand-white);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    height: 100%;
+    justify-content: flex-start;
+    overflow-y: auto;
+  }
+
+  .tirzepatide-calculator-widget .step-content.hidden {
+    display: none;
+  }
+
+
+  .tirzepatide-calculator-widget .prose {
+    max-width: none;
+  }
+
+  .tirzepatide-calculator-widget .prose p {
+    margin-bottom: 16px !important;
+    font-size: 18px !important;
+    font-family: Arial, sans-serif !important;
+    color: #231f20 !important;
+    line-height: 1.6 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .tirzepatide-calculator-widget h1,
+  .tirzepatide-calculator-widget h2,
+  .tirzepatide-calculator-widget h3,
+  .tirzepatide-calculator-widget h4,
+  .tirzepatide-calculator-widget h5,
+  .tirzepatide-calculator-widget h6 {
+    font-family: Arial, sans-serif !important;
+    font-weight: bold !important;
+    color: #003087 !important;
+    padding-bottom: 0 !important;
+    margin: 0 !important;
+  }
+
+  .tirzepatide-calculator-widget h2 {
+    font-size: 24px !important;
+    margin-bottom: 0px !important;
+  }
+
+  .tirzepatide-calculator-widget h3 {
+    font-size: 20px !important;
+    margin-bottom: 16px !important;
+  }
+
+
+  .tirzepatide-calculator-widget .important-box {
+    margin: 0px 0;
+    padding: 0px 24px 0;
+    background: #fefce8;
+    color: #374151;
+    border: 1px solid #FFB81C;
+    position: relative;
+  }
+
+  .tirzepatide-calculator-widget .important-header {
+    display: inline-block;
+    position: relative;
+    margin-left: -24px;
+    margin-bottom: 8px;
+    font-size: 20px;
+    line-height: 1.6;
+  }
+
+  .tirzepatide-calculator-widget .important-label {
+    font-weight: bold;
+    background: #FFB81C;
+    display: inline-block;
+    padding: 8px 32px;
+    position: relative;
+    top: -1px;
+    left: -1px;
+  }
+
+  .tirzepatide-calculator-widget .important-content {
+    font-size: 16px;
+    padding-bottom: 24px;
+  }
+
+
+  .tirzepatide-calculator-widget .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .tirzepatide-calculator-widget .radio-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .tirzepatide-calculator-widget .radio-option:hover {
+    background-color: #f9fafb;
+  }
+
+  .tirzepatide-calculator-widget .radio-option input[type="radio"] {
+    width: 20px !important;
+    height: 20px !important;
+    margin-top: 4px;
+    font-family: inherit !important;
+  }
+
+  .tirzepatide-calculator-widget .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tirzepatide-calculator-widget .checkbox-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 9px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .tirzepatide-calculator-widget .checkbox-option:hover {
+    background-color: #f9fafb;
+  }
+
+  .tirzepatide-calculator-widget .checkbox-option input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    margin-top: 4px;
+    font-family: inherit !important;
+  }
+
+  .tirzepatide-calculator-widget .condition-description {
+    font-size: 14px;
+    color: #4b5563;
+    margin-top: 4px;
+  }
+
+
+  .tirzepatide-calculator-widget .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .tirzepatide-calculator-widget .input-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tirzepatide-calculator-widget .input-group label {
+    margin-bottom: 4px !important;
+    font-weight: 500 !important;
+    font-family: Arial, sans-serif !important;
+    color: #374151 !important;
+    font-size: 14px !important;
+    padding-bottom: 0 !important;
+  }
+
+  .tirzepatide-calculator-widget .input-label {
+    margin-bottom: 4px !important;
+    font-weight: 500 !important;
+    font-family: Arial, sans-serif !important;
+    color: #374151 !important;
+    font-size: 14px !important;
+    padding-bottom: 0 !important;
+  }
+
+  .tirzepatide-calculator-widget .input-group input {
+    width: 100% !important;
+    padding: 8px !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    font-size: 16px !important;
+    font-family: Arial, sans-serif !important;
+    line-height: 1.6 !important;
+  }
+
+  .tirzepatide-calculator-widget .modern-input {
+    width: 100% !important;
+    padding: 12px 16px !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    font-size: 16px !important;
+    transition: all 0.2s ease-out;
+    background: white !important;
+    font-family: Arial, sans-serif !important;
+    line-height: 1.6 !important;
+  }
+
+  .tirzepatide-calculator-widget .modern-input:focus {
+    outline: none !important;
+    border-color: #005EB8 !important;
+    box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.1) !important;
+  }
+
+  .tirzepatide-calculator-widget .modern-input:hover {
+    border-color: #9ca3af !important;
+  }
+
+  .tirzepatide-calculator-widget .modern-select {
+    width: 100% !important;
+    padding: 12px 16px !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    font-size: 16px !important;
+    background-color: white !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236b7280'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd' /%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+    line-height: 1.5;
+    font-family: Arial, sans-serif !important;
+  }
+
+  .tirzepatide-calculator-widget .modern-select:focus {
+    outline: none !important;
+    border-color: #005EB8 !important;
+    box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.1) !important;
+  }
+
+  .tirzepatide-calculator-widget .modern-select option {
+    padding: 8px 12px;
+    background-color: white !important;
+    color: #231f20 !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+
+  .tirzepatide-calculator-widget .bmi-methods {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .tirzepatide-calculator-widget .method-btn {
+    padding: 8px 16px !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: Arial, sans-serif !important;
+    font-size: 16px !important;
+  }
+
+  .tirzepatide-calculator-widget .method-btn.active {
+    background: #005EB8 !important;
+    color: white !important;
+  }
+
+  .tirzepatide-calculator-widget .method-btn.inactive {
+    background: #e5e7eb !important;
+    color: #374151 !important;
+  }
+
+  .tirzepatide-calculator-widget .method-btn.inactive:hover {
+    background: #d1d5db !important;
+  }
+
+  .tirzepatide-calculator-widget .button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .tirzepatide-calculator-widget .button-group .btn {
+    flex: 1;
+  }
+
+  .tirzepatide-calculator-widget .btn {
+    padding: 8px 24px !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer;
+    font-size: 16px !important;
+    transition: all 0.2s;
+    font-family: Arial, sans-serif !important;
+    line-height: 1.6 !important;
+  }
+
+  .tirzepatide-calculator-widget .btn-primary {
+    background: #005EB8 !important;
+    color: white !important;
+  }
+
+  .tirzepatide-calculator-widget .btn-primary:hover:not(:disabled) {
+    background: #1058A5 !important;
+  }
+
+  .tirzepatide-calculator-widget .btn-primary:disabled {
+    background: #d1d5db !important;
+    cursor: not-allowed;
+  }
+
+  .tirzepatide-calculator-widget .btn-secondary {
+    background: #e5e7eb !important;
+    color: #374151 !important;
+  }
+
+  .tirzepatide-calculator-widget .btn-secondary:hover {
+    background: #d1d5db !important;
+  }
+
+  .tirzepatide-calculator-widget .btn-large {
+    padding: 12px 24px !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    width: 100% !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .tirzepatide-calculator-widget .btn-print {
+    background: var(--primary-color) !important;
+    color: var(--brand-white) !important;
+    border: 1px solid var(--primary-color) !important;
+    padding: 12px 24px !important;
+    font-size: 16px !important;
+    border-radius: 8px !important;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: Arial, sans-serif !important;
+    font-weight: 500 !important;
+    flex: 1;
+  }
+
+  .tirzepatide-calculator-widget .btn-print:hover {
+    background: #003087 !important;
+    border-color: #003087 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 48, 135, 0.3);
+  }
+
+
+  .tirzepatide-calculator-widget .result-box {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+
+  .tirzepatide-calculator-widget .result-box.success {
+    background: #dcfce7;
+    border: 1px solid #009639;
+  }
+
+  .tirzepatide-calculator-widget .result-box.warning {
+    background: #fefce8;
+    border: 1px solid #FFB81C;
+  }
+
+  .tirzepatide-calculator-widget .result-box.orange {
+    background: #fed7aa;
+    border: 1px solid #EE710C;
+  }
+
+  .tirzepatide-calculator-widget .info-box {
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+
+  .tirzepatide-calculator-widget .info-box.blue {
+    background: #dbeafe;
+    border: 1px solid #41B6E6;
+  }
+
+  .tirzepatide-calculator-widget .info-box.green {
+    background: #dcfce7;
+    border: 1px solid #009639;
+  }
+
+  .tirzepatide-calculator-widget .info-box.yellow {
+    background: #fefce8;
+    border: 1px solid #FFB81C;
+  }
+
+  .tirzepatide-calculator-widget .cohort-info {
+    background: white;
+    padding: 16px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    margin-top: 16px;
+  }
+
+  .tirzepatide-calculator-widget .timeline-box {
+    background: #dbeafe;
+    border: 1px solid #41B6E6;
+    padding: 24px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+
+  .tirzepatide-calculator-widget .timeline-item {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+
+  .tirzepatide-calculator-widget .bmi-result {
+    padding: 16px;
+    background: #f3f4f6;
+    border-radius: 6px;
+    margin-top: 16px;
+  }
+
+  .tirzepatide-calculator-widget .bmi-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    margin-bottom: 24px;
+    height: auto;
+  }
+
+  .tirzepatide-calculator-widget .bmi-tabs {
+    display: flex;
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 24px;
+    border: 1px solid #e5e7eb;
+  }
+
+  .tirzepatide-calculator-widget .bmi-tab {
+    flex: 1;
+    padding: 12px 16px !important;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 6px !important;
+    cursor: pointer;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease-out;
+    color: #6b7280 !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+  .tirzepatide-calculator-widget .bmi-tab.active {
+    background: #005EB8 !important;
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(0, 94, 184, 0.2);
+  }
+
+  .tirzepatide-calculator-widget .bmi-tab:hover:not(.active) {
+    background: #e5e7eb !important;
+    color: #374151 !important;
+  }
+
+  .tirzepatide-calculator-widget .bmi-result-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #e5e7eb 100%);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-top: 20px;
+    border: 2px solid #e5e7eb;
+    transition: all 0.3s ease-out;
+  }
+
+  .tirzepatide-calculator-widget .bmi-value {
+    font-size: 32px !important;
+    font-weight: bold !important;
+    color: #005EB8 !important;
+    margin-bottom: 8px !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+  .tirzepatide-calculator-widget .bmi-category {
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    margin-bottom: 4px !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+  .tirzepatide-calculator-widget .bmi-description {
+    font-size: 14px !important;
+    color: #6b7280 !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+
+  .tirzepatide-calculator-widget .unit-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .tirzepatide-calculator-widget .unit-btn {
+    padding: 6px 12px !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 4px !important;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+    font-size: 14px !important;
+    background: white !important;
+    color: #374151 !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+  .tirzepatide-calculator-widget .unit-btn.active {
+    background: #005EB8 !important;
+    color: white !important;
+    border-color: #005EB8 !important;
+  }
+
+  .tirzepatide-calculator-widget .unit-btn:hover:not(.active) {
+    background: #f3f4f6 !important;
+    border-color: #9ca3af !important;
+  }
+
+  .tirzepatide-calculator-widget .unit-switch {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+  }
+
+  .tirzepatide-calculator-widget .unit-switch-label {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+  .tirzepatide-calculator-widget .toggle-switch {
+    position: relative;
+    width: 60px;
+    height: 28px;
+    background: #d1d5db;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .tirzepatide-calculator-widget .toggle-switch.active {
+    background: #005EB8;
+  }
+
+  .tirzepatide-calculator-widget .toggle-slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .tirzepatide-calculator-widget .toggle-switch.active .toggle-slider {
+    transform: translateX(32px);
+  }
+
+
+  .tirzepatide-calculator-widget .input-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .tirzepatide-calculator-widget .input-col {
+    flex: 1;
+  }
+
+  .tirzepatide-calculator-widget .input-col.small {
+    flex: 0 0 100px;
+  }
+
+  .tirzepatide-calculator-widget .height-input-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .tirzepatide-calculator-widget .weight-toggle-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .tirzepatide-calculator-widget .weight-toggle-row .input-col:last-child {
+    flex: 0 0 120px;
+  }
+
+
+  .tirzepatide-calculator-widget .progress-container {
+    position: relative;
+    
+    padding: 16px 32px;
+    padding-bottom: 8px;
+    margin-top: auto;
+  }
+
+  .tirzepatide-calculator-widget .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .tirzepatide-calculator-widget .progress-text {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+  .tirzepatide-calculator-widget .progress-percentage {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #005EB8 !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+  .tirzepatide-calculator-widget .progress-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .tirzepatide-calculator-widget .progress-bar-track {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    flex: 1;
+  }
+
+  .tirzepatide-calculator-widget .progress-bar-fill {
+    height: 100%;
+    background: #009639;
+    border-radius: 4px;
+    transition: width 0.4s ease-out;
+    width: 0%;
+    position: relative;
+  }
+
+
+  .tirzepatide-calculator-widget .selected-conditions {
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 6px 0;
+  }
+
+  .tirzepatide-calculator-widget .selected-conditions h4 {
+    color: var(--primary-color) !important;
+    font-size: 16px !important;
+    margin-bottom: 4px !important;
+    font-weight: bold !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+  .tirzepatide-calculator-widget .condition-list {
+    column-count: 2;
+    padding: 0px 16px;
+    margin: 0 !important;
+    column-gap: 20px;
+    break-inside: avoid;
+    list-style-type: disc !important;
+  }
+
+  .tirzepatide-calculator-widget .condition-list li {
+    padding: 4px 0;
+    color: var(--text-primary) !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    font-family: Arial, sans-serif !important;
+  }
+
+  .tirzepatide-calculator-widget .print-section {
+    margin-top: 12px;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+  }
+
+
+  .tirzepatide-calculator-widget .header-logo {
+    flex-shrink: 0;
+    height: 40px;
+    width: auto;
+    padding: 0;
+    object-fit: contain;
+    margin-left: auto;
+    display: block;
+    justify-content: flex-end;
+    
+  }
+
+
+  .tirzepatide-calculator-widget fieldset {
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .tirzepatide-calculator-widget legend {
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    color: #1f2937 !important;
+    margin-bottom: 1rem !important;
+    padding: 0 !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+
+  .tirzepatide-calculator-widget .fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+
+  .tirzepatide-calculator-widget .radio-option:hover,
+  .tirzepatide-calculator-widget .checkbox-option:hover {
+    background-color: #f9fafb;
+    border-color: #005EB8;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .tirzepatide-calculator-widget .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .tirzepatide-calculator-widget .btn-primary:hover:not(:disabled) {
+    background: #1058A5 !important;
+    box-shadow: 0 4px 12px rgba(0, 94, 184, 0.3);
+  }
+
+  .tirzepatide-calculator-widget .input-group input:focus {
+    outline: none !important;
+    border-color: #005EB8 !important;
+    box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.1) !important;
+  }
+
+  .tirzepatide-calculator-widget .input-group input:hover {
+    border-color: #9ca3af !important;
+  }
+
+  .tirzepatide-calculator-widget .radio-option:focus-within,
+  .tirzepatide-calculator-widget .checkbox-option:focus-within {
+    border-color: #005EB8 !important;
+    box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.1) !important;
+  }
+
+
+  .tirzepatide-calculator-widget .calculator-container::-webkit-scrollbar,
+  .tirzepatide-calculator-widget .step-content::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .tirzepatide-calculator-widget .calculator-container::-webkit-scrollbar-track,
+  .tirzepatide-calculator-widget .step-content::-webkit-scrollbar-track {
+    background: rgba(248, 250, 252, 0.3);
+    border-radius: 4px;
+  }
+
+  .tirzepatide-calculator-widget .calculator-container::-webkit-scrollbar-thumb,
+  .tirzepatide-calculator-widget .step-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 94, 184, 0.4);
+    border-radius: 4px;
+    transition: all 0.2s ease-out;
+  }
+
+  .tirzepatide-calculator-widget .calculator-container::-webkit-scrollbar-thumb:hover,
+  .tirzepatide-calculator-widget .step-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 94, 184, 0.6);
+  }
+
+
+  @media (min-width: 641px) and (max-width: 1000px) {
+    .tirzepatide-calculator-widget .header-logo {
+      height: 35px !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .tirzepatide-calculator-widget {
+      padding: 10px !important;
+    }
+
+    .tirzepatide-calculator-widget .calculator-container {
+      border-width: 2px;
+      height: calc(100vh - 20px);
+      max-height: 100%;
+      margin-bottom: 10px;
+    }
+
+    .tirzepatide-calculator-widget .header {
+      padding: 15px !important;
+      gap: 10px;
+    }
+
+    .tirzepatide-calculator-widget .header-title {
+      font-size: 24px !important;
+    }
+
+    .tirzepatide-calculator-widget .header-logo {
+      height: 30px !important;
+    }
+
+    .tirzepatide-calculator-widget .content {
+      padding: 0 15px 15px !important;
+    }
+
+    .tirzepatide-calculator-widget .step-content {
+      padding: 16px 15px !important;
+      gap: 12px;
+    }
+
+    .tirzepatide-calculator-widget .prose p {
+      font-size: 15px !important;
+      margin-bottom: 10px !important;
+    }
+
+    .tirzepatide-calculator-widget h2 {
+      font-size: 20px !important;
+      margin-bottom: 4px !important;
+    }
+
+    .tirzepatide-calculator-widget h3 {
+      font-size: 18px !important;
+      margin-bottom: 10px !important;
+    }
+
+    .tirzepatide-calculator-widget .btn {
+      width: 100% !important;
+      min-height: 44px;
+      font-size: 15px !important;
+      padding: 10px 20px !important;
+    }
+
+    .tirzepatide-calculator-widget .btn-large {
+      font-size: 16px !important;
+      padding: 12px 20px !important;
+    }
+
+    .tirzepatide-calculator-widget .input-row {
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .tirzepatide-calculator-widget .height-input-row {
+      flex-direction: row;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .tirzepatide-calculator-widget .weight-toggle-row {
+      flex-direction: row;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+  }
+
+
+  @media print {
+    @page {
+      size: A4;
+      margin: 15mm;
+    }
+
+
+    header,
+    #footer,
+    .skip-link,
+    .site-header,
+    .site-footer {
+      display: none !important;
+    }
+
+
+    #main,
+    [role="main"] {
+      display: block !important;
+    }
+
+    .tirzepatide-calculator-widget * {
+      -webkit-print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+
+    .tirzepatide-calculator-widget {
+      background: white !important;
+      font-size: 10pt !important;
+      line-height: 1.3 !important;
+      color: black !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .tirzepatide-calculator-widget .calculator-container {
+      box-shadow: none !important;
+      border: 1px solid #000 !important;
+      border-radius: 0 !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      height: auto !important;
+      min-height: auto !important;
+    }
+
+    .tirzepatide-calculator-widget .header {
+      display: none !important;
+    }
+
+    .tirzepatide-calculator-widget .content {
+      padding: 10pt !important;
+    }
+
+    .tirzepatide-calculator-widget .step-content {
+      padding: 0 !important;
+      margin: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
+      background: white !important;
+      min-height: auto !important;
+      gap: 8pt !important;
+    }
+
+    .tirzepatide-calculator-widget .step-content:not(#step-result) {
+      display: none !important;
+    }
+
+    .tirzepatide-calculator-widget .progress-container,
+    .tirzepatide-calculator-widget .btn,
+    .tirzepatide-calculator-widget .print-section {
+      display: none !important;
+    }
+
+    .tirzepatide-calculator-widget h2 {
+      font-size: 12pt !important;
+      margin: 8pt 0 6pt 0 !important;
+      color: black !important;
+    }
+
+    .tirzepatide-calculator-widget h3 {
+      font-size: 11pt !important;
+      margin: 6pt 0 4pt 0 !important;
+      color: black !important;
+    }
+
+    .tirzepatide-calculator-widget .result-box,
+    .tirzepatide-calculator-widget .timeline-box,
+    .tirzepatide-calculator-widget .info-box,
+    .tirzepatide-calculator-widget .cohort-info,
+    .tirzepatide-calculator-widget .selected-conditions {
+      background: white !important;
+      border: 1px solid #333 !important;
+      box-shadow: none !important;
+      page-break-inside: avoid;
+      margin: 6pt 0 !important;
+      padding: 8pt !important;
+      border-radius: 0 !important;
+    }
+
+    .tirzepatide-calculator-widget .prose p {
+      margin: 3pt 0 !important;
+      font-size: 9pt !important;
+      line-height: 1.2 !important;
+    }
+  }
+
+
+  @media (prefers-reduced-motion: reduce) {
+
+    .tirzepatide-calculator-widget *,
+    .tirzepatide-calculator-widget *::before,
+    .tirzepatide-calculator-widget *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+
+  .tirzepatide-calculator-widget .btn:focus-visible,
+  .tirzepatide-calculator-widget .modern-input:focus-visible,
+  .tirzepatide-calculator-widget .modern-select:focus-visible {
+    outline: 2px solid #005EB8 !important;
+    outline-offset: 2px !important;
+  }
+
+
+
+
+  .tirzepatide-calculator-widget .bmi-content {
+    min-height: auto;
+    transition: all 0.3s ease-in-out;
+  }
+
+
+  .tirzepatide-calculator-widget .bmi-result.hidden {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+
+  .tirzepatide-calculator-widget .bmi-result-card.show {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .tirzepatide-calculator-widget .bmi-result-card.normal {
+    background: linear-gradient(135deg, #dcfce7 0%, #009639 100%) !important;
+    border-color: #009639 !important;
+  }
+
+  .tirzepatide-calculator-widget .bmi-result-card.overweight {
+    background: linear-gradient(135deg, #fefce8 0%, #41B6E6 100%) !important;
+    border-color: #FFB81C !important;
+  }
+
+  .tirzepatide-calculator-widget .bmi-result-card.obese {
+    background: linear-gradient(135deg, #fee2e2 0%, #FFB81C 100%) !important;
+    border-color: #DA291C !important;
+  }
+
+
+  .tirzepatide-calculator-widget .manual-bmi-input {
+    text-align: center;
+  }
+
+  .tirzepatide-calculator-widget .manual-bmi-input .modern-input {
+    font-size: 24px !important;
+    text-align: center !important;
+    font-weight: 600 !important;
+    color: #005EB8 !important;
+  }
+
+
+  .tirzepatide-calculator-widget .height-imperial {
+    display: flex;
+    gap: 8px;
+    align-items: end;
+  }
+
+  .tirzepatide-calculator-widget .height-imperial .input-group {
+    flex: 1;
+  }
+
+  .tirzepatide-calculator-widget .height-imperial .input-group:first-child {
+    flex: 0 0 80px;
+  }
+
+
+  .tirzepatide-calculator-widget .input-error {
+    border-color: #DA291C !important;
+    box-shadow: 0 0 0 3px rgba(218, 41, 28, 0.1) !important;
+  }
+
+  .tirzepatide-calculator-widget .input-success {
+    border-color: #009639 !important;
+  }
+
+
+  .tirzepatide-calculator-widget .modern-input.error {
+    border-color: #DA291C !important;
+    box-shadow: 0 0 0 3px rgba(218, 41, 28, 0.1) !important;
+  }
+
+  .tirzepatide-calculator-widget .modern-input.success {
+    border-color: #009639 !important;
+  }
+
+  .tirzepatide-calculator-widget .modern-select:hover:not(:disabled) {
+    border-color: #9ca3af !important;
+  }
+
+  .tirzepatide-calculator-widget .modern-select:disabled {
+    background-color: #f3f4f6 !important;
+    color: #9ca3af !important;
+    cursor: not-allowed;
+  }
+
+
+  .tirzepatide-calculator-widget .method-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+
+  .tirzepatide-calculator-widget .unit-labels {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  .tirzepatide-calculator-widget .unit-label.active {
+    color: #005EB8 !important;
+    font-weight: 600 !important;
+  }
+
+
+  .tirzepatide-calculator-widget .inline-unit-toggle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    min-width: 100px;
+    margin-top: 20px;
+  }
+
+  .tirzepatide-calculator-widget .inline-unit-label {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    margin-bottom: 6px !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+
+  .tirzepatide-calculator-widget .compact-toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 24px;
+    background: #d1d5db;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    padding: 0;
+    outline: none;
+  }
+
+  .tirzepatide-calculator-widget .compact-toggle-switch:focus {
+    box-shadow: 0 0 0 2px #005EB8, 0 0 0 4px rgba(0, 94, 184, 0.1) !important;
+  }
+
+  .tirzepatide-calculator-widget .compact-toggle-switch.active {
+    background: #005EB8;
+  }
+
+  .tirzepatide-calculator-widget .compact-toggle-slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .tirzepatide-calculator-widget .compact-toggle-switch.active .compact-toggle-slider {
+    transform: translateX(26px);
+  }
+
+  .tirzepatide-calculator-widget .compact-unit-labels {
+    display: flex !important;
+    font-size: 12px !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+    color: #6b7280 !important;
+  }
+
+  .tirzepatide-calculator-widget .compact-unit-label {
+    font-size: 12px !important;
+  }
+
+  .tirzepatide-calculator-widget .compact-unit-label.active {
+    color: #005EB8 !important;
+    font-weight: 600 !important;
+  }
+
+
+  .tirzepatide-calculator-widget .condition-list li:before {
+    font-weight: bold !important;
+    margin-right: 8px !important;
+  }
+
+
+  .tirzepatide-calculator-widget .weight-toggle-row .input-col:first-child {
+    flex: 1;
+  }
+
+
+  .tirzepatide-calculator-widget .progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+
+  .tirzepatide-calculator-widget .print-header {
+    display: none;
+  }
+
+
+  .tirzepatide-calculator-widget .calculator-container::-webkit-scrollbar-thumb:active,
+  .tirzepatide-calculator-widget .step-content::-webkit-scrollbar-thumb:active {
+    background: rgba(0, 94, 184, 0.8);
+  }
+
+
+  .tirzepatide-calculator-widget .input-col[style*="flex: 0 0 120px"] {
+    flex: 0 0 auto !important;
+    align-self: flex-start;
+    width: auto;
+  }
+
+
+  @media (max-width: 640px) {
+
+    .tirzepatide-calculator-widget .modern-input,
+    .tirzepatide-calculator-widget .modern-select {
+      padding: 10px 12px !important;
+      font-size: 15px !important;
+    }
+
+    .tirzepatide-calculator-widget .modern-select {
+      background-position: right 12px center !important;
+    }
+
+    .tirzepatide-calculator-widget .input-col[style*="flex: 0 0 120px"] {
+      flex: 0 0 auto !important;
+      align-self: flex-start;
+      width: auto;
+    }
+  }
+
+
+  .tirzepatide-calculator-widget .attribution-footer {
+    text-align: center;
+    padding: 0px;
+    font-size: 11px !important;
+    color: #6b7280 !important;
+    opacity: 0.7;
+    font-family: Arial, sans-serif !important;
+    line-height: 1.4 !important;
+    margin-top: 0px;
+  }
+
+  .tirzepatide-calculator-widget .attribution-footer a {
+    color: #005EB8 !important;
+    text-decoration: none;
+    opacity: 0.8;
+  }
+
+  .tirzepatide-calculator-widget .attribution-footer a:hover {
+    text-decoration: underline;
+    opacity: 1;
+  }
+
+  @media print {
+    .tirzepatide-calculator-widget .attribution-footer {
+      display: none !important;
+    }
+  }
+</style>
+
+<div class="tirzepatide-calculator-widget">
+  <div class="calculator-container" role="main">
+    <div class="header">
+      <div class="header-content">
+        <h1 class="header-title" onclick="resetForm()" role="button" tabindex="0" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); resetForm(); }" aria-label="Weight Loss Medicine Eligibility Checker - Click to restart">
+          Weight Loss Medicine Eligibility Checker
+        </h1>
+      </div>
+      <div class="header-logo-container">
+        <svg version="1.2" xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 70.39 28.35"
+          class="header-logo">
+          <title>NHS Logo</title>
+          <defs>
+            <style>
+              .cls-1 {
+                fill: #fff;
+              }
+
+              .cls-2 {
+                fill: #005eb8;
+              }
+            </style>
+          </defs>
+          <style>
+          </style>
+          <g id="Layer_1-2" data-name="Layer 1">
+            <g>
+              <polygon class="cls-2" points=".57 .57 .57 27.78 69.73 27.78 69.73 .57 .57 .57 .57 .57"/>
+              <path class="cls-1" d="M70.39,28.35V0H0v28.35h70.39ZM28.3,2.74l-4.86,22.82h-7.63l-4.79-15.79h-.06l-3.19,15.79H1.99L6.88,2.74h7.65l4.7,15.82h.06l3.22-15.82h5.78ZM50.11,2.74l-4.76,22.82h-6.14l2.04-9.77h-7.26l-2.04,9.77h-6.14L30.57,2.74h6.14l-1.8,8.73h7.26l1.81-8.73h6.14ZM67.76,3.36l-1.48,4.54c-1.18-.55-2.79-1.04-5.06-1.04-2.43,0-4.4.36-4.4,2.19,0,3.23,8.9,2.03,8.9,8.96,0,6.31-5.88,7.94-11.2,7.94-2.37,0-5.09-.56-7.09-1.18l1.45-4.64c1.21.79,3.65,1.31,5.65,1.31s4.89-.36,4.89-2.71c0-3.66-8.9-2.29-8.9-8.72,0-5.89,5.19-7.65,10.22-7.65,2.83,0,5.49.3,7.03,1.01h0Z"/>
+            </g>
+          </g>
+        </svg>
+
+      </div>
+    </div>
+    <div class="content">
+      <div id="step-start" class="step-content" role="region" aria-labelledby="start-heading">
+        <div class="prose">
+          <p>
+            The NHS is implementing a phased rollout of tirzepatide (Mounjaro) for weight management
+            from June 2025.
+          </p>
+          <p>
+            This checker will help you understand if you might be eligible for these
+            treatments for weight loss based on the latest NHS interim guidance,
+            not for the treatment of other conditions such as type 2 diabetes.
+          </p>
+        </div>
+
+        <div class="important-box" role="note" aria-labelledby="important-heading">
+          <h3 class="important-header" id="important-heading">
+            <span class="important-label">
+              Important
+            </span>
+          </h3>
+          <div class="important-content">
+            <p>
+              Meeting the eligibility criteria shown here does not guarantee access to these
+              medicines. This tool is for informational purposes only and does not
+              replace professional medical advice. You will need to discuss your
+              options with healthcare professionals who will consider your full
+              medical history and circumstances. Access is subject to phased rollout.
+            </p>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-large" onclick="startAssessment()" aria-describedby="important-heading">
+          Start Check
+        </button>
+      </div>
+
+      <div id="step-age" class="step-content hidden">
+        <h2>Age</h2>
+
+        <p class="prose">
+          Please confirm your age to continue with the eligibility check.
+        </p>
+
+        <div class="form-group">
+          <label class="input-label" for="age-select">Select your age group:</label>
+          <select id="age-select" name="age" class="modern-select" onchange="handleAgeChange()">
+            <option value="" disabled="" selected="">Please select…</option>
+            <option value="18">18 years or older</option>
+            <option value="under18">Under 18 years</option>
+          </select>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" onclick="goToPrevStep()">Back</button>
+          <button id="age-next-btn" class="btn btn-primary" onclick="goToNextStep()">Next</button>
+        </div>
+      </div>
+
+      <div id="step-ethnicity" class="step-content hidden">
+        <h2>Ethnicity</h2>
+
+        <p class="prose">
+          NHS guidance uses lower BMI thresholds for certain ethnicity groups.
+          Please select your ethnicity:
+        </p>
+
+        <div class="form-group">
+          <label class="input-label" for="ethnicity-select">Select your ethnicity:</label>
+          <select id="ethnicity-select" name="ethnicity" class="modern-select" onchange="handleEthnicityChange()">
+            <option value="" disabled="" selected="">Please select…</option>
+            <option value="white_british">White British/European/Other White</option>
+            <option value="south_asian">South Asian (Indian, Pakistani, Bangladeshi, Sri Lankan)</option>
+            <option value="chinese">Chinese</option>
+            <option value="other_asian">Other Asian</option>
+            <option value="middle_eastern">Middle Eastern</option>
+            <option value="black_african">Black African</option>
+            <option value="african_caribbean">African-Caribbean</option>
+            <option value="mixed_other">Mixed/Other</option>
+          </select>
+        </div>
+
+        <div id="ethnicity-note" class="info-box blue hidden">
+          <p>
+            <strong>Note:</strong> NHS guidance uses BMI thresholds that are 2.5 kg/m² lower
+            for people from South Asian, Chinese, other Asian, Middle Eastern, Black African
+            or African-Caribbean ethnic backgrounds.
+          </p>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" onclick="goToPrevStep()">Back</button>
+          <button id="ethnicity-next-btn" class="btn btn-primary" onclick="goToNextStep()">Next</button>
+        </div>
+      </div>
+
+      <div id="step-bmi" class="step-content hidden">
+        <h2>Body Mass Index (BMI)</h2>
+
+        <div class="bmi-card">
+          <div class="bmi-tabs">
+            <button id="calculate-tab" class="bmi-tab active" onclick="switchBmiMethod('calculate')">
+              Calculate my BMI
+            </button>
+            <button id="manual-tab" class="bmi-tab" onclick="switchBmiMethod('manual')">
+              Enter my BMI
+            </button>
+          </div>
+
+          <div id="bmi-content" class="bmi-content">
+
+            <div id="calculator-mode" class="fade-in" style="display: block;">
+              <div id="metric-inputs" style="display: block;">
+                <div class="weight-toggle-row">
+                  <div class="input-col">
+                    <label class="input-label" for="weight-input">Weight (kg)</label>
+                    <input type="text" id="weight-input" class="modern-input" placeholder="70"
+                      oninput="handleBmiInput()" inputmode="decimal">
+                  </div>
+                  <div class="input-col">
+                    <div class="inline-unit-toggle">
+                      <button class="compact-toggle-switch" id="unit-toggle" onclick="toggleUnits()" role="switch"
+                        aria-checked="false" aria-label="Toggle between Metric and Imperial units" tabindex="0"
+                        onkeydown="handleToggleKeydown(event, 'unit-toggle')">
+                        <div class="compact-toggle-slider"></div>
+                      </button>
+                      <div class="compact-unit-labels">
+                        <span id="metric-label" class="compact-unit-label active">Metric</span>
+                        <span id="imperial-label" class="compact-unit-label">Imperial</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="input-row">
+                  <div class="input-col">
+                    <label class="input-label" for="height-input">Height (cm)</label>
+                    <input type="text" id="height-input" class="modern-input" placeholder="175"
+                      oninput="handleBmiInput()" inputmode="decimal">
+                  </div>
+                </div>
+              </div>
+
+              <div id="imperial-inputs" style="display: none;">
+                <div class="weight-toggle-row">
+                  <div class="input-col">
+                    <label class="input-label" for="weight-lbs-input">Weight (lbs)</label>
+                    <input type="text" id="weight-lbs-input" class="modern-input" placeholder="154"
+                      oninput="handleBmiInput()" inputmode="decimal">
+                  </div>
+                  <div class="input-col">
+                    <div class="inline-unit-toggle">
+                      <button class="compact-toggle-switch" id="unit-toggle-imperial" onclick="toggleUnits()"
+                        role="switch" aria-checked="true" aria-label="Toggle between Metric and Imperial units"
+                        tabindex="0" onkeydown="handleToggleKeydown(event, 'unit-toggle-imperial')">
+                        <div class="compact-toggle-slider"></div>
+                      </button>
+                      <div class="compact-unit-labels">
+                        <span class="compact-unit-label">Metric</span>
+                        <span class="compact-unit-label active">Imperial</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="height-input-row">
+                  <div class="input-col">
+                    <label class="input-label" for="height-ft-input">Height – Feet</label>
+                    <input type="text" id="height-ft-input" class="modern-input" placeholder="5"
+                      oninput="handleBmiInput()" inputmode="numeric">
+                  </div>
+                  <div class="input-col">
+                    <label class="input-label" for="height-in-input">Height – Inches</label>
+                    <input type="text" id="height-in-input" class="modern-input" placeholder="9"
+                      oninput="handleBmiInput()" inputmode="decimal">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="manual-mode" style="display: none;" class="fade-in">
+              <div class="manual-bmi-input">
+                <label class="input-label" for="manual-bmi-input-field">Your BMI</label>
+                <input type="text" id="manual-bmi-input" class="modern-input" placeholder="25.0"
+                  oninput="handleManualBmiInput()" inputmode="decimal">
+                <p style="margin-top: 8px; font-size: 14px; color: #6b7280;">
+                  Enter your BMI if you already know it
+                </p>
+              </div>
+            </div>
+
+            <div id="bmi-result" class="bmi-result-card" style="display: none;">
+              <div class="bmi-value" id="bmi-display">--</div>
+              <div class="bmi-category" id="bmi-category">BMI Category</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" onclick="goToPrevStep()">Back</button>
+          <button id="bmi-next-btn" class="btn btn-primary" disabled="" onclick="handleBmiSubmit()">Next</button>
+        </div>
+      </div>
+
+      <div id="step-comorbidities" class="step-content hidden">
+        <h2>Qualifying Health Conditions</h2>
+
+        <p class="prose">
+          Please select any of the following qualifying health conditions that apply to you.
+          These are specific conditions defined in NHS guidance:
+        </p>
+
+        <div class="checkbox-group">
+          <label class="checkbox-option">
+            <input type="checkbox" name="comorbidities" value="ascvd" onchange="handleComorbidityChange()">
+            <div>
+              <span style="font-weight: 500;">Heart disease</span>
+              <p class="condition-description">
+                Established heart disease, peripheral vascular disease, or heart failure
+              </p>
+            </div>
+          </label>
+
+          <label class="checkbox-option">
+            <input type="checkbox" name="comorbidities" value="hypertension" onchange="handleComorbidityChange()">
+            <div>
+              <span style="font-weight: 500;">High blood pressure</span>
+              <p class="condition-description">
+                Established diagnosis of high blood pressure requiring medication
+              </p>
+            </div>
+          </label>
+
+          <label class="checkbox-option">
+            <input type="checkbox" name="comorbidities" value="dyslipidaemia" onchange="handleComorbidityChange()">
+            <div>
+              <span style="font-weight: 500;">High cholesterol</span>
+              <p class="condition-description">
+                Treated with medication (e.g., statins), or abnormal blood results leading to a diagnosis of
+                “dyslipidaemia”.
+              </p>
+            </div>
+          </label>
+
+          <label class="checkbox-option">
+            <input type="checkbox" name="comorbidities" value="osa" onchange="handleComorbidityChange()">
+            <div>
+              <span style="font-weight: 500;">Obstructive sleep apnoea (breathing problems during sleep)</span>
+              <p class="condition-description">
+                Established diagnosis confirmed by sleep study and requiring treatment
+                (e.g., CPAP machine)
+              </p>
+            </div>
+          </label>
+
+          <label class="checkbox-option">
+            <input type="checkbox" name="comorbidities" value="diabetes" onchange="handleComorbidityChange()">
+            <div>
+              <span style="font-weight: 500;">Type 2 diabetes</span>
+              <p class="condition-description">
+                Established type 2 diabetes diagnosis
+              </p>
+            </div>
+          </label>
+        </div>
+
+        <div class="info-box blue">
+          <p>
+            <strong>Selected conditions:</strong> <span id="condition-count">0</span> of 5
+          </p>
+          <p style="margin-top: 4px;">
+            The number of qualifying conditions affects which treatment cohort you may be eligible for.
+          </p>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" onclick="goToPrevStep()">Back</button>
+          <button class="btn btn-primary" onclick="goToNextStep()">Next</button>
+        </div>
+      </div>
+
+      <div id="step-previousAttempts" class="step-content hidden">
+        <div class="info-box blue">
+          <p>
+            <strong>Why do we ask this?</strong> NHS guidance requires that people have tried
+            other weight loss methods first before being prescribed weight loss medication.
+          </p>
+        </div>
+
+        <h2>Previous Weight Loss Attempts</h2>
+
+        <p class="prose">
+          Have you made serious attempts to lose weight through diet, exercise,
+          and/or behavior changes for at least 6 months without achieving or
+          maintaining significant weight loss?
+        </p>
+
+        <div class="form-group">
+          <label class="input-label" for="attempts-select">Select your answer:</label>
+          <select id="attempts-select" name="previousAttempts" class="modern-select"
+            onchange="handlePreviousAttemptsChange()">
+            <option value="" disabled="" selected="">Please select…</option>
+            <option value="true">Yes – I have tried other methods</option>
+            <option value="false">No – I have not tried other methods</option>
+          </select>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" onclick="goToPrevStep()">Back</button>
+          <button id="attempts-next-btn" class="btn btn-primary" disabled="" onclick="goToNextStep()">Next</button>
+        </div>
+      </div>
+
+      <div id="step-result" class="step-content hidden">
+        <div class="print-header">
+          <p><strong>NHS Norfolk &amp; Waveney ICB Weight Loss Medicine Eligibility Checker</strong></p>
+          <p>Generated on: <span id="print-date"></span></p>
+          <p>Please take this summary to your GP for discussion</p>
+        </div>
+
+        <div id="result-content">
+        </div>
+
+        <div class="timeline-box">
+          <h3>Phased rollout details</h3>
+          <div style="font-size: 14px; margin-top: 8px;">
+            <div class="timeline-item"><strong>Year 1 (2025/26):</strong> 4 or more qualifying conditions and BMI
+              greater or equal to <span id="timeline-bmi-1">40</span></div>
+            <div class="timeline-item"><strong>Year 2 (2026/27):</strong> 4 or more qualifying conditions and BMI
+              between <span id="timeline-bmi-2a">35</span> and <span id="timeline-bmi-2b">39.9</span></div>
+            <div class="timeline-item"><strong>Year 3 (2027/28):</strong> 3 or more qualifying conditions and BMI
+              greater or equal to <span id="timeline-bmi-3">40</span></div>
+          </div>
+        </div>
+
+        <div class="info-box blue">
+          <p>
+            This tool is based on NHS interim guidance and is for informational purposes only.
+            It does not replace professional medical advice. The NHS offers various weight
+            management options, and medication is just one possibility. Final decisions depend
+            on clinical assessment and local service capacity.
+          </p>
+        </div>
+
+        <div class="print-section">
+          <button class="btn-print" onclick="printResults()">
+            🖨️ Print Results for GP
+          </button>
+          <button class="btn btn-primary" style="flex: 1; padding: 12px 24px; font-size: 16px; font-weight: 500;"
+            onclick="resetForm()">
+            Start Again
+          </button>
+        </div>
+      </div>
+
+      <div class="progress-container">
+        <div class="progress-bar-container">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+          <span class="progress-percentage" id="progress-percentage">0%</span>
+        </div>
+        <div class="attribution-footer">
+          <p>Copyright © 2025 NHS Norfolk &amp; Waveney Integrated Care Board</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

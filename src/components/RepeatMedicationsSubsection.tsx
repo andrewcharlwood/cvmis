@@ -11,7 +11,7 @@ import { CardHeader } from './Card'
 import { skills } from '@/data/skills'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { getSkillsUICopy } from '@/lib/profile-content'
-import type { SkillMedication, SkillCategory } from '@/types/pmr'
+import type { SkillMedication } from '@/types/pmr'
 
 const iconMap: Record<string, LucideIcon> = {
   BarChart3, Code2, Database, PieChart, FileCode2,
@@ -20,7 +20,6 @@ const iconMap: Record<string, LucideIcon> = {
   MessageSquare, UserPlus, RefreshCw, Calculator, Presentation,
 }
 
-const SKILLS_PER_CATEGORY = 4
 
 interface SkillRowProps {
   skill: SkillMedication
@@ -129,32 +128,23 @@ function SkillRow({ skill, yearsSuffix, onClick, onHighlight }: SkillRowProps) {
 
 interface CategorySectionProps {
   label: string
-  categoryId: SkillCategory
   skills: SkillMedication[]
   itemCountSuffix: string
   yearsSuffix: string
-  viewAllLabel: string
   onSkillClick: (skill: SkillMedication) => void
-  onViewAll: (category: SkillCategory) => void
   isFirst: boolean
   onNodeHighlight?: (id: string | null) => void
 }
 
 function CategorySection({
   label,
-  categoryId,
   skills: categorySkills,
   itemCountSuffix,
   yearsSuffix,
-  viewAllLabel,
   onSkillClick,
-  onViewAll,
   isFirst,
   onNodeHighlight,
 }: CategorySectionProps) {
-  const visibleSkills = categorySkills.slice(0, SKILLS_PER_CATEGORY)
-  const remainingCount = categorySkills.length - SKILLS_PER_CATEGORY
-
   return (
     <div style={{ marginTop: isFirst ? 0 : '16px' }}>
       <div
@@ -196,7 +186,7 @@ function CategorySection({
         </span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {visibleSkills.map((skill) => (
+        {categorySkills.map((skill) => (
           <SkillRow
             key={skill.id}
             skill={skill}
@@ -206,37 +196,6 @@ function CategorySection({
           />
         ))}
       </div>
-      {remainingCount > 0 && (
-        <button
-          onClick={() => onViewAll(categoryId)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            marginTop: '8px',
-            padding: '4px 0',
-            minHeight: '44px',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: '12px',
-            fontWeight: 500,
-            color: 'var(--accent)',
-            fontFamily: 'inherit',
-            transition: 'color 0.15s',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = 'var(--accent-hover)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = 'var(--accent)'
-          }}
-          aria-label={`${viewAllLabel} ${categorySkills.length} ${label} skills`}
-        >
-          {viewAllLabel} ({categorySkills.length})
-          <ChevronRight size={12} />
-        </button>
-      )}
     </div>
   )
 }
@@ -254,15 +213,11 @@ export function RepeatMedicationsSubsection({ onNodeHighlight }: RepeatMedicatio
     label,
     skills: skills
       .filter((s) => s.category === id)
-      .sort((a, b) => b.proficiency - a.proficiency),
+      .sort((a, b) => b.yearsOfExperience - a.yearsOfExperience),
   }))
 
   const handleSkillClick = (skill: SkillMedication) => {
     openPanel({ type: 'skill', skill })
-  }
-
-  const handleViewAll = (category: SkillCategory) => {
-    openPanel({ type: 'skills-all', category })
   }
 
   return (
@@ -277,13 +232,10 @@ export function RepeatMedicationsSubsection({ onNodeHighlight }: RepeatMedicatio
           <CategorySection
             key={group.id}
             label={group.label}
-            categoryId={group.id}
             skills={group.skills}
             itemCountSuffix={skillsCopy.itemCountSuffix}
             yearsSuffix={skillsCopy.yearsSuffix}
-            viewAllLabel={skillsCopy.viewAllLabel}
             onSkillClick={handleSkillClick}
-            onViewAll={handleViewAll}
             isFirst
             onNodeHighlight={onNodeHighlight}
           />

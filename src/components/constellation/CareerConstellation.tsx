@@ -6,10 +6,12 @@ import { useForceSimulation, getHeight } from '@/hooks/useForceSimulation'
 import { useConstellationHighlight } from '@/hooks/useConstellationHighlight'
 import { useConstellationInteraction } from '@/hooks/useConstellationInteraction'
 import { useTimelineAnimation } from '@/hooks/useTimelineAnimation'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { MobileAccordion } from './MobileAccordion'
 import { ConstellationLegend } from './ConstellationLegend'
 import { AccessibleNodeOverlay } from './AccessibleNodeOverlay'
 import { PlayPauseButton } from './PlayPauseButton'
+import { FullscreenButton } from './FullscreenButton'
 import { srDescription } from './screen-reader-description'
 import {
   MIN_HEIGHT,
@@ -45,6 +47,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
   const [dimensions, setDimensions] = useState({ width: 800, height: MIN_HEIGHT, scaleFactor: 1 })
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null)
   const [chartInView, setChartInView] = useState(true)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   callbacksRef.current = { onRoleClick, onSkillClick, onNodeHover }
 
@@ -69,27 +72,27 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     if (!container) return
 
     let debounceTimer: ReturnType<typeof setTimeout> | null = null
-    const CHANGE_THRESHOLD = 0.3
+    const X_CHANGE_THRESHOLD = 0.3
 
     const updateDimensions = () => {
       const width = container.clientWidth
       const viewportWidth = window.innerWidth
-      const height = getHeight(viewportWidth, containerHeight)
+      const height = isFullscreen ? window.innerHeight : getHeight(viewportWidth, containerHeight)
       const scaleFactor = viewportWidth >= 1024
         ? Math.max(1, Math.min(1.6, viewportWidth / 1440))
         : 1
       setDimensions(prev => {
         const widthDelta = Math.abs(prev.width - width) / prev.width
-        const heightDelta = Math.abs(prev.height - height) / prev.height
-        if (widthDelta < CHANGE_THRESHOLD && heightDelta < CHANGE_THRESHOLD) {
+        const heightRatio = Math.max(height / prev.height, prev.height / height)
+        if (widthDelta < X_CHANGE_THRESHOLD && heightRatio < 2) {
           return prev
         }
         return { width, height, scaleFactor }
       })
     }
 
-    // Initial measurement (no debounce)
-    updateDimensions()
+    // Use rAF for fullscreen toggle so CSS layout settles before measuring
+    requestAnimationFrame(updateDimensions)
 
     const observer = new ResizeObserver(() => {
       if (debounceTimer) clearTimeout(debounceTimer)
@@ -100,7 +103,29 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
       observer.disconnect()
       if (debounceTimer) clearTimeout(debounceTimer)
     }
-  }, [containerHeight])
+  }, [containerHeight, isFullscreen])
+
+  const toggleFullscreen = useCallback(() => setIsFullscreen(prev => !prev), [])
+
+  // ESC key to exit fullscreen
+  useEffect(() => {
+    if (!isFullscreen) return
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.stopPropagation(); setIsFullscreen(false) }
+    }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [isFullscreen])
+
+  // Body scroll lock while fullscreen
+  useEffect(() => {
+    if (!isFullscreen) return
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [isFullscreen])
+
+  // Focus trap when fullscreen
+  useFocusTrap(containerRef, isFullscreen)
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 640
   const sf = isMobile ? 1 : dimensions.scaleFactor
@@ -240,84 +265,112 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
   const showAccordion = supportsCoarsePointer && pinnedCareerEntity !== null
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        width: '100%',
-        borderRadius: 'var(--radius-sm)',
-        border: '1px solid var(--border-light)',
-        overflow: 'hidden',
-        position: 'relative',
-      }}
-    >
-      <svg
-        ref={svgRef}
-        viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
-        role="img"
-        aria-label="Clinical pathway constellation showing career roles and skills in reverse-chronological order along a vertical timeline"
-        style={{
-          display: 'block',
-          width: '100%',
-          height: dimensions.height,
-          opacity: 1,
-        }}
-      />
-
-      <ConstellationLegend isTouch={supportsCoarsePointer} domainCounts={domainCounts} />
-
-      <MobileAccordion pinnedCareerEntity={pinnedCareerEntity} show={showAccordion} />
-
-      {!prefersReducedMotion && (
-        <PlayPauseButton
-          isPlaying={animation.isPlaying}
-          onToggle={animation.togglePlayPause}
-          isMobile={isMobile}
-          visible={chartInView}
-          containerRef={containerRef}
+    <>
+      {isFullscreen && (
+        <div
+          onClick={toggleFullscreen}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 899,
+            background: 'var(--backdrop-bg)',
+            backdropFilter: 'blur(var(--backdrop-blur))',
+            animation: 'backdrop-fade-in 200ms ease-out',
+          }}
         />
       )}
-
-      <p
+      <div
+        ref={containerRef}
+        {...(isFullscreen ? {
+          role: 'dialog',
+          'aria-modal': true,
+          'aria-label': 'Career constellation fullscreen view',
+        } : {})}
         style={{
-          position: 'absolute',
-          width: 1, height: 1, padding: 0, margin: -1,
-          overflow: 'hidden', clip: 'rect(0,0,0,0)',
-          whiteSpace: 'nowrap', border: 0,
+          width: '100%',
+          borderRadius: isFullscreen ? 0 : 'var(--radius-sm)',
+          border: isFullscreen ? 'none' : '1px solid var(--border-light)',
+          overflow: 'hidden',
+          position: isFullscreen ? 'fixed' : 'relative',
+          ...(isFullscreen ? { inset: 0, zIndex: 900, background: 'var(--surface)' } : {}),
+          animation: isFullscreen ? 'constellation-fullscreen-in 200ms ease-out' : undefined,
         }}
       >
-        {srDescription}
-      </p>
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+          role="img"
+          aria-label="Clinical pathway constellation showing career roles and skills in reverse-chronological order along a vertical timeline"
+          style={{
+            display: 'block',
+            width: '100%',
+            height: dimensions.height,
+            opacity: 1,
+          }}
+        />
 
-      <AccessibleNodeOverlay
-        nodes={constellationNodes}
-        nodeButtonPositions={sim.nodeButtonPositions}
-        dimensions={dimensions}
-        onFocus={(nodeId) => {
-          setFocusedNodeId(nodeId)
-          highlightGraphRef.current?.(nodeId)
-          const node = nodeById.get(nodeId)
-          if (node?.type !== 'skill') onNodeHover?.(nodeId)
-        }}
-        onBlur={() => {
-          setFocusedNodeId(null)
-          highlightGraphRef.current?.(resolveGraphFallback())
-          onNodeHover?.(resolveRoleFallback())
-        }}
-        onClick={(nodeId, nodeType) => {
-          setPinnedNodeId(nodeId)
-          pinnedNodeIdRef.current = nodeId
-          highlightGraphRef.current?.(nodeId)
-          if (nodeType !== 'skill') {
-            onNodeHover?.(nodeId)
-            onRoleClick(nodeId)
-          } else {
+        <ConstellationLegend isTouch={supportsCoarsePointer} domainCounts={domainCounts} />
+
+        <MobileAccordion pinnedCareerEntity={pinnedCareerEntity} show={showAccordion} />
+
+        {!prefersReducedMotion && (
+          <PlayPauseButton
+            isPlaying={animation.isPlaying}
+            onToggle={animation.togglePlayPause}
+            isMobile={isMobile}
+            visible={chartInView}
+            containerRef={containerRef}
+          />
+        )}
+
+        <FullscreenButton
+          isFullscreen={isFullscreen}
+          onToggle={toggleFullscreen}
+          isMobile={isMobile}
+        />
+
+        <p
+          style={{
+            position: 'absolute',
+            width: 1, height: 1, padding: 0, margin: -1,
+            overflow: 'hidden', clip: 'rect(0,0,0,0)',
+            whiteSpace: 'nowrap', border: 0,
+          }}
+        >
+          {srDescription}
+        </p>
+
+        <AccessibleNodeOverlay
+          nodes={constellationNodes}
+          nodeButtonPositions={sim.nodeButtonPositions}
+          dimensions={dimensions}
+          onFocus={(nodeId) => {
+            setFocusedNodeId(nodeId)
+            highlightGraphRef.current?.(nodeId)
+            const node = nodeById.get(nodeId)
+            if (node?.type !== 'skill') onNodeHover?.(nodeId)
+          }}
+          onBlur={() => {
+            setFocusedNodeId(null)
+            highlightGraphRef.current?.(resolveGraphFallback())
             onNodeHover?.(resolveRoleFallback())
-            onSkillClick(nodeId)
-          }
-        }}
-        onKeyDown={handleNodeKeyDown}
-      />
-    </div>
+          }}
+          onClick={(nodeId, nodeType) => {
+            setPinnedNodeId(nodeId)
+            pinnedNodeIdRef.current = nodeId
+            highlightGraphRef.current?.(nodeId)
+            if (nodeType !== 'skill') {
+              onNodeHover?.(nodeId)
+              onRoleClick(nodeId)
+            } else {
+              onNodeHover?.(resolveRoleFallback())
+              onSkillClick(nodeId)
+            }
+          }}
+          onKeyDown={handleNodeKeyDown}
+        />
+      </div>
+    </>
   )
 }
 

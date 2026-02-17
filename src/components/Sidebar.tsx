@@ -3,10 +3,8 @@ import type { CSSProperties, ReactNode } from 'react'
 import {
   AlertCircle,
   AlertTriangle,
-  GraduationCap,
   type LucideIcon,
   Menu,
-  Pill,
   Search,
   UserRound,
   Workflow,
@@ -34,10 +32,8 @@ interface NavSection {
 }
 
 const navSections: NavSection[] = [
-  { id: 'overview', label: 'Overview', tileId: 'patient-summary', Icon: UserRound },
-  { id: 'projects', label: 'Projects', tileId: 'projects', Icon: Pill },
+  { id: 'overview', label: 'Overview / Highlights', tileId: 'patient-summary', Icon: UserRound },
   { id: 'experience', label: 'Experience', tileId: 'section-experience', Icon: Workflow },
-  { id: 'education', label: 'Education', tileId: 'section-education', Icon: GraduationCap },
   { id: 'skills', label: 'Skills', tileId: 'section-skills', Icon: Wrench },
 ]
 
@@ -221,6 +217,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
           top: 0,
           left: 0,
           bottom: 0,
+          height: isDesktop ? '100%' : undefined,
           width: isExpanded ? 'var(--sidebar-width)' : 'var(--sidebar-rail-width)',
           minWidth: isExpanded ? 'var(--sidebar-width)' : 'var(--sidebar-rail-width)',
           background: 'var(--sidebar-bg)',

@@ -4,7 +4,6 @@ import Sidebar from './Sidebar'
 import { CommandPalette } from './CommandPalette'
 import { DetailPanel } from './DetailPanel'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
-import { ProjectsTile } from './tiles/ProjectsTile'
 import { ParentSection } from './ParentSection'
 import CareerConstellation from './constellation/CareerConstellation'
 import { TimelineInterventionsSubsection } from './TimelineInterventionsSubsection'
@@ -210,7 +209,7 @@ export function DashboardLayout() {
           initial="hidden"
           animate="visible"
           variants={sidebarVariants}
-          style={{ flexShrink: 0 }}
+          style={{ flexShrink: 0, height: '100%' }}
         >
           <Sidebar
             activeSection={activeSection}
@@ -236,9 +235,6 @@ export function DashboardLayout() {
             <div ref={patientSummaryRef}>
               <PatientSummaryTile />
             </div>
-
-            {/* ProjectsTile — full width */}
-            <ProjectsTile />
 
             {/* Patient Pathway — parent section with constellation graph + subsections */}
             <ParentSection title="Patient Pathway" tileId="patient-pathway">

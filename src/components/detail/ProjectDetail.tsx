@@ -94,6 +94,32 @@ export function ProjectDetail({ investigation }: ProjectDetailProps) {
         </div>
       </div>
 
+      {/* Domain skills */}
+      {investigation.skills && investigation.skills.length > 0 && (
+        <div>
+          <h3 style={sectionHeadingStyle}>Domain Skills</h3>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {investigation.skills.map((skill) => (
+              <span
+                key={skill}
+                style={{
+                  padding: '3px 10px',
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  fontFamily: 'var(--font-geist-mono)',
+                  color: '#0D9488',
+                  backgroundColor: 'rgba(13,148,136,0.08)',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid rgba(13,148,136,0.2)',
+                }}
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Results */}
       <div>
         <h3 style={sectionHeadingStyle}>Results</h3>
@@ -106,37 +132,85 @@ export function ProjectDetail({ investigation }: ProjectDetailProps) {
         </ul>
       </div>
 
-      {/* External link */}
-      {investigation.externalUrl && (
-        <a
-          href={investigation.externalUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+      {/* Action buttons */}
+      {(investigation.externalUrl || investigation.demoUrl) && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignSelf: 'flex-start' }}>
+          {investigation.externalUrl && (
+            <a
+              href={investigation.externalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 16px',
+                fontSize: '13px',
+                fontWeight: 600,
+                fontFamily: 'var(--font-ui)',
+                color: 'var(--surface)',
+                backgroundColor: 'var(--accent)',
+                borderRadius: 'var(--radius-sm)',
+                textDecoration: 'none',
+                transition: 'background-color 150ms',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--accent-hover)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--accent)'
+              }}
+            >
+              <ExternalLink size={14} />
+              View Live Project
+            </a>
+          )}
+          {investigation.demoUrl && (
+            <a
+              href={investigation.demoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 16px',
+                fontSize: '13px',
+                fontWeight: 600,
+                fontFamily: 'var(--font-ui)',
+                color: '#0D9488',
+                backgroundColor: 'transparent',
+                border: '1px solid #0D9488',
+                borderRadius: 'var(--radius-sm)',
+                textDecoration: 'none',
+                transition: 'background-color 150ms, color 150ms',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(13,148,136,0.08)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              <ExternalLink size={14} />
+              Interactive Demo
+            </a>
+          )}
+        </div>
+      )}
+
+      {/* Thumbnail */}
+      {investigation.thumbnail && (
+        <img
+          src={investigation.thumbnail}
+          alt={`${investigation.name} screenshot`}
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '8px 16px',
-            fontSize: '13px',
-            fontWeight: 600,
-            fontFamily: 'var(--font-ui)',
-            color: 'var(--surface)',
-            backgroundColor: 'var(--accent)',
+            width: '100%',
+            height: 'auto',
             borderRadius: 'var(--radius-sm)',
-            textDecoration: 'none',
-            alignSelf: 'flex-start',
-            transition: 'background-color 150ms',
+            border: '1px solid var(--border-light)',
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--accent-hover)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--accent)'
-          }}
-        >
-          <ExternalLink size={14} />
-          View Live Project
-        </a>
+        />
       )}
     </div>
   )

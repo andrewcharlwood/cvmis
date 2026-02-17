@@ -12,7 +12,7 @@ interface LastConsultationCardProps {
 
 export function LastConsultationCard({ highlightedRoleId }: LastConsultationCardProps) {
   const { openPanel } = useDetailPanel()
-  const consultation = timelineConsultations[0]
+  const consultation = timelineConsultations.find(c => c.isCurrent) ?? timelineConsultations[0]
   if (!consultation) {
     return null
   }
@@ -42,10 +42,7 @@ export function LastConsultationCard({ highlightedRoleId }: LastConsultationCard
   }
 
   const getBand = (): string => {
-    if (consultation.role.includes('Head')) {
-      return '8a'
-    }
-    return '—'
+    return consultation.band ?? '—'
   }
 
   const fieldLabelStyle: React.CSSProperties = {
@@ -75,7 +72,7 @@ export function LastConsultationCard({ highlightedRoleId }: LastConsultationCard
         margin: '-8px',
       }}
     >
-      <CardHeader dotColor="green" title="LAST CONSULTATION" rightText="Most recent role" />
+      <CardHeader dotColor="green" title="LAST CONSULTATION" rightText="Current role" />
 
       <div
         role="button"

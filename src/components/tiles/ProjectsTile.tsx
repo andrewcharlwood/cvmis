@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { investigations } from '@/data/investigations'
-import { Card, CardHeader } from '../Card'
+import { CardHeader } from '../Card'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import type { Investigation } from '@/types/pmr'
 import { PROJECT_STATUS_COLORS } from '@/lib/theme-colors'
@@ -9,7 +9,6 @@ interface ProjectItemProps {
   project: Investigation
   slideWidth: string
   cardMinHeight: number
-  thumbnailHeight: number
   onClick: () => void
 }
 
@@ -17,7 +16,6 @@ function ProjectItem({
   project,
   slideWidth,
   cardMinHeight,
-  thumbnailHeight,
   onClick,
 }: ProjectItemProps) {
   const dotColor = PROJECT_STATUS_COLORS[project.status]
@@ -78,15 +76,16 @@ function ProjectItem({
       >
         <div
           style={{
-            minHeight: `${thumbnailHeight}px`,
-            flex: 1,
+            aspectRatio: '16 / 9',
             borderRadius: '6px',
             border: '1px solid var(--border-light)',
-            background:
-              'linear-gradient(135deg, rgba(19, 94, 94, 0.12), rgba(212, 171, 46, 0.18))',
+            background: project.thumbnail
+              ? undefined
+              : 'linear-gradient(135deg, rgba(19, 94, 94, 0.12), rgba(212, 171, 46, 0.18))',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            overflow: 'hidden',
             fontFamily: 'var(--font-geist-mono)',
             fontSize: '10px',
             letterSpacing: '0.08em',
@@ -94,7 +93,20 @@ function ProjectItem({
             textTransform: 'uppercase',
           }}
         >
-          Thumbnail Pending
+          {project.thumbnail ? (
+            <img
+              src={project.thumbnail}
+              alt={`${project.name} thumbnail`}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'top',
+              }}
+            />
+          ) : (
+            'Thumbnail Pending'
+          )}
         </div>
 
         <div
@@ -129,38 +141,95 @@ function ProjectItem({
           </span>
         </div>
 
-        {project.techStack && project.techStack.length > 0 && (
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '4px',
-            }}
-          >
-            {project.techStack.map((tech) => (
-              <span
-                key={tech}
-                style={{
-                  fontSize: '10px',
-                  fontFamily: 'var(--font-geist-mono)',
-                  padding: '3px 8px',
-                  borderRadius: '3px',
-                  background: 'var(--amber-light)',
-                  color: '#92400E',
-                  border: '1px solid var(--amber-border)',
-                }}
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-        )}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: '8px',
+            alignItems: 'flex-start',
+          }}
+        >
+          {project.techStack && project.techStack.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', minWidth: 0 }}>
+              {project.techStack.slice(0, 3).map((tech) => (
+                <span
+                  key={tech}
+                  style={{
+                    fontSize: '10px',
+                    fontFamily: 'var(--font-geist-mono)',
+                    padding: '3px 8px',
+                    borderRadius: '3px',
+                    background: 'var(--amber-light)',
+                    color: '#92400E',
+                    border: '1px solid var(--amber-border)',
+                  }}
+                >
+                  {tech}
+                </span>
+              ))}
+              {project.techStack.length > 3 && (
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontFamily: 'var(--font-geist-mono)',
+                    padding: '3px 6px',
+                    color: 'var(--text-tertiary)',
+                  }}
+                >
+                  +{project.techStack.length - 3}
+                </span>
+              )}
+            </div>
+          )}
+          {project.skills && project.skills.length > 0 && (
+            <div
+              className="skills-tags"
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '4px',
+                justifyContent: 'flex-end',
+                minWidth: 0,
+              }}
+            >
+              {project.skills.slice(0, 2).map((skill) => (
+                <span
+                  key={skill}
+                  style={{
+                    fontSize: '10px',
+                    fontFamily: 'var(--font-geist-mono)',
+                    padding: '3px 8px',
+                    borderRadius: '3px',
+                    background: 'rgba(13,148,136,0.08)',
+                    color: '#0D9488',
+                    border: '1px solid rgba(13,148,136,0.2)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {skill}
+                </span>
+              ))}
+              {project.skills.length > 2 && (
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontFamily: 'var(--font-geist-mono)',
+                    padding: '3px 6px',
+                    color: 'var(--text-tertiary)',
+                  }}
+                >
+                  +{project.skills.length - 2}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
-export function ProjectsTile() {
+export function ProjectsCarousel() {
   const { openPanel } = useDetailPanel()
   const viewportRef = useRef<HTMLDivElement | null>(null)
   const trackRef = useRef<HTMLDivElement | null>(null)
@@ -250,7 +319,7 @@ export function ProjectsTile() {
 
   const cardsPerView = useMemo(() => {
     if (viewportWidth < 768) {
-      return 1
+      return 2
     }
     return 4
   }, [viewportWidth])
@@ -275,25 +344,12 @@ export function ProjectsTile() {
     return 214
   }, [viewportWidth])
 
-  const thumbnailHeight = useMemo(() => {
-    if (viewportWidth < 640) {
-      return 62
-    }
-    if (viewportWidth < 1024) {
-      return 68
-    }
-    if (viewportWidth < 1440) {
-      return 76
-    }
-    return 84
-  }, [viewportWidth])
-
   const setPaused = (value: boolean) => {
     isPausedRef.current = value
   }
 
   return (
-    <Card full tileId="projects">
+    <div style={{ marginTop: '28px' }}>
       <CardHeader dotColor="amber" title="SIGNIFICANT INTERVENTIONS" />
 
       <div
@@ -329,7 +385,6 @@ export function ProjectsTile() {
                   project={project}
                   slideWidth={slideWidth}
                   cardMinHeight={cardMinHeight}
-                  thumbnailHeight={thumbnailHeight}
                   onClick={() => openPanel({ type: 'project', investigation: project })}
                 />
               ))}
@@ -337,6 +392,6 @@ export function ProjectsTile() {
           ))}
         </div>
       </div>
-    </Card>
+    </div>
   )
 }

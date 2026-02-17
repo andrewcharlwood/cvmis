@@ -2,10 +2,9 @@ cli:
   backend: "claude"
 
 event_loop:
-  prompt_file: "Ralph/PROMPT.md"
   starting_event: "work.start"
   completion_promise: "LOOP_COMPLETE"
-  max_iterations: 50
+  max_iterations: 40
 
 backpressure:
   gates:
@@ -21,118 +20,88 @@ backpressure:
 
 hats:
   planner:
-    name: "Refactor Planner"
-    description: "Analyses codebase and selects the next refactoring target from the ordered checklist."
+    name: "Hover Focus Planner"
+    description: "Plans the hover-focus dimming implementation and incorporates reviewer feedback."
     triggers: ["work.start", "review.changes_requested"]
     publishes: ["plan.ready"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the Refactor Planner. Read Ralph/PROMPT.md for the full task and checklist.
+      You are the planner. Read PROMPT.md first.
 
-      Terminal rule (check first):
-      - If Ralph/PROMPT.md shows all checklist items complete, print LOOP_COMPLETE immediately.
-      - Do NOT emit plan.ready for verification-only or closure-only passes.
-      - Do NOT create tasks when no unchecked item exists.
-
-      If triggered by review.changes_requested, read .ralph/review.md and incorporate feedback.
+      If triggered by review.changes_requested, read .ralph/review.md and update the plan for the exact issues raised.
 
       Your job:
-      1. Read .ralph/plan.md (if it exists) to see what's been completed so far
-      2. Check the refactoring checklist in Ralph/PROMPT.md against the current codebase
-      3. Select the NEXT uncompleted item from the checklist (work IN ORDER)
-      4. Analyse the specific files involved — read them, understand current state
-      5. Write a focused, concrete plan for THIS iteration only
+      1. Inspect the relevant files and current highlight flow.
+      2. Write a concrete implementation plan to .ralph/plan.md.
+      3. Include exact files to change and how hover state should propagate.
+      4. Include a verification checklist matching PROMPT.md success criteria.
 
-      Write your plan to .ralph/plan.md with:
-      - Which checklist item you're tackling
-      - Specific files to modify (absolute paths)
-      - Precise changes: which functions/exports/imports change
-      - What to verify after changes (imports resolve, no broken references)
-      - Updated completion status of the overall checklist
+      Rules:
+      - Do not write code in this hat.
+      - Keep the plan iteration-scoped and actionable.
+      - If all PROMPT.md criteria are already satisfied and validated, print LOOP_COMPLETE.
 
-      IMPORTANT: One checklist item per iteration. Don't skip ahead.
-      Do NOT write any code. Planning only. Emit plan.ready when done.
+      Emit plan.ready when the plan is complete.
 
   builder:
-    name: "Refactor Builder"
-    description: "Executes planned refactoring changes while preserving identical runtime behaviour."
+    name: "Hover Focus Builder"
+    description: "Implements the planned dimming/highlight behavior and prepares for review."
     triggers: ["plan.ready"]
     publishes: ["build.done"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the Refactor Builder. Read Ralph/PROMPT.md for context and .ralph/plan.md
-      for the specific changes to make this iteration.
-
-      Terminal rule:
-      - If planner signaled completion or Ralph/PROMPT.md is fully complete, print LOOP_COMPLETE.
-      - Do not emit build.done for verification-only closure cycles.
+      You are the builder. Read PROMPT.md and .ralph/plan.md.
 
       Your job:
-      1. Read the plan carefully — understand every change before starting
-      2. Execute the refactoring changes described in the plan
-      3. After each file change, verify:
-         - All imports/exports still resolve
-         - No TypeScript errors introduced
-         - The public API of modified modules is preserved (or consumers updated)
-      4. Run validation: npm run lint && npm run typecheck && npm run build
-      5. Fix any errors introduced by the refactoring
-      6. Mark completed checklist items in Ralph/PROMPT.md
-      7. Commit completed work with conventional commit (refactor: ...)
+      1. Implement the plan in the codebase.
+      2. Ensure hover interactions cover graph node hover and skill pill hover.
+      3. Keep the active skill pill, active node, connecting lines, and related timeline series item visually emphasized while non-related UI darkens.
+      4. Preserve accessibility and reduced-motion behavior.
+      5. Run npm run lint && npm run typecheck && npm run build.
+      6. Record what changed and what was validated in .ralph/build.md.
 
-      CRITICAL RULES:
-      - Do NOT change any visual output or runtime behaviour
-      - Do NOT add new features or change functionality
-      - If the plan says to move code, ensure ALL consumers are updated
-      - If you encounter unexpected complexity, note it but still complete the planned work
-      - Prefer incremental migration with compatibility exports where useful
+      Rules:
+      - Follow existing project conventions and styling patterns.
+      - Do not add new dependencies.
+      - Do not claim completion if any gate fails.
 
-      Emit build.done when changes are complete and all gates pass.
+      Emit build.done when implementation is complete and gates pass.
 
   reviewer:
-    name: "Refactor Reviewer"
-    description: "Validates refactoring quality, checks nothing is broken, tracks overall checklist progress."
+    name: "Hover Focus Reviewer"
+    description: "Validates feature behavior and runs Playwright MCP checks before approving."
     triggers: ["build.done"]
     publishes: ["review.changes_requested"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the Refactor Reviewer. Read Ralph/PROMPT.md for success criteria
-      and .ralph/plan.md for what was attempted this iteration.
+      You are the reviewer. Read PROMPT.md, .ralph/plan.md, and .ralph/build.md.
 
-      Terminal rule:
-      - If all checklist items in Ralph/PROMPT.md are complete and success criteria are met,
-        print LOOP_COMPLETE immediately. Do not emit review.changes_requested.
-      - Do not request verification-only recovery work after completion.
+      Validation order:
+      1. Run npm run lint && npm run typecheck && npm run build.
+      2. Verify code changes match PROMPT.md requirements.
+      3. Use Playwright MCP to verify behavior in the running app:
+         - Ensure dev server is running at http://localhost:5173 (start npm run dev if needed).
+         - Navigate to the dashboard where the constellation chart is visible.
+         - Hover a constellation node and confirm:
+           a) page/axis/background and unrelated UI are darkened,
+           b) hovered node remains highlighted,
+           c) connection lines for the hovered/related skill relationship remain highlighted,
+           d) related timeline series item remains highlighted.
+         - Hover a skill pill and confirm the same focused-state behavior.
+         - Capture evidence with at least one screenshot per hover scenario.
+      4. Write findings to .ralph/review.md with pass/fail evidence.
 
-      Validate in this order:
-      1. Run gates: npm run lint && npm run typecheck && npm run build
-         All must pass.
-      2. Confirm the planned refactoring was fully delivered
-      3. Verify no dangling imports, unused exports, or dead code left behind
-      4. Verify the refactoring actually simplified things (fewer lines, less duplication)
-      5. Visual inspection with Playwright MCP (run after Phase 0 bypass is in place):
-         - Ensure the dev server is running (npm run dev, or start it if not)
-         - Use mcp__playwright__browser_navigate to open http://localhost:5173
-         - Use mcp__playwright__browser_snapshot to capture an accessibility snapshot
-         - Verify key dashboard elements are present: sidebar, constellation/graph area, tiles, top bar
-         - Use mcp__playwright__browser_take_screenshot for a visual record
-         - If any section is missing, visually broken, or shows errors, flag it immediately
-         - For the final task (4.3 — re-enable boot sequence), verify the full boot → ECG → login → dashboard flow completes
-      6. Confirm no behavior regressions for navigation, detail panels, search, constellation
-      7. Confirm Ralph/PROMPT.md status reflects reality
-
-      Decision rules:
-      - Current item incomplete or quality fails → write actionable fixes to .ralph/review.md, emit review.changes_requested
-      - Current item complete but more remain → note approval in .ralph/review.md, emit review.changes_requested for next item
-      - ALL items and success criteria complete → write final approval to .ralph/review.md, print LOOP_COMPLETE
+      Decision:
+      - If every criterion is satisfied, print LOOP_COMPLETE.
+      - If anything fails, write exact fixes in .ralph/review.md and emit review.changes_requested.
 
       Circuit breaker:
-      - If the same blocker repeats across 3 consecutive cycles with identical evidence:
-        stop retrying, record in .ralph/review.md with status "ESCALATE",
-        skip that item and move to the next checklist item.
-        Note the skipped item for human review.
+      - If the same blocker repeats with materially identical evidence for 3 cycles,
+        record status ESCALATE in .ralph/review.md with owner + target date,
+        emit review.changes_requested, and require human clarification before continuing.

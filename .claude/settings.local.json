@@ -33,7 +33,13 @@
       "Bash(git stash:*)",
       "Bash(npx tsc:*)",
       "mcp__context7__resolve-library-id",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(python3:*)",
+      "Bash(pip install:*)",
+      "Bash(python scripts/generate_demo_data.py:*)",
+      "Bash(sqlite3:*)",
+      "Bash(python:*)",
+      "Bash(grep:*)"
     ]
   }
 }

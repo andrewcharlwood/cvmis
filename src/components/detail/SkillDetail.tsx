@@ -13,13 +13,6 @@ const categoryLabels: Record<SkillMedication['category'], string> = {
   Leadership: 'Strategic & Leadership',
 }
 
-// Proficiency bar color based on value
-function getProficiencyColor(proficiency: number): string {
-  if (proficiency >= 90) return 'var(--success)'
-  if (proficiency >= 75) return 'var(--accent)'
-  return 'var(--amber)'
-}
-
 export function SkillDetail({ skill }: SkillDetailProps) {
   // Find roles that use this skill from constellation data
   const usedInRoles = roleSkillMappings
@@ -94,44 +87,6 @@ export function SkillDetail({ skill }: SkillDetailProps) {
         >
           {categoryLabels[skill.category]}
         </span>
-      </div>
-
-      {/* Proficiency bar */}
-      <div>
-        <h3 style={sectionHeadingStyle}>Proficiency</h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div
-            style={{
-              flex: 1,
-              height: '6px',
-              backgroundColor: 'var(--border-light)',
-              borderRadius: '3px',
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              style={{
-                width: `${skill.proficiency}%`,
-                height: '100%',
-                backgroundColor: getProficiencyColor(skill.proficiency),
-                borderRadius: '3px',
-                transition: 'width 400ms ease-out',
-              }}
-            />
-          </div>
-          <span
-            style={{
-              fontSize: '13px',
-              fontWeight: 700,
-              fontFamily: 'var(--font-geist)',
-              color: getProficiencyColor(skill.proficiency),
-              minWidth: '36px',
-              textAlign: 'right',
-            }}
-          >
-            {skill.proficiency}%
-          </span>
-        </div>
       </div>
 
       {/* Years of experience */}

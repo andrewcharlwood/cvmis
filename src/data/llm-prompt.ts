@@ -61,8 +61,8 @@ Completed pre-registration training across multiple community pharmacy sites in 
 
 ## Projects
 
-### [proj-inv-pharmetrics] PharMetrics Switching Dashboard (2025, Live)
-Dashboard tracking patient-level switching data from the PharMetrics algorithm, monitoring which patients have been switched with quality metrics providing points for each intervention. Enables practices to monitor their own progress against the switching scheme. Tech: Power BI, SQL, DAX.
+### [proj-inv-pharmetrics] PharMetrics (2025, Live)
+First TypeScript project. Interactive health economics educational platform combining clinical trial statistics, health economics modules, and game-based learning. Features a risk calculator (ARR, RRR, NNT), five health economics education modules (NNT cost analysis, QALY, ICER with NICE thresholds, sensitivity analysis with Monte Carlo simulations, and budget impact analysis), and two educational games: a p-hacking simulator and a pharmaceutical business simulation exploring ethical trade-offs. Tech: React, TypeScript, Vite, Zustand, Recharts, D3, Styled Components.
 
 ### [proj-inv-switching-algorithm] Patient Switching Algorithm (2025, Complete)
 Annual medicines switching schemes previously required months of manual data trawling by the optimisation team. This Python algorithm ingests real-world GP prescribing data, cross-references dm+d product information, and automatically identifies patients on expensive drugs who could be switched to cost-effective alternatives, with built-in clinical safety rules. Tech: Python, Pandas, SQL. 14,000 patients identified, £2.6M annual savings, novel GP payment system linking incentives to delivered savings.
