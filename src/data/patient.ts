@@ -6,7 +6,7 @@ export const patient: Patient = {
   dob: '14/02/1993',
   nhsNumber: '221 181 0',
   nhsNumberTooltip: 'GPhC Registration Number',
-  address: 'Norwich, NR1',
+  address: 'Norwich, UK',
   phone: '07795553088',
   email: 'andy@charlwood.xyz',
   linkedin: 'linkedin.com/in/andycharlwood',
