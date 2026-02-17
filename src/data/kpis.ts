@@ -10,12 +10,12 @@ export const kpis: KPI[] = [
     explanation: 'Full analytical accountability for the ICB\'s total prescribing budget, with sophisticated forecasting models identifying cost pressures and enabling proactive financial planning across Norfolk & Waveney.',
     story: {
       context: 'Total primary care prescribing budget for NHS Norfolk & Waveney ICB, covering prescriptions for a population of 1.2 million across the integrated care system. Expenditure driven by GP prescribing patterns, NICE technology appraisal mandates, patent expiry timelines, and pharmaceutical pricing changes.',
-      role: 'Full analytical accountability to ICB board for budget oversight and variance analysis. Built sophisticated forecasting models integrating prescribing trend data, cost pressure drivers, and efficiency programme trajectories. Delivered monthly financial reporting to the executive team and presented budget position to Chief Medical Officer bimonthly.',
+      role: 'Full analytical accountability for budget oversight, building sophisticated forecasting models integrating prescribing trend data, cost pressure drivers, and efficiency programme trajectories. Presented budget position and evidence-based recommendations to Chief Medical Officer bimonthly.',
       outcomes: [
-        'Forecasting models identifying cost pressures ahead of materialisation',
+        'Forecasting models identifying cost pressures and enabling proactive financial planning',
         'Proactive financial planning embedded across the medicines optimisation programme',
         'Interactive Power BI dashboard tracking expenditure patterns against plan',
-        'Monthly variance analysis and financial reporting to executive team and ICB board',
+        'Bimonthly financial reporting and evidence-based recommendations to CMO',
       ],
       period: 'Jul 2024 – Present',
     },
@@ -67,9 +67,9 @@ export const kpis: KPI[] = [
     explanation: 'Leading population health analytics and data-driven medicines optimisation for Norfolk & Waveney Integrated Care System, serving 1.2 million people across the region.',
     story: {
       context: 'Norfolk & Waveney Integrated Care System serves a population of 1.2 million people across Norfolk and parts of Suffolk, coordinating health and care services across primary care, secondary care, community services, and mental health provision.',
-      role: 'Lead population health analytics for the medicines optimisation function, developing patient-level datasets and analytical frameworks from real-world GP prescribing data to identify efficiency opportunities, monitor medicines safety, address health inequalities, and support evidence-based decision-making at system scale.',
+      role: 'Lead population health analytics for the medicines optimisation function, developing patient-level datasets and analytical frameworks from real-world GP prescribing data to identify efficiency opportunities and address health inequalities across the integrated care system.',
       outcomes: [
-        'Transformed analytics from practice-level aggregate reporting to patient-level SQL analysis',
+        'Transformed analytics from practice-level data to patient-level SQL analysis',
         'Built comprehensive dm+d medicines data table: standardised strengths, morphine equivalents, Anticholinergic Burden scoring',
         'Developed population-scale controlled drug monitoring system tracking patient-level opioid exposure',
         'Created self-serve Power BI tools improving data fluency across the wider team',

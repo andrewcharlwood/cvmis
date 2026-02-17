@@ -28,7 +28,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
       'Identified and prioritised a £14.6M efficiency programme through comprehensive prescribing data analysis, targeting the highest-value, lowest-risk interventions across the integrated care system',
       'Built Python-based switching algorithm using real-world GP prescribing data: 14,000 patients identified, £2.6M annual savings, compressing months of manual analysis into 3 days',
       'Automated incentive scheme analysis, enabling a novel GP payment system linking rewards to delivered savings; achieved 50% reduction in targeted prescribing within 2 months',
-      'Led transformation from practice-level aggregate reporting to patient-level SQL analytics, enabling targeted clinical interventions and a self-serve model for the wider team',
+      'Led transformation from practice-level data to patient-level SQL analytics, enabling targeted interventions and a self-serve model for the wider team',
     ],
     outcomes: [
       'Achieved over-target performance by October 2025',
