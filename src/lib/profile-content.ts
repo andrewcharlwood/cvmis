@@ -5,7 +5,6 @@ import type {
   EducationCopyEntry,
   ExperienceEducationUICopy,
   LatestResultsCopy,
-  LLMCopy,
   ProfileContent,
   QuickActionCopyEntry,
   SidebarCopy,
@@ -52,7 +51,4 @@ export function getEducationEntries(): ReadonlyArray<EducationCopyEntry> {
   return profileContent.experienceEducation.educationEntries
 }
 
-export function getLLMCopy(): DeepReadonly<LLMCopy> {
-  return profileContent.searchChat.llm
-}
 

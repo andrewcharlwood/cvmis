@@ -1,4 +1,4 @@
-import { getLLMCopy } from '@/lib/profile-content'
+import { LLM_SYSTEM_PROMPT } from '@/data/llm-prompt'
 
 export interface ChatMessage {
   role: 'user' | 'assistant'
@@ -19,7 +19,7 @@ export function isLLMAvailable(): boolean {
 }
 
 export function buildSystemPrompt(): string {
-  return getLLMCopy().systemPrompt
+  return LLM_SYSTEM_PROMPT
 }
 
 function buildRequestBody(

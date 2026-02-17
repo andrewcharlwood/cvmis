@@ -80,10 +80,6 @@ export interface SkillsUICopy {
   readonly categories: ReadonlyArray<SkillsCategoryCopyEntry>
 }
 
-export interface LLMCopy {
-  readonly systemPrompt: string
-}
-
 export interface ProfileContent {
   readonly profile: {
     readonly sectionTitle: string
@@ -104,6 +100,5 @@ export interface ProfileContent {
   }
   readonly searchChat: {
     readonly quickActions: ReadonlyArray<QuickActionCopyEntry>
-    readonly llm: LLMCopy
   }
 }
