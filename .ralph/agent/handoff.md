@@ -1,11 +1,11 @@
 # Session Handoff
 
-_Generated: 2026-02-16 15:06:20 UTC_
+_Generated: 2026-02-17 02:26:43 UTC_
 
 ## Git Context
 
 - **Branch:** `master`
-- **HEAD:** e9a7581: chore: auto-commit before merge (loop primary)
+- **HEAD:** 9a58b3c: chore: auto-commit before merge (loop primary)
 
 ## Tasks
 
@@ -46,22 +46,34 @@ _Generated: 2026-02-16 15:06:20 UTC_
 - [x] Visual: Entry animation reveal effects
 - [x] Integration: Wire animation to highlight system (Phase 4)
 - [x] Accessibility: reduced-motion + play/pause button
+- [x] Plan Stage 1 canonical content schema
+- [x] Stage1 Checkpoint A: add canonical profile content schema/module/helpers
+- [x] Stage 2 core UI migration to canonical profile content
+- [x] Stage 3 secondary consumer migration (timeline/search/chat)
+- [x] Stage 4 cleanup hardening and one-file editing docs
+- [x] Resolve build.blocked backpressure and close loop
+- [x] Backpressure recovery handoff
+- [x] Backpressure recovery after abandoned build task
+- [x] Backpressure recovery after abandoned build task
+- [x] Phase 1.1: Migrate medications.ts prescribingHistory into skills.ts, then delete medications.ts
+- [x] Phase 1.3: Split profile-content.ts into focused concerns — extract LLM prompt, evaluate education/achievements placement
+- [x] Phase 3.1: Extract shared ExpandableCard component from WorkExperienceSubsection, TimelineInterventionsSubsection, RepeatMedicationsSubsection
 
 
 ## Key Files
 
 Recently modified:
 
-- `.claude/skills/d3-visualization/SKILL (3).md:Zone.Identifier`
-- `.claude/skills/d3-visualization/SKILL.md`
-- `.claude/skills/d3-visualization/scripts/bubble_chart_example.js`
-- `.claude/skills/d3-visualization/scripts/bubble_chart_example.js:Zone.Identifier`
-- `.claude/skills/d3-visualization/scripts/check_tooltip.js`
-- `.claude/skills/d3-visualization/scripts/check_tooltip.js:Zone.Identifier`
-- `.claude/skills/d3-visualization/scripts/interactive_table_example.js`
-- `.claude/skills/d3-visualization/scripts/interactive_table_example.js:Zone.Identifier`
-- `.claude/skills/d3-visualization/scripts/tooltip_handler.js`
-- `.claude/skills/d3-visualization/scripts/tooltip_handler.js:Zone.Identifier`
+- `.claude/settings.local.json`
+- `.ralph/agent/scratchpad.md`
+- `.ralph/agent/summary.md`
+- `.ralph/agent/tasks.jsonl`
+- `.ralph/current-events`
+- `.ralph/current-loop-id`
+- `.ralph/events-20260217-012659.jsonl`
+- `.ralph/history.jsonl`
+- `.ralph/loop.lock`
+- `.ralph/plan.md`
 
 ## Next Session
 
@@ -70,16 +82,13 @@ Session completed successfully. No pending work.
 **Original objective:**
 
 ```
-# Task: Career Constellation Chart & Layout Polish
+# Task: Comprehensive Codebase Refactor & Simplification
 
-Visual polish and layout adjustments to the career constellation chart, sidebar, and repeat medications section. 12 discrete changes across 10 files.
+Refactor the portfolio codebase to eliminate duplication, consolidate data sources, extract shared utilities, and simplify components — while preserving identical runtime behaviour and visual output.
 
-## Requirements
+## Guiding Principle
 
-### 1. Reduce link opacity (`src/components/constellation/constants.ts`)
-- Lower `LINK_BASE_OPACITY` from `0.08` → `0.04`
-- Lower `LINK_STRENGTH_OPACITY_FACTOR` from `0.12` → `0.06`
-- Makes skill connection lines subtler so job pills are visually clearer
+**Single Source of Truth**: Every piece of information should live in exactly one place. Derived data is fine (for code-splitting/performance), but the canonical definition must not be duplicated.
 
-### 2. White backgro...
+## Refactoring Chec...
 ```

@@ -1,141 +1,147 @@
-# Task: Comprehensive Codebase Refactor & Simplification
+# Task: Content Accuracy Audit & Boot Sequence Redesign
 
-Refactor the portfolio codebase to eliminate duplication, consolidate data sources, extract shared utilities, and simplify components — while preserving identical runtime behaviour and visual output.
+Audit all user-facing text content on the portfolio website against authoritative reference documents. Replace hallucinated or inaccurate content with verified text. Redesign the boot sequence to remove the ECG phase and create a polished software-launch transition.
 
-## Guiding Principle
+## Reference Documents (Sources of Truth)
 
-**Single Source of Truth**: Every piece of information should live in exactly one place. Derived data is fine (for code-splitting/performance), but the canonical definition must not be duplicated.
+**Primary (highest authority — written and reviewed by Andy):**
+- `References/CV_v4.md`
 
-## Refactoring Checklist
+**Secondary (comprehensive but compiled by AI from conversations — may contain inaccuracies):**
+- `References/andy_charlwood_complete_reference.md` (merged file you create in Phase 1)
 
-Work through these IN ORDER. Each item is a self-contained refactoring that leaves the codebase in a passing state (lint + typecheck + build).
+**Original secondary sources (kept for reference, do not modify):**
+- `References/andy_charlwood_career_knowledge.md`
+- `References/andy_charlwood_career_knowledge_dump.md`
+
+## Content Files to Audit
+
+Every file below contains user-facing text that must be verified:
+
+| File | Content Type |
+|------|-------------|
+| `src/data/timeline.ts` | Career roles (6) + education (2) with descriptions, details, outcomes, codedEntries |
+| `src/data/skills.ts` | 21 skills with prescribing history narratives |
+| `src/data/kpis.ts` | 4 KPIs with values, labels, story context, outcomes |
+| `src/data/llm-prompt.ts` | ~100 line system prompt with full professional profile |
+| `src/data/profile-content.ts` | UI copy: profile narrative, achievements, education entries, skill summaries |
+| `src/data/patient.ts` | Personal details: name, contact, location, registration |
+| `src/data/alerts.ts` | 2 alert banner messages |
+| `src/data/investigations.ts` | 5 projects with methodology, results, tech stack |
+| `src/data/documents.ts` | Education credentials, grades, research detail |
+| `src/data/educationExtras.ts` | Extracurriculars, research descriptions, OSCE score |
+| `src/components/BootSequence.tsx` | Terminal boot text: system name, user, role, location |
+
+## Checklist
+
+Work through IN ORDER. Each phase leaves the codebase in a passing state (lint + typecheck + build).
 
 ### Phase 0: Dev Shortcut
 
-- [x] **0.1 — Disable boot/ECG/login sequence for faster visual review**
+- [ ] **0.1 — Disable boot/login sequence for faster iteration**
   - In `src/App.tsx` line 48, change `useState<Phase>('boot')` to `useState<Phase>('pmr')`
-  - This skips straight to the dashboard, saving ~10s per visual inspection
-  - Do NOT remove the BootSequence/ECGAnimation/LoginScreen components or imports — just bypass them
-  - Verify: `npm run build` passes, app loads directly to dashboard at localhost:5173
+  - Do NOT remove components or imports — just bypass them
+  - Verify: `npm run build` passes
 
-### Phase 1: Data Consolidation
+### Phase 1: Merge Secondary Reference Documents
 
-- [x] **1.1 — Migrate medications.ts history into skills.ts, then delete medications.ts**
-  - `src/data/medications.ts` has ZERO imports anywhere (dead code) but contains `prescribingHistory[]` arrays with rich skill progression data
-  - Merge the `prescribingHistory` data into corresponding entries in `src/data/skills.ts` (add a `prescribingHistory` field to SkillMedication type)
-  - Update `src/types/pmr.ts` if needed for the new field
-  - Delete `src/data/medications.ts`
-  - Verify: no broken imports, build passes
+- [ ] **1.1 — Create merged secondary reference file**
+  - Read both `References/andy_charlwood_career_knowledge.md` and `References/andy_charlwood_career_knowledge_dump.md`
+  - Create `References/andy_charlwood_complete_reference.md` — a single, deduplicated document
+  - Structure: logical sections (Career Timeline, Projects, Skills, Education, Leadership, Goals, etc.)
+  - Where the two files conflict, prefer the more detailed/specific version
+  - Where the two files duplicate, keep only one copy
+  - Do NOT modify the original files
+  - The merged file is your secondary source of truth for all subsequent phases
 
-- [x] **1.2 — Consolidate timeline narrative into timeline.ts**
-  - `src/data/profile-content.ts` contains a `timelineNarrative` section (~320 lines) that is pulled into `timeline.ts` via `getTimelineNarrativeEntry()`
-  - Inline the narrative content directly into the `TimelineEntity` objects in `timeline.ts`
-  - Remove the `timelineNarrative` section from `profile-content.ts`
-  - Remove `getTimelineNarrativeEntry()` from `src/lib/profile-content.ts` and all call sites
-  - Verify: timeline entities still have all their description/details/outcomes/codedEntries data
+### Phase 2: Content Audit & Correction
 
-- [x] **1.3 — Split profile-content.ts into focused concerns**
-  - After 1.2, `profile-content.ts` should be smaller. Split remaining content:
-    - LLM system prompt → inline into `src/lib/llm.ts` or a dedicated `src/data/llm-prompt.ts`
-    - Education narrative → merge into `src/data/documents.ts` or `educationExtras.ts`
-    - Profile summary/achievements → keep in `profile-content.ts` only if genuinely unique
-  - Goal: `profile-content.ts` either deleted or contains only truly unique content with zero duplication
-  - Update `src/lib/profile-content.ts` accessor functions and all consumers
-  - Update `src/types/profile-content.ts` types to match
+For each file in the audit list, compare every piece of text content against the reference documents. Apply these rules:
 
-- [x] **1.4 — Evaluate thin re-export layers**
-  - `src/data/constellation.ts` (9 lines) re-exports from `timeline.ts`
-  - `src/data/tags.ts` (10 lines) derives from `timeline.ts`
-  - For each: inline at call sites if few consumers, or keep if many consumers benefit
-  - If kept, add a brief comment explaining why the indirection exists
-  - If removed, update all import paths
+**Rule 1 — Primary source match:** If text can be verified against `References/CV_v4.md`, ensure the language matches closely. Prefer lifting phrasing directly from the CV where it reads naturally.
 
-### Phase 2: Utility Extraction
+**Rule 2 — Secondary source match:** If text isn't in the CV but IS in the merged secondary reference, it can stay — but flag for review if the wording seems embellished or AI-generated. Tighten the language to sound natural and factual.
 
-- [x] **2.1 — Extract duplicated utility functions into lib/utils.ts**
-  - `hexToRgba()` is defined locally in at least: `DashboardLayout.tsx`, `TimelineInterventionsSubsection.tsx`, `WorkExperienceSubsection.tsx`
-  - `prefersReducedMotion` media query is repeated across 8+ files
-  - Extract both to `src/lib/utils.ts` (currently only 8 lines with `cn()`)
-  - Replace all local definitions with imports from `@/lib/utils`
-  - Verify: no duplicate function definitions remain, search codebase to confirm
+**Rule 3 — No source match:** If text content (facts, claims, metrics, descriptions) cannot be verified against ANY reference document, add it to `References/unverified-content.md` and remove it from the website. Format: file path, the unverified text, and why it couldn't be verified.
 
-- [x] **2.2 — Audit and consolidate other repeated patterns**
-  - Search for other duplicated helper functions, constants, or inline logic across components
-  - Extract anything used in 3+ places into shared modules
-  - Common candidates: date formatting, color manipulation, responsive breakpoint checks, animation config objects
+**Rule 4 — Missed opportunities:** While auditing, note any skills, projects, achievements, or goals from the reference documents that are NOT represented on the website but could be valuable additions. Add these to a "Missed Opportunities" section in `References/unverified-content.md` for future consideration.
 
-### Phase 3: Component Simplification
+Work through files in this order:
 
-- [ ] **3.1 — Extract shared ExpandableCard component**
-  - `WorkExperienceSubsection.tsx` (306 lines), `TimelineInterventionsSubsection.tsx` (346 lines), and `RepeatMedicationsSubsection.tsx` (294 lines) all implement expand/collapse card patterns with similar styling and interaction logic
-  - Extract the shared pattern into `src/components/ExpandableCard.tsx`
-  - The shared component handles: expand/collapse toggle, animation, consistent styling
-  - Each subsection keeps its unique content rendering via children/render props
-  - Goal: measurable line reduction across the three files
+- [ ] **2.1 — Audit patient.ts** (personal details — quick win, easy to verify)
+- [ ] **2.2 — Audit timeline.ts** (career narratives — largest content file, most critical)
+- [ ] **2.3 — Audit kpis.ts** (metrics and values — must match CV exactly)
+- [ ] **2.4 — Audit investigations.ts** (projects — verify methodology, results, tech stack)
+- [ ] **2.5 — Audit skills.ts** (skill descriptions and prescribing history)
+- [ ] **2.6 — Audit documents.ts and educationExtras.ts** (education credentials)
+- [ ] **2.7 — Audit profile-content.ts** (UI copy and narrative text)
+- [ ] **2.8 — Audit llm-prompt.ts** (system prompt — must reflect accurate profile)
+- [ ] **2.9 — Audit alerts.ts** (banner messages)
+- [ ] **2.10 — Audit BootSequence.tsx** (terminal boot text)
+- [ ] **2.11 — Final sweep for any remaining hardcoded strings in components**
 
-- [ ] **3.2 — Simplify detail panel components**
-  - 6 detail panel components share structural patterns: `SkillDetail`, `SkillsAllDetail`, `ConsultationDetail`, `EducationDetail`, `ProjectDetail`, `KPIDetail`
-  - Extract shared layout into a base component: container, header, close button, scroll behaviour, enter/exit animation
-  - Each detail component keeps its unique content but reuses the shared shell
-  - Look at `src/components/detail/` directory
+### Phase 3: Boot Sequence Redesign
 
-- [ ] **3.3 — Review large components for extraction opportunities**
-  - Components over 400 lines: ECGAnimation (686), ChatWidget (648), Sidebar (572), DashboardLayout (503), BootSequence (497), CommandPalette (456), LoginScreen (449)
-  - For each: identify self-contained sections that can become sub-components
-  - Only extract where it genuinely reduces complexity — not arbitrary line-count reduction
-  - Prioritise sections with their own state/effects that don't need parent state
+- [ ] **3.1 — Remove ECG phase entirely**
+  - Delete `src/components/ECGAnimation.tsx`
+  - Remove ECG import, phase, and rendering from `src/App.tsx`
+  - Remove `'ecg'` from the `Phase` type in `src/types/` (or wherever it's defined)
+  - Update flow: boot → login (no ECG intermediary)
 
-### Phase 4: Final Cleanup
+- [ ] **3.2 — Redesign boot-to-login transition**
+  - Create a convincing "software launching" experience that transitions from the terminal boot into the login screen
+  - The boot sequence already has a terminal/CLI aesthetic — lean into this
+  - Ideas to consider (pick what works best):
+    - Boot terminal completes its checks, then smoothly morphs/dissolves into the login screen
+    - A loading progress bar or spinner after boot completes, then login fades in
+    - Terminal text clears line-by-line (or collapses) as the login interface materialises
+    - A brief "system ready" state with a visual flourish before transitioning
+  - The transition should feel intentional and polished, not abrupt
+  - Must respect `prefers-reduced-motion` (instant transition if reduced motion preferred)
+  - Keep the Skip button visible during boot — it should skip directly to the dashboard (`'pmr'` phase)
 
-- [ ] **4.1 — Remove dead code and unused exports**
-  - After all refactoring, scan for: unused imports, unused exports, unused types, orphaned files
-  - ESLint should catch most — run `npm run lint` and fix everything
-  - Manually check for files that are no longer imported anywhere
+- [ ] **3.3 — Verify boot sequence flow**
+  - Re-enable boot sequence: change `useState<Phase>('pmr')` back to `useState<Phase>('boot')`
+  - Manually verify: boot → transition → login → dashboard
+  - Skip button works and goes straight to dashboard
+  - `npm run build` passes
 
-- [ ] **4.2 — Final validation and baseline comparison**
-  - `npm run lint` passes with zero warnings
+### Phase 4: Final Validation
+
+- [ ] **4.1 — Compile unverified content summary**
+  - Ensure `References/unverified-content.md` is complete and well-formatted
+  - Sections: "Removed Content" (with file/line references) and "Missed Opportunities" (from reference docs)
+
+- [ ] **4.2 — Final quality gates**
+  - `npm run lint` passes with zero errors
   - `npm run typecheck` passes with zero errors
   - `npm run build` succeeds
-  - Compare total line count against baseline (recorded at start)
-  - Record the reduction in this file
-
-- [ ] **4.3 — Re-enable boot/ECG/login sequence**
-  - In `src/App.tsx`, change `useState<Phase>('pmr')` back to `useState<Phase>('boot')`
-  - Verify: `npm run build` passes
-  - Do a final Playwright visual check to confirm the full boot → ECG → login → dashboard flow works
-  - Commit: `fix: re-enable boot sequence after refactor`
+  - Boot sequence plays correctly (not bypassed)
 
 ## Success Criteria
 
 ALL of the following must be true:
-- [ ] Every checklist item above is complete (or explicitly escalated with reason)
+- [ ] `References/andy_charlwood_complete_reference.md` exists as a clean, deduplicated merge
+- [ ] Every text claim on the website is verifiable against at least one reference document
+- [ ] Language in career/achievement descriptions closely matches CV_v4.md phrasing
+- [ ] `References/unverified-content.md` lists all removed content and missed opportunities
+- [ ] ECG phase is completely removed (component deleted, type removed, no references)
+- [ ] Boot → login transition is smooth, polished, and respects reduced motion
+- [ ] Skip button skips directly to dashboard
 - [ ] `npm run lint && npm run typecheck && npm run build` passes cleanly
-- [ ] No data is defined in more than one place (single source of truth)
-- [ ] `src/data/medications.ts` is deleted (history migrated to skills.ts)
-- [ ] `hexToRgba()` exists in exactly one location
-- [ ] `prefersReducedMotion` query is centralised
-- [ ] Shared component patterns are extracted (ExpandableCard, detail panel base)
-- [ ] Total codebase line count is measurably reduced
-- [ ] Zero runtime behaviour changes — identical visual output
+- [ ] No runtime errors — app loads and all content renders correctly
 
 ## Constraints
 
 - TypeScript strict mode must be maintained
 - Preserve all existing path aliases (`@/*`)
 - Follow existing naming conventions (PascalCase components, kebab-case utils)
-- Conventional commit messages for each logical change (`refactor: ...`)
-- Do not modify the app's phases or lifecycle (boot → ECG → login → dashboard) — except the temporary Phase 0 bypass which is reverted in 4.3
-- Do not change any Tailwind classes or visual styling
-- Do not add new dependencies
+- Conventional commit messages for each logical change
+- Do not change Tailwind classes or visual styling (except for boot sequence redesign)
+- Do not add new dependencies (unless genuinely needed for boot transition — prefer CSS/Framer Motion which are already installed)
 - Do not remove the CLAUDE.md file
-
-## Baseline
-
-Record line count before starting. Run at first iteration:
-```bash
-find src -name '*.ts' -o -name '*.tsx' | xargs wc -l
-```
-Store result in .ralph/plan.md for comparison at end.
+- Do not modify the original reference files (`andy_charlwood_career_knowledge.md`, `andy_charlwood_career_knowledge_dump.md`)
+- The `References/` directory is for reference only — not deployed with the site
 
 ## Status
 

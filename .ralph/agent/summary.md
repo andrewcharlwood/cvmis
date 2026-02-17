@@ -1,8 +1,8 @@
 # Loop Summary
 
 **Status:** Completed successfully
-**Iterations:** 27
-**Duration:** 55m 41s
+**Iterations:** 3
+**Duration:** 25m 16s
 
 ## Tasks
 
@@ -14,4 +14,4 @@ _No events recorded._
 
 ## Final Commit
 
-01a48ce: fix: re-enable boot sequence after refactor
+841c186: chore: finalise unverified-content.md audit summary
