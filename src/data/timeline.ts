@@ -85,7 +85,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
       startYear: 2024,
       endYear: null,
     },
-    description: 'Driving data analytics strategy for medicines optimisation, developing bespoke datasets and analytical frameworks from messy, real-world GP prescribing data to identify efficiency opportunities, monitor medicines safety, and address health inequalities across the integrated care system. Responsible for the analytical infrastructure underpinning all prescribing intelligence, from dm+d product data to population-level monitoring tools.',
+    description: 'Driving data analytics strategy for medicines optimisation, developing bespoke datasets and analytical frameworks from messy, real-world GP prescribing data to identify efficiency opportunities and address health inequalities across the integrated care system.',
     details: [
       'Managed £220M prescribing budget with sophisticated forecasting models identifying cost pressures and enabling proactive financial planning for ICB board reporting',
       'Collaborated with ICB data engineering to create a comprehensive dm+d medicines data table: standardised strength calculations, oral morphine equivalent conversions, and Anticholinergic Burden scoring, providing a single source of truth for all medicines analytics',
@@ -153,11 +153,11 @@ const timelineEntitySeeds: TimelineEntity[] = [
       startYear: 2022,
       endYear: 2024,
     },
-    description: 'Led implementation of NICE technology appraisals and high-cost drug pathways across the ICS. Authored most of the system\'s high-cost drug pathways spanning rheumatology, ophthalmology (wet AMD, DMO, RVO), dermatology, gastroenterology, neurology, and migraine, balancing the legal requirement to implement TAs against financial costs, formulary management, and local clinical preferences. Engaged clinical leads across primary care, secondary care, and commissioning to agree pathways and secure system-wide adoption.',
+    description: 'Led implementation of NICE technology appraisals and high-cost drug pathways across the ICS. Wrote most of the system\'s high-cost drug pathways spanning rheumatology, ophthalmology (wet AMD, DMO, RVO), dermatology, gastroenterology, neurology, and migraine — balancing legal requirements to implement TAs against financial costs and local clinical preferences. Engaged clinical leads across all sectors of care to agree pathways and secure system-wide adoption.',
     details: [
       'Developed software automating Blueteq prior authorisation form creation: 70% reduction in required forms, 200 hours immediate savings, and ongoing 7 to 8 hours weekly efficiency gains',
       'Integrated Blueteq data with secondary care activity databases, resolving critical data-matching limitations and enabling accurate high-cost drug spend tracking across the system',
-      'Created Python-based Sankey chart analysis tool visualising patient journeys through high-cost drug pathways, enabling trusts to audit compliance and identify formulary adherence opportunities',
+      'Created Python-based Sankey chart analysis tool visualising patient journeys through high-cost drug pathways, enabling trusts to audit compliance and identify improvement opportunities',
       'Negotiated pathway agreements with consultant clinical leads, GP prescribing leads, and pharmaceutical company representatives across multiple therapeutic areas',
     ],
     outcomes: [
@@ -259,20 +259,17 @@ const timelineEntitySeeds: TimelineEntity[] = [
       startYear: 2016,
       endYear: 2017,
     },
-    description: 'Provided clinical leadership and operational management across community pharmacy services at Tesco PLC in Great Yarmouth, progressing from newly qualified pharmacist to acting pharmacy manager within two months. Developed early expertise in service development, quality improvement, and the intersection of clinical practice and operational efficiency that would define the trajectory of the career ahead.',
+    description: 'Progressed from newly qualified pharmacist to acting pharmacy manager within two months at Tesco PLC in Great Yarmouth. Co-led regional initiatives for NMS and asthma referrals, developing resources supporting service provision across the region.',
     details: [
-      'Led NMS and asthma referral service development, improving uptake and patient outcomes',
-      'Devised a quality payments solution adopted nationally across the Tesco pharmacy estate',
+      'Co-led regional NMS and asthma referral service initiatives, developing resources adopted across 39 pharmacies in the region',
       'Built clinical foundation in medicines optimisation, patient safety, and community pharmacy operations',
     ],
     outcomes: [
-      'Service development leadership recognised regionally',
-      'National adoption of quality payments approach across Tesco estate',
+      'Regional service development resources adopted across 39 pharmacies',
       'Strong clinical grounding established for progression to pharmacy management',
     ],
     codedEntries: [
-      { code: 'SVC001', description: 'Service development: NMS and asthma referrals' },
-      { code: 'INN002', description: 'Innovation: national quality payments solution' },
+      { code: 'SVC001', description: 'Service development: NMS and asthma referrals, regional adoption' },
     ],
     skills: [
       'medicines-optimisation',
@@ -303,22 +300,22 @@ const timelineEntitySeeds: TimelineEntity[] = [
       startYear: 2015,
       endYear: 2016,
     },
-    description: 'Completed pre-registration training at Paydens Pharmacy across multiple community pharmacy sites in Tunbridge Wells and Ashford, Kent. Developed core clinical competencies and demonstrated initiative through expanding clinical services and delivering measurable quality improvements during the training year.',
+    description: 'Completed pre-registration training at Paydens Pharmacy across multiple community pharmacy sites in Tunbridge Wells and Ashford, Kent. Took on advanced responsibilities beyond typical pre-registration scope, including clinical service initiation and audit-driven process improvement.',
     details: [
-      'Expanded PGD clinical services: NRT, EHC, and chlamydia screening programmes across multiple Paydens branches',
-      'Improved NMS audit completion rate from under 10% to 50 to 60% through process redesign',
-      'Developed a palliative care screening pathway for community pharmacy setting',
-      'Gained broad operational experience across multiple pharmacy sites',
+      'Led initiation of Patient Group Directions (PGDs) including NRT, emergency hormonal contraception, and chlamydia screening/treatment services',
+      'Conducted comprehensive NMS audit, increasing completion rates from under 10% to 50 to 60% of target through process improvement',
+      'Provided clinical screening services for palliative care hospice, gaining complex patient care and end-of-life medication management experience',
+      'Developed understanding of wholesale procedures, regulatory compliance, and pharmacy business operations',
     ],
     outcomes: [
       'Successfully registered with GPhC in August 2016',
-      'Clinical service expansion adopted across multiple Paydens branches',
-      'Established reputation for quality improvement and proactive service development',
+      'Clinical service initiation adopted across multiple Paydens branches',
+      'Complex patient care experience gained through palliative care hospice work',
     ],
     codedEntries: [
       { code: 'PGD001', description: 'Clinical services: NRT, EHC, chlamydia PGDs' },
-      { code: 'AUD001', description: 'Audit: NMS completion under 10% to 50 to 60%' },
-      { code: 'PAL001', description: 'Palliative care: community screening pathway' },
+      { code: 'AUD001', description: 'Audit: NMS completion under 10% to 50 to 60% of target' },
+      { code: 'PAL001', description: 'Palliative care: hospice clinical screening services' },
     ],
     skills: [
       'medicines-optimisation',
@@ -345,7 +342,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
       startYear: 2011,
       endYear: 2015,
     },
-    description: 'Completed four-year integrated Master of Pharmacy degree at the University of East Anglia, building a strong foundation in pharmaceutical sciences, clinical pharmacy, pharmacology, therapeutics, and research methodology. Demonstrated academic excellence through a distinction-grade research project and active engagement in university leadership.',
+    description: 'Completed four-year integrated Master of Pharmacy degree at the University of East Anglia, building a strong foundation in pharmaceutical sciences, clinical pharmacy, pharmacology, therapeutics, and research methodology. Achieved a distinction-grade research project and served as President of UEA Pharmacy Society.',
     details: [
       'Independent research project on drug delivery and cocrystals: 75.1% (Distinction)',
       '4th year OSCE: 80%',

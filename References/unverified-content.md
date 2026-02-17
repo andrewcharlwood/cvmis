@@ -28,6 +28,14 @@ _Content modified to better align with reference documents._
 | File | Original | Corrected | Source |
 |------|----------|-----------|--------|
 | `src/data/patient.ts` | `address: 'Norwich, NR1'` | `address: 'Norwich, UK'` | CV_v4.md: "Norwich, UK" |
+| `src/data/timeline.ts` | HCD: "Authored most" | "Wrote most" | CV_v4.md: "Wrote most of the system's high-cost drug pathways" |
+| `src/data/timeline.ts` | HCD: "formulary adherence opportunities" | "improvement opportunities" | CV_v4.md: "identify improvement opportunities" |
+| `src/data/timeline.ts` | Deputy Head: added "monitor medicines safety" and extra sentence | Removed to match CV phrasing | CV_v4.md description is more concise |
+| `src/data/timeline.ts` | Duty Pharm Mgr: "Led NMS..." | "Co-led regional NMS..." | Secondary ref: "Co-led regional initiatives" |
+| `src/data/timeline.ts` | Duty Pharm Mgr: "Devised a quality payments solution adopted nationally" | Removed — belongs to Pharmacy Manager role | Secondary ref places national quality payments under Pharmacy Manager period |
+| `src/data/timeline.ts` | Pre-Reg: "Expanded PGD clinical services" | "Led initiation of Patient Group Directions" | Secondary ref: "Led initiation of PGDs" |
+| `src/data/timeline.ts` | Pre-Reg: "Developed a palliative care screening pathway" | "Provided clinical screening services for palliative care hospice" | Secondary ref: hospice clinical screening, not pathway development |
+| `src/data/timeline.ts` | UEA: "Demonstrated academic excellence" | "Achieved a distinction-grade research project and served as President of UEA Pharmacy Society" | Secondary ref: failed exams years 1-3, "academic excellence" misleading |
 
 ## Missed Opportunities
 
@@ -35,4 +43,11 @@ _Skills, projects, achievements, or goals from reference documents not yet repre
 
 | Source | Content | Potential Use |
 |--------|---------|---------------|
-| — | — | — |
+| Secondary ref | McDonald's Corporation role (Sep 2009 – Jun 2014) — Floor Manager, Crew Trainer & Crew Member | Early career leadership experience; could add as education-era entry |
+| Secondary ref | Mary Seacole Programme (NHS Leadership Academy, 78%, 2018) | NHS leadership qualification; currently missing from timeline |
+| Secondary ref | Failed pharmacy exams years 1-3 before completing degree | Powerful resilience narrative; could be added to MPharm description |
+| Secondary ref | Self-taught coding during Tesco night shifts (2017-2022) | Key narrative about technical skill origin; could enhance Pharmacy Manager entry |
+| Secondary ref | ADHD medication shortage guidance | Clinical leadership example during HCD role |
+| Secondary ref | UEA speaking engagements (2025) — "Careers in Data" and "Inspirational Roles in Pharmacy" panels | Public engagement and thought leadership |
+| Secondary ref | Opioid deprescribing evaluation: 18.3% decrease vs 6.9% national average | Strong quantified impact metric for CD monitoring system |
+| Secondary ref | AI/LLM work — fine-tuned 11B parameter model for prescription direction parsing | Technical capability demonstration |
