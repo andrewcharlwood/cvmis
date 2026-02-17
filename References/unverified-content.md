@@ -21,6 +21,8 @@ _Content not in reference documents but retained as personal data or UI elements
 | `src/data/patient.ts` | `linkedin: 'linkedin.com/in/andycharlwood'` | Personal account URL — secondary ref mentions LinkedIn but not exact slug |
 | `src/data/patient.ts` | `badge: 'Open to opportunities'` | UI status element — current preference, not a factual claim |
 | `src/data/profile-content.ts` | `roleTitle: 'Informatics Pharmacist'` | Not in any reference doc — CV says "Healthcare leader", role titles are "Deputy Head" / "Interim Head". Retained as portfolio self-description |
+| `src/components/LastConsultationCard.tsx` | NHS Band "8a" hardcoded for roles containing "Head" | Not in CV or secondary reference — from GPSystem HTML concept only. Retained as UI element |
+| `src/components/EducationSubsection.tsx` | Education details hardcoded in switch statement | Duplicates data layer but all content verified against CV |
 
 ## Content Corrections
 
