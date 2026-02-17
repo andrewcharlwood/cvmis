@@ -10,8 +10,6 @@ import type {
   QuickActionCopyEntry,
   SidebarCopy,
   SkillsUICopy,
-  TimelineNarrativeId,
-  TimelineNarrativeEntry,
 } from '@/types/profile-content'
 
 export function getProfileContent(): DeepReadonly<ProfileContent> {
@@ -58,6 +56,3 @@ export function getLLMCopy(): DeepReadonly<LLMCopy> {
   return profileContent.searchChat.llm
 }
 
-export function getTimelineNarrativeEntry(entityId: TimelineNarrativeId): DeepReadonly<TimelineNarrativeEntry> {
-  return profileContent.timelineNarrative[entityId]
-}

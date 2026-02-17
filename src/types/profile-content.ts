@@ -35,28 +35,6 @@ export type QuickActionCopyEntry =
       readonly url: string
     }
 
-export interface TimelineNarrativeCodeEntry {
-  readonly code: string
-  readonly description: string
-}
-
-export interface TimelineNarrativeEntry {
-  readonly description: string
-  readonly details: ReadonlyArray<string>
-  readonly outcomes: ReadonlyArray<string>
-  readonly codedEntries: ReadonlyArray<TimelineNarrativeCodeEntry>
-}
-
-export type TimelineNarrativeId =
-  | 'interim-head-2025'
-  | 'deputy-head-2024'
-  | 'high-cost-drugs-2022'
-  | 'pharmacy-manager-2017'
-  | 'duty-pharmacy-manager-2016'
-  | 'pre-reg-pharmacist-2015'
-  | 'uea-mpharm-2011'
-  | 'highworth-alevels-2009'
-
 export interface SidebarCopy {
   readonly sectionTitle: string
   readonly roleTitle: string
@@ -128,5 +106,4 @@ export interface ProfileContent {
     readonly quickActions: ReadonlyArray<QuickActionCopyEntry>
     readonly llm: LLMCopy
   }
-  readonly timelineNarrative: Readonly<Record<TimelineNarrativeId, TimelineNarrativeEntry>>
 }
