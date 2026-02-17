@@ -1,24 +1,22 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { ChevronRight } from 'lucide-react'
 import Sidebar from './Sidebar'
 import { CommandPalette } from './CommandPalette'
 import { DetailPanel } from './DetailPanel'
-import { CardHeader } from './Card'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
 import { ProjectsTile } from './tiles/ProjectsTile'
 import { ParentSection } from './ParentSection'
 import CareerConstellation from './constellation/CareerConstellation'
 import { TimelineInterventionsSubsection } from './TimelineInterventionsSubsection'
 import { RepeatMedicationsSubsection } from './RepeatMedicationsSubsection'
+import { LastConsultationCard } from './LastConsultationCard'
 import { ChatWidget } from './ChatWidget'
 import { useActiveSection } from '@/hooks/useActiveSection'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { timelineConsultations } from '@/data/timeline'
 import { skills } from '@/data/skills'
 import type { PaletteAction } from '@/lib/search'
-import { hexToRgba, prefersReducedMotion, motionSafeTransition } from '@/lib/utils'
-import { DEFAULT_ORG_COLOR } from '@/lib/theme-colors'
+import { prefersReducedMotion, motionSafeTransition } from '@/lib/utils'
 
 const sidebarVariants = {
   hidden: prefersReducedMotion ? { x: 0, opacity: 1 } : { x: -272, opacity: 0 },
@@ -35,203 +33,6 @@ const contentVariants = {
     opacity: 1,
     transition: motionSafeTransition(0.3, 'easeOut', 0.15),
   },
-}
-
-interface LastConsultationSubsectionProps {
-  highlightedRoleId?: string | null
-}
-
-function LastConsultationSubsection({ highlightedRoleId }: LastConsultationSubsectionProps) {
-  const { openPanel } = useDetailPanel()
-  const consultation = timelineConsultations[0]
-  if (!consultation) {
-    return null
-  }
-  const isHighlighted = highlightedRoleId === consultation.id
-
-  const handleOpenPanel = () => {
-    openPanel({ type: 'consultation', consultation })
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      handleOpenPanel()
-    }
-  }
-
-  const formatDate = (dateStr: string): string => {
-    const date = new Date(dateStr)
-    return date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
-  }
-
-  const getEmploymentType = (): string => {
-    if (consultation.organization.includes('ICB')) {
-      return 'Permanent · Full-time'
-    }
-    return 'Permanent'
-  }
-
-  const getBand = (): string => {
-    if (consultation.role.includes('Head')) {
-      return '8a'
-    }
-    return '—'
-  }
-
-  const fieldLabelStyle: React.CSSProperties = {
-    fontSize: '12px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.06em',
-    color: 'var(--text-tertiary)',
-    marginBottom: '3px',
-  }
-
-  const fieldValueStyle: React.CSSProperties = {
-    fontSize: '13px',
-    fontWeight: 600,
-    color: 'var(--text-primary)',
-  }
-
-  return (
-    <div
-      style={{
-        marginTop: '24px',
-        borderRadius: 'var(--radius-sm)',
-        border: '1px solid',
-        borderColor: isHighlighted ? hexToRgba(consultation.orgColor ?? DEFAULT_ORG_COLOR, 0.2) : 'transparent',
-        background: isHighlighted ? hexToRgba(consultation.orgColor ?? DEFAULT_ORG_COLOR, 0.03) : 'transparent',
-        transition: 'border-color 150ms ease-out, background-color 150ms ease-out',
-        padding: '8px',
-        margin: '-8px',
-      }}
-    >
-      <CardHeader dotColor="green" title="LAST CONSULTATION" rightText="Most recent role" />
-
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={handleOpenPanel}
-        onKeyDown={handleKeyDown}
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '20px',
-          marginBottom: '1=px',
-          paddingBottom: '14px',
-          borderBottom: '1px solid var(--border-light)',
-          cursor: 'pointer',
-          borderRadius: 'var(--radius-sm)',
-          padding: '8px',
-          margin: '-8px -8px 14px -8px',
-          transition: 'background-color 150ms ease-out',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = hexToRgba(consultation.orgColor ?? DEFAULT_ORG_COLOR, 0.04)
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent'
-        }}
-        aria-label={`View full details for ${consultation.role}`}
-      >
-        <div>
-          <div style={fieldLabelStyle}>Date</div>
-          <div style={fieldValueStyle}>{formatDate(consultation.date)}</div>
-        </div>
-        <div>
-          <div style={fieldLabelStyle}>Organisation</div>
-          <div style={fieldValueStyle}>{consultation.organization}</div>
-        </div>
-        <div>
-          <div style={fieldLabelStyle}>Type</div>
-          <div style={fieldValueStyle}>{getEmploymentType()}</div>
-        </div>
-        <div>
-          <div style={fieldLabelStyle}>Band</div>
-          <div style={fieldValueStyle}>{getBand()}</div>
-        </div>
-      </div>
-
-      <div
-        style={{
-          fontSize: '15px',
-          fontWeight: 600,
-          color: consultation.orgColor ?? 'var(--accent)',
-          marginBottom: '12px',
-        }}
-      >
-        {consultation.role}
-      </div>
-
-      <ul
-        style={{
-          listStyle: 'none',
-          padding: 0,
-          margin: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '7px',
-          marginBottom: '0px',
-        }}
-      >
-        {consultation.examination.map((bullet, index) => (
-          <li
-            key={index}
-            style={{
-              fontSize: '14px',
-              color: 'var(--text-primary)',
-              paddingLeft: '16px',
-              lineHeight: '1.5',
-              position: 'relative',
-            }}
-          >
-            <span
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                left: '0',
-                top: '8px',
-                width: '5px',
-                height: '5px',
-                borderRadius: '50%',
-                backgroundColor: consultation.orgColor ?? 'var(--accent)',
-                opacity: 0.5,
-              }}
-            />
-            {bullet}
-          </li>
-        ))}
-      </ul>
-
-      <button
-        onClick={handleOpenPanel}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          fontSize: '13px',
-          fontWeight: 500,
-          color: consultation.orgColor ?? 'var(--accent)',
-          background: 'transparent',
-          border: 'none',
-          padding: '6px 0',
-          minHeight: '44px',
-          cursor: 'pointer',
-          transition: 'opacity 150ms ease-out',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.opacity = '0.7'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.opacity = '1'
-        }}
-        aria-label="View full consultation record"
-      >
-        <span>View full record</span>
-        <ChevronRight size={15} strokeWidth={2.5} />
-      </button>
-    </div>
-  )
 }
 
 export function DashboardLayout() {
@@ -446,7 +247,7 @@ export function DashboardLayout() {
 
 
                   <div className="chronology-item">
-                    <LastConsultationSubsection highlightedRoleId={highlightedRoleId} />
+                    <LastConsultationCard highlightedRoleId={highlightedRoleId} />
                   </div>
 
                   <div className="chronology-item">
