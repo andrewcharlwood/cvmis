@@ -4,11 +4,7 @@ Compiled during Phase 2 content audit. Each entry records content that could not
 
 ## Removed Content
 
-_Content removed from the website because it could not be verified against any reference document._
-
-| File | Content | Reason | Action |
-|------|---------|--------|--------|
-| — | — | — | — |
+_No content was fully removed. All factual claims had at least secondary source backing. Embellished or inaccurate phrasing was corrected in place (see Content Corrections below)._
 
 ## Flagged But Retained
 
@@ -43,6 +39,11 @@ _Content modified to better align with reference documents._
 | `src/data/profile-content.ts` | Achievement subtitle: "Full analytical accountability to ICB board" | "Prescribing budget with forecasting models" | CV_v4.md: "managed...with sophisticated forecasting models" |
 | `src/data/profile-content.ts` | Skills summary: "data engineering...clinical decision support" | "data pipeline development" — removed "clinical decision support" | CV_v4.md: "Data pipeline development"; "clinical decision support" not in any reference |
 | `src/data/documents.ts` | Research: "investigating cocrystal formation for improved drug delivery properties" | "on drug delivery and cocrystals" | CV_v4.md: "drug delivery and cocrystals" |
+| `src/data/skills.ts` | Python startYear: 2019, yearsOfExperience: 6 | startYear: 2017, yearsOfExperience: 8 | Secondary ref: "self-taught during Tesco night shifts (2017–2022)" |
+| `src/data/skills.ts` | SQL startYear: 2018, yearsOfExperience: 7 | startYear: 2022, yearsOfExperience: 3 | Secondary ref: "Learned SQL once he gained access to NHS databases" |
+| `src/data/skills.ts` | Power BI: "PharMetrics real-time expenditure dashboard" | "Switching progress dashboards, executive reporting" | PharMetrics refers to the switching algorithm, not a dashboard |
+| `src/data/investigations.ts` | "PharMetrics Interactive Platform" (2024) | "PharMetrics Switching Dashboard" (2025) | Secondary ref: PharMetrics is the switching algorithm; dashboard tracks switching data |
+| `src/data/llm-prompt.ts` | Multiple corrections aligning with all above changes | See individual file audits | Kept in sync with data layer corrections |
 
 ## Missed Opportunities
 
