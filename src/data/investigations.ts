@@ -39,6 +39,7 @@ export const investigations: Investigation[] = [
     ],
     techStack: ['Python', 'Pandas', 'SQL'],
     skills: ['Health Economics', 'Medicines Optimisation', 'Prescribing Analytics'],
+    thumbnail: '/thumbnails/switchingdashboard.jpg',
   },
   {
     id: 'inv-blueteq-gen',
@@ -76,6 +77,7 @@ export const investigations: Investigation[] = [
     ],
     techStack: ['Python', 'SQL'],
     skills: ['Controlled Drugs', 'Patient Safety', 'Prescribing Analytics'],
+    thumbnail: '/thumbnails/ome.jpg',
   },
   {
     id: 'inv-nms-training',

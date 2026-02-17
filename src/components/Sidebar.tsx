@@ -11,7 +11,8 @@ import {
   Wrench,
   X,
 } from 'lucide-react'
-import cvmisLogo from '../../cvmis-logo.svg'
+import { CvmisLogo } from './CvmisLogo'
+import { PhoneCaptcha } from './PhoneCaptcha'
 import { patient } from '@/data/patient'
 import { tags } from '@/data/tags'
 import { alerts } from '@/data/alerts'
@@ -266,22 +267,14 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
             <div
               style={{
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: 'flex-end',
                 justifyContent: 'flex-start',
                 gap: '6px',
                 marginBottom: '4px',
                 width: '100%',
               }}
             >
-              <img
-                src={cvmisLogo}
-                alt="CVMIS"
-                style={{
-                  width: '25%',
-                  height: 'auto',
-                  display: 'block',
-                }}
-              />
+              <CvmisLogo cssHeight="48px" />
                           <button
               type="button"
               onClick={onSearchClick}
@@ -299,7 +292,6 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                 gap: '8px',
                 padding: '0 10px',
                 cursor: 'pointer',
-                marginBottom: '8px',
               }}
             >
               <Search size={16} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} aria-hidden="true" />
@@ -440,19 +432,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                 }}
               >
                 <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>{sidebarCopy.phoneLabel}</span>
-                <a
-                  href={`tel:${patient.phone}`}
-                  style={{
-                    color: 'var(--accent)',
-                    fontWeight: 500,
-                    textDecoration: 'none',
-                    textAlign: 'right',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
-                  onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
-                >
-                  {patient.phone.replace(/(\d{5})(\d{6})/, '$1 $2')}
-                </a>
+                <PhoneCaptcha phone={patient.phone} />
               </div>
 
               <div

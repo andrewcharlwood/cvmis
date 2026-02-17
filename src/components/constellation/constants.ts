@@ -22,6 +22,8 @@ export const LINK_BASE_WIDTH = 0.7
 export const LINK_STRENGTH_WIDTH_FACTOR = 0
 export const LINK_BASE_OPACITY = 0
 export const LINK_STRENGTH_OPACITY_FACTOR = 0
+export const LINK_REST_OPACITY = 0.12
+export const LINK_REST_STRENGTH_FACTOR = 0.08
 export const LINK_HIGHLIGHT_BASE_WIDTH = 1
 export const LINK_HIGHLIGHT_STRENGTH_WIDTH_FACTOR = 2
 export const LINK_BEZIER_VERTICAL_OFFSET = 0.15
@@ -66,7 +68,7 @@ export const ANIM_STEP_GAP_MS = 1000
 export const ANIM_HOLD_MS = 15000
 export const ANIM_RESET_MS = 800
 export const ANIM_RESTART_DELAY_MS = 400
-export const ANIM_INTERACTION_RESUME_MS = 800
+
 export const ANIM_SETTLE_ALPHA = 0.05
 export const ANIM_MONTH_STEP_MS = 80
 

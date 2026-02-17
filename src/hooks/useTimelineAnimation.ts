@@ -10,10 +10,7 @@ import {
   ANIM_LINK_STAGGER_MS,
   ANIM_REINFORCEMENT_MS,
   ANIM_STEP_GAP_MS,
-  ANIM_HOLD_MS,
-  ANIM_RESET_MS,
   ANIM_RESTART_DELAY_MS,
-  ANIM_INTERACTION_RESUME_MS,
   ANIM_SETTLE_ALPHA,
   ANIM_MONTH_STEP_MS,
   ANIM_CHRONOLOGICAL_ENABLED,
@@ -74,11 +71,10 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
   const rafIdRef = useRef(0)
   const timeoutIdsRef = useRef<number[]>([])
   const userPausedRef = useRef(false)
-  const interactionPausedRef = useRef(false)
-  const resumeTimerRef = useRef(0)
   const displayedMonthRef = useRef(-1) // 0-indexed, -1 = not yet shown
   const displayedYearRef = useRef(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isCompleted, setIsCompleted] = useState(false)
   const [animationInitialized, setAnimationInitialized] = useState(false)
 
   const scheduleTimeout = useCallback((fn: () => void, ms: number) => {
@@ -179,8 +175,6 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
     rafIdRef.current = 0
     timeoutIdsRef.current.forEach(id => clearTimeout(id))
     timeoutIdsRef.current = []
-    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current)
-    resumeTimerRef.current = 0
   }, [])
 
   const hideAll = useCallback(() => {
@@ -217,14 +211,6 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
     // Show full axis immediately — axis stays visible throughout animation
     if (tlGroup) {
       tlGroup.attr('opacity', 1)
-      let minTickY = Infinity
-      tlGroup.selectAll<SVGLineElement, number>('line.year-tick').each(function () {
-        const y = parseFloat(d3.select(this).attr('y1'))
-        if (y < minTickY) minTickY = y
-      })
-      if (minTickY < Infinity) {
-        tlGroup.select('.axis-line').attr('y1', minTickY - 12)
-      }
       tlGroup.selectAll('line.year-tick').attr('stroke-opacity', 0.8)
       tlGroup.selectAll('text.year-label').attr('opacity', 1)
       tlGroup.selectAll('line.year-guide').attr('stroke-opacity', 0.25)
@@ -255,15 +241,6 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
 
     // Show full axis
     if (tlGroup) {
-      // Find the topmost tick y to set axis line extent
-      let minTickY = Infinity
-      tlGroup.selectAll<SVGLineElement, number>('line.year-tick').each(function () {
-        const y = parseFloat(d3.select(this).attr('y1'))
-        if (y < minTickY) minTickY = y
-      })
-      if (minTickY < Infinity) {
-        tlGroup.select('.axis-line').attr('y1', minTickY - 12)
-      }
       tlGroup.selectAll('line.year-tick').attr('stroke-opacity', 0.8)
       tlGroup.selectAll('text.year-label').attr('opacity', 1)
       tlGroup.selectAll('line.year-guide').attr('stroke-opacity', 0.25)
@@ -400,41 +377,10 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
 
       const stepIdx = currentStepRef.current
       if (stepIdx >= animationSteps.length) {
-        // All steps done — hold then reset
-        animationStateRef.current = 'HOLDING'
-        scheduleTimeout(() => {
-          if (userPausedRef.current || interactionPausedRef.current) return
-          animationStateRef.current = 'RESETTING'
-
-          // Fade date indicator
-          deps.yearIndicatorRef.current?.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
-
-          // Fade all
-          deps.nodeSelectionRef.current
-            ?.transition().duration(ANIM_RESET_MS).style('opacity', '0')
-          deps.linkSelectionRef.current
-            ?.transition().duration(ANIM_RESET_MS).attr('stroke-opacity', 0)
-          deps.connectorSelectionRef.current
-            ?.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
-
-          scheduleTimeout(() => {
-            if (userPausedRef.current) return
-            // Reset skill radii
-            deps.nodeSelectionRef.current
-              ?.filter((d: SimNode) => d.type === 'skill')
-              .select('.node-circle')
-              .attr('r', 0)
-
-            visibleNodeIdsRef.current = new Set()
-            displayedMonthRef.current = -1
-            displayedYearRef.current = 0
-            currentStepRef.current = 0
-            animationStateRef.current = 'PLAYING'
-            setIsPlaying(true)
-
-            scheduleTimeout(advanceStep, ANIM_RESTART_DELAY_MS)
-          }, ANIM_RESET_MS + 50)
-        }, ANIM_HOLD_MS)
+        // All steps done — immediately show replay
+        animationStateRef.current = 'COMPLETED'
+        setIsPlaying(false)
+        setIsCompleted(true)
         return
       }
 
@@ -467,13 +413,24 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
   const togglePlayPause = useCallback(() => {
     if (prefersReducedMotion) return
 
-    if (userPausedRef.current) {
-      // Resume
+    if (animationStateRef.current === 'COMPLETED') {
+      // Replay from completed state
+      setIsCompleted(false)
       userPausedRef.current = false
-      interactionPausedRef.current = false
+      cancelAll()
+      hideAll()
+      currentStepRef.current = 0
+
+      scheduleTimeout(() => {
+        animationStateRef.current = 'PLAYING'
+        setIsPlaying(true)
+        runAnimation()
+      }, ANIM_RESTART_DELAY_MS)
+    } else if (userPausedRef.current) {
+      // Resume from user pause
+      userPausedRef.current = false
       animationStateRef.current = 'RESETTING'
 
-      // Reset and restart
       hideAll()
       currentStepRef.current = 0
 
@@ -491,69 +448,6 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
     }
   }, [hideAll, cancelAll, runAnimation, scheduleTimeout])
 
-  const pauseForInteraction = useCallback(() => {
-    if (prefersReducedMotion || userPausedRef.current) return
-    if (animationStateRef.current === 'IDLE') return
-    interactionPausedRef.current = true
-    cancelAll()
-    animationStateRef.current = 'PAUSED'
-    // Don't setIsPlaying(false) — interaction pause is temporary
-    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current)
-  }, [cancelAll])
-
-  const resumeAfterInteraction = useCallback(() => {
-    if (prefersReducedMotion || userPausedRef.current) return
-    if (!interactionPausedRef.current) return
-
-    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current)
-    resumeTimerRef.current = window.setTimeout(() => {
-      if (userPausedRef.current) return
-      interactionPausedRef.current = false
-
-      // Resume from current state — restart the animation loop from current position
-      animationStateRef.current = 'PLAYING'
-      setIsPlaying(true)
-
-      const advanceFromCurrent = () => {
-        if (animationStateRef.current !== 'PLAYING') return
-        const stepIdx = currentStepRef.current
-        if (stepIdx >= animationSteps.length) {
-          // We were at the end — hold then reset
-          animationStateRef.current = 'HOLDING'
-          scheduleTimeout(() => {
-            if (userPausedRef.current || interactionPausedRef.current) return
-            animationStateRef.current = 'RESETTING'
-            deps.yearIndicatorRef.current?.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
-            deps.nodeSelectionRef.current?.transition().duration(ANIM_RESET_MS).style('opacity', '0')
-            deps.linkSelectionRef.current?.transition().duration(ANIM_RESET_MS).attr('stroke-opacity', 0)
-            deps.connectorSelectionRef.current?.transition().duration(ANIM_RESET_MS).attr('opacity', 0)
-            scheduleTimeout(() => {
-              if (userPausedRef.current) return
-              deps.nodeSelectionRef.current
-                ?.filter((d: SimNode) => d.type === 'skill')
-                .select('.node-circle')
-                .attr('r', 0)
-              visibleNodeIdsRef.current = new Set()
-              displayedMonthRef.current = -1
-              displayedYearRef.current = 0
-              currentStepRef.current = 0
-              animationStateRef.current = 'PLAYING'
-              setIsPlaying(true)
-              scheduleTimeout(advanceFromCurrent, ANIM_RESTART_DELAY_MS)
-            }, ANIM_RESET_MS + 50)
-          }, ANIM_HOLD_MS)
-          return
-        }
-        revealStep(stepIdx, () => {
-          currentStepRef.current = stepIdx + 1
-          advanceFromCurrent()
-        })
-      }
-
-      advanceFromCurrent()
-    }, ANIM_INTERACTION_RESUME_MS)
-  }, [deps.nodeSelectionRef, deps.linkSelectionRef, deps.connectorSelectionRef, deps.yearIndicatorRef, revealStep, scheduleTimeout])
-
   // Start animation on mount / dimension change — wait for ready signal
   useEffect(() => {
     if (!deps.ready) return
@@ -569,10 +463,10 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
     // Reset and start animation
     cancelAll()
     userPausedRef.current = false
-    interactionPausedRef.current = false
     animationStateRef.current = 'IDLE'
     visibleNodeIdsRef.current = new Set()
     currentStepRef.current = 0
+    setIsCompleted(false)
     runAnimation()
 
     return () => {
@@ -585,9 +479,8 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
     animationStateRef,
     visibleNodeIdsRef,
     isPlaying,
+    isCompleted,
     animationInitialized,
     togglePlayPause,
-    pauseForInteraction,
-    resumeAfterInteraction,
   }
 }

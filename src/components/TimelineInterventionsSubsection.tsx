@@ -1,11 +1,14 @@
 import { useMemo, useState, useCallback } from 'react'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, ChevronDown, History } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ExpandableCardShell } from './ExpandableCardShell'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { timelineEntities, timelineConsultations } from '@/data/timeline'
 import { getExperienceEducationUICopy } from '@/lib/profile-content'
 import type { TimelineEntity } from '@/types/pmr'
-import { hexToRgba } from '@/lib/utils'
+import { hexToRgba, motionSafeTransition } from '@/lib/utils'
+
+const VISIBLE_COUNT = 4
 
 interface TimelineInterventionItemProps {
   entity: TimelineEntity
@@ -262,7 +265,11 @@ interface TimelineInterventionsSubsectionProps {
 
 export function TimelineInterventionsSubsection({ onNodeHighlight, highlightedRoleId, focusRelatedIds }: TimelineInterventionsSubsectionProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [historicalOpen, setHistoricalOpen] = useState(false)
   const { openPanel } = useDetailPanel()
+
+  const visibleEntities = useMemo(() => timelineEntities.slice(0, VISIBLE_COUNT), [])
+  const historicalEntities = useMemo(() => timelineEntities.slice(VISIBLE_COUNT), [])
 
   const consultationsById = useMemo(
     () => new Map(timelineConsultations.map((consultation) => [consultation.id, consultation])),
@@ -284,9 +291,13 @@ export function TimelineInterventionsSubsection({ onNodeHighlight, highlightedRo
     openPanel({ type: 'career-role', consultation })
   }, [consultationsById, openPanel])
 
+  const historicalHasAnyFocusRelevance = focusRelatedIds !== null && focusRelatedIds !== undefined &&
+    historicalEntities.some((e) => focusRelatedIds.has(e.id))
+  const historicalDimmed = focusRelatedIds !== null && focusRelatedIds !== undefined && !historicalHasAnyFocusRelevance
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-      {timelineEntities.map((entity) => (
+      {visibleEntities.map((entity) => (
         <TimelineInterventionItem
           key={entity.id}
           entity={entity}
@@ -299,6 +310,97 @@ export function TimelineInterventionsSubsection({ onNodeHighlight, highlightedRo
           onHighlight={onNodeHighlight}
         />
       ))}
+
+      {historicalEntities.length > 0 && (
+        <div
+          style={{
+            opacity: historicalDimmed ? 0.25 : 1,
+            transition: 'opacity 150ms ease-out',
+          }}
+        >
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => setHistoricalOpen((prev) => !prev)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                setHistoricalOpen((prev) => !prev)
+              }
+            }}
+            aria-expanded={historicalOpen}
+            aria-label={`${historicalOpen ? 'Hide' : 'Show'} ${historicalEntities.length} historical entries`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '6px 10px',
+              background: 'var(--bg-dashboard)',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-light)',
+              cursor: 'pointer',
+              transition: 'border-color 0.15s, box-shadow 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(0, 137, 123, 0.2)'
+              e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border-light)'
+              e.currentTarget.style.boxShadow = 'none'
+            }}
+          >
+            <History size={13} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
+            <span
+              style={{
+                fontSize: '12px',
+                color: 'var(--text-secondary)',
+                fontFamily: 'var(--font-geist-mono)',
+                flex: 1,
+              }}
+            >
+              {historicalOpen ? 'Hide' : 'View'} historical entries ({historicalEntities.length})
+            </span>
+            <ChevronDown
+              size={13}
+              style={{
+                color: 'var(--text-tertiary)',
+                flexShrink: 0,
+                transform: historicalOpen ? 'rotate(180deg)' : 'none',
+                transition: 'transform 0.15s ease-out',
+              }}
+            />
+          </div>
+
+          <AnimatePresence>
+            {historicalOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={motionSafeTransition(0.25)}
+                style={{ overflow: 'hidden' }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', paddingTop: '10px' }}>
+                  {historicalEntities.map((entity) => (
+                    <TimelineInterventionItem
+                      key={entity.id}
+                      entity={entity}
+                      isExpanded={expandedId === entity.id}
+                      isHighlightedFromGraph={highlightedRoleId === entity.id}
+                      isDimmedByFocus={focusRelatedIds !== null && focusRelatedIds !== undefined && !focusRelatedIds.has(entity.id)}
+                      isEducationAnchor={entity.id === firstEducationId}
+                      onToggle={() => handleToggle(entity.id)}
+                      onViewFull={() => handleViewFull(entity)}
+                      onHighlight={onNodeHighlight}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   )
 }

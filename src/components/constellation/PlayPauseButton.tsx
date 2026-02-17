@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 interface PlayPauseButtonProps {
   isPlaying: boolean
+  isCompleted?: boolean
   onToggle: () => void
   isMobile: boolean
   visible?: boolean
@@ -9,7 +10,7 @@ interface PlayPauseButtonProps {
 }
 
 export const PlayPauseButton: React.FC<PlayPauseButtonProps> = ({
-  isPlaying, onToggle, isMobile, visible = true, containerRef,
+  isPlaying, isCompleted = false, onToggle, isMobile, visible = true, containerRef,
 }) => {
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1024
   const scale = vw >= 1440 ? 1.75 : vw >= 1280 ? 1.5 : vw >= 1080 ? 1.25 : 1
@@ -62,7 +63,7 @@ export const PlayPauseButton: React.FC<PlayPauseButtonProps> = ({
     <button
       ref={btnRef}
       onClick={onToggle}
-      aria-label={isPlaying ? 'Pause animation' : 'Play animation'}
+      aria-label={isCompleted ? 'Replay animation' : isPlaying ? 'Pause animation' : 'Play animation'}
       style={{
         position: 'absolute',
         left: offset,
@@ -87,7 +88,11 @@ export const PlayPauseButton: React.FC<PlayPauseButtonProps> = ({
       onMouseEnter={e => { if (showButton) e.currentTarget.style.opacity = '1' }}
       onMouseLeave={e => { if (showButton) e.currentTarget.style.opacity = '0.85' }}
     >
-      {isPlaying ? (
+      {isCompleted ? (
+        <svg width={Math.round(14 * scale)} height={Math.round(14 * scale)} viewBox="0 0 76.398 76.398" fill="var(--text-secondary)">
+          <path d="M58.828,16.208l-3.686,4.735c7.944,6.182,11.908,16.191,10.345,26.123C63.121,62.112,48.954,72.432,33.908,70.06C18.863,67.69,8.547,53.522,10.912,38.477c1.146-7.289,5.063-13.694,11.028-18.037c5.207-3.79,11.433-5.613,17.776-5.252l-5.187,5.442l3.848,3.671l8.188-8.596l0.002,0.003l3.668-3.852L46.39,8.188l-0.002,0.001L37.795,0l-3.671,3.852l5.6,5.334c-7.613-0.36-15.065,1.853-21.316,6.403c-7.26,5.286-12.027,13.083-13.423,21.956c-2.879,18.313,9.676,35.558,27.989,38.442c1.763,0.277,3.514,0.411,5.245,0.411c16.254-0.001,30.591-11.85,33.195-28.4C73.317,35.911,68.494,23.73,58.828,16.208z" />
+        </svg>
+      ) : isPlaying ? (
         <svg width={Math.round(14 * scale)} height={Math.round(14 * scale)} viewBox="0 0 14 14" fill="var(--text-secondary)">
           <rect x="2" y="1" width="4" height="12" rx="1" />
           <rect x="8" y="1" width="4" height="12" rx="1" />

@@ -219,8 +219,6 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     resolveGraphFallback,
     resolveRoleFallback,
     dimensionsTrigger: dimensions.width + dimensions.height,
-    pauseForInteraction: animation.pauseForInteraction,
-    resumeAfterInteraction: animation.resumeAfterInteraction,
   })
 
   // External highlight sync
@@ -319,6 +317,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         {!prefersReducedMotion && (
           <PlayPauseButton
             isPlaying={animation.isPlaying}
+            isCompleted={animation.isCompleted}
             onToggle={animation.togglePlayPause}
             isMobile={isMobile}
             visible={chartInView}

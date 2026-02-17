@@ -40,7 +40,7 @@ export interface ConstellationCallbacks {
   onNodeHover?: (id: string | null) => void
 }
 
-export type AnimationState = 'IDLE' | 'PLAYING' | 'PAUSED' | 'HOLDING' | 'RESETTING'
+export type AnimationState = 'IDLE' | 'PLAYING' | 'PAUSED' | 'HOLDING' | 'RESETTING' | 'COMPLETED'
 
 export interface AnimationStep {
   entityId: string

@@ -4,7 +4,7 @@ import { select as d3select } from 'd3'
 import {
   DOMAIN_COLOR_MAP, prefersReducedMotion,
   LINK_BASE_WIDTH, LINK_STRENGTH_WIDTH_FACTOR,
-  LINK_BASE_OPACITY, LINK_STRENGTH_OPACITY_FACTOR,
+  LINK_REST_OPACITY, LINK_REST_STRENGTH_FACTOR,
   LINK_HIGHLIGHT_BASE_WIDTH, LINK_HIGHLIGHT_STRENGTH_WIDTH_FACTOR,
   SKILL_STROKE_OPACITY, SKILL_ACTIVE_STROKE_OPACITY,
   SKILL_REST_OPACITY, SKILL_ACTIVE_OPACITY, LABEL_REST_OPACITY,
@@ -94,7 +94,7 @@ export function useConstellationHighlight(deps: {
           const src = resolveLinkId(l.source)
           const tgt = resolveLinkId(l.target)
           if (!isVisible(src) || !isVisible(tgt)) return 0
-          return LINK_BASE_OPACITY + l.strength * LINK_STRENGTH_OPACITY_FACTOR
+          return LINK_REST_OPACITY + l.strength * LINK_REST_STRENGTH_FACTOR
         })
 
       return
@@ -177,7 +177,7 @@ export function useConstellationHighlight(deps: {
         if (src === activeNodeId || tgt === activeNodeId) {
           return Math.max(0.35, Math.min(0.65, l.strength * 0.55 + 0.2))
         }
-        return LINK_BASE_OPACITY + l.strength * LINK_STRENGTH_OPACITY_FACTOR
+        return HIGHLIGHT_DIM_OPACITY * (LINK_REST_OPACITY + l.strength * LINK_REST_STRENGTH_FACTOR)
       })
       .attr('stroke-width', l => {
         const src = resolveLinkId(l.source)

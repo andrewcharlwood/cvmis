@@ -84,10 +84,8 @@ export function useForceSimulation(
     svg.selectAll('*').remove()
 
     const years = roleNodes.map(n => fractionalYear(n))
-    const now = new Date()
-    const currentFractionalYear = now.getFullYear() + now.getMonth() / 12
     const minYear = Math.min(...years)
-    const maxYear = Math.max(...years, currentFractionalYear)
+    const maxYear = Math.max(...years)
 
     const rw = isMobile ? MOBILE_ROLE_WIDTH : Math.round(ROLE_WIDTH * sf)
     const rh = isMobile ? ROLE_HEIGHT : Math.round(ROLE_HEIGHT * sf)
@@ -236,12 +234,12 @@ export function useForceSimulation(
     const axisRightPadding = isMobile ? 16 : Math.round(12 * sf)
     const axisX = width - axisRightPadding - labelSpace
 
-    const topTickY = tickYears.length > 0 ? yScale(tickYears[0]) : topPadding
+    const axisTop = yScale(maxYear) - 12
     timelineGroup.append('line')
       .attr('class', 'axis-line')
       .attr('x1', axisX)
       .attr('x2', axisX)
-      .attr('y1', topTickY - 12)
+      .attr('y1', axisTop)
       .attr('y2', height - bottomPadding + 12)
       .attr('stroke', 'var(--border)')
       .attr('stroke-width', 1)
@@ -287,7 +285,7 @@ export function useForceSimulation(
 
     const roleOrder = [...roleNodes].sort((a, b) => fractionalYear(a) - fractionalYear(b))
     const roleInitialMap = new Map<string, { x: number; y: number }>()
-    const roleGap = isMobile ? 54 : Math.round(54 * sf)
+    const roleGap = isMobile ? 28 : Math.round(28 * sf)
     const roleX = axisX - roleGap - rw / 2
 
     roleOrder.forEach((role) => {
