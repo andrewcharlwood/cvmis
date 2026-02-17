@@ -24,9 +24,9 @@ interface BootConfig {
     lineDelay: number
     cursorBlinkInterval: number
     holdAfterComplete: number
+    loadingDuration: number
     fadeOutDuration: number
     cursorShrinkDuration: number
-    completionDelay: number
   }
   colors: {
     bright: string
@@ -82,15 +82,15 @@ const BOOT_CONFIG: BootConfig = {
     { type: 'module', text: 'population_health.mod', style: 'dim' },
     { type: 'module', text: 'data_analytics.eng', style: 'dim' },
     { type: 'separator', text: '---', style: 'dim' },
-    { type: 'ready', text: 'READY \u2014 Rendering CV..', style: 'bright' },
+    { type: 'ready', text: 'READY \u2014 Launching CV..', style: 'bright' },
   ],
   timing: {
     lineDelay: 220,
     cursorBlinkInterval: 300,
-    holdAfterComplete: 1000,
-    fadeOutDuration: 600,
-    cursorShrinkDuration: 600,
-    completionDelay: 0,
+    holdAfterComplete: 600,
+    loadingDuration: 1200,
+    fadeOutDuration: 500,
+    cursorShrinkDuration: 400,
   },
   colors: COLORS,
 }
@@ -190,12 +190,61 @@ const TYPED_LINES = buildTypedLines()
 const TOTAL_CHARS = TYPED_LINES.reduce((sum, l) => sum + l.totalChars, 0)
 
 // =============================================================================
+// Progress Bar Component
+// =============================================================================
+
+function ProgressBar({ active }: { active: boolean }) {
+  const [progress, setProgress] = useState(0)
+
+  useEffect(() => {
+    if (!active) return
+    const start = performance.now()
+    let raf: number
+
+    const tick = (now: number) => {
+      const elapsed = now - start
+      const pct = Math.min(elapsed / BOOT_CONFIG.timing.loadingDuration, 1)
+      // Ease-out curve for natural feel
+      setProgress(1 - Math.pow(1 - pct, 2.5))
+      if (pct < 1) raf = requestAnimationFrame(tick)
+    }
+
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [active])
+
+  return (
+    <div
+      style={{
+        marginTop: 16,
+        height: 2,
+        backgroundColor: 'rgba(0, 255, 65, 0.1)',
+        borderRadius: 1,
+        overflow: 'hidden',
+        maxWidth: 280,
+      }}
+    >
+      <div
+        style={{
+          height: '100%',
+          width: `${progress * 100}%`,
+          backgroundColor: COLORS.bright,
+          boxShadow: `0 0 8px ${COLORS.bright}40`,
+          borderRadius: 1,
+          transition: 'none',
+        }}
+      />
+    </div>
+  )
+}
+
+// =============================================================================
 // Main Component
 // =============================================================================
 
 export function BootSequence({ onComplete }: BootSequenceProps) {
   const [typedCount, setTypedCount] = useState(0)
-  const [phase, setPhase] = useState<'typing' | 'holding' | 'fading' | 'done'>('typing')
+  const [phase, setPhase] = useState<'typing' | 'holding' | 'loading' | 'fading' | 'done'>('typing')
   const [isVisible, setIsVisible] = useState(true)
   const cursorAnchorRef = useRef<HTMLSpanElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -205,7 +254,6 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
   const reducedMotion = typeof window !== 'undefined'
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
     : false
-
 
   // Typing engine — runs as a self-scheduling setTimeout chain
   useEffect(() => {
@@ -253,31 +301,37 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
     }
   }, [typedCount, phase, reducedMotion])
 
-  // Hold phase: then start fading
+  // Hold phase → loading
   useEffect(() => {
     if (phase !== 'holding') return
 
-    const fadeTimer = setTimeout(() => {
-      setPhase('fading')
+    const timer = setTimeout(() => {
+      setPhase('loading')
     }, BOOT_CONFIG.timing.holdAfterComplete)
 
-    return () => clearTimeout(fadeTimer)
+    return () => clearTimeout(timer)
+  }, [phase])
+
+  // Loading phase → fading (after progress bar completes)
+  useEffect(() => {
+    if (phase !== 'loading') return
+
+    const timer = setTimeout(() => {
+      setPhase('fading')
+    }, BOOT_CONFIG.timing.loadingDuration + 100)
+
+    return () => clearTimeout(timer)
   }, [phase])
 
   // Fade phase: wait for animations to finish, then complete
   useEffect(() => {
     if (phase !== 'fading') return
 
-    const longestFade = Math.max(
-      BOOT_CONFIG.timing.fadeOutDuration,
-      BOOT_CONFIG.timing.cursorShrinkDuration
-    )
-
     const completeTimer = setTimeout(() => {
       setIsVisible(false)
       setPhase('done')
       onComplete()
-    }, longestFade + BOOT_CONFIG.timing.completionDelay)
+    }, BOOT_CONFIG.timing.fadeOutDuration)
 
     return () => clearTimeout(completeTimer)
   }, [phase, onComplete])
@@ -379,6 +433,8 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
     return renderedLines
   }
 
+  const isFadingOut = phase === 'fading' || phase === 'done'
+
   // Reduced motion: instant render
   if (reducedMotion) {
     return (
@@ -421,13 +477,13 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
         <motion.div
           className="fixed inset-0 z-50 flex flex-col justify-center bg-black px-5 py-8 sm:p-10 font-mono text-sm overflow-hidden"
           initial={{ opacity: 1 }}
-          exit={{ opacity: 1 }}
-          transition={{ duration: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: BOOT_CONFIG.timing.fadeOutDuration / 1000, ease: 'easeOut' }}
         >
           {/* CRT Scanlines */}
           <motion.div
             className="absolute inset-0 pointer-events-none"
-            animate={{ opacity: phase === 'fading' || phase === 'done' ? 0 : 1 }}
+            animate={{ opacity: isFadingOut ? 0 : 1 }}
             transition={{ duration: BOOT_CONFIG.timing.fadeOutDuration / 1000, ease: 'easeOut' }}
             style={{
               background: `repeating-linear-gradient(
@@ -442,28 +498,39 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
 
           {/* Content container */}
           <div ref={containerRef} className="flex flex-col gap-1 max-w-[640px] transform -translate-y-1/2 relative z-10">
-            {/* Text fades out independently */}
+            {/* Text content — slides up and fades during exit */}
             <motion.div
-              animate={{ opacity: phase === 'fading' || phase === 'done' ? 0 : 1 }}
-              transition={{ duration: BOOT_CONFIG.timing.fadeOutDuration / 1000, ease: 'easeOut' }}
+              animate={{
+                opacity: isFadingOut ? 0 : 1,
+                y: isFadingOut ? -20 : 0,
+              }}
+              transition={{
+                duration: BOOT_CONFIG.timing.fadeOutDuration / 1000,
+                ease: 'easeIn',
+              }}
             >
               {renderLines()}
+
+              {/* Progress bar — appears during loading phase */}
+              {(phase === 'loading' || phase === 'fading') && (
+                <ProgressBar active={phase === 'loading'} />
+              )}
             </motion.div>
 
-            {/* Cursor rendered outside fading wrapper — shrinks independently */}
-            {cursorPos && phase !== 'done' && (
+            {/* Cursor rendered outside fading wrapper — shrinks into progress bar */}
+            {cursorPos && !isFadingOut && (
               <span
                 className="absolute animate-blink"
                 style={{
                   left: cursorPos.left,
-                  top: cursorPos.top + (phase === 'fading' ? 12 : 0),
+                  top: cursorPos.top,
                   width: 8,
-                  height: phase === 'fading' ? 4 : 16,
+                  height: phase === 'loading' ? 4 : 16,
                   backgroundColor: COLORS.bright,
-                  filter: phase === 'fading' ? 'blur(1px)' : 'none',
-                  boxShadow: phase === 'fading' ? '0 0 12px rgba(0,255,65,0.9)' : 'none',
-                  transition: phase === 'fading'
-                    ? `top ${BOOT_CONFIG.timing.cursorShrinkDuration}ms ease-out, height ${BOOT_CONFIG.timing.cursorShrinkDuration}ms ease-out, filter ${BOOT_CONFIG.timing.cursorShrinkDuration}ms ease-out, box-shadow ${BOOT_CONFIG.timing.cursorShrinkDuration}ms ease-out`
+                  filter: phase === 'loading' ? 'blur(1px)' : 'none',
+                  boxShadow: phase === 'loading' ? `0 0 12px ${COLORS.bright}E6` : 'none',
+                  transition: phase === 'loading'
+                    ? `height ${BOOT_CONFIG.timing.cursorShrinkDuration}ms ease-out, filter ${BOOT_CONFIG.timing.cursorShrinkDuration}ms ease-out, box-shadow ${BOOT_CONFIG.timing.cursorShrinkDuration}ms ease-out`
                     : 'none',
                   animationDuration: `${BOOT_CONFIG.timing.cursorBlinkInterval}ms`,
                 }}
