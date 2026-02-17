@@ -76,7 +76,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     let debounceTimer: ReturnType<typeof setTimeout> | null = null
     const X_CHANGE_THRESHOLD = 0.3
 
-    const updateDimensions = () => {
+    const updateDimensions = (force = false) => {
       const width = container.clientWidth
       const viewportWidth = window.innerWidth
       const height = isFullscreen ? window.innerHeight : getHeight(viewportWidth, containerHeight)
@@ -84,30 +84,59 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
         ? Math.max(1, Math.min(1.6, viewportWidth / 1440))
         : 1
       setDimensions(prev => {
-        const widthDelta = Math.abs(prev.width - width) / prev.width
-        const heightRatio = Math.max(height / prev.height, prev.height / height)
-        if (widthDelta < X_CHANGE_THRESHOLD && heightRatio < 2) {
-          return prev
+        if (!force) {
+          const widthDelta = Math.abs(prev.width - width) / prev.width
+          const heightRatio = Math.max(height / prev.height, prev.height / height)
+          if (widthDelta < X_CHANGE_THRESHOLD && heightRatio < 2) {
+            return prev
+          }
         }
         return { width, height, scaleFactor }
       })
     }
 
-    // Use rAF for fullscreen toggle so CSS layout settles before measuring
-    requestAnimationFrame(updateDimensions)
+    // Force update on fullscreen/orientation change so animation always restarts
+    requestAnimationFrame(() => updateDimensions(true))
+
+    const onOrientationChange = () => {
+      requestAnimationFrame(() => updateDimensions(true))
+    }
+    window.addEventListener('orientationchange', onOrientationChange)
 
     const observer = new ResizeObserver(() => {
       if (debounceTimer) clearTimeout(debounceTimer)
-      debounceTimer = setTimeout(updateDimensions, 2000)
+      debounceTimer = setTimeout(() => updateDimensions(), 2000)
     })
     observer.observe(container)
     return () => {
       observer.disconnect()
+      window.removeEventListener('orientationchange', onOrientationChange)
       if (debounceTimer) clearTimeout(debounceTimer)
     }
   }, [containerHeight, isFullscreen])
 
-  const toggleFullscreen = useCallback(() => setIsFullscreen(prev => !prev), [])
+  const toggleFullscreen = useCallback(() => {
+    const entering = !isFullscreen
+    setIsFullscreen(entering)
+
+    if (entering) {
+      // On portrait touch devices, request native fullscreen + lock landscape
+      const isPortrait = window.matchMedia('(orientation: portrait)').matches
+      const isTouch = window.matchMedia('(pointer: coarse)').matches
+      if (isPortrait && isTouch && containerRef.current?.requestFullscreen) {
+        const so = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }
+        containerRef.current.requestFullscreen()
+          .then(() => so.lock?.('landscape'))
+          .catch(() => {})
+      }
+    } else {
+      const so = screen.orientation as ScreenOrientation & { unlock?: () => void }
+      try { so.unlock?.() } catch { /* not supported */ }
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {})
+      }
+    }
+  }, [isFullscreen])
 
   // ESC key to exit fullscreen
   useEffect(() => {
@@ -126,6 +155,17 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     return () => { document.body.style.overflow = '' }
   }, [isFullscreen])
 
+  // Sync state when native fullscreen is exited via browser controls
+  useEffect(() => {
+    const handler = () => {
+      if (!document.fullscreenElement && isFullscreen) {
+        setIsFullscreen(false)
+      }
+    }
+    document.addEventListener('fullscreenchange', handler)
+    return () => document.removeEventListener('fullscreenchange', handler)
+  }, [isFullscreen])
+
   // Focus trap when fullscreen
   useFocusTrap(containerRef, isFullscreen)
 
@@ -134,6 +174,8 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
   const srDefault = isMobile ? MOBILE_SKILL_RADIUS_DEFAULT : Math.round(SKILL_RADIUS_DEFAULT * sf)
   const srActive = isMobile ? MOBILE_SKILL_RADIUS_ACTIVE : Math.round(SKILL_RADIUS_ACTIVE * sf)
 
+  // pinnedNodeIdRef is declared later but only accessed at call-time (not during render), so empty dep arrays are correct
+  /* eslint-disable react-hooks/exhaustive-deps */
   const resolveGraphFallback = useCallback(
     () => highlightedNodeIdRef.current ?? pinnedNodeIdRef.current,
     [],
@@ -148,6 +190,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
     if (pId && pType && pType !== 'skill') return pId
     return null
   }, [])
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   // Shared refs for hooks
   const highlightGraphRef = useRef<((activeNodeId: string | null) => void) | null>(null)

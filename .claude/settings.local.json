@@ -39,7 +39,10 @@
       "Bash(python scripts/generate_demo_data.py:*)",
       "Bash(sqlite3:*)",
       "Bash(python:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "WebFetch(domain:www.embla-carousel.com)",
+      "Bash(npm ls:*)",
+      "Bash(npm install:*)"
     ]
   }
 }

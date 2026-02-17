@@ -621,7 +621,7 @@ export function useForceSimulation(
     return () => {
       simulation.stop()
     }
-  }, [dimensions, options])
+  }, [dimensions, options, svgRef])
 
   return {
     simulationRef,

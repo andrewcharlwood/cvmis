@@ -408,7 +408,7 @@ export function useTimelineAnimation(deps: UseTimelineAnimationDeps) {
     }
 
     rafIdRef.current = requestAnimationFrame(waitForSettle)
-  }, [deps.simulationRef, deps.nodeSelectionRef, deps.linkSelectionRef, deps.connectorSelectionRef, deps.yearIndicatorRef, hideAll, revealStep, scheduleTimeout])
+  }, [deps.simulationRef, hideAll, revealStep, scheduleTimeout])
 
   const togglePlayPause = useCallback(() => {
     if (prefersReducedMotion) return

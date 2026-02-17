@@ -441,7 +441,7 @@ html {
 /* Tablet+: 2 columns */
 @media (min-width: 768px) {
   .pathway-columns {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 3.5fr);
+    grid-template-columns: minmax(0, 3fr) minmax(0, 3.5fr);
     align-items: start;
     gap: 22px;
   }

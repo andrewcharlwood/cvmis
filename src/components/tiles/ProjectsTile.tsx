@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import useEmblaCarousel from 'embla-carousel-react'
+import Autoplay from 'embla-carousel-autoplay'
 import { investigations } from '@/data/investigations'
 import { CardHeader } from '../Card'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
@@ -229,7 +231,129 @@ function ProjectItem({
   )
 }
 
-export function ProjectsCarousel() {
+// --- Embla slide-by-slide carousel for screens < 1024px ---
+
+function EmblaProjectsCarousel() {
+  const { openPanel } = useDetailPanel()
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const [wrapperWidth, setWrapperWidth] = useState(0)
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([])
+
+  useEffect(() => {
+    const el = wrapperRef.current
+    if (!el) return
+    const update = () => {
+      const w = el.clientWidth
+      if (w > 0) setWrapperWidth(w)
+    }
+    update()
+    const obs = new ResizeObserver(update)
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
+
+  const slidesPerView = wrapperWidth < 480 ? 1 : 2
+  const slideWidth = slidesPerView === 1 ? '100%' : 'calc(50% - 6px)'
+  const cardMinHeight = wrapperWidth < 480 ? 148 : wrapperWidth < 640 ? 168 : 182
+
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { loop: true, align: 'start' },
+    [Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })],
+  )
+
+  useEffect(() => {
+    if (!emblaApi || typeof window === 'undefined') return
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const sync = () => {
+      const autoplay = emblaApi.plugins()?.autoplay
+      if (!autoplay) return
+      if (mq.matches) autoplay.stop()
+      else autoplay.play()
+    }
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [emblaApi])
+
+  useEffect(() => {
+    emblaApi?.reInit()
+  }, [emblaApi, slidesPerView])
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return
+    setSelectedIndex(emblaApi.selectedScrollSnap())
+  }, [emblaApi])
+
+  useEffect(() => {
+    if (!emblaApi) return
+    const updateSnaps = () => {
+      setScrollSnaps(emblaApi.scrollSnapList())
+      setSelectedIndex(emblaApi.selectedScrollSnap())
+    }
+    updateSnaps()
+    emblaApi.on('select', onSelect)
+    emblaApi.on('reInit', updateSnaps)
+    return () => {
+      emblaApi.off('select', onSelect)
+      emblaApi.off('reInit', updateSnaps)
+    }
+  }, [emblaApi, onSelect])
+
+  return (
+    <div ref={wrapperRef}>
+      <div ref={emblaRef} style={{ overflow: 'hidden' }}>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {investigations.map((project) => (
+            <ProjectItem
+              key={project.id}
+              project={project}
+              slideWidth={slideWidth}
+              cardMinHeight={cardMinHeight}
+              onClick={() => openPanel({ type: 'project', investigation: project })}
+            />
+          ))}
+        </div>
+      </div>
+      {scrollSnaps.length > 1 && (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '6px',
+            marginTop: '12px',
+          }}
+        >
+          {scrollSnaps.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              aria-label={`Go to slide ${index + 1}`}
+              onClick={() => emblaApi?.scrollTo(index)}
+              style={{
+                width: index === selectedIndex ? '16px' : '6px',
+                height: '6px',
+                borderRadius: '3px',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                background:
+                  index === selectedIndex
+                    ? 'var(--accent-primary, #00897B)'
+                    : 'var(--border-light, #d1d5db)',
+                transition: 'all 0.3s ease',
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// --- Continuous scroll carousel for screens >= 1024px ---
+
+function ContinuousScrollCarousel() {
   const { openPanel } = useDetailPanel()
   const viewportRef = useRef<HTMLDivElement | null>(null)
   const trackRef = useRef<HTMLDivElement | null>(null)
@@ -245,95 +369,64 @@ export function ProjectsCarousel() {
 
   useEffect(() => {
     const viewportEl = viewportRef.current
-    if (!viewportEl || typeof window === 'undefined') {
-      return
-    }
-
+    if (!viewportEl || typeof window === 'undefined') return
     const updateWidth = () => {
       const nextWidth = viewportEl.clientWidth
-      if (nextWidth > 0) {
-        setViewportWidth(nextWidth)
-      }
+      if (nextWidth > 0) setViewportWidth(nextWidth)
     }
     updateWidth()
-
     if (typeof ResizeObserver !== 'undefined') {
       const observer = new ResizeObserver(() => updateWidth())
       observer.observe(viewportEl)
       return () => observer.disconnect()
     }
-
     window.addEventListener('resize', updateWidth)
     return () => window.removeEventListener('resize', updateWidth)
   }, [])
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
-      return
-    }
-
+    if (typeof window === 'undefined') return
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
     const syncMotionPreference = () => setPrefersReducedMotion(mediaQuery.matches)
-
     syncMotionPreference()
     mediaQuery.addEventListener('change', syncMotionPreference)
-
     return () => mediaQuery.removeEventListener('change', syncMotionPreference)
   }, [])
 
   useEffect(() => {
     const trackEl = trackRef.current
     const firstSetEl = firstSetRef.current
-    if (!trackEl || !firstSetEl || prefersReducedMotion) {
-      return
-    }
-
+    if (!trackEl || !firstSetEl || prefersReducedMotion) return
     let animationFrameId = 0
     let lastTime = 0
-    const speedPxPerSecond = viewportWidth < 768 ? 18 : 24
-
+    const speedPxPerSecond = 24
     const tick = (timestamp: number) => {
-      if (!lastTime) {
-        lastTime = timestamp
-      }
+      if (!lastTime) lastTime = timestamp
       const deltaSeconds = (timestamp - lastTime) / 1000
       lastTime = timestamp
-
       if (!isPausedRef.current) {
         const setWidth = firstSetEl.offsetWidth
         if (setWidth > 0) {
           offsetRef.current += speedPxPerSecond * deltaSeconds
-          if (offsetRef.current >= setWidth) {
-            offsetRef.current -= setWidth
-          }
+          if (offsetRef.current >= setWidth) offsetRef.current -= setWidth
           trackEl.style.transform = `translate3d(-${offsetRef.current}px, 0, 0)`
         }
       }
-
       animationFrameId = window.requestAnimationFrame(tick)
     }
-
     animationFrameId = window.requestAnimationFrame(tick)
     return () => window.cancelAnimationFrame(animationFrameId)
   }, [prefersReducedMotion, viewportWidth])
 
-  const cardsPerView = useMemo(() => {
-    if (viewportWidth < 480) return 1
-    if (viewportWidth < 768) return 2
-    return 4
-  }, [viewportWidth])
-
   const slideWidth = useMemo(() => {
+    const cardsPerView = 4
     const gap = 12
     const totalGap = (cardsPerView - 1) * gap
     const computedWidth = (viewportWidth - totalGap) / cardsPerView
     return `${Math.max(computedWidth, 0)}px`
-  }, [cardsPerView, viewportWidth])
+  }, [viewportWidth])
 
   const cardMinHeight = useMemo(() => {
-    if (viewportWidth < 480) return 148
-    if (viewportWidth < 640) return 168
-    if (viewportWidth < 1024) return 182
     if (viewportWidth < 1440) return 196
     return 214
   }, [viewportWidth])
@@ -343,49 +436,70 @@ export function ProjectsCarousel() {
   }
 
   return (
-    <div style={{ marginTop: '28px' }}>
-      <CardHeader dotColor="amber" title="SIGNIFICANT INTERVENTIONS" />
-
+    <div
+      ref={viewportRef}
+      style={{ overflow: 'hidden' }}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setPaused(false)
+        }
+      }}
+    >
       <div
-        ref={viewportRef}
-        style={{ overflow: 'hidden' }}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-        onFocusCapture={() => setPaused(true)}
-        onBlurCapture={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-            setPaused(false)
-          }
+        ref={trackRef}
+        style={{
+          display: 'flex',
+          width: 'max-content',
+          willChange: 'transform',
+          transform: 'translate3d(0, 0, 0)',
         }}
       >
-        <div
-          ref={trackRef}
-          style={{
-            display: 'flex',
-            width: 'max-content',
-            willChange: 'transform',
-            transform: 'translate3d(0, 0, 0)',
-          }}
-        >
-          {[0, 1].map((setIndex) => (
-            <div
-              key={setIndex}
-              ref={setIndex === 0 ? firstSetRef : undefined}
-              style={{ display: 'flex', gap: '12px', paddingRight: '12px', flexShrink: 0 }}
-            >
-              {investigations.map((project) => (
-                <ProjectItem
-                  key={`${setIndex}-${project.id}`}
-                  project={project}
-                  slideWidth={slideWidth}
-                  cardMinHeight={cardMinHeight}
-                  onClick={() => openPanel({ type: 'project', investigation: project })}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
+        {[0, 1].map((setIndex) => (
+          <div
+            key={setIndex}
+            ref={setIndex === 0 ? firstSetRef : undefined}
+            style={{ display: 'flex', gap: '12px', paddingRight: '12px', flexShrink: 0 }}
+          >
+            {investigations.map((project) => (
+              <ProjectItem
+                key={`${setIndex}-${project.id}`}
+                project={project}
+                slideWidth={slideWidth}
+                cardMinHeight={cardMinHeight}
+                onClick={() => openPanel({ type: 'project', investigation: project })}
+              />
+            ))}
+          </div>
+        ))}
       </div>
+    </div>
+  )
+}
+
+// --- Main export ---
+
+export function ProjectsCarousel() {
+  const [isSmallScreen, setIsSmallScreen] = useState(() =>
+    typeof window !== 'undefined'
+      ? window.matchMedia('(max-width: 1023px)').matches
+      : false,
+  )
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)')
+    const handler = () => setIsSmallScreen(mq.matches)
+    setIsSmallScreen(mq.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  return (
+    <div style={{ marginTop: '28px' }}>
+      <CardHeader dotColor="amber" title="SIGNIFICANT INTERVENTIONS" />
+      {isSmallScreen ? <EmblaProjectsCarousel /> : <ContinuousScrollCarousel />}
     </div>
   )
 }

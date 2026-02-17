@@ -43,6 +43,7 @@ export function DetailPanelProvider({ children }: DetailPanelProviderProps) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useDetailPanel(): DetailPanelContextValue {
   const context = useContext(DetailPanelContext)
   if (!context) {

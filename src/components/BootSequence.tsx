@@ -424,7 +424,7 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
       }
 
       renderedLines.push(
-        <div key={lineIdx} className="font-mono text-sm leading-relaxed whitespace-nowrap">
+        <div key={lineIdx} className="font-mono text-sm leading-relaxed">
           {spans}
         </div>
       )
@@ -459,7 +459,7 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
                 )
               }
               lines.push(
-                <div key={lineIdx} className="font-mono text-sm leading-relaxed whitespace-nowrap">
+                <div key={lineIdx} className="font-mono text-sm leading-relaxed">
                   {spans}
                 </div>
               )
