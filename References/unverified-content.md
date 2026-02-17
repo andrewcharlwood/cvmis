@@ -20,6 +20,7 @@ _Content not in reference documents but retained as personal data or UI elements
 | `src/data/patient.ts` | `nhsNumber: '221 181 0'` (GPhC reg number) | Professional registration number — verifiable via GPhC register but not in reference docs |
 | `src/data/patient.ts` | `linkedin: 'linkedin.com/in/andycharlwood'` | Personal account URL — secondary ref mentions LinkedIn but not exact slug |
 | `src/data/patient.ts` | `badge: 'Open to opportunities'` | UI status element — current preference, not a factual claim |
+| `src/data/profile-content.ts` | `roleTitle: 'Informatics Pharmacist'` | Not in any reference doc — CV says "Healthcare leader", role titles are "Deputy Head" / "Interim Head". Retained as portfolio self-description |
 
 ## Content Corrections
 
@@ -36,6 +37,10 @@ _Content modified to better align with reference documents._
 | `src/data/timeline.ts` | Pre-Reg: "Expanded PGD clinical services" | "Led initiation of Patient Group Directions" | Secondary ref: "Led initiation of PGDs" |
 | `src/data/timeline.ts` | Pre-Reg: "Developed a palliative care screening pathway" | "Provided clinical screening services for palliative care hospice" | Secondary ref: hospice clinical screening, not pathway development |
 | `src/data/timeline.ts` | UEA: "Demonstrated academic excellence" | "Achieved a distinction-grade research project and served as President of UEA Pharmacy Society" | Secondary ref: failed exams years 1-3, "academic excellence" misleading |
+| `src/data/profile-content.ts` | Narrative: "Informatics pharmacist combining clinical expertise..." | Aligned with CV Profile phrasing: "Healthcare leader combining clinical pharmacy expertise..." | CV_v4.md Profile section |
+| `src/data/profile-content.ts` | Achievement subtitle: "Full analytical accountability to ICB board" | "Prescribing budget with forecasting models" | CV_v4.md: "managed...with sophisticated forecasting models" |
+| `src/data/profile-content.ts` | Skills summary: "data engineering...clinical decision support" | "data pipeline development" — removed "clinical decision support" | CV_v4.md: "Data pipeline development"; "clinical decision support" not in any reference |
+| `src/data/documents.ts` | Research: "investigating cocrystal formation for improved drug delivery properties" | "on drug delivery and cocrystals" | CV_v4.md: "drug delivery and cocrystals" |
 
 ## Missed Opportunities
 

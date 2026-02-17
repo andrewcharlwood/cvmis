@@ -3,7 +3,7 @@ import type { DeepReadonly, ProfileContent } from '@/types/profile-content'
 export const profileContent: DeepReadonly<ProfileContent> = {
   profile: {
     sectionTitle: 'Patient Summary',
-    patientSummaryNarrative: 'Informatics pharmacist combining clinical expertise with advanced proficiency in Python, SQL, Power BI, and healthcare data analytics, self-taught over the past decade through a drive to find root causes in messy, real-world data and engineer the most efficient solutions to complex problems. Currently leading population health analytics and prescribing intelligence for NHS Norfolk & Waveney ICB, serving a population of 1.2 million across an integrated care system. Experienced in transforming large-scale GP prescribing data into actionable insight: from financial scenario modelling, pharmaceutical rebate negotiation, and health technology assessment to algorithm design, clinical decision support tooling, and population-level pathway development. Proven track record of identifying and prioritising efficiency programmes worth £14.6M+ through automated, data-driven analysis. Skilled at translating complex clinical, financial, and analytical requirements into clear, evidence-based recommendations for executive stakeholders, bridging primary care, secondary care, and commissioning perspectives.',
+    patientSummaryNarrative: 'Healthcare leader combining clinical pharmacy expertise with proficiency in Python, SQL, and data analytics, self-taught over the past decade through a drive to find root causes in data and build the most efficient solutions to complex problems. Currently leading population health analytics for NHS Norfolk & Waveney ICB, serving a population of 1.2 million. Experienced in working with messy, real-world prescribing data at scale to deliver actionable insights — from financial scenario modelling and pharmaceutical rebate negotiation to algorithm design and population-level pathway development. Proven track record of identifying and prioritising efficiency programmes worth £14.6M+ through automated, data-driven analysis. Skilled at translating complex clinical, financial, and analytical requirements into clear recommendations for executive stakeholders.',
     latestResults: {
       title: 'LATEST RESULTS (CLICK TO VIEW FULL REFERENCE RANGE)',
       rightText: 'Updated February 2026',
@@ -58,7 +58,7 @@ export const profileContent: DeepReadonly<ProfileContent> = {
     },
   },
   skillsNarrative: {
-    summary: 'Technical, healthcare domain, and strategic leadership capabilities spanning data engineering, prescribing analytics, medicines optimisation, health technology assessment, clinical decision support, and executive communication, with practical delivery across population-scale NHS programmes serving 1.2 million people.',
+    summary: 'Technical, healthcare domain, and strategic leadership capabilities spanning data pipeline development, prescribing analytics, medicines optimisation, health technology assessment, and executive communication, with practical delivery across population-scale NHS programmes serving 1.2 million people.',
     ui: {
       sectionTitle: 'REPEAT MEDICATIONS',
       rightText: 'Active prescriptions',
@@ -82,7 +82,7 @@ export const profileContent: DeepReadonly<ProfileContent> = {
       },
       {
         title: '£220M Budget Oversight',
-        subtitle: 'Full analytical accountability to ICB board',
+        subtitle: 'Prescribing budget with forecasting models',
         keywords: '220m budget oversight analytical accountability icb board financial planning forecasting prescribing expenditure',
         kpiId: 'budget',
       },
