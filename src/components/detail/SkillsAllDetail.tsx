@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { skills } from '@/data/skills'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
+import { getSkillsUICopy } from '@/lib/profile-content'
 import type { SkillMedication, SkillCategory } from '@/types/pmr'
 
 const iconMap: Record<string, LucideIcon> = {
@@ -18,12 +19,6 @@ const iconMap: Record<string, LucideIcon> = {
   MessageSquare, UserPlus, RefreshCw, Calculator, Presentation,
 }
 
-const categoryConfig: { id: SkillCategory; label: string }[] = [
-  { id: 'Technical', label: 'Technical' },
-  { id: 'Domain', label: 'Healthcare Domain' },
-  { id: 'Leadership', label: 'Strategic & Leadership' },
-]
-
 interface SkillsAllDetailProps {
   category?: SkillCategory
 }
@@ -31,6 +26,7 @@ interface SkillsAllDetailProps {
 export function SkillsAllDetail({ category }: SkillsAllDetailProps) {
   const { openPanel } = useDetailPanel()
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const skillsCopy = getSkillsUICopy()
 
   // Scroll to highlighted category on mount
   useEffect(() => {
@@ -39,7 +35,7 @@ export function SkillsAllDetail({ category }: SkillsAllDetailProps) {
     }
   }, [category])
 
-  const groupedSkills = categoryConfig.map(({ id, label }) => ({
+  const groupedSkills = skillsCopy.categories.map(({ id, label }) => ({
     id,
     label,
     skills: skills
@@ -91,17 +87,17 @@ export function SkillsAllDetail({ category }: SkillsAllDetailProps) {
                   background: 'var(--border-light)',
                 }}
               />
-              <span
-                style={{
-                  fontSize: '10px',
-                  color: 'var(--text-tertiary)',
-                  fontFamily: '"Geist Mono", monospace',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {group.skills.length} items
-              </span>
-            </div>
+                <span
+                  style={{
+                    fontSize: '10px',
+                    color: 'var(--text-tertiary)',
+                    fontFamily: '"Geist Mono", monospace',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {group.skills.length} {skillsCopy.itemCountSuffix}
+                </span>
+              </div>
 
             {/* Skill rows */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -109,6 +105,7 @@ export function SkillsAllDetail({ category }: SkillsAllDetailProps) {
                 <SkillRow
                   key={skill.id}
                   skill={skill}
+                  yearsSuffix={skillsCopy.yearsSuffix}
                   onClick={() => handleSkillClick(skill)}
                 />
               ))}
@@ -122,10 +119,11 @@ export function SkillsAllDetail({ category }: SkillsAllDetailProps) {
 
 interface SkillRowProps {
   skill: SkillMedication
+  yearsSuffix: string
   onClick: () => void
 }
 
-function SkillRow({ skill, onClick }: SkillRowProps) {
+function SkillRow({ skill, yearsSuffix, onClick }: SkillRowProps) {
   const IconComponent = iconMap[skill.icon]
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -198,7 +196,7 @@ function SkillRow({ skill, onClick }: SkillRowProps) {
             fontFamily: '"Geist Mono", monospace',
           }}
         >
-          {skill.frequency} · {skill.yearsOfExperience} yrs
+          {skill.frequency} · {skill.yearsOfExperience} {yearsSuffix}
         </div>
       </div>
 

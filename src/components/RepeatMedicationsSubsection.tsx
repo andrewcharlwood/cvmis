@@ -10,6 +10,7 @@ import {
 import { CardHeader } from './Card'
 import { skills } from '@/data/skills'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
+import { getSkillsUICopy } from '@/lib/profile-content'
 import type { SkillMedication, SkillCategory } from '@/types/pmr'
 
 const iconMap: Record<string, LucideIcon> = {
@@ -21,19 +22,14 @@ const iconMap: Record<string, LucideIcon> = {
 
 const SKILLS_PER_CATEGORY = 4
 
-const categoryConfig: { id: SkillCategory; label: string }[] = [
-  { id: 'Technical', label: 'Technical' },
-  { id: 'Domain', label: 'Healthcare Domain' },
-  { id: 'Leadership', label: 'Strategic & Leadership' },
-]
-
 interface SkillRowProps {
   skill: SkillMedication
+  yearsSuffix: string
   onClick: () => void
   onHighlight?: (id: string | null) => void
 }
 
-function SkillRow({ skill, onClick, onHighlight }: SkillRowProps) {
+function SkillRow({ skill, yearsSuffix, onClick, onHighlight }: SkillRowProps) {
   const IconComponent = iconMap[skill.icon]
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -106,7 +102,7 @@ function SkillRow({ skill, onClick, onHighlight }: SkillRowProps) {
             fontFamily: '"Geist Mono", monospace',
           }}
         >
-          {skill.frequency} · {skill.yearsOfExperience} yrs
+          {skill.frequency} · {skill.yearsOfExperience} {yearsSuffix}
         </div>
       </div>
       <div
@@ -135,6 +131,9 @@ interface CategorySectionProps {
   label: string
   categoryId: SkillCategory
   skills: SkillMedication[]
+  itemCountSuffix: string
+  yearsSuffix: string
+  viewAllLabel: string
   onSkillClick: (skill: SkillMedication) => void
   onViewAll: (category: SkillCategory) => void
   isFirst: boolean
@@ -145,6 +144,9 @@ function CategorySection({
   label,
   categoryId,
   skills: categorySkills,
+  itemCountSuffix,
+  yearsSuffix,
+  viewAllLabel,
   onSkillClick,
   onViewAll,
   isFirst,
@@ -190,7 +192,7 @@ function CategorySection({
             whiteSpace: 'nowrap',
           }}
         >
-          {categorySkills.length} items
+          {categorySkills.length} {itemCountSuffix}
         </span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -198,6 +200,7 @@ function CategorySection({
           <SkillRow
             key={skill.id}
             skill={skill}
+            yearsSuffix={yearsSuffix}
             onClick={() => onSkillClick(skill)}
             onHighlight={onNodeHighlight}
           />
@@ -228,9 +231,9 @@ function CategorySection({
           onMouseLeave={(e) => {
             e.currentTarget.style.color = 'var(--accent)'
           }}
-          aria-label={`View all ${categorySkills.length} ${label} skills`}
+          aria-label={`${viewAllLabel} ${categorySkills.length} ${label} skills`}
         >
-          View all ({categorySkills.length})
+          {viewAllLabel} ({categorySkills.length})
           <ChevronRight size={12} />
         </button>
       )}
@@ -244,8 +247,9 @@ interface RepeatMedicationsSubsectionProps {
 
 export function RepeatMedicationsSubsection({ onNodeHighlight }: RepeatMedicationsSubsectionProps) {
   const { openPanel } = useDetailPanel()
+  const skillsCopy = getSkillsUICopy()
 
-  const groupedSkills = categoryConfig.map(({ id, label }) => ({
+  const groupedSkills = skillsCopy.categories.map(({ id, label }) => ({
     id,
     label,
     skills: skills
@@ -265,8 +269,8 @@ export function RepeatMedicationsSubsection({ onNodeHighlight }: RepeatMedicatio
     <div>
       <CardHeader
         dotColor="amber"
-        title="REPEAT MEDICATIONS"
-        rightText="Active prescriptions"
+        title={skillsCopy.sectionTitle}
+        rightText={skillsCopy.rightText}
       />
       <div className="medications-grid">
         {groupedSkills.map((group) => (
@@ -275,6 +279,9 @@ export function RepeatMedicationsSubsection({ onNodeHighlight }: RepeatMedicatio
             label={group.label}
             categoryId={group.id}
             skills={group.skills}
+            itemCountSuffix={skillsCopy.itemCountSuffix}
+            yearsSuffix={skillsCopy.yearsSuffix}
+            viewAllLabel={skillsCopy.viewAllLabel}
             onSkillClick={handleSkillClick}
             onViewAll={handleViewAll}
             isFirst

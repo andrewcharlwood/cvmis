@@ -34,6 +34,42 @@
 
 ## Fixes
 
+### mem-1771288640-fc4b
+> failure: cmd=sed -n '1,260p' .ralph/agent/scratchpad.md && ..., exit=2, error=No such file or directory, next=create .ralph/agent/scratchpad.md before context reads
+<!-- tags: tooling, error-handling, ralph | created: 2026-02-17 -->
+
+### mem-1771288552-d5bd
+> failure: cmd=sed -n '1,220p' .ralph/agent/scratchpad.md, exit=2, error=No such file or directory, next=create .ralph/agent/scratchpad.md before context reads
+<!-- tags: tooling, error-handling, ralph | created: 2026-02-17 -->
+
+### mem-1771286649-5bb0
+> failure: cmd=cat >> .ralph/agent/scratchpad.md <<EOF ... (unquoted), exit=126/127, error=backticks triggered command substitution and spurious command-not-found/permission messages, next=use quoted heredoc delimiter <<'EOF' when appending markdown containing backticks
+<!-- tags: tooling, error-handling, ralph | created: 2026-02-17 -->
+
+### mem-1771286379-1ec4
+> failure: cmd=rg -n --fixed-strings "I blend robust backend architecture" src, exit=1, error=no matches found, next=use known canonical phrases from src/data/profile-content.ts or tolerate no-match exit with || true when probing duplication
+<!-- tags: tooling, error-handling, search | created: 2026-02-16 -->
+
+### mem-1771285624-1fed
+> failure: cmd=npm run typecheck && npm run build (parallel), exit=2/1, error=TS7053 indexing timelineNarrative with string in src/lib/profile-content.ts, next=introduce TimelineNarrativeId union and type getTimelineNarrativeEntry parameter accordingly
+<!-- tags: typescript, error-handling, profile-content | created: 2026-02-16 -->
+
+### mem-1771284936-8a79
+> failure: cmd=sed -n '1,260p' ralph/prompt.md, exit=2, error=No such file or directory, next=use correct prompt path via rg --files and open Ralph/PROMPT.md
+<!-- tags: tooling, error-handling, ralph | created: 2026-02-16 -->
+
+### mem-1771284859-2e04
+> failure: cmd=sed -n '1,360p' src/components/MedicationSubsection.tsx, exit=2, error=file not found, next=read src/components/RepeatMedicationsSubsection.tsx as the skills subsection
+<!-- tags: tooling, error-handling, search | created: 2026-02-16 -->
+
+### mem-1771284853-5c5e
+> failure: cmd=sed -n '1,360p' src/components/tiles/SkillsTile.tsx, exit=2, error=file not found, next=use rg to locate actual skills UI surface (MedicationSubsection.tsx)
+<!-- tags: tooling, error-handling, search | created: 2026-02-16 -->
+
+### mem-1771284848-c43c
+> failure: cmd=rg --files src/components | rg 'Skill|skills|Skills' && sed -n '1,340p' src/components/SkillsSubsection.tsx, exit=2, error=SkillsSubsection.tsx missing, next=locate actual skills UI files (SkillsTile.tsx and detail components) before planning migration
+<!-- tags: tooling, error-handling, search | created: 2026-02-16 -->
+
 ### mem-1771284167-9e36
 > failure: cmd=sed -n '1,260p' ralph/prompt.md, exit=2, error=No such file or directory, next=locate actual prompt path with rg --files and use correct casing/location
 <!-- tags: tooling, error-handling, ralph | created: 2026-02-16 -->

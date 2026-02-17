@@ -17,6 +17,7 @@ import cvmisLogo from '../../cvmis-logo.svg'
 import { patient } from '@/data/patient'
 import { tags } from '@/data/tags'
 import { alerts } from '@/data/alerts'
+import { getSidebarCopy } from '@/lib/profile-content'
 import type { Tag, Alert } from '@/types/pmr'
 
 interface SidebarProps {
@@ -163,6 +164,7 @@ function AlertFlag({ alert }: AlertFlagProps) {
 }
 
 export default function Sidebar({ activeSection, onNavigate, onSearchClick }: SidebarProps) {
+  const sidebarCopy = getSidebarCopy()
   const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches)
   const [isMobileExpanded, setIsMobileExpanded] = useState(false)
 
@@ -257,7 +259,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
               cursor: 'pointer',
             }}
           >
-            {isExpanded && <span style={{ fontSize: '12px', fontWeight: 600 }}>Menu</span>}
+            {isExpanded && <span style={{ fontSize: '12px', fontWeight: 600 }}>{sidebarCopy.menuLabel}</span>}
             {isExpanded ? <X size={17} strokeWidth={2.4} /> : <Menu size={18} strokeWidth={2.4} />}
           </button>
         )}
@@ -287,7 +289,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
               type="button"
               onClick={onSearchClick}
               className="sidebar-control"
-              aria-label="Search. Press Control plus K"
+              aria-label={sidebarCopy.searchAriaLabel}
               style={{
                 width: '100%',
                 minHeight: '44px',
@@ -305,7 +307,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
             >
               <Search size={16} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} aria-hidden="true" />
               <span style={{ flex: 1, textAlign: 'left', fontSize: '13px' }}>
-                Search
+                {sidebarCopy.searchLabel}
               </span>
               <kbd
                 style={{
@@ -318,7 +320,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                   lineHeight: 1,
                 }}
               >
-                Ctrl+K
+                {sidebarCopy.searchShortcut}
               </kbd>
             </button>
 
@@ -326,7 +328,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
 
 
 
-            <SectionTitle>Patient Data</SectionTitle>
+            <SectionTitle>{sidebarCopy.sectionTitle}</SectionTitle>
 
             <div
               style={{
@@ -367,7 +369,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                 marginTop: '2px',
               }}
             >
-              Pharmacy Data Technologist
+              {sidebarCopy.roleTitle}
             </div>
 
             <div
@@ -387,7 +389,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                   padding: '4px 0',
                 }}
               >
-                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>GPhC No.</span>
+                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>{sidebarCopy.gphcLabel}</span>
                 <span
                   style={{
                     color: 'var(--text-primary)',
@@ -410,7 +412,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                   padding: '4px 0',
                 }}
               >
-                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>Education</span>
+                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>{sidebarCopy.educationLabel}</span>
                 <span style={{ color: 'var(--text-primary)', fontWeight: 500, textAlign: 'right' }}>
                   {patient.qualification}
                 </span>
@@ -425,7 +427,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                   padding: '4px 0',
                 }}
               >
-                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>Location</span>
+                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>{sidebarCopy.locationLabel}</span>
                 <span style={{ color: 'var(--text-primary)', fontWeight: 500, textAlign: 'right' }}>
                   {patient.address}
                 </span>
@@ -440,7 +442,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                   padding: '4px 0',
                 }}
               >
-                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>Phone</span>
+                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>{sidebarCopy.phoneLabel}</span>
                 <a
                   href={`tel:${patient.phone}`}
                   style={{
@@ -465,7 +467,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                   padding: '4px 0',
                 }}
               >
-                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>Email</span>
+                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>{sidebarCopy.emailLabel}</span>
                 <a
                   href={`mailto:${patient.email}`}
                   style={{
@@ -490,7 +492,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                   padding: '4px 0',
                 }}
               >
-                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>Registered</span>
+                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>{sidebarCopy.registeredLabel}</span>
                 <span style={{ color: 'var(--text-primary)', fontWeight: 500, textAlign: 'right' }}>
                   {patient.registrationYear}
                 </span>
@@ -500,7 +502,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
         )}
 
         <section>
-          {isExpanded && <SectionTitle>Navigation</SectionTitle>}
+          {isExpanded && <SectionTitle>{sidebarCopy.navigationTitle}</SectionTitle>}
           <nav aria-label="Sidebar navigation" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {navSections.map((section) => {
               const isActive = activeSection === section.id
@@ -546,7 +548,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
         {isExpanded && (
           <>
             <section style={{ paddingTop: '8px' }}>
-              <SectionTitle>Tags</SectionTitle>
+              <SectionTitle>{sidebarCopy.tagsTitle}</SectionTitle>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                 {tags.map((tag) => (
                   <TagPill key={tag.label} tag={tag} />
@@ -555,7 +557,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
             </section>
 
             <section style={{ padding: '8px 0 4px' }}>
-              <SectionTitle>Alerts / Highlights</SectionTitle>
+              <SectionTitle>{sidebarCopy.alertsTitle}</SectionTitle>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {alerts.map((alert, index) => (
                   <AlertFlag key={index} alert={alert} />

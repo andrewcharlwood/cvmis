@@ -1,8 +1,8 @@
 # Loop Summary
 
-**Status:** Completed successfully
-**Iterations:** 4
-**Duration:** 6m 33s
+**Status:** Stopped: max iterations reached
+**Iterations:** 3
+**Duration:** 1m 2s
 
 ## Tasks
 
@@ -14,4 +14,4 @@ _No events recorded._
 
 ## Final Commit
 
-aca5771: chore: auto-commit before merge (loop primary)
+6605966: feat: add canonical profile content schema and access helpers

@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
 import { CardHeader } from './Card'
-import { consultations } from '@/data/consultations'
+import { timelineConsultations } from '@/data/timeline'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -15,7 +15,7 @@ function hexToRgba(hex: string, opacity: number): string {
 }
 
 interface RoleItemProps {
-  consultation: typeof consultations[0]
+  consultation: typeof timelineConsultations[0]
   isExpanded: boolean
   isHighlightedFromGraph: boolean
   onToggle: () => void
@@ -279,7 +279,7 @@ export function WorkExperienceSubsection({ onNodeHighlight, highlightedRoleId }:
   }, [])
 
   const handleViewFull = useCallback(
-    (consultation: typeof consultations[0]) => {
+    (consultation: typeof timelineConsultations[0]) => {
       openPanel({ type: 'career-role', consultation })
     },
     [openPanel],
@@ -287,9 +287,9 @@ export function WorkExperienceSubsection({ onNodeHighlight, highlightedRoleId }:
 
   return (
     <div>
-      <CardHeader dotColor="teal" title="WORK EXPERIENCE" rightText={`${consultations.length} roles`} />
+      <CardHeader dotColor="teal" title="WORK EXPERIENCE" rightText={`${timelineConsultations.length} roles`} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {consultations.map((c) => (
+        {timelineConsultations.map((c) => (
           <RoleItem
             key={c.id}
             consultation={c}

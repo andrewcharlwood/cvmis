@@ -1,10 +1,15 @@
 import Fuse from 'fuse.js'
 
-import { consultations } from '@/data/consultations'
 import { documents } from '@/data/documents'
 import { investigations } from '@/data/investigations'
 import { skills } from '@/data/skills'
 import { kpis } from '@/data/kpis'
+import { timelineConsultations } from '@/data/timeline'
+import {
+  getAchievementEntries,
+  getEducationEntries,
+  getSearchQuickActions,
+} from '@/lib/profile-content'
 import type { DetailPanelContent } from '@/types/pmr'
 
 export type PaletteSection = 'Experience' | 'Core Skills' | 'Significant Interventions' | 'Achievements' | 'Education' | 'Quick Actions'
@@ -34,7 +39,7 @@ export function buildPaletteData(): PaletteItem[] {
   const items: PaletteItem[] = []
 
   // Experience — all 4 roles from consultations.ts, open detail panel on select
-  consultations.forEach((c) => {
+  timelineConsultations.forEach((c) => {
     items.push({
       id: `exp-${c.id}`,
       title: c.role,
@@ -76,39 +81,12 @@ export function buildPaletteData(): PaletteItem[] {
   })
 
   // Achievements — open corresponding KPI detail panel
-  const achievementEntries: Array<{ title: string; sub: string; keywords: string; kpiId: string }> = [
-    {
-      title: '\u00a314.6M Efficiency Savings Identified',
-      sub: 'Data-driven prescribing interventions',
-      keywords: '14.6m efficiency savings identified data-driven prescribing interventions money cost',
-      kpiId: 'savings',
-    },
-    {
-      title: '\u00a3220M Budget Oversight',
-      sub: 'Full analytical accountability to ICB board',
-      keywords: '220m budget oversight analytical accountability icb board',
-      kpiId: 'budget',
-    },
-    {
-      title: 'Power BI Dashboards for 200+ Users',
-      sub: 'Clinicians & commissioners across ICB',
-      keywords: 'power bi dashboards 200 users clinicians commissioners',
-      kpiId: 'years',
-    },
-    {
-      title: '1.2M Population Served',
-      sub: 'Norfolk & Waveney Integrated Care System',
-      keywords: '1.2m population served norfolk waveney ics integrated care system',
-      kpiId: 'population',
-    },
-  ]
-
-  achievementEntries.forEach((entry, i) => {
+  getAchievementEntries().forEach((entry, i) => {
     const kpi = kpis.find(k => k.id === entry.kpiId)
     items.push({
       id: `ach-${i}`,
       title: entry.title,
-      subtitle: entry.sub,
+      subtitle: entry.subtitle,
       section: 'Achievements',
       iconVariant: 'amber',
       iconType: 'achievement',
@@ -120,34 +98,11 @@ export function buildPaletteData(): PaletteItem[] {
   })
 
   // Education — matching actual entries in EducationSubsection
-  const educationEntries: Array<{ title: string; sub: string; keywords: string }> = [
-    {
-      title: 'NHS Leadership Academy \u2014 Mary Seacole Programme',
-      sub: 'NHS Leadership Academy \u00b7 2018',
-      keywords: 'nhs leadership academy mary seacole programme 2018 qualification management',
-    },
-    {
-      title: 'MPharm (Hons) \u2014 2:1',
-      sub: 'University of East Anglia \u00b7 2011\u20132015',
-      keywords: 'mpharm hons 2:1 university east anglia uea 2011 2015 pharmacy degree',
-    },
-    {
-      title: 'A-Levels',
-      sub: 'Highworth Grammar School \u00b7 2009\u20132011',
-      keywords: 'a-levels mathematics chemistry politics highworth grammar school 2009 2011',
-    },
-    {
-      title: 'GPhC Registration',
-      sub: 'General Pharmaceutical Council \u00b7 August 2016',
-      keywords: 'gphc registration general pharmaceutical council 2016 registered pharmacist',
-    },
-  ]
-
-  educationEntries.forEach((entry, i) => {
+  getEducationEntries().forEach((entry, i) => {
     items.push({
       id: `edu-${i}`,
       title: entry.title,
-      subtitle: entry.sub,
+      subtitle: entry.subtitle,
       section: 'Education',
       iconVariant: 'purple',
       iconType: 'edu',
@@ -157,43 +112,20 @@ export function buildPaletteData(): PaletteItem[] {
   })
 
   // Quick Actions
-  const quickActions: Array<{ title: string; sub: string; keywords: string; action: PaletteAction }> = [
-    {
-      title: 'Download CV',
-      sub: 'Export as PDF',
-      keywords: 'download cv export pdf resume',
-      action: { type: 'download' },
-    },
-    {
-      title: 'Send Email',
-      sub: 'andy@charlwood.xyz',
-      keywords: 'send email contact andy charlwood',
-      action: { type: 'link', url: 'mailto:andy@charlwood.xyz' },
-    },
-    {
-      title: 'View LinkedIn',
-      sub: 'Professional profile',
-      keywords: 'view linkedin professional profile social',
-      action: { type: 'link', url: 'https://linkedin.com/in/andycharlwood' },
-    },
-    {
-      title: 'View Projects',
-      sub: 'GitHub & portfolio',
-      keywords: 'view projects github portfolio code repositories',
-      action: { type: 'link', url: 'https://github.com/andycharlwood' },
-    },
-  ]
+  getSearchQuickActions().forEach((entry, i) => {
+    const action: PaletteAction = entry.type === 'download'
+      ? { type: 'download' }
+      : { type: 'link', url: entry.url }
 
-  quickActions.forEach((entry, i) => {
     items.push({
       id: `action-${i}`,
       title: entry.title,
-      subtitle: entry.sub,
+      subtitle: entry.subtitle,
       section: 'Quick Actions',
       iconVariant: 'teal',
       iconType: 'action',
       keywords: entry.keywords,
-      action: entry.action,
+      action,
     })
   })
 
@@ -248,7 +180,7 @@ export function buildEmbeddingTexts(): Array<{ id: string; text: string }> {
   const texts: Array<{ id: string; text: string }> = []
 
   // Consultations (Experience) — enriched with plan outcomes, employer classification, clinical specialties
-  consultations.forEach((c) => {
+  timelineConsultations.forEach((c) => {
     const isNHS = c.organization.includes('NHS') || c.organization.includes('ICB')
     const employer = isNHS
       ? `NHS employer: ${c.organization}`
@@ -309,14 +241,8 @@ export function buildEmbeddingTexts(): Array<{ id: string; text: string }> {
   })
 
   // KPI-backed Achievements — enriched with full story context and outcomes
-  const achievementMap: Array<{ id: string; title: string; subtitle: string; kpiId: string }> = [
-    { id: 'ach-0', title: '£14.6M Efficiency Savings Identified', subtitle: 'Data-driven prescribing interventions', kpiId: 'savings' },
-    { id: 'ach-1', title: '£220M Budget Oversight', subtitle: 'Full analytical accountability to ICB board', kpiId: 'budget' },
-    { id: 'ach-2', title: 'Power BI Dashboards for 200+ Users', subtitle: 'Clinicians & commissioners across ICB', kpiId: 'years' },
-    { id: 'ach-3', title: '1.2M Population Served', subtitle: 'Norfolk & Waveney Integrated Care System', kpiId: 'population' },
-  ]
-
-  achievementMap.forEach((entry) => {
+  getAchievementEntries().forEach((entry, index) => {
+    const id = `ach-${index}`
     const kpi = kpis.find(k => k.id === entry.kpiId)
     const explanation = kpi?.explanation ?? ''
     const storyParts: string[] = []
@@ -327,7 +253,7 @@ export function buildEmbeddingTexts(): Array<{ id: string; text: string }> {
       storyParts.push(`Outcomes: ${kpi.story.outcomes.join('. ')}.`)
     }
     texts.push({
-      id: entry.id,
+      id,
       text: `Achievement: ${entry.title}. ${entry.subtitle}. ${explanation} ${storyParts.join(' ')}`,
     })
   })
@@ -352,14 +278,15 @@ export function buildEmbeddingTexts(): Array<{ id: string; text: string }> {
   })
 
   // Education — enriched with research grades and specific subject details
-  const educationItems: Array<{ id: string; docId: string; fallbackTitle: string; fallbackSub: string }> = [
-    { id: 'edu-0', docId: 'doc-mary-seacole', fallbackTitle: 'NHS Leadership Academy — Mary Seacole Programme', fallbackSub: 'NHS Leadership Academy · 2018' },
-    { id: 'edu-1', docId: 'doc-mpharm', fallbackTitle: 'MPharm (Hons) — 2:1', fallbackSub: 'University of East Anglia · 2011–2015' },
-    { id: 'edu-2', docId: 'doc-alevels', fallbackTitle: 'A-Levels', fallbackSub: 'Highworth Grammar School · 2009–2011' },
-    { id: 'edu-3', docId: 'doc-gphc', fallbackTitle: 'GPhC Registration', fallbackSub: 'General Pharmaceutical Council · August 2016' },
+  const educationItems: Array<{ id: string; docId: string }> = [
+    { id: 'edu-0', docId: 'doc-mary-seacole' },
+    { id: 'edu-1', docId: 'doc-mpharm' },
+    { id: 'edu-2', docId: 'doc-alevels' },
+    { id: 'edu-3', docId: 'doc-gphc' },
   ]
 
-  educationItems.forEach((entry) => {
+  educationItems.forEach((entry, index) => {
+    const fallback = getEducationEntries()[index]
     const doc = documents.find(d => d.id === entry.docId)
     if (doc) {
       const research = doc.researchDetail ? ` Research: ${doc.researchDetail}.` : ''
@@ -372,22 +299,15 @@ export function buildEmbeddingTexts(): Array<{ id: string; text: string }> {
     } else {
       texts.push({
         id: entry.id,
-        text: `Education: ${entry.fallbackTitle}. ${entry.fallbackSub}.`,
+        text: `Education: ${fallback?.title ?? ''}. ${fallback?.subtitle ?? ''}.`,
       })
     }
   })
 
   // Quick Actions
-  const quickActionTexts: Array<{ id: string; title: string; subtitle: string }> = [
-    { id: 'action-0', title: 'Download CV', subtitle: 'Export as PDF' },
-    { id: 'action-1', title: 'Send Email', subtitle: 'andy@charlwood.xyz' },
-    { id: 'action-2', title: 'View LinkedIn', subtitle: 'Professional profile' },
-    { id: 'action-3', title: 'View Projects', subtitle: 'GitHub & portfolio' },
-  ]
-
-  quickActionTexts.forEach((entry) => {
+  getSearchQuickActions().forEach((entry, index) => {
     texts.push({
-      id: entry.id,
+      id: `action-${index}`,
       text: `${entry.title}. ${entry.subtitle}.`,
     })
   })

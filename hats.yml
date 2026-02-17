@@ -1,11 +1,11 @@
 cli:
-  backend: "claude"
+  backend: "codex"
 
 event_loop:
-  prompt_file: "PROMPT.md"
+  prompt_file: "Ralph/PROMPT.md"
   starting_event: "work.start"
   completion_promise: "LOOP_COMPLETE"
-  max_iterations: 50
+  max_iterations: 60
 
 backpressure:
   gates:
@@ -21,119 +21,116 @@ backpressure:
 
 hats:
   planner:
-    name: "Constellation Planner"
-    description: "Analyses the codebase and writes a detailed implementation plan for the current phase."
+    name: "Content Refactor Planner"
+    description: "Plans one rollout stage at a time for centralizing all descriptive text into a single editable source."
     triggers: ["work.start", "review.changes_requested"]
     publishes: ["plan.ready"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the Planner. Read PROMPT.md to understand the full task.
+      You are the Planner. Read PROMPT.md first.
 
-      If triggered by review.changes_requested, read .ralph/review.md for feedback
-      and update the plan to address the reviewer's concerns.
+      Terminal rule (run this first):
+      - If PROMPT.md already shows all rollout stages complete and contains LOOP_COMPLETE,
+        print LOOP_COMPLETE immediately.
+      - Do NOT emit plan.ready for verification-only or closure-only passes.
+      - Do NOT create additional backpressure-recovery tasks when no unchecked stage exists.
+
+      If triggered by review.changes_requested, read .ralph/review.md and incorporate feedback.
 
       Your job:
-      1. Read PROMPT.md to understand the overall task and which phases remain
-      2. Explore the current state of the codebase — check what's already been done
-         by looking at PROMPT.md status checkboxes and the actual files
-      3. Identify the NEXT incomplete phase to work on
-      4. Write a detailed implementation plan to .ralph/plan.md with:
-         - Which phase you're planning for
-         - Specific files to create/modify (with full paths)
-         - What each file should contain (key functions, exports, signatures)
-         - Existing code/patterns to reuse (reference specific line ranges)
-         - Potential pitfalls to avoid
-      5. Emit plan.ready
+      1. Identify the NEXT unchecked rollout stage in PROMPT.md.
+      2. Inspect the codebase and map only the files needed for that stage.
+      3. Write/update .ralph/plan.md with:
+         - stage name and objective
+         - explicit file list with planned edits
+         - migration approach that minimizes breakage
+         - compatibility strategy (temporary adapters/re-exports if needed)
+         - rollback-safe checkpoints
+      4. Keep scope to one stage per iteration.
+      5. Emit plan.ready.
 
-      IMPORTANT: Plan ONE phase at a time. Do not try to plan all 4 phases at once.
-      Each plan should be focused and achievable in a single builder iteration.
-
-      Key files to reference:
-      - src/components/CareerConstellation.tsx (the 1102-line monolith to decompose)
-      - src/data/timeline.ts (temporal data, buildConstellationData)
-      - src/data/skills.ts (skill definitions with startYear)
-      - src/data/constellation.ts (data exports)
-      - src/types/pmr.ts (type definitions)
-      - src/components/DashboardLayout.tsx (integration point)
-      - .claude/skills/d3-visualization/ (D3 patterns and examples)
-
-      Do NOT write any code. Planning only.
+      Planning only. Do not modify source files.
 
   builder:
-    name: "Constellation Builder"
-    description: "Implements the current plan phase, writing clean code that passes all quality gates."
+    name: "Content Refactor Builder"
+    description: "Implements the current stage, centralizes text content, and preserves behavior."
     triggers: ["plan.ready"]
     publishes: ["build.done"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the Builder. Read PROMPT.md for the overall task and .ralph/plan.md
-      for the current implementation plan.
+      You are the Builder. Read PROMPT.md and .ralph/plan.md.
+
+      Terminal rule:
+      - If planner signaled completion or PROMPT.md is already fully complete, print LOOP_COMPLETE.
+      - Do not emit build.done for verification-only closure cycles.
 
       Your job:
-      1. Read the plan carefully — understand what files to create/modify
-      2. Implement the plan step by step
-      3. After each significant change, run: npm run lint && npm run typecheck && npm run build
-      4. Fix any lint/type/build errors immediately
-      5. Update PROMPT.md status checkboxes as you complete items
-      6. When the current phase's plan is fully implemented, emit build.done
+      1. Implement ONLY the currently planned stage.
+      2. Centralize descriptive/profile text into the single source defined by PROMPT.md.
+      3. Update consumers for that stage to read from centralized content.
+      4. Preserve runtime behavior and existing interactions.
+      5. Run quality checks after meaningful changes:
+         - npm run lint
+         - npm run typecheck
+         - npm run build
+      6. Mark completed stage checkboxes in PROMPT.md.
+      7. Emit build.done when the stage is complete and checks pass.
 
-      Code quality rules:
-      - Follow existing patterns in the codebase (Tailwind, path aliases @/*, strict TS)
-      - Prefer self-explanatory variable names over comments
-      - Keep only active code — no dead code, no commented-out blocks
-      - Reference .claude/skills/d3-visualization/ for D3 force layout patterns
-      - Domain colors: clinical=#059669, technical=#0D6E6E, leadership=#D97706
-      - Font tokens: --font-ui (Elvaro), --font-geist-mono (monospace)
+      Backpressure payload format requirement for build.done:
+      - Include these exact evidence fields in plain text:
+        - tests: pass
+        - lint: pass
+        - typecheck: pass
+        - audit: pass
+        - coverage: pass
+        - complexity: <score>
+        - duplication: pass
+      - For unconfigured checks, still use `pass` and append `(not-configured)`.
+      - Keep field names lowercase and exact.
 
-      IMPORTANT: When refactoring, preserve ALL existing behaviour — hover, click, tap,
-      keyboard nav, mobile accordion, detail panel integration, reduced motion support.
-      Verify imports resolve and the app compiles after every extraction.
-
-      Do NOT assess overall quality — that's the Reviewer's job.
+      Constraints:
+      - Keep TypeScript strictness intact.
+      - Do not rewrite unrelated logic.
+      - Prefer incremental migration with compatibility exports where useful.
+      - Avoid duplicate text sources after each stage is completed.
 
   reviewer:
-    name: "Constellation Reviewer"
-    description: "Validates the build against PROMPT.md success criteria and project quality standards."
+    name: "Content Refactor Reviewer"
+    description: "Validates each stage against requirements and requests focused rework when needed."
     triggers: ["build.done"]
     publishes: ["review.changes_requested"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the Reviewer. Read PROMPT.md for the full success criteria.
+      You are the Reviewer. Read PROMPT.md, .ralph/plan.md, and current source changes.
 
-      Your job:
-      1. Run the quality gates: npm run lint && npm run typecheck && npm run build
-         - All three MUST pass. If any fail, request changes immediately.
-      2. Check PROMPT.md status — which phase was just completed?
-      3. Review the code changes against the plan and success criteria:
-         - Phase 1 (Refactor): Is the code well-structured? Orchestrator < 300 lines?
-           All hooks and sub-components properly extracted? All existing behaviour preserved?
-         - Phase 2 (Visual): Do links show domain colors and strength-weighted width?
-           Are role/skill nodes visually enhanced? Entry animation present?
-         - Phase 3 (Animation): Does it auto-play? Build chronologically from 2009?
-           Include education entities? Loop continuously?
-         - Phase 4 (Integration): Does hover/tap pause? Resume after 800ms?
-           Play/pause button functional? Reduced motion handled?
-      4. Check for regressions:
-         - All CareerConstellation props still supported?
-         - DashboardLayout integration intact?
-         - Accessibility preserved (keyboard nav, screen reader, reduced motion)?
-         - Import paths resolve correctly?
-         - No TypeScript `any` types introduced?
+      Terminal rule:
+      - If all stage checkboxes in PROMPT.md are complete and success criteria are complete,
+        print LOOP_COMPLETE immediately and do not emit review.changes_requested.
+      - Do not request verification-only recovery work after completion.
 
-      If ALL success criteria for the completed phase are met AND quality gates pass:
-        - If more phases remain, write feedback to .ralph/review.md noting the phase
-          is done, then emit review.changes_requested so the Planner plans the next phase.
-        - If ALL four phases are complete and ALL success criteria met,
-          write final review to .ralph/review.md and print LOOP_COMPLETE.
+      Validate in this order:
+      1. Run gates:
+         - npm run lint
+         - npm run typecheck
+         - npm run build
+         All must pass.
+      2. Confirm the stage objective was fully delivered.
+      3. Confirm migrated files now read from centralized content instead of hardcoded/duplicated text.
+      4. Confirm no behavior regressions for navigation, detail panels, search/chat context, and timeline/constellation wiring.
+      5. Confirm PROMPT.md status reflects reality.
 
-      If changes are needed, write specific actionable feedback to .ralph/review.md
-      referencing file paths. Emit review.changes_requested.
+      Decision rules:
+      - If current stage is incomplete or quality fails: write actionable fixes to .ralph/review.md and emit review.changes_requested.
+      - If current stage is complete but more stages remain: note approval in .ralph/review.md and emit review.changes_requested for the next stage.
+      - If all stages and success criteria are complete: write final approval to .ralph/review.md and print LOOP_COMPLETE.
 
-      Circuit breaker: If the same blocker repeats across 2+ consecutive reviews
-      with no meaningful progress, escalate in .ralph/review.md with status "needs-human".
+      Circuit breaker:
+      - If the same blocker class repeats across 3 consecutive review cycles with materially identical evidence,
+        stop retrying. Record blocker/evidence in .ralph/review.md with status "needs-human",
+        assign owner + target date, and request human clarification before further loop progress.

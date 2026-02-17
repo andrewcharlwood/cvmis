@@ -5,6 +5,7 @@ import { ParentSection } from '../ParentSection'
 import { kpis } from '@/data/kpis'
 import type { KPI } from '@/types/pmr'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
+import { getLatestResultsCopy, getProfileSectionTitle, getProfileSummaryText } from '@/lib/profile-content'
 
 const colorMap: Record<KPI['colorVariant'], string> = {
   green: '#059669',
@@ -18,6 +19,7 @@ interface MetricCardProps {
 
 function MetricCard({ kpi }: MetricCardProps) {
   const { openPanel } = useDetailPanel()
+  const latestResultsCopy = getLatestResultsCopy()
 
   const handleClick = () => {
     openPanel({ type: 'kpi', kpi })
@@ -102,7 +104,7 @@ function MetricCard({ kpi }: MetricCardProps) {
           fontFamily: 'var(--font-geist-mono)',
         }}
       >
-        Click to view evidence
+        {latestResultsCopy.evidenceCta}
         <ChevronRight size={12} />
       </div>
     </button>
@@ -110,6 +112,10 @@ function MetricCard({ kpi }: MetricCardProps) {
 }
 
 export function PatientSummaryTile() {
+  const summaryText = getProfileSummaryText()
+  const latestResultsCopy = getLatestResultsCopy()
+  const sectionTitle = getProfileSectionTitle()
+
   const profileTextStyles: React.CSSProperties = {
     fontSize: '15px',
     lineHeight: '1.65',
@@ -123,22 +129,14 @@ export function PatientSummaryTile() {
   }
 
   return (
-    <ParentSection title="Patient Summary" tileId="patient-summary">
+    <ParentSection title={sectionTitle} tileId="patient-summary">
       {/* Profile text */}
-      <div style={profileTextStyles}>
-        <strong>Healthcare leader</strong> combining clinical pharmacy expertise with proficiency in{' '}
-        <strong>Python, SQL, and data analytics</strong>, self-taught over the past decade through a drive to find root causes in data and build the most efficient solutions to complex problems. Currently{' '}
-        <strong>leading population health analytics for NHS Norfolk & Waveney ICB</strong>, serving a population of 1.2 million. Experienced in working with messy, real-world prescribing data at scale to deliver actionable insights—from{' '}
-        <strong>financial scenario modelling</strong> and <strong>pharmaceutical rebate negotiation</strong> to{' '}
-        <strong>algorithm design</strong> and <strong>population-level pathway development</strong>. Proven track record of identifying and prioritising efficiency programmes worth{' '}
-        <strong>£14.6M+</strong> through automated, data-driven analysis. Skilled at translating complex clinical, financial, and analytical requirements into clear recommendations for{' '}
-        <strong>executive stakeholders</strong>.
-      </div>
+      <div style={profileTextStyles}>{summaryText}</div>
 
       {/* Latest Results subsection */}
       <div style={{ marginTop: '28px' }}>
         <div className="latest-results-header">
-          <CardHeader dotColor="teal" title="LATEST RESULTS (CLICK TO VIEW FULL REFERENCE RANGE)" rightText="Updated May 2025" />
+          <CardHeader dotColor="teal" title={latestResultsCopy.title} rightText={latestResultsCopy.rightText} />
           <p
             style={{
               margin: 0,
@@ -147,7 +145,7 @@ export function PatientSummaryTile() {
               fontFamily: 'var(--font-geist-mono)',
             }}
           >
-            Select a metric to inspect methodology, impact, and outcomes.
+            {latestResultsCopy.helperText}
           </p>
         </div>
         <div className="latest-results-grid" style={kpiGridStyles}>

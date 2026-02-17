@@ -1,12 +1,20 @@
 import { profileContent } from '@/data/profile-content'
 import type {
+  AchievementCopyEntry,
+  DeepReadonly,
+  EducationCopyEntry,
+  ExperienceEducationUICopy,
+  LatestResultsCopy,
   LLMCopy,
   ProfileContent,
   QuickActionCopyEntry,
   SidebarCopy,
+  SkillsUICopy,
+  TimelineNarrativeId,
+  TimelineNarrativeEntry,
 } from '@/types/profile-content'
 
-export function getProfileContent(): ProfileContent {
+export function getProfileContent(): DeepReadonly<ProfileContent> {
   return profileContent
 }
 
@@ -14,14 +22,42 @@ export function getProfileSummaryText(): string {
   return profileContent.profile.patientSummaryNarrative
 }
 
-export function getSidebarCopy(): SidebarCopy {
+export function getProfileSectionTitle(): string {
+  return profileContent.profile.sectionTitle
+}
+
+export function getLatestResultsCopy(): DeepReadonly<LatestResultsCopy> {
+  return profileContent.profile.latestResults
+}
+
+export function getSidebarCopy(): DeepReadonly<SidebarCopy> {
   return profileContent.profile.sidebar
+}
+
+export function getExperienceEducationUICopy(): DeepReadonly<ExperienceEducationUICopy> {
+  return profileContent.experienceEducation.ui
+}
+
+export function getSkillsUICopy(): DeepReadonly<SkillsUICopy> {
+  return profileContent.skillsNarrative.ui
 }
 
 export function getSearchQuickActions(): ReadonlyArray<QuickActionCopyEntry> {
   return profileContent.searchChat.quickActions
 }
 
-export function getLLMCopy(): LLMCopy {
+export function getAchievementEntries(): ReadonlyArray<AchievementCopyEntry> {
+  return profileContent.resultsNarrative.achievements
+}
+
+export function getEducationEntries(): ReadonlyArray<EducationCopyEntry> {
+  return profileContent.experienceEducation.educationEntries
+}
+
+export function getLLMCopy(): DeepReadonly<LLMCopy> {
   return profileContent.searchChat.llm
+}
+
+export function getTimelineNarrativeEntry(entityId: TimelineNarrativeId): DeepReadonly<TimelineNarrativeEntry> {
+  return profileContent.timelineNarrative[entityId]
 }

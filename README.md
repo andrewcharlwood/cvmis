@@ -58,6 +58,12 @@ src/
 └── index.css      # Global styles + Tailwind
 ```
 
+## Editing Profile Copy In One Place
+
+- Canonical shared descriptive/profile text lives in `src/data/profile-content.ts`.
+- Typed selectors for all consumers live in `src/lib/profile-content.ts`.
+- Rule of thumb: if copy is shared across UI/search/chat/timeline surfaces, edit it once in `src/data/profile-content.ts` and let consumers read it via selectors.
+
 ## Design Tokens
 
 - **Primary**: Teal `#00897B`

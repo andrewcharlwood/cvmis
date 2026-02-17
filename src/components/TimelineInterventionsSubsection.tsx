@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { timelineEntities, timelineConsultations } from '@/data/timeline'
+import { getExperienceEducationUICopy } from '@/lib/profile-content'
 import type { TimelineEntity } from '@/types/pmr'
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -33,8 +34,9 @@ function TimelineInterventionItem({
   onViewFull,
   onHighlight,
 }: TimelineInterventionItemProps) {
+  const experienceEducationCopy = getExperienceEducationUICopy()
   const isEducation = entity.kind === 'education'
-  const interventionLabel = isEducation ? 'Education' : 'Employment'
+  const interventionLabel = isEducation ? experienceEducationCopy.educationLabel : experienceEducationCopy.employmentLabel
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -284,7 +286,7 @@ function TimelineInterventionItem({
                     e.currentTarget.style.opacity = '1'
                   }}
                 >
-                  View full record
+                  {experienceEducationCopy.viewFullRecordLabel}
                   <ChevronRight size={12} />
                 </button>
               </div>
