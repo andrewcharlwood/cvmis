@@ -4,15 +4,7 @@ import { ChevronRight } from 'lucide-react'
 import { CardHeader } from './Card'
 import { timelineConsultations } from '@/data/timeline'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-function hexToRgba(hex: string, opacity: number): string {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return `rgba(${r},${g},${b},${opacity})`
-}
+import { hexToRgba, prefersReducedMotion } from '@/lib/utils'
 
 interface RoleItemProps {
   consultation: typeof timelineConsultations[0]

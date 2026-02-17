@@ -1,3 +1,5 @@
+// Module-level cache: buildConstellationData() is expensive (D3 graph construction).
+// 5 consumers import from here instead of calling the builder independently.
 import type { ConstellationLink, ConstellationNode, RoleSkillMapping } from '@/types/pmr'
 import { buildConstellationData } from '@/data/timeline'
 

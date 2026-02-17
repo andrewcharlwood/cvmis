@@ -86,5 +86,5 @@ export const HIDDEN_ENTITY_IDS = new Set([
 ])
 
 // Media queries (evaluated once at module level)
-export const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+export { prefersReducedMotion } from '@/lib/utils'
 export const supportsCoarsePointer = window.matchMedia('(pointer: coarse)').matches

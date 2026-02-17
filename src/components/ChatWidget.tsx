@@ -12,8 +12,7 @@ import {
 import { buildPaletteData } from '@/lib/search'
 import type { PaletteItem, PaletteAction } from '@/lib/search'
 import { iconByType, iconColorStyles } from '@/lib/palette-icons'
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+import { prefersReducedMotion } from '@/lib/utils'
 
 const MAX_HISTORY = 10
 

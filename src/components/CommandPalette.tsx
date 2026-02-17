@@ -9,8 +9,7 @@ import type { PaletteItem, PaletteAction } from '@/lib/search'
 import { iconByType, iconColorStyles } from '@/lib/palette-icons'
 import { isModelReady, embedQuery } from '@/lib/embedding-model'
 import { semanticSearch, loadEmbeddings } from '@/lib/semantic-search'
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+import { prefersReducedMotion } from '@/lib/utils'
 
 interface CommandPaletteProps {
   isOpen: boolean

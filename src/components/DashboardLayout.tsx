@@ -17,8 +17,7 @@ import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { timelineConsultations } from '@/data/timeline'
 import { skills } from '@/data/skills'
 import type { PaletteAction } from '@/lib/search'
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+import { hexToRgba, prefersReducedMotion } from '@/lib/utils'
 
 const sidebarVariants = {
   hidden: prefersReducedMotion ? { x: 0, opacity: 1 } : { x: -272, opacity: 0 },
@@ -39,13 +38,6 @@ const contentVariants = {
       ? { duration: 0 }
       : { duration: 0.3, delay: 0.15 },
   },
-}
-
-function hexToRgba(hex: string, opacity: number): string {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return `rgba(${r},${g},${b},${opacity})`
 }
 
 interface LastConsultationSubsectionProps {
