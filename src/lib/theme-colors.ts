@@ -7,8 +7,6 @@ export const DOT_COLORS = {
   purple: '#7C3AED',
 } as const
 
-export type DotColorName = keyof typeof DOT_COLORS
-
 /** KPI color variants (subset of DOT_COLORS) */
 export const KPI_COLORS: Record<'green' | 'amber' | 'teal', string> = {
   green: DOT_COLORS.green,

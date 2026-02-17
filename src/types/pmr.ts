@@ -48,34 +48,6 @@ export interface PrescribingHistoryEntry {
   description: string
 }
 
-export interface Medication {
-  id: string
-  name: string
-  dose: number
-  frequency: 'Daily' | 'Weekly' | 'Monthly' | 'As needed'
-  startYear: number
-  status: 'Active' | 'Historical'
-  category: 'Active' | 'Clinical' | 'PRN'
-  prescribingHistory: PrescribingHistoryEntry[]
-}
-
-export interface Problem {
-  id: string
-  code: string
-  description: string
-  since?: string
-  resolved?: string
-  status: 'Active' | 'In Progress' | 'Resolved'
-  outcome?: string
-  narrative?: string
-  linkedConsultations?: string[]
-}
-
-export interface InvestigationResult {
-  label: string
-  value: string
-}
-
 export interface Investigation {
   id: string
   name: string
@@ -123,23 +95,6 @@ export interface Patient {
   registrationYear: string
 }
 
-export type ViewId = 'summary' | 'consultations' | 'medications' | 'problems' | 'investigations' | 'documents' | 'referrals'
-
-export interface NavItem {
-  id: ViewId
-  label: string
-  icon: string
-}
-
-export interface ReferralFormData {
-  priority: 'Urgent' | 'Routine' | 'Two-Week Wait'
-  referrerName: string
-  referrerEmail: string
-  referrerOrg?: string
-  reason: string
-  contactMethod: 'Email' | 'Phone' | 'LinkedIn'
-}
-
 export interface Tag {
   label: string
   colorVariant: 'teal' | 'amber' | 'green'
@@ -171,6 +126,7 @@ export interface SkillMedication {
   category: 'Technical' | 'Domain' | 'Leadership'
   status: 'Active' | 'Historical'
   icon: string
+  prescribingHistory?: PrescribingHistoryEntry[]
 }
 
 // Skill categories for grouped display

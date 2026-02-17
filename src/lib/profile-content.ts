@@ -5,15 +5,10 @@ import type {
   EducationCopyEntry,
   ExperienceEducationUICopy,
   LatestResultsCopy,
-  ProfileContent,
   QuickActionCopyEntry,
   SidebarCopy,
   SkillsUICopy,
 } from '@/types/profile-content'
-
-export function getProfileContent(): DeepReadonly<ProfileContent> {
-  return profileContent
-}
 
 export function getProfileSummaryText(): string {
   return profileContent.profile.patientSummaryNarrative
