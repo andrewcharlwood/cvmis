@@ -1,4 +1,5 @@
 import type { Consultation } from '@/types/pmr'
+import { detailRootStyle, sectionHeadingStyle, bulletListStyle, bodyTextStyle, paragraphStyle } from './detail-styles'
 
 interface ConsultationDetailProps {
   consultation: Consultation
@@ -6,14 +7,7 @@ interface ConsultationDetailProps {
 
 export function ConsultationDetail({ consultation }: ConsultationDetailProps) {
   return (
-    <div
-      style={{
-        fontFamily: 'var(--font-ui)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px',
-      }}
-    >
+    <div style={detailRootStyle}>
       {/* Role header */}
       <div>
         <div
@@ -69,26 +63,8 @@ export function ConsultationDetail({ consultation }: ConsultationDetailProps) {
 
       {/* History (presenting complaint) */}
       <div>
-        <h3
-          style={{
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--text-secondary)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginBottom: '8px',
-          }}
-        >
-          History
-        </h3>
-        <p
-          style={{
-            fontSize: '14px',
-            lineHeight: '1.6',
-            color: 'var(--text-primary)',
-            margin: 0,
-          }}
-        >
+        <h3 style={sectionHeadingStyle}>History</h3>
+        <p style={paragraphStyle}>
           {consultation.history}
         </p>
       </div>
@@ -96,36 +72,10 @@ export function ConsultationDetail({ consultation }: ConsultationDetailProps) {
       {/* Examination (achievements) */}
       {consultation.examination && consultation.examination.length > 0 && (
         <div>
-          <h3
-            style={{
-              fontSize: '12px',
-              fontWeight: 600,
-              color: 'var(--text-secondary)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              marginBottom: '8px',
-            }}
-          >
-            Key Achievements
-          </h3>
-          <ul
-            style={{
-              margin: 0,
-              paddingLeft: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-            }}
-          >
+          <h3 style={sectionHeadingStyle}>Key Achievements</h3>
+          <ul style={bulletListStyle}>
             {consultation.examination.map((item, index) => (
-              <li
-                key={index}
-                style={{
-                  fontSize: '14px',
-                  lineHeight: '1.6',
-                  color: 'var(--text-primary)',
-                }}
-              >
+              <li key={index} style={bodyTextStyle}>
                 {item}
               </li>
             ))}
@@ -136,36 +86,10 @@ export function ConsultationDetail({ consultation }: ConsultationDetailProps) {
       {/* Plan (outcomes) */}
       {consultation.plan && consultation.plan.length > 0 && (
         <div>
-          <h3
-            style={{
-              fontSize: '12px',
-              fontWeight: 600,
-              color: 'var(--text-secondary)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              marginBottom: '8px',
-            }}
-          >
-            Outcomes & Impact
-          </h3>
-          <ul
-            style={{
-              margin: 0,
-              paddingLeft: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-            }}
-          >
+          <h3 style={sectionHeadingStyle}>Outcomes & Impact</h3>
+          <ul style={bulletListStyle}>
             {consultation.plan.map((item, index) => (
-              <li
-                key={index}
-                style={{
-                  fontSize: '14px',
-                  lineHeight: '1.6',
-                  color: 'var(--text-primary)',
-                }}
-              >
+              <li key={index} style={bodyTextStyle}>
                 {item}
               </li>
             ))}
@@ -176,18 +100,7 @@ export function ConsultationDetail({ consultation }: ConsultationDetailProps) {
       {/* Coded entries (technical environment / tags) */}
       {consultation.codedEntries && consultation.codedEntries.length > 0 && (
         <div>
-          <h3
-            style={{
-              fontSize: '12px',
-              fontWeight: 600,
-              color: 'var(--text-secondary)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              marginBottom: '8px',
-            }}
-          >
-            Coded Entries
-          </h3>
+          <h3 style={sectionHeadingStyle}>Coded Entries</h3>
           <div
             style={{
               display: 'flex',

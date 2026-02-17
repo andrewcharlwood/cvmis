@@ -1,5 +1,6 @@
 import type { KPI } from '@/types/pmr'
 import { KPI_COLORS } from '@/lib/theme-colors'
+import { detailRootStyle, sectionHeadingStyle, bulletListStyle, bodyTextStyle, paragraphStyle } from './detail-styles'
 
 interface KPIDetailProps {
   kpi: KPI
@@ -35,14 +36,7 @@ export function KPIDetail({ kpi }: KPIDetailProps) {
   const { context, role, outcomes, period } = kpi.story
 
   return (
-    <div
-      style={{
-        fontFamily: 'var(--font-ui)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px',
-      }}
-    >
+    <div style={detailRootStyle}>
       {/* Headline number */}
       <div>
         <div
@@ -98,88 +92,22 @@ export function KPIDetail({ kpi }: KPIDetailProps) {
 
       {/* Context paragraph */}
       <div>
-        <h3
-          style={{
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--text-secondary)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginBottom: '8px',
-          }}
-        >
-          Context
-        </h3>
-        <p
-          style={{
-            fontSize: '14px',
-            lineHeight: '1.6',
-            color: 'var(--text-primary)',
-            margin: 0,
-          }}
-        >
-          {context}
-        </p>
+        <h3 style={sectionHeadingStyle}>Context</h3>
+        <p style={paragraphStyle}>{context}</p>
       </div>
 
       {/* Your role paragraph */}
       <div>
-        <h3
-          style={{
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--text-secondary)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginBottom: '8px',
-          }}
-        >
-          Your Role
-        </h3>
-        <p
-          style={{
-            fontSize: '14px',
-            lineHeight: '1.6',
-            color: 'var(--text-primary)',
-            margin: 0,
-          }}
-        >
-          {role}
-        </p>
+        <h3 style={sectionHeadingStyle}>Your Role</h3>
+        <p style={paragraphStyle}>{role}</p>
       </div>
 
       {/* Outcome bullets */}
       <div>
-        <h3
-          style={{
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--text-secondary)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginBottom: '8px',
-          }}
-        >
-          Key Outcomes
-        </h3>
-        <ul
-          style={{
-            margin: 0,
-            paddingLeft: '20px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-          }}
-        >
+        <h3 style={sectionHeadingStyle}>Key Outcomes</h3>
+        <ul style={bulletListStyle}>
           {outcomes.map((outcome, index) => (
-            <li
-              key={index}
-              style={{
-                fontSize: '14px',
-                lineHeight: '1.6',
-                color: 'var(--text-primary)',
-              }}
-            >
+            <li key={index} style={bodyTextStyle}>
               {outcome}
             </li>
           ))}

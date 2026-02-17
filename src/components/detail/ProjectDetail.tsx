@@ -1,6 +1,7 @@
 import { ExternalLink } from 'lucide-react'
 import type { Investigation } from '@/types/pmr'
 import { PROJECT_STATUS_COLORS } from '@/lib/theme-colors'
+import { detailRootStyle, sectionHeadingStyle, bulletListStyle, bodyTextStyle, paragraphStyle } from './detail-styles'
 
 interface ProjectDetailProps {
   investigation: Investigation
@@ -17,14 +18,7 @@ export function ProjectDetail({ investigation }: ProjectDetailProps) {
   const statusBg = statusBgMap[investigation.status]
 
   return (
-    <div
-      style={{
-        fontFamily: 'var(--font-ui)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px',
-      }}
-    >
+    <div style={detailRootStyle}>
       {/* Header: name + year + status */}
       <div>
         <div
@@ -72,44 +66,13 @@ export function ProjectDetail({ investigation }: ProjectDetailProps) {
 
       {/* Methodology */}
       <div>
-        <h3
-          style={{
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--text-secondary)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginBottom: '8px',
-          }}
-        >
-          Methodology
-        </h3>
-        <p
-          style={{
-            fontSize: '14px',
-            lineHeight: '1.6',
-            color: 'var(--text-primary)',
-            margin: 0,
-          }}
-        >
-          {investigation.methodology}
-        </p>
+        <h3 style={sectionHeadingStyle}>Methodology</h3>
+        <p style={paragraphStyle}>{investigation.methodology}</p>
       </div>
 
       {/* Tech stack tags */}
       <div>
-        <h3
-          style={{
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--text-secondary)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginBottom: '8px',
-          }}
-        >
-          Tech Stack
-        </h3>
+        <h3 style={sectionHeadingStyle}>Tech Stack</h3>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
           {investigation.techStack.map((tech) => (
             <span
@@ -133,36 +96,10 @@ export function ProjectDetail({ investigation }: ProjectDetailProps) {
 
       {/* Results */}
       <div>
-        <h3
-          style={{
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--text-secondary)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginBottom: '8px',
-          }}
-        >
-          Results
-        </h3>
-        <ul
-          style={{
-            margin: 0,
-            paddingLeft: '20px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-          }}
-        >
+        <h3 style={sectionHeadingStyle}>Results</h3>
+        <ul style={bulletListStyle}>
           {investigation.results.map((result, index) => (
-            <li
-              key={index}
-              style={{
-                fontSize: '14px',
-                lineHeight: '1.6',
-                color: 'var(--text-primary)',
-              }}
-            >
+            <li key={index} style={bodyTextStyle}>
               {result}
             </li>
           ))}

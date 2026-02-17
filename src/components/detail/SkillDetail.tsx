@@ -1,5 +1,6 @@
 import type { SkillMedication } from '@/types/pmr'
 import { roleSkillMappings, constellationNodes } from '@/data/constellation'
+import { detailRootStyle, sectionHeadingStyle } from './detail-styles'
 
 interface SkillDetailProps {
   skill: SkillMedication
@@ -32,14 +33,7 @@ export function SkillDetail({ skill }: SkillDetailProps) {
     .sort((a, b) => (a!.startYear ?? 0) - (b!.startYear ?? 0))
 
   return (
-    <div
-      style={{
-        fontFamily: 'var(--font-ui)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px',
-      }}
-    >
+    <div style={detailRootStyle}>
       {/* Skill header */}
       <div>
         <div
@@ -104,18 +98,7 @@ export function SkillDetail({ skill }: SkillDetailProps) {
 
       {/* Proficiency bar */}
       <div>
-        <h3
-          style={{
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--text-secondary)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginBottom: '8px',
-          }}
-        >
-          Proficiency
-        </h3>
+        <h3 style={sectionHeadingStyle}>Proficiency</h3>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div
             style={{
@@ -153,18 +136,7 @@ export function SkillDetail({ skill }: SkillDetailProps) {
 
       {/* Years of experience */}
       <div>
-        <h3
-          style={{
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--text-secondary)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginBottom: '8px',
-          }}
-        >
-          Experience
-        </h3>
+        <h3 style={sectionHeadingStyle}>Experience</h3>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
           <span
             style={{
@@ -200,18 +172,7 @@ export function SkillDetail({ skill }: SkillDetailProps) {
       {/* Used in roles */}
       {usedInRoles.length > 0 && (
         <div>
-          <h3
-            style={{
-              fontSize: '12px',
-              fontWeight: 600,
-              color: 'var(--text-secondary)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              marginBottom: '10px',
-            }}
-          >
-            Used In
-          </h3>
+          <h3 style={{ ...sectionHeadingStyle, marginBottom: '10px' }}>Used In</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {usedInRoles.map((node) => (
               <div

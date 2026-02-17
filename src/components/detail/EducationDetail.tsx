@@ -1,18 +1,10 @@
 import { GraduationCap, Award, BookOpen, FlaskConical, type LucideIcon } from 'lucide-react'
 import type { Document } from '@/types/pmr'
 import { educationExtras } from '@/data/educationExtras'
+import { detailRootStyle, sectionHeadingStyle, bulletListStyle, bodyTextStyle, paragraphStyle } from './detail-styles'
 
 interface EducationDetailProps {
   document: Document
-}
-
-const sectionHeaderStyle: React.CSSProperties = {
-  fontSize: '12px',
-  fontWeight: 600,
-  color: 'var(--text-secondary)',
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-  marginBottom: '8px',
 }
 
 const typeIconMap: Record<string, LucideIcon> = {
@@ -27,14 +19,7 @@ export function EducationDetail({ document }: EducationDetailProps) {
   const Icon = typeIconMap[document.type] || GraduationCap
 
   return (
-    <div
-      style={{
-        fontFamily: 'var(--font-ui)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px',
-      }}
-    >
+    <div style={detailRootStyle}>
       {/* Header */}
       <div>
         <div
@@ -117,15 +102,8 @@ export function EducationDetail({ document }: EducationDetailProps) {
       {/* Research project (MPharm) */}
       {extra?.researchDescription && (
         <div>
-          <h3 style={sectionHeaderStyle}>Research Project</h3>
-          <p
-            style={{
-              fontSize: '14px',
-              lineHeight: '1.6',
-              color: 'var(--text-primary)',
-              margin: 0,
-            }}
-          >
+          <h3 style={sectionHeadingStyle}>Research Project</h3>
+          <p style={paragraphStyle}>
             {extra.researchDescription}
           </p>
         </div>
@@ -134,7 +112,7 @@ export function EducationDetail({ document }: EducationDetailProps) {
       {/* OSCE score (MPharm) */}
       {extra?.osceScore && (
         <div>
-          <h3 style={sectionHeaderStyle}>OSCE Performance</h3>
+          <h3 style={sectionHeadingStyle}>OSCE Performance</h3>
           <div
             style={{
               display: 'inline-flex',
@@ -170,25 +148,10 @@ export function EducationDetail({ document }: EducationDetailProps) {
       {/* Extracurricular activities (MPharm) */}
       {extra?.extracurriculars && extra.extracurriculars.length > 0 && (
         <div>
-          <h3 style={sectionHeaderStyle}>Extracurricular Activities</h3>
-          <ul
-            style={{
-              margin: 0,
-              paddingLeft: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-            }}
-          >
+          <h3 style={sectionHeadingStyle}>Extracurricular Activities</h3>
+          <ul style={bulletListStyle}>
             {extra.extracurriculars.map((activity, index) => (
-              <li
-                key={index}
-                style={{
-                  fontSize: '14px',
-                  lineHeight: '1.6',
-                  color: 'var(--text-primary)',
-                }}
-              >
+              <li key={index} style={bodyTextStyle}>
                 {activity}
               </li>
             ))}
@@ -199,15 +162,8 @@ export function EducationDetail({ document }: EducationDetailProps) {
       {/* Programme detail (Mary Seacole) */}
       {extra?.programmeDetail && (
         <div>
-          <h3 style={sectionHeaderStyle}>Programme Overview</h3>
-          <p
-            style={{
-              fontSize: '14px',
-              lineHeight: '1.6',
-              color: 'var(--text-primary)',
-              margin: 0,
-            }}
-          >
+          <h3 style={sectionHeadingStyle}>Programme Overview</h3>
+          <p style={paragraphStyle}>
             {extra.programmeDetail}
           </p>
         </div>
@@ -216,13 +172,11 @@ export function EducationDetail({ document }: EducationDetailProps) {
       {/* Notes */}
       {document.notes && (
         <div>
-          <h3 style={sectionHeaderStyle}>Notes</h3>
+          <h3 style={sectionHeadingStyle}>Notes</h3>
           <p
             style={{
-              fontSize: '14px',
-              lineHeight: '1.6',
+              ...paragraphStyle,
               color: 'var(--text-secondary)',
-              margin: 0,
               fontStyle: 'italic',
             }}
           >
