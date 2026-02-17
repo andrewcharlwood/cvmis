@@ -26,9 +26,10 @@ interface SkillRowProps {
   yearsSuffix: string
   onClick: () => void
   onHighlight?: (id: string | null) => void
+  isDimmedByFocus?: boolean
 }
 
-function SkillRow({ skill, yearsSuffix, onClick, onHighlight }: SkillRowProps) {
+function SkillRow({ skill, yearsSuffix, onClick, onHighlight, isDimmedByFocus = false }: SkillRowProps) {
   const IconComponent = iconMap[skill.icon]
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -55,7 +56,8 @@ function SkillRow({ skill, yearsSuffix, onClick, onHighlight }: SkillRowProps) {
         borderRadius: 'var(--radius-sm)',
         border: '1px solid var(--border-light)',
         cursor: 'pointer',
-        transition: 'border-color 0.15s, box-shadow 0.15s',
+        transition: 'border-color 0.15s, box-shadow 0.15s, opacity 150ms ease-out',
+        opacity: isDimmedByFocus ? 0.25 : 1,
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = 'var(--accent-border)'
@@ -134,6 +136,7 @@ interface CategorySectionProps {
   onSkillClick: (skill: SkillMedication) => void
   isFirst: boolean
   onNodeHighlight?: (id: string | null) => void
+  focusRelatedIds?: Set<string> | null
 }
 
 function CategorySection({
@@ -144,6 +147,7 @@ function CategorySection({
   onSkillClick,
   isFirst,
   onNodeHighlight,
+  focusRelatedIds,
 }: CategorySectionProps) {
   return (
     <div style={{ marginTop: isFirst ? 0 : '16px' }}>
@@ -193,6 +197,7 @@ function CategorySection({
             yearsSuffix={yearsSuffix}
             onClick={() => onSkillClick(skill)}
             onHighlight={onNodeHighlight}
+            isDimmedByFocus={focusRelatedIds != null && !focusRelatedIds.has(skill.id)}
           />
         ))}
       </div>
@@ -202,9 +207,10 @@ function CategorySection({
 
 interface RepeatMedicationsSubsectionProps {
   onNodeHighlight?: (id: string | null) => void
+  focusRelatedIds?: Set<string> | null
 }
 
-export function RepeatMedicationsSubsection({ onNodeHighlight }: RepeatMedicationsSubsectionProps) {
+export function RepeatMedicationsSubsection({ onNodeHighlight, focusRelatedIds }: RepeatMedicationsSubsectionProps) {
   const { openPanel } = useDetailPanel()
   const skillsCopy = getSkillsUICopy()
 
@@ -238,6 +244,7 @@ export function RepeatMedicationsSubsection({ onNodeHighlight }: RepeatMedicatio
             onSkillClick={handleSkillClick}
             isFirst
             onNodeHighlight={onNodeHighlight}
+            focusRelatedIds={focusRelatedIds}
           />
         ))}
       </div>

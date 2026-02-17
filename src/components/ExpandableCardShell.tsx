@@ -6,6 +6,7 @@ import { hexToRgba, motionSafeTransition } from '@/lib/utils'
 interface ExpandableCardShellProps {
   isExpanded: boolean
   isHighlighted: boolean
+  isDimmedByFocus?: boolean
   accentColor: string
   onToggle: () => void
   ariaLabel: string
@@ -21,6 +22,7 @@ interface ExpandableCardShellProps {
 export function ExpandableCardShell({
   isExpanded,
   isHighlighted,
+  isDimmedByFocus = false,
   accentColor,
   onToggle,
   ariaLabel,
@@ -52,6 +54,10 @@ export function ExpandableCardShell({
       className={className}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      style={{
+        opacity: isDimmedByFocus ? 0.25 : 1,
+        transition: 'opacity 150ms ease-out',
+      }}
     >
       <div
         style={{

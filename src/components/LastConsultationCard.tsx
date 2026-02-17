@@ -8,15 +8,17 @@ import { DEFAULT_ORG_COLOR } from '@/lib/theme-colors'
 
 interface LastConsultationCardProps {
   highlightedRoleId?: string | null
+  focusRelatedIds?: Set<string> | null
 }
 
-export function LastConsultationCard({ highlightedRoleId }: LastConsultationCardProps) {
+export function LastConsultationCard({ highlightedRoleId, focusRelatedIds }: LastConsultationCardProps) {
   const { openPanel } = useDetailPanel()
   const consultation = timelineConsultations.find(c => c.isCurrent) ?? timelineConsultations[0]
   if (!consultation) {
     return null
   }
   const isHighlighted = highlightedRoleId === consultation.id
+  const isDimmed = focusRelatedIds != null && !focusRelatedIds.has(consultation.id)
 
   const handleOpenPanel = () => {
     openPanel({ type: 'consultation', consultation })
@@ -67,9 +69,10 @@ export function LastConsultationCard({ highlightedRoleId }: LastConsultationCard
         border: '1px solid',
         borderColor: isHighlighted ? hexToRgba(consultation.orgColor ?? DEFAULT_ORG_COLOR, 0.2) : 'transparent',
         background: isHighlighted ? hexToRgba(consultation.orgColor ?? DEFAULT_ORG_COLOR, 0.03) : 'transparent',
-        transition: 'border-color 150ms ease-out, background-color 150ms ease-out',
+        transition: 'border-color 150ms ease-out, background-color 150ms ease-out, opacity 150ms ease-out',
         padding: '8px',
         margin: '-8px',
+        opacity: isDimmed ? 0.25 : 1,
       }}
     >
       <CardHeader dotColor="green" title="LAST CONSULTATION" rightText="Current role" />

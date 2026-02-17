@@ -12,8 +12,9 @@ import { LastConsultationCard } from './LastConsultationCard'
 import { ChatWidget } from './ChatWidget'
 import { useActiveSection } from '@/hooks/useActiveSection'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
-import { timelineConsultations } from '@/data/timeline'
+import { timelineConsultations, timelineEntities } from '@/data/timeline'
 import { skills } from '@/data/skills'
+import { constellationNodes } from '@/data/constellation'
 import type { PaletteAction } from '@/lib/search'
 import { prefersReducedMotion, motionSafeTransition } from '@/lib/utils'
 
@@ -48,6 +49,47 @@ export function DashboardLayout() {
     () => new Map(timelineConsultations.map((consultation) => [consultation.id, consultation])),
     [],
   )
+
+  // Global focus mode: tracks which entity (skill or role) is being hovered across all components
+  const [globalFocusId, setGlobalFocusId] = useState<string | null>(null)
+
+  // Build lookup maps for resolving relationships between skills and roles
+  const nodeTypeById = useMemo(
+    () => new Map(constellationNodes.map(n => [n.id, n.type])),
+    [],
+  )
+  const skillToRoles = useMemo(() => {
+    const map = new Map<string, Set<string>>()
+    for (const entity of timelineEntities) {
+      for (const skillId of entity.skills) {
+        if (!map.has(skillId)) map.set(skillId, new Set())
+        map.get(skillId)!.add(entity.id)
+      }
+    }
+    return map
+  }, [])
+  const roleToSkills = useMemo(
+    () => new Map(timelineEntities.map(e => [e.id, new Set(e.skills)])),
+    [],
+  )
+
+  // Derive the set of all IDs related to the focused entity
+  const focusRelatedIds = useMemo(() => {
+    if (!globalFocusId) return null
+    const related = new Set<string>()
+    related.add(globalFocusId)
+    const nodeType = nodeTypeById.get(globalFocusId)
+    if (nodeType === 'skill') {
+      // Skill focused: related roles are those containing this skill
+      const roles = skillToRoles.get(globalFocusId)
+      if (roles) roles.forEach(r => related.add(r))
+    } else {
+      // Role/education focused: related skills are that entity's skills
+      const entitySkills = roleToSkills.get(globalFocusId)
+      if (entitySkills) entitySkills.forEach(s => related.add(s))
+    }
+    return related
+  }, [globalFocusId, nodeTypeById, skillToRoles, roleToSkills])
 
   // Signal constellation animation readiness when patient summary scrolls out of view
   useEffect(() => {
@@ -115,11 +157,14 @@ export function DashboardLayout() {
 
   const handleNodeHighlight = useCallback((id: string | null) => {
     setHighlightedNodeId(id)
+    setGlobalFocusId(id)
   }, [])
 
   const handleNodeHover = useCallback((id: string | null) => {
-    setHighlightedRoleId(id)
-  }, [])
+    const nodeType = id ? nodeTypeById.get(id) : null
+    setHighlightedRoleId(nodeType !== 'skill' ? id : null)
+    setGlobalFocusId(id)
+  }, [nodeTypeById])
 
   // Global Ctrl+K listener to open command palette
   useEffect(() => {
@@ -243,11 +288,11 @@ export function DashboardLayout() {
 
 
                   <div className="chronology-item">
-                    <LastConsultationCard highlightedRoleId={highlightedRoleId} />
+                    <LastConsultationCard highlightedRoleId={highlightedRoleId} focusRelatedIds={focusRelatedIds} />
                   </div>
 
                   <div className="chronology-item">
-                    <TimelineInterventionsSubsection onNodeHighlight={handleNodeHighlight} highlightedRoleId={highlightedRoleId} />
+                    <TimelineInterventionsSubsection onNodeHighlight={handleNodeHighlight} highlightedRoleId={highlightedRoleId} focusRelatedIds={focusRelatedIds} />
                   </div>
                 </div>
                 <div className="pathway-graph-sticky">
@@ -258,6 +303,7 @@ export function DashboardLayout() {
                     highlightedNodeId={highlightedNodeId}
                     containerHeight={chronologyHeight}
                     animationReady={constellationReady}
+                    globalFocusActive={globalFocusId !== null}
                   />
                 </div>
 
@@ -265,7 +311,7 @@ export function DashboardLayout() {
               </div>
 
               <div data-tile-id="section-skills" style={{ marginTop: '22px' }}>
-                <RepeatMedicationsSubsection onNodeHighlight={handleNodeHighlight} />
+                <RepeatMedicationsSubsection onNodeHighlight={handleNodeHighlight} focusRelatedIds={focusRelatedIds} />
               </div>
             </ParentSection>
           </div>

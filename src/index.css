@@ -494,6 +494,27 @@ html {
   to { transform: scale(1); opacity: 1; }
 }
 
+/* ===== CONSTELLATION FOCUS MODE — axis/background dimming ===== */
+svg.constellation-focus-active .axis-line,
+svg.constellation-focus-active .year-tick {
+  stroke-opacity: 0.25;
+  transition: stroke-opacity 150ms ease-out;
+}
+
+svg.constellation-focus-active .year-label {
+  opacity: 0.25;
+  transition: opacity 150ms ease-out;
+}
+
+svg:not(.constellation-focus-active) .axis-line,
+svg:not(.constellation-focus-active) .year-tick {
+  transition: stroke-opacity 150ms ease-out;
+}
+
+svg:not(.constellation-focus-active) .year-label {
+  transition: opacity 150ms ease-out;
+}
+
 /* ===== FOCUS VISIBLE STYLES (WCAG Compliance) ===== */
 /* Default focus ring for all focusable elements */
 *:focus-visible {
@@ -591,6 +612,16 @@ textarea:focus-visible {
   @keyframes backdrop-fade-in {
     from { opacity: 1; }
     to { opacity: 1; }
+  }
+
+  /* No transition for constellation focus mode axis dimming */
+  svg.constellation-focus-active .axis-line,
+  svg.constellation-focus-active .year-tick,
+  svg.constellation-focus-active .year-label,
+  svg:not(.constellation-focus-active) .axis-line,
+  svg:not(.constellation-focus-active) .year-tick,
+  svg:not(.constellation-focus-active) .year-label {
+    transition: none;
   }
 
   /* Instant constellation fullscreen */

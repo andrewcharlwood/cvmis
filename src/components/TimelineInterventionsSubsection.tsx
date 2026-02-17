@@ -11,6 +11,7 @@ interface TimelineInterventionItemProps {
   entity: TimelineEntity
   isExpanded: boolean
   isHighlightedFromGraph: boolean
+  isDimmedByFocus: boolean
   isEducationAnchor: boolean
   onToggle: () => void
   onViewFull: () => void
@@ -21,6 +22,7 @@ function TimelineInterventionItem({
   entity,
   isExpanded,
   isHighlightedFromGraph,
+  isDimmedByFocus,
   isEducationAnchor,
   onToggle,
   onViewFull,
@@ -34,6 +36,7 @@ function TimelineInterventionItem({
     <ExpandableCardShell
       isExpanded={isExpanded}
       isHighlighted={isHighlightedFromGraph}
+      isDimmedByFocus={isDimmedByFocus}
       accentColor={entity.orgColor}
       onToggle={onToggle}
       ariaLabel={`${entity.title} at ${entity.organization}, ${entity.dateRange.display}. Click to ${isExpanded ? 'collapse' : 'expand'} details.`}
@@ -254,9 +257,10 @@ function TimelineInterventionItem({
 interface TimelineInterventionsSubsectionProps {
   onNodeHighlight?: (id: string | null) => void
   highlightedRoleId?: string | null
+  focusRelatedIds?: Set<string> | null
 }
 
-export function TimelineInterventionsSubsection({ onNodeHighlight, highlightedRoleId }: TimelineInterventionsSubsectionProps) {
+export function TimelineInterventionsSubsection({ onNodeHighlight, highlightedRoleId, focusRelatedIds }: TimelineInterventionsSubsectionProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const { openPanel } = useDetailPanel()
 
@@ -288,6 +292,7 @@ export function TimelineInterventionsSubsection({ onNodeHighlight, highlightedRo
           entity={entity}
           isExpanded={expandedId === entity.id}
           isHighlightedFromGraph={highlightedRoleId === entity.id}
+          isDimmedByFocus={focusRelatedIds !== null && focusRelatedIds !== undefined && !focusRelatedIds.has(entity.id)}
           isEducationAnchor={entity.id === firstEducationId}
           onToggle={() => handleToggle(entity.id)}
           onViewFull={() => handleViewFull(entity)}

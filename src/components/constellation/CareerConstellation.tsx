@@ -27,6 +27,7 @@ interface CareerConstellationProps {
   highlightedNodeId?: string | null
   containerHeight?: number | null
   animationReady?: boolean
+  globalFocusActive?: boolean
 }
 
 const nodeById = new Map(constellationNodes.map(node => [node.id, node]))
@@ -39,6 +40,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
   highlightedNodeId,
   containerHeight,
   animationReady = false,
+  globalFocusActive = false,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -301,6 +303,7 @@ const CareerConstellation: React.FC<CareerConstellationProps> = ({
           viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
           role="img"
           aria-label="Clinical pathway constellation showing career roles and skills in reverse-chronological order along a vertical timeline"
+          className={globalFocusActive || highlightedNodeId || pinnedNodeId ? 'constellation-focus-active' : ''}
           style={{
             display: 'block',
             width: '100%',

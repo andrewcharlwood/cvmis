@@ -42,9 +42,7 @@ export function useConstellationInteraction(deps: {
       if (supportsCoarsePointer) return
       deps.pauseForInteraction?.()
       deps.highlightGraphRef.current?.(d.id)
-      if (d.type !== 'skill') {
-        deps.callbacksRef.current.onNodeHover?.(d.id)
-      }
+      deps.callbacksRef.current.onNodeHover?.(d.id)
     })
 
     nodeSelection.on('mouseleave.interaction', function() {
