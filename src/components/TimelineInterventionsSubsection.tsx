@@ -5,7 +5,7 @@ import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { timelineEntities, timelineConsultations } from '@/data/timeline'
 import { getExperienceEducationUICopy } from '@/lib/profile-content'
 import type { TimelineEntity } from '@/types/pmr'
-import { hexToRgba, prefersReducedMotion } from '@/lib/utils'
+import { hexToRgba, motionSafeTransition } from '@/lib/utils'
 
 interface TimelineInterventionItemProps {
   entity: TimelineEntity
@@ -170,11 +170,7 @@ function TimelineInterventionItem({
               initial={{ height: 0 }}
               animate={{ height: 'auto' }}
               exit={{ height: 0 }}
-              transition={
-                prefersReducedMotion
-                  ? { duration: 0 }
-                  : { duration: 0.2, ease: 'easeOut' }
-              }
+              transition={motionSafeTransition(0.2)}
               style={{ overflow: 'hidden' }}
             >
               <div

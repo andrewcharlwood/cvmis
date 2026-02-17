@@ -12,7 +12,7 @@ import {
 import { buildPaletteData } from '@/lib/search'
 import type { PaletteItem, PaletteAction } from '@/lib/search'
 import { iconByType, iconColorStyles } from '@/lib/palette-icons'
-import { prefersReducedMotion } from '@/lib/utils'
+import { prefersReducedMotion, motionSafeTransition } from '@/lib/utils'
 
 const MAX_HISTORY = 10
 
@@ -29,9 +29,7 @@ const buttonVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: prefersReducedMotion
-      ? { duration: 0 }
-      : { duration: 0.3, ease: 'easeOut', delay: 1 },
+    transition: motionSafeTransition(0.3, 'easeOut', 1),
   },
 }
 
@@ -42,9 +40,7 @@ const panelVariants = {
   visible: {
     opacity: 1,
     scale: 1,
-    transition: prefersReducedMotion
-      ? { duration: 0 }
-      : { duration: 0.2, ease: 'easeOut' },
+    transition: motionSafeTransition(0.2),
   },
   exit: prefersReducedMotion
     ? { opacity: 1, scale: 1 }

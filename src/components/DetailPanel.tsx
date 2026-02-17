@@ -10,6 +10,7 @@ import { SkillDetail } from './detail/SkillDetail'
 import { SkillsAllDetail } from './detail/SkillsAllDetail'
 import { EducationDetail } from './detail/EducationDetail'
 import { ProjectDetail } from './detail/ProjectDetail'
+import { DOT_COLORS } from '@/lib/theme-colors'
 
 // Width mapping from content type
 const widthMap: Record<DetailPanelContent['type'], 'narrow' | 'wide'> = {
@@ -60,15 +61,6 @@ function getDotColor(content: DetailPanelContent): CardHeaderProps['dotColor'] {
   }
 }
 
-// Dot color value map (from Card.tsx)
-const dotColorValueMap: Record<CardHeaderProps['dotColor'], string> = {
-  teal: '#0D6E6E',
-  amber: '#D97706',
-  green: '#059669',
-  alert: '#DC2626',
-  purple: '#7C3AED',
-}
-
 export function DetailPanel() {
   const { content, closePanel, isOpen } = useDetailPanel()
   const panelRef = useRef<HTMLDivElement>(null)
@@ -96,7 +88,7 @@ export function DetailPanel() {
   const width = widthMap[content.type]
   const title = getPanelTitle(content)
   const dotColor = getDotColor(content)
-  const dotColorValue = dotColorValueMap[dotColor]
+  const dotColorValue = DOT_COLORS[dotColor]
 
   return (
     <>

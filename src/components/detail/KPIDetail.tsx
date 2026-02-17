@@ -1,14 +1,8 @@
 import type { KPI } from '@/types/pmr'
+import { KPI_COLORS } from '@/lib/theme-colors'
 
 interface KPIDetailProps {
   kpi: KPI
-}
-
-// Color map for KPI values
-const colorMap: Record<KPI['colorVariant'], string> = {
-  green: '#059669',
-  amber: '#D97706',
-  teal: '#0D6E6E',
 }
 
 export function KPIDetail({ kpi }: KPIDetailProps) {
@@ -27,7 +21,7 @@ export function KPIDetail({ kpi }: KPIDetailProps) {
           style={{
             fontSize: '32px',
             fontWeight: 700,
-            color: colorMap[kpi.colorVariant],
+            color: KPI_COLORS[kpi.colorVariant],
             marginBottom: '16px',
           }}
         >
@@ -55,7 +49,7 @@ export function KPIDetail({ kpi }: KPIDetailProps) {
           style={{
             fontSize: '48px',
             fontWeight: 700,
-            color: colorMap[kpi.colorVariant],
+            color: KPI_COLORS[kpi.colorVariant],
             lineHeight: '1',
             marginBottom: '8px',
           }}

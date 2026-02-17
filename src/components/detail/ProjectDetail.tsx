@@ -1,14 +1,9 @@
 import { ExternalLink } from 'lucide-react'
 import type { Investigation } from '@/types/pmr'
+import { PROJECT_STATUS_COLORS } from '@/lib/theme-colors'
 
 interface ProjectDetailProps {
   investigation: Investigation
-}
-
-const statusColorMap: Record<Investigation['status'], string> = {
-  Complete: '#059669',
-  Ongoing: '#D97706',
-  Live: '#0D6E6E',
 }
 
 const statusBgMap: Record<Investigation['status'], string> = {
@@ -18,7 +13,7 @@ const statusBgMap: Record<Investigation['status'], string> = {
 }
 
 export function ProjectDetail({ investigation }: ProjectDetailProps) {
-  const statusColor = statusColorMap[investigation.status]
+  const statusColor = PROJECT_STATUS_COLORS[investigation.status]
   const statusBg = statusBgMap[investigation.status]
 
   return (

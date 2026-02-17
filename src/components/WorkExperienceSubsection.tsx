@@ -4,7 +4,8 @@ import { ChevronRight } from 'lucide-react'
 import { CardHeader } from './Card'
 import { timelineConsultations } from '@/data/timeline'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
-import { hexToRgba, prefersReducedMotion } from '@/lib/utils'
+import { hexToRgba, motionSafeTransition } from '@/lib/utils'
+import { DEFAULT_ORG_COLOR } from '@/lib/theme-colors'
 
 interface RoleItemProps {
   consultation: typeof timelineConsultations[0]
@@ -33,9 +34,9 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
   return (
     <div
       style={{
-        background: isHighlightedFromGraph ? hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.03) : 'var(--bg-dashboard)',
+        background: isHighlightedFromGraph ? hexToRgba(consultation.orgColor ?? DEFAULT_ORG_COLOR, 0.03) : 'var(--bg-dashboard)',
         borderRadius: 'var(--radius-sm)',
-        border: `1px solid ${isExpanded || isHighlightedFromGraph ? hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.2) : 'var(--border-light)'}`,
+        border: `1px solid ${isExpanded || isHighlightedFromGraph ? hexToRgba(consultation.orgColor ?? DEFAULT_ORG_COLOR, 0.2) : 'var(--border-light)'}`,
         transition: 'border-color 0.15s, box-shadow 0.15s, background-color 0.15s',
         overflow: 'hidden',
       }}
@@ -60,7 +61,7 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
         }}
         onMouseEnter={(e) => {
           if (!isExpanded) {
-            e.currentTarget.parentElement!.style.borderColor = hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.2)
+            e.currentTarget.parentElement!.style.borderColor = hexToRgba(consultation.orgColor ?? DEFAULT_ORG_COLOR, 0.2)
             e.currentTarget.parentElement!.style.boxShadow = 'var(--shadow-md)'
           }
         }}
@@ -78,7 +79,7 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
             width: '9px',
             height: '9px',
             borderRadius: '50%',
-            background: consultation.orgColor ?? '#0D6E6E',
+            background: consultation.orgColor ?? DEFAULT_ORG_COLOR,
             flexShrink: 0,
             marginTop: '4px',
           }}
@@ -137,11 +138,7 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
             initial={{ height: 0 }}
             animate={{ height: 'auto' }}
             exit={{ height: 0 }}
-            transition={
-              prefersReducedMotion
-                ? { duration: 0 }
-                : { duration: 0.2, ease: 'easeOut' }
-            }
+            transition={motionSafeTransition(0.2)}
             style={{ overflow: 'hidden' }}
           >
             <div
@@ -210,9 +207,9 @@ function RoleItem({ consultation, isExpanded, isHighlightedFromGraph, onToggle, 
                       fontFamily: 'var(--font-geist-mono)',
                       padding: '3px 8px',
                       borderRadius: '4px',
-                      background: hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.08),
+                      background: hexToRgba(consultation.orgColor ?? DEFAULT_ORG_COLOR, 0.08),
                       color: consultation.orgColor ?? 'var(--accent)',
-                      border: `1px solid ${hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.2)}`,
+                      border: `1px solid ${hexToRgba(consultation.orgColor ?? DEFAULT_ORG_COLOR, 0.2)}`,
                     }}
                   >
                     {entry.code}: {entry.description}

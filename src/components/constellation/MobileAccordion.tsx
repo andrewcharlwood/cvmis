@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { TimelineEntity } from '@/types/pmr'
-import { prefersReducedMotion } from './constants'
+import { motionSafeTransition } from '@/lib/utils'
 
 interface MobileAccordionProps {
   pinnedCareerEntity: TimelineEntity | null
@@ -23,7 +23,7 @@ export const MobileAccordion: React.FC<MobileAccordionProps> = ({ pinnedCareerEn
           initial={{ height: 0 }}
           animate={{ height: 'auto' }}
           exit={{ height: 0 }}
-          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }}
+          transition={motionSafeTransition(0.2)}
           style={{ overflow: 'hidden' }}
         >
           <div

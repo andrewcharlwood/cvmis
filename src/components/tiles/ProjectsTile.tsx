@@ -3,12 +3,7 @@ import { investigations } from '@/data/investigations'
 import { Card, CardHeader } from '../Card'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import type { Investigation } from '@/types/pmr'
-
-const statusColorMap: Record<string, string> = {
-  Complete: '#059669',
-  Ongoing: '#0D6E6E',
-  Live: '#059669',
-}
+import { PROJECT_STATUS_COLORS } from '@/lib/theme-colors'
 
 interface ProjectItemProps {
   project: Investigation
@@ -25,7 +20,7 @@ function ProjectItem({
   thumbnailHeight,
   onClick,
 }: ProjectItemProps) {
-  const dotColor = statusColorMap[project.status] || '#0D6E6E'
+  const dotColor = PROJECT_STATUS_COLORS[project.status]
   const isLive = project.status === 'Live'
 
   const handleKeyDown = useCallback(

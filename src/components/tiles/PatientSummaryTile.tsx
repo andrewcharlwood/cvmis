@@ -6,12 +6,7 @@ import { kpis } from '@/data/kpis'
 import type { KPI } from '@/types/pmr'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { getLatestResultsCopy, getProfileSectionTitle, getProfileSummaryText } from '@/lib/profile-content'
-
-const colorMap: Record<KPI['colorVariant'], string> = {
-  green: '#059669',
-  amber: '#D97706',
-  teal: '#0D6E6E',
-}
+import { KPI_COLORS } from '@/lib/theme-colors'
 
 interface MetricCardProps {
   kpi: KPI
@@ -52,7 +47,7 @@ function MetricCard({ kpi }: MetricCardProps) {
     fontWeight: 700,
     letterSpacing: '-0.02em',
     lineHeight: 1.2,
-    color: colorMap[kpi.colorVariant],
+    color: KPI_COLORS[kpi.colorVariant],
   }
 
   const labelStyles: React.CSSProperties = {

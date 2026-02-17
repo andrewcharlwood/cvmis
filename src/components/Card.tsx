@@ -1,4 +1,5 @@
 import React from 'react'
+import { DOT_COLORS } from '@/lib/theme-colors'
 
 interface CardProps {
   children: React.ReactNode
@@ -43,14 +44,6 @@ export interface CardHeaderProps {
   rightText?: string
 }
 
-const dotColorMap: Record<CardHeaderProps['dotColor'], string> = {
-  teal: '#0D6E6E',
-  amber: '#D97706',
-  green: '#059669',
-  alert: '#DC2626',
-  purple: '#7C3AED',
-}
-
 export function CardHeader({ dotColor, title, rightText }: CardHeaderProps) {
   const headerStyles: React.CSSProperties = {
     display: 'flex',
@@ -63,7 +56,7 @@ export function CardHeader({ dotColor, title, rightText }: CardHeaderProps) {
     width: '9px',
     height: '9px',
     borderRadius: '50%',
-    backgroundColor: dotColorMap[dotColor],
+    backgroundColor: DOT_COLORS[dotColor],
     flexShrink: 0,
   }
 

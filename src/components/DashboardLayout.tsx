@@ -17,16 +17,15 @@ import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { timelineConsultations } from '@/data/timeline'
 import { skills } from '@/data/skills'
 import type { PaletteAction } from '@/lib/search'
-import { hexToRgba, prefersReducedMotion } from '@/lib/utils'
+import { hexToRgba, prefersReducedMotion, motionSafeTransition } from '@/lib/utils'
+import { DEFAULT_ORG_COLOR } from '@/lib/theme-colors'
 
 const sidebarVariants = {
   hidden: prefersReducedMotion ? { x: 0, opacity: 1 } : { x: -272, opacity: 0 },
   visible: {
     x: 0,
     opacity: 1,
-    transition: prefersReducedMotion
-      ? { duration: 0 }
-      : { duration: 0.25, ease: 'easeOut', delay: 0.05 },
+    transition: motionSafeTransition(0.25, 'easeOut', 0.05),
   },
 }
 
@@ -34,9 +33,7 @@ const contentVariants = {
   hidden: prefersReducedMotion ? { opacity: 1 } : { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: prefersReducedMotion
-      ? { duration: 0 }
-      : { duration: 0.3, delay: 0.15 },
+    transition: motionSafeTransition(0.3, 'easeOut', 0.15),
   },
 }
 
@@ -102,8 +99,8 @@ function LastConsultationSubsection({ highlightedRoleId }: LastConsultationSubse
         marginTop: '24px',
         borderRadius: 'var(--radius-sm)',
         border: '1px solid',
-        borderColor: isHighlighted ? hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.2) : 'transparent',
-        background: isHighlighted ? hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.03) : 'transparent',
+        borderColor: isHighlighted ? hexToRgba(consultation.orgColor ?? DEFAULT_ORG_COLOR, 0.2) : 'transparent',
+        background: isHighlighted ? hexToRgba(consultation.orgColor ?? DEFAULT_ORG_COLOR, 0.03) : 'transparent',
         transition: 'border-color 150ms ease-out, background-color 150ms ease-out',
         padding: '8px',
         margin: '-8px',
@@ -130,7 +127,7 @@ function LastConsultationSubsection({ highlightedRoleId }: LastConsultationSubse
           transition: 'background-color 150ms ease-out',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = hexToRgba(consultation.orgColor ?? '#0D6E6E', 0.04)
+          e.currentTarget.style.backgroundColor = hexToRgba(consultation.orgColor ?? DEFAULT_ORG_COLOR, 0.04)
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = 'transparent'
