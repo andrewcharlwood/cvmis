@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import {
-  AlertCircle,
-  AlertTriangle,
+  Download,
+  Github,
+  Linkedin,
   type LucideIcon,
   Menu,
   Search,
+  Send,
   UserRound,
   Workflow,
   Wrench,
@@ -14,11 +16,11 @@ import {
 import { useIsMobileNav } from '@/hooks/useIsMobileNav'
 import { CvmisLogo } from './CvmisLogo'
 import { PhoneCaptcha } from './PhoneCaptcha'
+import { ReferralFormModal } from './ReferralFormModal'
 import { patient } from '@/data/patient'
 import { tags } from '@/data/tags'
-import { alerts } from '@/data/alerts'
 import { getSidebarCopy } from '@/lib/profile-content'
-import type { Tag, Alert } from '@/types/pmr'
+import type { Tag } from '@/types/pmr'
 
 interface SidebarProps {
   activeSection: string
@@ -110,62 +112,12 @@ function TagPill({ tag }: TagPillProps) {
   )
 }
 
-interface AlertFlagProps {
-  alert: Alert
-}
-
-function AlertFlag({ alert }: AlertFlagProps) {
-  const Icon = alert.icon === 'AlertTriangle' ? AlertTriangle : AlertCircle
-
-  const styles: Record<Alert['severity'], CSSProperties> = {
-    alert: {
-      background: 'var(--alert-light)',
-      color: 'var(--alert)',
-      border: '1px solid var(--alert-border)',
-    },
-    amber: {
-      background: 'var(--amber-light)',
-      color: 'var(--amber)',
-      border: '1px solid var(--amber-border)',
-    },
-  }
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        fontSize: '13px',
-        fontWeight: 700,
-        padding: '8px 12px',
-        borderRadius: 'var(--radius-sm)',
-        letterSpacing: '0.02em',
-        ...styles[alert.severity],
-      }}
-    >
-      <div
-        style={{
-          width: '18px',
-          height: '18px',
-          flexShrink: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Icon size={16} strokeWidth={2.5} />
-      </div>
-      <span>{alert.message}</span>
-    </div>
-  )
-}
-
 export default function Sidebar({ activeSection, onNavigate, onSearchClick }: SidebarProps) {
   const sidebarCopy = getSidebarCopy()
   const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches)
   const isMobileNav = useIsMobileNav()
   const [isMobileExpanded, setIsMobileExpanded] = useState(false)
+  const [showReferralForm, setShowReferralForm] = useState(false)
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(min-width: 1024px)')
@@ -481,6 +433,35 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                 </span>
               </div>
             </div>
+            <a
+              href="/References/CV_v4.md"
+              target="_blank"
+              rel="noopener noreferrer"
+                  style={{
+                    width: '100%',
+                    minHeight: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    border: '1px solid var(--accent-border)',
+                    background: 'var(--surface)',
+                    color: 'var(--accent)',
+                    borderRadius: 'var(--radius-sm)',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    //fontFamily: 'var(--font-geist-mono)',
+                    letterSpacing: '0.03em',
+                    transition: 'border-color 150ms, color 150ms',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+            >
+              
+              <Download size={14} />
+              Download CV
+            </a>
           </section>
         )}
 
@@ -530,6 +511,91 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
 
         {isExpanded && (
           <>
+            <section style={{ paddingTop: '4px' }}>
+              <SectionTitle>Contact</SectionTitle>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                
+                <button
+                  type="button"
+                  onClick={() => setShowReferralForm(true)}
+                  className="sidebar-control"
+                  style={{
+                    width: '100%',
+                    minHeight: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    border: '1px solid var(--accent-border)',
+                    background: 'var(--surface)',
+                    color: 'var(--accent)',
+                    borderRadius: 'var(--radius-sm)',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    //fontFamily: 'var(--font-geist-mono)',
+                    letterSpacing: '0.03em',
+                    transition: 'border-color 150ms, color 150ms',
+                  }}
+                >
+                  <Send size={14} />
+                  Refer Patient
+                </button>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <a
+                    href="https://linkedin.com/in/andycharlwood"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="sidebar-control"
+                    style={{
+                      flex: 1,
+                      minHeight: '36px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      border: '1px solid var(--border-light)',
+                      background: 'var(--surface)',
+                      color: 'var(--text-secondary)',
+                      borderRadius: 'var(--radius-sm)',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      textDecoration: 'none',
+                      transition: 'border-color 150ms, color 150ms',
+                    }}
+                  >
+                    <Linkedin size={14} />
+                    LinkedIn
+                  </a>
+                  <a
+                    href="https://github.com/andycharlwood"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="sidebar-control"
+                    style={{
+                      flex: 1,
+                      minHeight: '36px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      border: '1px solid var(--border-light)',
+                      background: 'var(--surface)',
+                      color: 'var(--text-secondary)',
+                      borderRadius: 'var(--radius-sm)',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      textDecoration: 'none',
+                      transition: 'border-color 150ms, color 150ms',
+                    }}
+                  >
+                    <Github size={14} />
+                    GitHub
+                  </a>
+                </div>
+              </div>
+            </section>
+
             <section style={{ paddingTop: '8px' }}>
               <SectionTitle>{sidebarCopy.tagsTitle}</SectionTitle>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
@@ -538,18 +604,10 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                 ))}
               </div>
             </section>
-
-            <section style={{ padding: '8px 0 4px' }}>
-              <SectionTitle>{sidebarCopy.alertsTitle}</SectionTitle>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {alerts.map((alert, index) => (
-                  <AlertFlag key={index} alert={alert} />
-                ))}
-              </div>
-            </section>
           </>
         )}
       </aside>
+      <ReferralFormModal isOpen={showReferralForm} onClose={() => setShowReferralForm(false)} />
     </>
   )
 }

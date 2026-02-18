@@ -8,11 +8,14 @@ import type {
   QuickActionCopyEntry,
   SidebarCopy,
   SkillsUICopy,
-  StructuredProfile,
 } from '@/types/profile-content'
 
 export function getProfileSectionTitle(): string {
   return profileContent.profile.sectionTitle
+}
+
+export function getPatientSummaryNarrative(): string {
+  return profileContent.profile.patientSummaryNarrative
 }
 
 export function getLatestResultsCopy(): DeepReadonly<LatestResultsCopy> {
@@ -43,6 +46,3 @@ export function getEducationEntries(): ReadonlyArray<EducationCopyEntry> {
   return profileContent.experienceEducation.educationEntries
 }
 
-export function getStructuredProfile(): DeepReadonly<StructuredProfile> {
-  return profileContent.profile.structuredProfile
-}

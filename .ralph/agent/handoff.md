@@ -1,11 +1,11 @@
 # Session Handoff
 
-_Generated: 2026-02-17 21:19:40 UTC_
+_Generated: 2026-02-18 00:42:07 UTC_
 
 ## Git Context
 
 - **Branch:** `master`
-- **HEAD:** d51efb5: chore: auto-commit before merge (loop primary)
+- **HEAD:** 134e41f: chore: auto-commit before merge (loop primary)
 
 ## Tasks
 
@@ -15,16 +15,16 @@ _No tasks tracked in this session._
 
 Recently modified:
 
+- `.claude/settings.json`
+- `.claude/settings.local.json`
+- `.ralph/agent/handoff.md`
+- `.ralph/agent/memories.md`
+- `.ralph/agent/memories.md.lock`
 - `.ralph/agent/scratchpad.md`
 - `.ralph/agent/summary.md`
-- `.ralph/agent/tasks.jsonl.lock`
+- `.ralph/agent/tasks.jsonl`
 - `.ralph/current-events`
 - `.ralph/current-loop-id`
-- `.ralph/events-20260217-140400.jsonl`
-- `.ralph/events-20260217-205901.jsonl`
-- `.ralph/history.jsonl`
-- `.ralph/loop.lock`
-- `.ralph/plan.md`
 
 ## Next Session
 
@@ -33,14 +33,12 @@ Session completed successfully. No pending work.
 **Original objective:**
 
 ```
-# Task: Fix Mobile Responsiveness for Small Viewport Widths (≤430px)
+# Task: Portfolio UX Improvements — GP Clinical System Theme Polish
 
-The portfolio website is broken on phones with viewport widths around 400px. Text overflows off-screen, elements are hidden behind `overflow: hidden`, and layout components are sized inappropriately for small screens.
+Implement 11 prioritised UX improvements to the portfolio site. This is an interactive CV/portfolio themed as a GP primary care clinical system (like EMIS Web / SystmOne). The site should feel like a real GP system but function as a portfolio.
 
-## Context
-
-- **Tech stack:** React + TypeScript + Tailwind CSS + Framer Motion + D3
-- **Dev server:** `npm run dev` (localhost:5173)
-- **Quality gates:** `npm run lint && npm run typecheck && npm run build`
--...
+**Important constraints:**
+- Do NOT change the overall structure or architecture
+- Preserve the GP clinical system theme — improvements should reinforce it, not break it
+- Respect ex...
 ```

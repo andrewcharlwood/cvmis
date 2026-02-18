@@ -75,7 +75,7 @@ export function LastConsultationCard({ highlightedRoleId, focusRelatedIds }: Las
         opacity: isDimmed ? 0.25 : 1,
       }}
     >
-      <CardHeader dotColor="green" title="LAST CONSULTATION" rightText="Current role" />
+      <CardHeader dotColor="green" title="LATEST CONSULTATION" rightText="Current role" />
 
       <div
         role="button"
@@ -126,11 +126,51 @@ export function LastConsultationCard({ highlightedRoleId, focusRelatedIds }: Las
           fontSize: '15px',
           fontWeight: 600,
           color: consultation.orgColor ?? 'var(--accent)',
-          marginBottom: '4px',
+          marginBottom: '12px',
         }}
       >
         {consultation.role}
       </div>
+
+      <ul
+        style={{
+          listStyle: 'none',
+          padding: 0,
+          margin: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '7px',
+          marginBottom: '0px',
+        }}
+      >
+        {consultation.examination.map((bullet, index) => (
+          <li
+            key={index}
+            style={{
+              fontSize: '14px',
+              color: 'var(--text-primary)',
+              paddingLeft: '16px',
+              lineHeight: '1.5',
+              position: 'relative',
+            }}
+          >
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                left: '0',
+                top: '8px',
+                width: '5px',
+                height: '5px',
+                borderRadius: '50%',
+                backgroundColor: consultation.orgColor ?? 'var(--accent)',
+                opacity: 0.5,
+              }}
+            />
+            {bullet}
+          </li>
+        ))}
+      </ul>
 
       <button
         onClick={handleOpenPanel}

@@ -23,6 +23,7 @@ function ProjectItem({
 }: ProjectItemProps) {
   const dotColor = PROJECT_STATUS_COLORS[project.status]
   const livePillLabel = project.demoUrl ? 'Live Demo' : project.externalUrl ? 'Live' : null
+  const [isHovered, setIsHovered] = useState(false)
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -34,11 +35,14 @@ function ProjectItem({
     [onClick],
   )
 
+  const maxVisibleResults = 4
+
   return (
     <div
       style={{
         flex: `0 0 ${slideWidth}`,
         minWidth: 0,
+        containerType: 'inline-size',
       }}
     >
       <div
@@ -47,6 +51,7 @@ function ProjectItem({
         onClick={onClick}
         onKeyDown={handleKeyDown}
         style={{
+          position: 'relative',
           display: 'flex',
           flexDirection: 'column',
           gap: '10px',
@@ -59,12 +64,15 @@ function ProjectItem({
           color: 'var(--text-primary)',
           transition: 'border-color 0.15s, box-shadow 0.15s',
           cursor: 'pointer',
+          overflow: 'hidden',
         }}
         onMouseEnter={(e) => {
+          setIsHovered(true)
           e.currentTarget.style.borderColor = 'var(--accent-border)'
           e.currentTarget.style.boxShadow = '0 2px 8px rgba(26,43,42,0.08)'
         }}
         onMouseLeave={(e) => {
+          setIsHovered(false)
           e.currentTarget.style.borderColor = 'var(--border-light)'
           e.currentTarget.style.boxShadow = 'none'
         }}
@@ -77,6 +85,92 @@ function ProjectItem({
           e.currentTarget.style.boxShadow = 'none'
         }}
       >
+        {/* Results hover overlay */}
+        {project.results && project.results.length > 0 && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 1,
+              background: 'rgba(20, 40, 38, 0.96)',
+              borderRadius: 'inherit',
+              display: 'flex',
+              flexDirection: 'column',
+              padding: 'clamp(10px, 4cqi, 18px) clamp(12px, 5cqi, 20px)',
+              opacity: isHovered ? 1 : 0,
+              transition: 'opacity 0.25s ease',
+              pointerEvents: isHovered ? 'auto' : 'none',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 'clamp(9px, 3.5cqi, 13px)',
+                fontFamily: 'var(--font-geist-mono)',
+                fontWeight: 600,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: 'rgba(255, 255, 255, 0.45)',
+                marginBottom: 'clamp(6px, 3cqi, 12px)',
+              }}
+            >
+              Intervention Outcomes
+            </div>
+            <ul
+              style={{
+                listStyle: 'none',
+                margin: 0,
+                padding: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'clamp(5px, 2.5cqi, 12px)',
+                flex: 1,
+                overflow: 'hidden',
+              }}
+            >
+              {project.results.slice(0, maxVisibleResults).map((result, i) => (
+                <li
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    gap: 'clamp(6px, 2.5cqi, 10px)',
+                    fontSize: 'clamp(11px, 4.5cqi, 16px)',
+                    lineHeight: 1.4,
+                    color: 'rgba(255, 255, 255, 0.85)',
+                  }}
+                >
+                  <span
+                    style={{
+                      flexShrink: 0,
+                      width: 'clamp(4px, 1.5cqi, 7px)',
+                      height: 'clamp(4px, 1.5cqi, 7px)',
+                      borderRadius: '50%',
+                      background: 'var(--accent-primary, #00897B)',
+                      marginTop: 'clamp(4px, 2cqi, 7px)',
+                    }}
+                  />
+                  <span>{result}</span>
+                </li>
+              ))}
+            </ul>
+            <div
+              style={{
+                marginTop: 'auto',
+                paddingTop: 'clamp(6px, 3cqi, 14px)',
+                fontSize: 'clamp(10px, 4cqi, 14px)',
+                fontFamily: 'var(--font-geist-mono)',
+                fontWeight: 500,
+                letterSpacing: '0.02em',
+                color: 'var(--accent-primary, #00897B)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'clamp(3px, 1.5cqi, 6px)',
+              }}
+            >
+              Click to view more
+              <span style={{ fontSize: 'clamp(12px, 4.5cqi, 16px)', lineHeight: 1 }}>&#8594;</span>
+            </div>
+          </div>
+        )}
         <div
           style={{
             aspectRatio: '16 / 9',
