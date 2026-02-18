@@ -45,8 +45,12 @@ function SkipButton({ onSkip }: { onSkip: () => void }) {
 
 function App() {
   const [phase, setPhase] = useState<Phase>(() => {
-    if (typeof window !== 'undefined' && sessionStorage.getItem('portfolio-visited')) {
-      return 'pmr'
+    if (typeof window !== 'undefined') {
+      const visitedAt = sessionStorage.getItem('portfolio-visited')
+      if (visitedAt && Date.now() - Number(visitedAt) < 60 * 60 * 1000) {
+        return 'pmr'
+      }
+      sessionStorage.removeItem('portfolio-visited')
     }
     return 'boot'
   })
@@ -57,7 +61,7 @@ function App() {
 
   useEffect(() => {
     if (phase === 'pmr') {
-      sessionStorage.setItem('portfolio-visited', '1')
+      sessionStorage.setItem('portfolio-visited', String(Date.now()))
     }
   }, [phase])
 

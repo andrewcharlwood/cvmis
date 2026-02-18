@@ -1,5 +1,5 @@
 {
-  "pid": 2394688,
-  "started": "2026-02-18T00:22:19.954094949Z",
-  "prompt": "# Task: Portfolio UX Improvements — GP Clinical System Theme Polish\n\nImplement 11 prioritised UX ..."
+  "pid": 2540300,
+  "started": "2026-02-18T03:23:25.597181722Z",
+  "prompt": "# Task: Replace Mobile Banner with Inline Overview Section\n\nRemove the sticky `MobilePatientBanner`..."
 }

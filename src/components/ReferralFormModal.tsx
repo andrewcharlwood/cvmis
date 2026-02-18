@@ -84,6 +84,7 @@ export function ReferralFormModal({ isOpen, onClose }: ReferralFormModalProps) {
   const inputStyle: React.CSSProperties = {
     width: '100%',
     padding: '10px 12px',
+    minHeight: '44px',
     fontFamily: 'var(--font-ui)',
     fontSize: '14px',
     color: 'var(--text-primary, #1A2B2A)',
@@ -133,7 +134,7 @@ export function ReferralFormModal({ isOpen, onClose }: ReferralFormModalProps) {
             transition={{ duration: 0.25, ease: 'easeOut' }}
             style={{
               width: '100%',
-              maxWidth: '540px',
+              maxWidth: 'min(540px, calc(100vw - 32px))',
               maxHeight: 'calc(100vh - 32px)',
               overflowY: 'auto',
               backgroundColor: 'var(--surface, #FFFFFF)',
@@ -151,7 +152,7 @@ export function ReferralFormModal({ isOpen, onClose }: ReferralFormModalProps) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '16px 24px',
+                padding: '14px 16px',
                 borderBottom: '2px solid var(--accent, #0D6E6E)',
                 backgroundColor: 'var(--bg-dashboard, #F0F5F4)',
               }}
@@ -190,8 +191,8 @@ export function ReferralFormModal({ isOpen, onClose }: ReferralFormModalProps) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: '32px',
-                  height: '32px',
+                  width: '44px',
+                  height: '44px',
                   border: 'none',
                   background: 'transparent',
                   borderRadius: 'var(--radius-sm, 6px)',
@@ -215,7 +216,7 @@ export function ReferralFormModal({ isOpen, onClose }: ReferralFormModalProps) {
             {/* Form body */}
             <form
               onSubmit={handleSubmit}
-              style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px' }}
+              style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '18px' }}
             >
               {/* Referring Clinician */}
               <div>
@@ -261,7 +262,7 @@ export function ReferralFormModal({ isOpen, onClose }: ReferralFormModalProps) {
                   id="organisationTo"
                   type="text"
                   readOnly
-                  value="A. Charlwood"
+                  value="CV Managment Information System"
                   style={readOnlyStyle}
                   tabIndex={-1}
                 />
@@ -383,6 +384,7 @@ export function ReferralFormModal({ isOpen, onClose }: ReferralFormModalProps) {
                 style={{
                   width: '100%',
                   padding: '12px 16px',
+                  minHeight: '44px',
                   fontFamily: 'var(--font-ui)',
                   fontSize: '14px',
                   fontWeight: 600,

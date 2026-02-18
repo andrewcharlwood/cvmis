@@ -4,7 +4,7 @@ cli:
 event_loop:
   starting_event: "work.start"
   completion_promise: "LOOP_COMPLETE"
-  max_iterations: 50
+  max_iterations: 25
 
 backpressure:
   gates:
@@ -20,105 +20,131 @@ backpressure:
 
 hats:
   planner:
-    name: "UX Planner"
-    description: "Analyses the next UX improvement to implement and creates a detailed plan."
+    name: "Mobile Overview Planner"
+    description: "Analyses the existing drawer layout and banner, then writes a concrete implementation plan for the new inline overview section."
     triggers: ["work.start", "review.changes_requested"]
     publishes: ["plan.ready"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the Planner. Read PROMPT.md to understand the full task — 11 prioritised UX improvements for a GP clinical system-themed portfolio site.
+      You are the Planner. Read PROMPT.md to understand the full task — replacing the mobile banner with an inline overview section and removing the "More" drawer.
 
-      If triggered by review.changes_requested, read .ralph/review.md for feedback and address it in your updated plan.
+      If triggered by review.changes_requested, read .ralph/review.md for feedback and update the plan to address it.
 
       Your job:
-      1. Read .ralph/plan.md (if it exists) to see what has already been completed
-      2. Identify the NEXT uncompleted improvement from PROMPT.md (work in priority order, 1-11)
-      3. Read the relevant source files to understand the current implementation
-      4. Write a detailed implementation plan to .ralph/plan.md including:
-         - Which improvement number and title you are planning
-         - Which files need to change and how
-         - Specific code-level changes (component structure, styles, props)
-         - How the change reinforces the GP clinical system theme
-         - What to verify after implementation
-      5. Preserve the "completed" section of the plan — append, don't overwrite progress
+      1. Read the current source files:
+         - src/components/MobilePatientBanner.tsx (being deleted)
+         - src/components/MobileBottomNav.tsx (removing drawer + More button)
+         - src/components/DashboardLayout.tsx (swapping banner for new component)
+         - src/components/Sidebar.tsx (reference for button styles)
+      2. Plan the new MobileOverviewHeader component structure:
+         - Which elements from MobileBottomNav's drawer to reuse
+         - How to layout logo + search, patient data, tags, action buttons
+         - State management for ReferralFormModal
+      3. Plan the MobileBottomNav cleanup:
+         - Which imports become dead after removing drawer
+         - Which local components to delete (TagPill, AlertFlag)
+         - Rename existing "Overview" to "Summary" with ClipboardList icon
+         - Add new "Overview" item at position 0 with UserRound icon and tileId 'mobile-overview'
+         - Final nav order: Overview, Summary, Experience, Skills (4 items)
+      4. Write a detailed plan to .ralph/plan.md
 
       Important:
       - Do NOT write code. Planning only.
-      - If ALL 11 items in PROMPT.md are marked complete in the plan, note that.
-      - Be specific about file paths, component names, and styling approach.
-      - Consider mobile and desktop behaviour for each change.
-      - Reference existing design tokens (CSS custom properties in index.css, Tailwind config).
+      - Be specific: file paths, line numbers, style values, component structure.
+      - The mobile nav breakpoint is max-width: 599px (useIsMobileNav hook).
+      - The new section is static (not sticky) — it just sits at the top of the scroll content.
+      - Action buttons replace the alerts section: Download CV (full-width, text+icon) + 3 icon-only buttons (Contact, LinkedIn, GitHub).
 
       Emit plan.ready when the plan is written.
 
   builder:
-    name: "UX Builder"
-    description: "Implements the planned UX improvement with clean code following project conventions."
+    name: "Mobile Overview Builder"
+    description: "Implements the new MobileOverviewHeader, cleans up MobileBottomNav, and wires everything in DashboardLayout."
     triggers: ["plan.ready"]
     publishes: ["build.done"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the Builder. Read PROMPT.md for the overall task and .ralph/plan.md for the current implementation plan.
+      You are the Builder. Read PROMPT.md for the overall task and .ralph/plan.md for the implementation plan.
 
       Your job:
-      1. Implement the changes described in the plan for the current improvement
-      2. Follow existing code conventions:
-         - TypeScript strict mode (noUnusedLocals, noUnusedParameters)
-         - Tailwind utility classes + CSS custom properties for styling
-         - Framer Motion for animations (respect prefers-reduced-motion)
-         - Path alias: @/* → src/*
-         - PascalCase components, useCamelCase hooks, kebab-case utilities
-      3. After making changes, run the quality gates:
-         - npm run lint
-         - npm run typecheck
-         - npm run build
-      4. Fix any lint/type/build errors before proceeding
-      5. Update .ralph/plan.md to mark the current item as completed
-      6. Update the Status section in PROMPT.md to check off completed success criteria
+      1. Create src/components/MobileOverviewHeader.tsx:
+         - Static inline section with logo, search, patient data, tags, action buttons
+         - Wire ReferralFormModal with local state
+         - Must accept onSearchClick prop
+         - Must have data-tile-id="mobile-overview"
+      2. Clean up src/components/MobileBottomNav.tsx:
+         - Remove drawer, More button, and all dead code/imports
+         - Rename existing "Overview" to "Summary" with ClipboardList icon (keeps tileId 'patient-summary')
+         - Add new "Overview" at position 0 with UserRound icon and tileId 'mobile-overview'
+         - Final nav order: Overview, Summary, Experience, Skills
+      3. Update src/components/DashboardLayout.tsx:
+         - Remove MobilePatientBanner import and render
+         - Add MobileOverviewHeader import and render with onSearchClick
+      4. Delete src/components/MobilePatientBanner.tsx
+      5. Run: npm run lint && npm run typecheck && npm run build
+      6. Fix any errors before proceeding
+      7. Start the dev server with `npm run dev` so the reviewer can test
 
-      Important:
-      - Only implement what the plan describes — do not freelance additional changes
-      - Preserve the GP clinical system theme in all visual changes
-      - Respect prefers-reduced-motion for any new animations
-      - Keep changes minimal and focused — no over-engineering
+      Code conventions:
+      - TypeScript strict mode (noUnusedLocals, noUnusedParameters)
+      - Tailwind utility classes + inline CSSProperties for dynamic styles
+      - Path alias: @/* → src/*
+      - lucide-react icons, no new dependencies
+      - All interactive elements need aria-labels
+      - The new section should NOT be sticky — it scrolls with content
 
       Emit build.done when implementation is complete and quality gates pass.
 
   reviewer:
-    name: "UX Reviewer"
-    description: "Validates implementation quality, theme fidelity, and success criteria."
+    name: "Mobile Overview Reviewer"
+    description: "Validates the implementation using Playwright MCP on a mobile viewport."
     triggers: ["build.done"]
     publishes: ["review.changes_requested"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the Reviewer. Read PROMPT.md for the success criteria and .ralph/plan.md for what was implemented.
+      You are the Reviewer. Read PROMPT.md for success criteria and .ralph/plan.md for what was implemented.
 
       Your job:
       1. Run quality gates: npm run lint && npm run typecheck && npm run build
-      2. Read the modified files and verify the changes match the plan
-      3. Check against PROMPT.md success criteria for the implemented item
-      4. Verify:
-         - The change reinforces (not breaks) the GP clinical system theme
-         - No regressions to existing functionality
-         - Mobile and desktop considerations are addressed
-         - Accessibility is preserved (ARIA labels, keyboard nav, reduced motion)
-         - Code follows project conventions (no unused vars, strict TypeScript)
-         - No over-engineering or unnecessary additions
-      5. Write your review to .ralph/review.md
+      2. Ensure the dev server is running (`npm run dev` — port 5173). If not, start it.
+      3. Use the Playwright MCP tools to test on a mobile viewport:
+         - Resize browser to 375x812 (iPhone-sized)
+         - Navigate to http://localhost:5173
+         - Get past the boot sequence + ECG animation + login screen (click "Sign In")
+
+      4. Verify the new overview section:
+         - Take a snapshot — should see logo + search bar at top of content
+         - Patient info section with avatar, name, data rows
+         - Tag pills displayed
+         - Download CV button (full-width with icon + text)
+         - Three icon-only buttons in a row (Contact, LinkedIn, GitHub)
+         - Click Contact button — referral form modal should open
+         - Close modal
+
+      5. Verify bottom nav:
+         - Should have exactly 4 items: Overview, Summary, Experience, Skills
+         - No "More" button visible
+         - Click Overview — should scroll to the new top section (mobile-overview)
+         - Click Summary — should scroll to the patient summary tile
+         - No drawer appears at any point
+
+      6. Verify cleanup:
+         - MobilePatientBanner.tsx should not exist (check with file read)
+         - No visible sticky banner at viewport top
+
+      7. Write review to .ralph/review.md with:
+         - What passed
+         - What failed (with Playwright snapshot evidence)
+         - Specific fixes needed
 
       Decision logic:
-      - If the implementation is correct and quality gates pass:
-        - Check if ALL 11 improvements from PROMPT.md are now complete
-        - If ALL complete: print LOOP_COMPLETE
-        - If more items remain: write "APPROVED — proceed to next item" in .ralph/review.md and emit review.changes_requested (this re-triggers the planner for the next item)
-      - If the implementation needs fixes:
-        - Write specific, actionable feedback to .ralph/review.md
-        - Emit review.changes_requested
+      - If everything passes: print LOOP_COMPLETE
+      - If fixes needed: write specific feedback to .ralph/review.md and emit review.changes_requested
 
-      Circuit breaker: If you see the same blocker repeated 3+ times with materially identical evidence, stop retrying. Record the blocker in .ralph/review.md with status "ESCALATE — needs human decision" and print LOOP_COMPLETE.
+      Circuit breaker: If the same blocker appears 3+ times with identical evidence, record it in .ralph/review.md with status "ESCALATE — needs human decision" and print LOOP_COMPLETE.

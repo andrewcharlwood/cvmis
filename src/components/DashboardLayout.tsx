@@ -11,7 +11,7 @@ import { TimelineInterventionsSubsection } from './TimelineInterventionsSubsecti
 import { RepeatMedicationsSubsection } from './RepeatMedicationsSubsection'
 import { LastConsultationCard } from './LastConsultationCard'
 import { ChatWidget } from './ChatWidget'
-import { MobilePatientBanner } from './MobilePatientBanner'
+import { MobileOverviewHeader } from './MobileOverviewHeader'
 import { useActiveSection } from '@/hooks/useActiveSection'
 import { useIsMobileNav } from '@/hooks/useIsMobileNav'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
@@ -300,7 +300,7 @@ export function DashboardLayout() {
             paddingBottom: isMobileNav ? 'calc(56px + env(safe-area-inset-bottom) + 16px)' : undefined,
           }}
         >
-          {isMobileNav && <MobilePatientBanner />}
+          {isMobileNav && <MobileOverviewHeader onSearchClick={handleSearchClick} />}
           <div className="dashboard-grid">
             {/* PatientSummaryTile — full width (includes Latest Results subsection) */}
             <div ref={patientSummaryRef}>
@@ -361,7 +361,6 @@ export function DashboardLayout() {
       <MobileBottomNav
         activeSection={activeSection}
         onNavigate={scrollToSection}
-        onSearchClick={handleSearchClick}
       />
     </div>
   )

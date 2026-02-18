@@ -17,7 +17,6 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   const [activeField, setActiveField] = useState<'username' | 'password' | 'done' | null>('username')
   const [buttonPressed, setButtonPressed] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [typingComplete, setTypingComplete] = useState(false)
   const [buttonHovered, setButtonHovered] = useState(false)
   const [connectionState, setConnectionState] = useState<'connecting' | 'connected'>('connecting')
@@ -48,20 +47,16 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
   const canLogin = typingComplete && connectionState === 'connected'
 
   const handleLogin = useCallback(() => {
-    if (!canLogin || isExiting || isLoading) return
+    if (!canLogin || isExiting) return
     setButtonPressed(true)
     addTimeout(() => {
-      setIsLoading(true)
+      setIsExiting(true)
       addTimeout(() => {
-        setIsExiting(true)
-        // After dissolve completes (~400ms), remove overlay and reveal dashboard
-        addTimeout(() => {
-          requestFocusAfterLogin()
-          onComplete()
-        }, prefersReducedMotion ? 0 : 400)
-      }, prefersReducedMotion ? 0 : 600)
+        requestFocusAfterLogin()
+        onComplete()
+      }, prefersReducedMotion ? 0 : 400)
     }, 100)
-  }, [canLogin, isExiting, isLoading, onComplete, requestFocusAfterLogin, prefersReducedMotion, addTimeout])
+  }, [canLogin, isExiting, onComplete, requestFocusAfterLogin, prefersReducedMotion, addTimeout])
 
   const startLoginSequence = useCallback(() => {
     if (prefersReducedMotion) {
@@ -201,40 +196,6 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
         animate={isExiting ? { scale: 1.03, opacity: 0 } : { scale: 1, opacity: 1 }}
         transition={isExiting ? { duration: 0.4, ease: 'easeOut' } : { duration: 0.2, ease: 'easeOut' }}
       >
-        {isLoading ? (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '48px 0',
-              gap: '16px',
-            }}
-          >
-            <div
-              className="login-spinner"
-              style={{
-                width: '32px',
-                height: '32px',
-                border: '3px solid var(--border-light, #E4EDEB)',
-                borderTopColor: 'var(--accent, #0D6E6E)',
-                borderRadius: '50%',
-              }}
-              role="status"
-              aria-label="Loading clinical records"
-            />
-            <span
-              style={{
-                fontFamily: "var(--font-ui)",
-                fontSize: '12px',
-                color: 'var(--text-secondary, #5B7A78)',
-              }}
-            >
-              Loading clinical records...
-            </span>
-          </div>
-        ) : (
           <>
             {/* Branding Header */}
             <div
@@ -442,7 +403,6 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               </p>
             </div>
           </>
-        )}
       </motion.div>
     </motion.div>
   )

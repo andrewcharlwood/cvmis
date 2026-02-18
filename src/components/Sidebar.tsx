@@ -532,14 +532,14 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                     borderRadius: 'var(--radius-sm)',
                     cursor: 'pointer',
                     fontSize: '13px',
-                    fontWeight: 600,
+                    fontWeight: 500,
                     //fontFamily: 'var(--font-geist-mono)',
                     letterSpacing: '0.03em',
                     transition: 'border-color 150ms, color 150ms',
                   }}
                 >
                   <Send size={14} />
-                  Refer Patient
+                  Contact patient
                 </button>
                 <div style={{ display: 'flex', gap: '6px' }}>
                   <a

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Grid Concept — Overlay Variant</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1a1a2e;
+    color: rgba(255,255,255,0.87);
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 32px 24px;
+    min-height: 100vh;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-family: 'Geist Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .section-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00897B;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    color: rgba(255,255,255,0.87);
+    font-weight: 600;
+  }
+
+  .section-count {
+    color: rgba(255,255,255,0.38);
+    margin-left: auto;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .card {
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    aspect-ratio: 16 / 9;
+  }
+
+  .card:hover {
+    border-color: rgba(0,137,123,0.5);
+    box-shadow: 0 4px 20px rgba(0,137,123,0.15);
+  }
+
+  .card:hover .card-top,
+  .card:hover .card-bottom {
+    background: rgba(18, 18, 35, 0.88);
+  }
+
+  /* Thumbnail background */
+  .card-bg {
+    position: absolute;
+    inset: 0;
+  }
+
+  .card-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+  }
+
+  /* Text overlay — no background, just a layout shell */
+  .card-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Top section: title + year + status */
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    background: rgba(18, 18, 35, 0.78);
+    padding: 10px 12px;
+    border-radius: 5px 5px 0 0;
+    transition: background 0.2s;
+  }
+
+  .card-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+    line-height: 1.2;
+  }
+
+  .card-year {
+    font-family: 'Geist Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* Bottom section: result + tags */
+  .card-bottom {
+    background: rgba(18, 18, 35, 0.78);
+    padding: 10px 12px;
+    border-radius: 0 0 5px 5px;
+    transition: background 0.2s;
+  }
+
+  .card-result {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(0, 178, 163, 0.9);
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-dot.complete { background: #4caf50; }
+
+  .status-live {
+    font-family: 'Geist Mono', 'Fira Code', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #00897B;
+    background: rgba(0,137,123,0.2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    line-height: 1.4;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    align-items: center;
+  }
+
+  .tag {
+    font-family: 'Geist Mono', 'Fira Code', monospace;
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    white-space: nowrap;
+    line-height: 1.5;
+    flex-shrink: 0;
+  }
+
+  .tag-tech {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.55);
+  }
+
+  .tag-domain {
+    background: rgba(0,137,123,0.12);
+    color: rgba(0,137,123,0.8);
+  }
+
+  .tag-overflow {
+    font-family: 'Geist Mono', 'Fira Code', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .card-chevron {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.2);
+    line-height: 1;
+  }
+
+  @media (max-width: 767px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 479px) {
+    .grid { grid-template-columns: 1fr; }
+    body { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="section-header">
+  <span class="section-dot"></span>
+  <span class="section-title">Significant Interventions</span>
+  <span class="section-count">6 investigations</span>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const projects = [
+  {
+    name: "Patient Switching Algorithm",
+    year: 2025,
+    status: "complete",
+    result: "14,000 patients identified for potential therapeutic switching",
+    tech: ["Python", "Pandas", "SQL"],
+    domain: ["Health Economics", "Medicines Optimisation"],
+    thumb: "thumbnails/switchingdashboard.jpg"
+  },
+  {
+    name: "Blueteq Generator",
+    year: 2023,
+    status: "complete",
+    result: "70% reduction in high-cost drug approval forms",
+    tech: ["Python", "SQL"],
+    domain: ["High-Cost Drugs", "Process Automation"],
+    thumb: "thumbnails/blueteq.jpg"
+  },
+  {
+    name: "PharMetrics",
+    year: 2025,
+    status: "live",
+    result: "Live at medicines.charlwood.xyz",
+    tech: ["React", "TypeScript", "D3.js", "Tailwind", "Vite", "Supabase", "Recharts"],
+    domain: ["Health Economics", "Medicines Optimisation", "Data Visualisation"],
+    thumb: "thumbnails/pharmmetrics.jpg"
+  },
+  {
+    name: "Patient Pathway Analysis Tool",
+    year: 2024,
+    status: "complete",
+    result: "9 interactive chart types, sub-50ms query responses",
+    tech: ["Python", "Dash", "Plotly", "Pandas", "SQL", "CSS", "Docker", "Gunicorn"],
+    domain: ["Health Economics", "Data Visualisation", "Medicines Optimisation", "Prescribing Analytics", "Clinical Pathways", "Population Health"],
+    thumb: "thumbnails/pathways.jpg"
+  },
+  {
+    name: "CD Monitoring System",
+    year: 2024,
+    status: "complete",
+    result: "Population-scale OME tracking for controlled drugs",
+    tech: ["Python", "Pandas", "SQL"],
+    domain: ["Controlled Drugs", "Medicines Safety", "Population Health"],
+    thumb: "thumbnails/ome.jpg"
+  },
+  {
+    name: "NMS National Training Video",
+    year: 2018,
+    status: "complete",
+    result: "Shared nationally across Tesco Pharmacy network",
+    tech: ["Video Production", "Adobe Premiere"],
+    domain: ["Training", "New Medicine Service"],
+    thumb: "thumbnails/nms.jpg"
+  }
+];
+
+const grid = document.getElementById("grid");
+
+projects.forEach(p => {
+  const techShow = p.tech.slice(0, 2);
+  const domainShow = p.domain.slice(0, 2);
+  const overflow = (p.tech.length - 2) + (p.domain.length - 2);
+
+  const statusHtml = p.status === "live"
+    ? `<span class="status-live">Live</span>`
+    : `<span class="status-dot complete"></span>`;
+
+  const tagsHtml = [
+    ...techShow.map(t => `<span class="tag tag-tech">${t}</span>`),
+    ...domainShow.map(t => `<span class="tag tag-domain">${t}</span>`),
+    ...(overflow > 0 ? [`<span class="tag-overflow">+${overflow}</span>`] : [])
+  ].join("");
+
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <div class="card-bg"><img src="public/${p.thumb}" alt="${p.name} screenshot"></div>
+    <div class="card-overlay">
+      <div class="card-top">
+        <span class="card-name">${p.name}</span>
+        <span class="card-year">${p.year}</span>
+        ${statusHtml}
+      </div>
+      <div class="card-bottom">
+        <div class="card-result">${p.result}</div>
+        <div class="card-tags">${tagsHtml}</div>
+      </div>
+    </div>
+    <span class="card-chevron">&#9662;</span>
+  `;
+  grid.appendChild(card);
+});
+</script>
+
+</body>
+</html>

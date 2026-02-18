@@ -87,8 +87,8 @@ const BOOT_CONFIG: BootConfig = {
   timing: {
     lineDelay: 220,
     cursorBlinkInterval: 300,
-    holdAfterComplete: 200,
-    loadingDuration: 600,
+    holdAfterComplete: 1000,
+    loadingDuration: 2000,
     fadeOutDuration: 500,
     cursorShrinkDuration: 400,
   },
@@ -190,10 +190,10 @@ const TYPED_LINES = buildTypedLines()
 const TOTAL_CHARS = TYPED_LINES.reduce((sum, l) => sum + l.totalChars, 0)
 
 // =============================================================================
-// Progress Bar Component
+// ASCII Loading Screen Component
 // =============================================================================
 
-function ProgressBar({ active }: { active: boolean }) {
+function LoadingBar({ active }: { active: boolean }) {
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
@@ -204,7 +204,6 @@ function ProgressBar({ active }: { active: boolean }) {
     const tick = (now: number) => {
       const elapsed = now - start
       const pct = Math.min(elapsed / BOOT_CONFIG.timing.loadingDuration, 1)
-      // Ease-out curve for natural feel
       setProgress(1 - Math.pow(1 - pct, 2.5))
       if (pct < 1) raf = requestAnimationFrame(tick)
     }
@@ -216,24 +215,41 @@ function ProgressBar({ active }: { active: boolean }) {
   return (
     <div
       style={{
-        marginTop: 16,
-        height: 2,
-        backgroundColor: 'rgba(0, 255, 65, 0.1)',
-        borderRadius: 1,
+        width: 'calc(100vw - 48px)',
+        position: 'relative',
         overflow: 'hidden',
-        maxWidth: 280,
+        height: '1.2em',
+        fontFamily: 'monospace',
+        fontSize: 14,
+        letterSpacing: '0.02em',
       }}
     >
       <div
         style={{
-          height: '100%',
-          width: `${progress * 100}%`,
-          backgroundColor: COLORS.bright,
-          boxShadow: `0 0 8px ${COLORS.bright}40`,
-          borderRadius: 1,
-          transition: 'none',
+          position: 'absolute',
+          inset: 0,
+          color: `${COLORS.bright}30`,
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
         }}
-      />
+      >
+        {'\u2591'.repeat(500)}
+      </div>
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          bottom: 0,
+          width: `${progress * 100}%`,
+          color: COLORS.bright,
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          textShadow: `0 0 4px ${COLORS.bright}30`,
+        }}
+      >
+        {'\u2588'.repeat(500)}
+      </div>
     </div>
   )
 }
@@ -369,10 +385,11 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
       const charsForLine = Math.min(Math.max(0, remaining), line.totalChars)
       remaining -= charsForLine
 
-      // Cursor goes on the line currently being typed, or the last line in non-typing phases
+      // During typing: cursor inline on the line being typed
+      // During holding/loading: cursor handled after the loop (on a new line)
       const isCursorLine = phase === 'typing'
         ? !cursorPlaced && (charsForLine < line.totalChars || remaining <= 0)
-        : lineIdx === TYPED_LINES.length - 1
+        : false
 
       // Render segments
       let charBudget = phase === 'typing' ? charsForLine : line.totalChars
@@ -426,6 +443,25 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
       renderedLines.push(
         <div key={lineIdx} className="font-mono text-sm leading-relaxed">
           {spans}
+        </div>
+      )
+    }
+
+    // After typing completes: cursor on new line, or loading bar replacing it
+    if (phase === 'holding') {
+      renderedLines.push(
+        <div key="cursor-line" className="font-mono text-sm leading-relaxed">
+          <span
+            ref={cursorAnchorRef}
+            className="inline-block align-middle"
+            style={{ width: 8, height: 16 }}
+          />
+        </div>
+      )
+    } else if (phase === 'loading' || phase === 'fading') {
+      renderedLines.push(
+        <div key="bar-line" style={{ marginTop: 4 }}>
+          <LoadingBar active={phase === 'loading'} />
         </div>
       )
     }
@@ -496,9 +532,8 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
             }}
           />
 
-          {/* Content container */}
-          <div ref={containerRef} className="flex flex-col gap-1 max-w-[640px] transform -translate-y-1/2 relative z-10">
-            {/* Text content — slides up and fades during exit */}
+          {/* Content container — text always visible, bar appears below during loading */}
+          <div ref={containerRef} className="flex flex-col gap-1 transform -translate-y-1/2 relative z-10">
             <motion.div
               animate={{
                 opacity: isFadingOut ? 0 : 1,
@@ -510,28 +545,18 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
               }}
             >
               {renderLines()}
-
-              {/* Progress bar — appears during loading phase */}
-              {(phase === 'loading' || phase === 'fading') && (
-                <ProgressBar active={phase === 'loading'} />
-              )}
             </motion.div>
 
-            {/* Cursor rendered outside fading wrapper — shrinks into progress bar */}
-            {cursorPos && !isFadingOut && (
+            {/* Cursor — blinks during typing/holding, hidden when bar takes over */}
+            {cursorPos && phase !== 'loading' && !isFadingOut && (
               <span
                 className="absolute animate-blink"
                 style={{
                   left: cursorPos.left,
                   top: cursorPos.top,
                   width: 8,
-                  height: phase === 'loading' ? 4 : 16,
+                  height: 16,
                   backgroundColor: COLORS.bright,
-                  filter: phase === 'loading' ? 'blur(1px)' : 'none',
-                  boxShadow: phase === 'loading' ? `0 0 12px ${COLORS.bright}E6` : 'none',
-                  transition: phase === 'loading'
-                    ? `height ${BOOT_CONFIG.timing.cursorShrinkDuration}ms ease-out, filter ${BOOT_CONFIG.timing.cursorShrinkDuration}ms ease-out, box-shadow ${BOOT_CONFIG.timing.cursorShrinkDuration}ms ease-out`
-                    : 'none',
                   animationDuration: `${BOOT_CONFIG.timing.cursorBlinkInterval}ms`,
                 }}
               />

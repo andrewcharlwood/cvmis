@@ -624,20 +624,20 @@ function ContinuousScrollCarousel() {
     position: 'absolute',
     top: '50%',
     transform: 'translateY(-50%)',
-    width: '32px',
-    height: '32px',
+    width: '40px',
+    height: '40px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'var(--surface)',
-    border: '1px solid var(--border)',
+    background: 'var(--accent-light)',
+    border: '1px solid var(--accent-border)',
     borderRadius: '50%',
     cursor: 'pointer',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-    color: 'var(--text-secondary)',
-    transition: 'opacity 150ms, background-color 150ms',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+    color: 'var(--accent)',
+    transition: 'opacity 150ms, background-color 150ms, border-color 150ms',
     zIndex: 2,
-    opacity: 0.7,
+    opacity: 0.85,
     padding: 0,
   }
 
@@ -684,26 +684,58 @@ function ContinuousScrollCarousel() {
         </div>
       </div>
 
+      {/* Edge fade masks */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, bottom: 0, width: '48px',
+        background: 'linear-gradient(to right, var(--surface), transparent)',
+        pointerEvents: 'none', zIndex: 1,
+      }} />
+      <div style={{
+        position: 'absolute', top: 0, right: 0, bottom: 0, width: '48px',
+        background: 'linear-gradient(to left, var(--surface), transparent)',
+        pointerEvents: 'none', zIndex: 1,
+      }} />
+
       {/* Left arrow */}
       <button
         onClick={() => jumpByCards(-1)}
         aria-label="Previous project"
-        style={{ ...arrowStyle, left: '-4px' }}
-        onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
-        onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.7' }}
+        style={{ ...arrowStyle, left: '2px' }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.opacity = '1'
+          e.currentTarget.style.background = 'var(--accent)'
+          e.currentTarget.style.color = '#fff'
+          e.currentTarget.style.borderColor = 'var(--accent)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.opacity = '0.85'
+          e.currentTarget.style.background = 'var(--accent-light)'
+          e.currentTarget.style.color = 'var(--accent)'
+          e.currentTarget.style.borderColor = 'var(--accent-border)'
+        }}
       >
-        <ChevronLeft size={16} />
+        <ChevronLeft size={20} />
       </button>
 
       {/* Right arrow */}
       <button
         onClick={() => jumpByCards(1)}
         aria-label="Next project"
-        style={{ ...arrowStyle, right: '-4px' }}
-        onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
-        onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.7' }}
+        style={{ ...arrowStyle, right: '2px' }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.opacity = '1'
+          e.currentTarget.style.background = 'var(--accent)'
+          e.currentTarget.style.color = '#fff'
+          e.currentTarget.style.borderColor = 'var(--accent)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.opacity = '0.85'
+          e.currentTarget.style.background = 'var(--accent-light)'
+          e.currentTarget.style.color = 'var(--accent)'
+          e.currentTarget.style.borderColor = 'var(--accent-border)'
+        }}
       >
-        <ChevronRight size={16} />
+        <ChevronRight size={20} />
       </button>
     </div>
   )
