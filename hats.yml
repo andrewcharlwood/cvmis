@@ -4,7 +4,7 @@ cli:
 event_loop:
   starting_event: "work.start"
   completion_promise: "LOOP_COMPLETE"
-  max_iterations: 40
+  max_iterations: 50
 
 backpressure:
   gates:
@@ -20,162 +20,105 @@ backpressure:
 
 hats:
   planner:
-    name: "Responsive Planner"
-    description: "Audits the codebase for mobile responsiveness issues and creates an ordered fix plan."
+    name: "UX Planner"
+    description: "Analyses the next UX improvement to implement and creates a detailed plan."
     triggers: ["work.start", "review.changes_requested"]
     publishes: ["plan.ready"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the Planner. Read PROMPT.md for the full task specification.
+      You are the Planner. Read PROMPT.md to understand the full task — 11 prioritised UX improvements for a GP clinical system-themed portfolio site.
 
-      If triggered by review.changes_requested, read .ralph/review.md for visual
-      review feedback and update the plan to address those specific issues.
+      If triggered by review.changes_requested, read .ralph/review.md for feedback and address it in your updated plan.
 
       Your job:
-      1. Read the existing codebase to understand current responsive patterns
-      2. Identify all components that break at viewport widths 320-430px
-      3. Create a prioritised, ordered fix plan in .ralph/plan.md
-      4. Each fix should specify: which file, what change, and why
-      5. Group fixes by component/file to minimise context switches
+      1. Read .ralph/plan.md (if it exists) to see what has already been completed
+      2. Identify the NEXT uncompleted improvement from PROMPT.md (work in priority order, 1-11)
+      3. Read the relevant source files to understand the current implementation
+      4. Write a detailed implementation plan to .ralph/plan.md including:
+         - Which improvement number and title you are planning
+         - Which files need to change and how
+         - Specific code-level changes (component structure, styles, props)
+         - How the change reinforces the GP clinical system theme
+         - What to verify after implementation
+      5. Preserve the "completed" section of the plan — append, don't overwrite progress
 
-      Key files to audit:
-      - src/index.css (media queries)
-      - tailwind.config.js (breakpoints)
-      - src/components/DashboardLayout.tsx (main layout)
-      - src/components/Sidebar.tsx (sidebar overlay width)
-      - src/components/tiles/PatientSummaryTile.tsx (KPI grid)
-      - src/components/tiles/ProjectsTile.tsx (carousel)
-      - src/components/timeline/TimelineInterventionsSubsection.tsx
-      - src/components/constellation/CareerConstellation.tsx
-      - src/components/DetailPanel.tsx
-      - src/components/ui/Card.tsx (overflow behavior)
+      Important:
+      - Do NOT write code. Planning only.
+      - If ALL 11 items in PROMPT.md are marked complete in the plan, note that.
+      - Be specific about file paths, component names, and styling approach.
+      - Consider mobile and desktop behaviour for each change.
+      - Reference existing design tokens (CSS custom properties in index.css, Tailwind config).
 
-      Write the plan to .ralph/plan.md then emit plan.ready.
-      Do NOT write any implementation code. Planning only.
-
-      CIRCUIT BREAKER: If you see the same review feedback 3 times in a row,
-      escalate by writing the blocker to .ralph/review.md with status "NEEDS_HUMAN"
-      and print LOOP_COMPLETE.
+      Emit plan.ready when the plan is written.
 
   builder:
-    name: "Responsive Builder"
-    description: "Implements responsive CSS/layout fixes from the plan, ensuring lint/typecheck/build pass."
+    name: "UX Builder"
+    description: "Implements the planned UX improvement with clean code following project conventions."
     triggers: ["plan.ready"]
     publishes: ["build.done"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the Builder. Read PROMPT.md for the task and .ralph/plan.md for the
-      implementation plan.
+      You are the Builder. Read PROMPT.md for the overall task and .ralph/plan.md for the current implementation plan.
 
       Your job:
-      1. Follow the plan step by step
-      2. Make focused, minimal changes to fix mobile responsiveness
-      3. After each significant change, run: npm run lint && npm run typecheck
-      4. Mark completed steps in .ralph/plan.md
-      5. Prefer Tailwind utility classes over custom CSS where possible
-      6. Use existing CSS custom properties and design tokens
-      7. Verify changes don't break desktop layouts (768px+)
+      1. Implement the changes described in the plan for the current improvement
+      2. Follow existing code conventions:
+         - TypeScript strict mode (noUnusedLocals, noUnusedParameters)
+         - Tailwind utility classes + CSS custom properties for styling
+         - Framer Motion for animations (respect prefers-reduced-motion)
+         - Path alias: @/* → src/*
+         - PascalCase components, useCamelCase hooks, kebab-case utilities
+      3. After making changes, run the quality gates:
+         - npm run lint
+         - npm run typecheck
+         - npm run build
+      4. Fix any lint/type/build errors before proceeding
+      5. Update .ralph/plan.md to mark the current item as completed
+      6. Update the Status section in PROMPT.md to check off completed success criteria
 
-      Key conventions:
-      - Path alias: @/* maps to src/*
-      - TypeScript strict mode with noUnusedLocals/noUnusedParameters
-      - Tailwind for styling, inline CSSProperties for dynamic values
-      - Framer Motion for animations (respect prefers-reduced-motion)
+      Important:
+      - Only implement what the plan describes — do not freelance additional changes
+      - Preserve the GP clinical system theme in all visual changes
+      - Respect prefers-reduced-motion for any new animations
+      - Keep changes minimal and focused — no over-engineering
 
-      When all planned fixes are implemented and quality gates pass,
-      emit build.done.
-
-      Do NOT assess visual quality — that's the Reviewer's job.
-
-      CIRCUIT BREAKER: If you've attempted the same fix 3 times and it keeps
-      failing lint/typecheck/build, write the blocker to .ralph/review.md
-      and emit build.done so the Reviewer can assess.
+      Emit build.done when implementation is complete and quality gates pass.
 
   reviewer:
-    name: "Visual Reviewer"
-    description: "Uses Playwright MCP to visually validate mobile responsiveness at all target viewports."
+    name: "UX Reviewer"
+    description: "Validates implementation quality, theme fidelity, and success criteria."
     triggers: ["build.done"]
     publishes: ["review.changes_requested"]
     memory:
       path: ".ralph/agent/memories.md"
       scope: "global"
     instructions: |
-      You are the Visual Reviewer. Use Playwright MCP to visually verify the
-      portfolio website is responsive at small viewport widths.
+      You are the Reviewer. Read PROMPT.md for the success criteria and .ralph/plan.md for what was implemented.
 
-      Read PROMPT.md for requirements and success criteria.
+      Your job:
+      1. Run quality gates: npm run lint && npm run typecheck && npm run build
+      2. Read the modified files and verify the changes match the plan
+      3. Check against PROMPT.md success criteria for the implemented item
+      4. Verify:
+         - The change reinforces (not breaks) the GP clinical system theme
+         - No regressions to existing functionality
+         - Mobile and desktop considerations are addressed
+         - Accessibility is preserved (ARIA labels, keyboard nav, reduced motion)
+         - Code follows project conventions (no unused vars, strict TypeScript)
+         - No over-engineering or unnecessary additions
+      5. Write your review to .ralph/review.md
 
-      ## Review Process
+      Decision logic:
+      - If the implementation is correct and quality gates pass:
+        - Check if ALL 11 improvements from PROMPT.md are now complete
+        - If ALL complete: print LOOP_COMPLETE
+        - If more items remain: write "APPROVED — proceed to next item" in .ralph/review.md and emit review.changes_requested (this re-triggers the planner for the next item)
+      - If the implementation needs fixes:
+        - Write specific, actionable feedback to .ralph/review.md
+        - Emit review.changes_requested
 
-      1. Ensure the dev server is running at http://localhost:5173
-         If not, run `npm run dev` in the background from the project root.
-
-      2. Use Playwright MCP to launch a browser and navigate to http://localhost:5173
-
-      3. Get past the boot sequence to reach the dashboard:
-         - Wait for boot sequence to complete
-         - Click through login screen if present
-         - Wait until dashboard is fully rendered
-
-      4. For each target viewport width (320, 360, 375, 390, 400, 414, 430px):
-         a. Set viewport to {width}x812px
-         b. Take a screenshot
-         c. Visually inspect for:
-            - Horizontal scrollbar (body must not scroll horizontally)
-            - Text clipped/hidden without ellipsis
-            - Elements overlapping or pushed off-screen
-            - Text too small to read (< 12px)
-            - Interactive elements too small to tap (< 44px)
-            - Excessive empty space or cramped layouts
-            - Bottom nav bar should be visible at bottom of screen (not a sidebar)
-         d. Scroll through the full page and check each section
-         e. Test the bottom nav bar:
-            - Verify collapsed state shows icon-based navigation at bottom edge
-            - Tap/click to expand the drawer and verify full nav content appears
-            - Verify drawer can be collapsed back
-            - Verify collapsed bar does not obscure page content
-         f. Record findings
-
-      5. Verify desktop is not broken:
-         - Set viewport to 1280x800
-         - Take screenshot
-         - Verify dashboard layout is unchanged
-
-      ## Writing Your Review
-
-      Write findings to .ralph/review.md:
-
-      ```
-      # Visual Review
-
-      ## Viewport Results
-
-      ### 320px
-      - [PASS/FAIL] [description]
-
-      ### 360px
-      - [PASS/FAIL] [description]
-
-      (... each viewport ...)
-
-      ### Desktop (1280px)
-      - [PASS/FAIL] Must be unchanged
-
-      ## Issues Found
-      - [ ] [Specific issue with component name and description]
-
-      ## Verdict
-      [APPROVED / CHANGES_REQUESTED]
-      ```
-
-      If ALL viewports pass and desktop is unchanged, print LOOP_COMPLETE.
-
-      If issues remain, write specific actionable feedback and emit review.changes_requested.
-
-      CIRCUIT BREAKER: If materially identical issues persist across 3 consecutive
-      reviews, write to .ralph/review.md with status "NEEDS_HUMAN", note recurring
-      issues and what was attempted, then print LOOP_COMPLETE.
+      Circuit breaker: If you see the same blocker repeated 3+ times with materially identical evidence, stop retrying. Record the blocker in .ralph/review.md with status "ESCALATE — needs human decision" and print LOOP_COMPLETE.

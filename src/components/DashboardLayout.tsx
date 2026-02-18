@@ -46,6 +46,7 @@ export function DashboardLayout() {
   const isMobileNav = useIsMobileNav()
   const chronologyRef = useRef<HTMLDivElement>(null)
   const patientSummaryRef = useRef<HTMLDivElement>(null)
+  const constellationWrapperRef = useRef<HTMLDivElement>(null)
   const activeSection = useActiveSection()
   const { openPanel } = useDetailPanel()
   const careerConsultationsById = useMemo(
@@ -94,18 +95,35 @@ export function DashboardLayout() {
     return related
   }, [globalFocusId, nodeTypeById, skillToRoles, roleToSkills])
 
-  // Signal constellation animation readiness when patient summary scrolls out of view
+  // Signal constellation animation readiness:
+  // Desktop (>=768): when patient summary scrolls out of view (graph is side-by-side)
+  // Mobile (<768): when the constellation itself scrolls into view (single-column layout)
   useEffect(() => {
-    const el = patientSummaryRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) setConstellationReady(true)
-      },
-      { threshold: 0 },
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
+    const isMobile = window.innerWidth < 768
+
+    if (isMobile) {
+      const el = constellationWrapperRef.current
+      if (!el) return
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setConstellationReady(true)
+        },
+        { threshold: 0.1 },
+      )
+      observer.observe(el)
+      return () => observer.disconnect()
+    } else {
+      const el = patientSummaryRef.current
+      if (!el) return
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) setConstellationReady(true)
+        },
+        { threshold: 0 },
+      )
+      observer.observe(el)
+      return () => observer.disconnect()
+    }
   }, [])
 
   // Measure the chronology stream height so the constellation graph can match it
@@ -301,7 +319,7 @@ export function DashboardLayout() {
                     <TimelineInterventionsSubsection onNodeHighlight={handleNodeHighlight} highlightedRoleId={highlightedRoleId} focusRelatedIds={focusRelatedIds} />
                   </div>
                 </div>
-                <div className="pathway-graph-sticky">
+                <div ref={constellationWrapperRef} className="pathway-graph-sticky">
                   <CareerConstellation
                     onRoleClick={handleRoleClick}
                     onSkillClick={handleSkillClick}

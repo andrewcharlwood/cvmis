@@ -226,6 +226,18 @@ html {
   }
 }
 
+/* Live pill pulse — gentle glow throb */
+@keyframes live-pill-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.2);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 6px 2px rgba(34, 197, 94, 0.15);
+  }
+}
+
 /* Login spinner */
 @keyframes login-spin {
   to { transform: rotate(360deg); }
@@ -679,6 +691,12 @@ textarea:focus-visible {
   /* No pulse animation */
   .login-pulse-active {
     animation: none;
+  }
+
+  /* Static live pill */
+  .live-pill {
+    animation: none !important;
+    box-shadow: none !important;
   }
 
   /* Instant smooth scroll override */

@@ -21,7 +21,7 @@ function ProjectItem({
   onClick,
 }: ProjectItemProps) {
   const dotColor = PROJECT_STATUS_COLORS[project.status]
-  const isLive = project.status === 'Live'
+  const livePillLabel = project.demoUrl ? 'Live Demo' : project.externalUrl ? 'Live' : null
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -118,19 +118,44 @@ function ProjectItem({
             gap: '8px',
           }}
         >
-          <div
-            style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: dotColor,
-              flexShrink: 0,
-              marginTop: '4px',
-              animation: isLive ? 'pulse 2s infinite' : undefined,
-            }}
-            aria-hidden="true"
-          />
-          <span style={{ flex: 1, fontWeight: 500 }}>{project.name}</span>
+          {!livePillLabel && (
+            <div
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: dotColor,
+                flexShrink: 0,
+                marginTop: '4px',
+              }}
+              aria-hidden="true"
+            />
+          )}
+          <span style={{ flex: 1, fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            {project.name}
+            {livePillLabel && (
+              <span
+                className="live-pill"
+                style={{
+                  fontSize: '9px',
+                  fontFamily: 'var(--font-geist-mono)',
+                  fontWeight: 600,
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                  padding: '2px 7px',
+                  borderRadius: '9999px',
+                  background: 'rgba(34, 197, 94, 0.12)',
+                  color: '#16a34a',
+                  border: '1px solid rgba(34, 197, 94, 0.3)',
+                  animation: 'live-pill-pulse 2s ease-in-out infinite',
+                  whiteSpace: 'nowrap',
+                  lineHeight: '1.4',
+                }}
+              >
+                {livePillLabel}
+              </span>
+            )}
+          </span>
           <span
             style={{
               fontSize: '11px',

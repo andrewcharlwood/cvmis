@@ -1,103 +1,103 @@
-# Task: Fix Mobile Responsiveness for Small Viewport Widths (≤430px)
+# Task: Portfolio UX Improvements — GP Clinical System Theme Polish
 
-The portfolio website is broken on phones with viewport widths around 400px. Text overflows off-screen, elements are hidden behind `overflow: hidden`, and layout components are sized inappropriately for small screens.
+Implement 11 prioritised UX improvements to the portfolio site. This is an interactive CV/portfolio themed as a GP primary care clinical system (like EMIS Web / SystmOne). The site should feel like a real GP system but function as a portfolio.
 
-## Context
+**Important constraints:**
+- Do NOT change the overall structure or architecture
+- Preserve the GP clinical system theme — improvements should reinforce it, not break it
+- Respect existing conventions: TypeScript strict, Tailwind + CSS custom properties, Framer Motion with `prefers-reduced-motion`
+- Path alias: `@/*` → `src/*`
+- Quality gates: `npm run lint && npm run typecheck && npm run build`
 
-- **Tech stack:** React + TypeScript + Tailwind CSS + Framer Motion + D3
-- **Dev server:** `npm run dev` (localhost:5173)
-- **Quality gates:** `npm run lint && npm run typecheck && npm run build`
-- **Smallest configured breakpoint:** `xs: 480px` in tailwind.config.js — there is no sub-480px handling
-- **Key layout file:** `src/components/DashboardLayout.tsx` orchestrates all dashboard tiles
-- **CSS media queries:** `src/index.css` contains most custom responsive rules
-- **Tailwind config:** `tailwind.config.js` defines breakpoints and theme
+## Improvements (ordered by priority)
 
-## Target Viewports
+### 1. Restructure Profile Summary Text
+**File:** `src/components/tiles/PatientSummaryTile.tsx` (or wherever the narrative renders)
+**Problem:** The patient summary narrative is a dense ~80-word paragraph — a wall of text. It's the first substantive content visitors see and doesn't match the structured clinical aesthetic.
+**Change:** Break into structured clinical-style data:
+- Brief 1-2 sentence summary (like a presenting complaint)
+- Key facts as labeled fields below: Specialisation, Current System, Population, Focus Areas
+- Or collapse behind "Read more" with first sentence visible
+- Must feel like GP system structured data, not a LinkedIn About section
 
-Test and fix at these widths (all portrait orientation, 812px height):
-- **320px** — iPhone SE / smallest realistic phone
-- **360px** — Common Android (Samsung Galaxy S series)
-- **375px** — iPhone 12 mini / iPhone SE 3rd gen
-- **390px** — iPhone 14
-- **400px** — User's specific device (primary target)
-- **414px** — iPhone 8 Plus / larger phones
-- **430px** — iPhone 14 Pro Max
+### 2. Surface Impact Metrics on Project Cards
+**File:** `src/components/tiles/ProjectsTile.tsx` (or the project card component)
+**Problem:** `resultSummary` exists in the data (e.g., "14,000 patients identified", "£2.6M savings") but is not rendered on project card faces. Recruiters scan for numbers.
+**Change:** Render `resultSummary` prominently on each project card — below the title, styled as a bold stat. If a project has no `resultSummary`, don't show a placeholder.
 
-## Known Issues (from codebase analysis)
+### 3. Add Prominent Contact/Download CV CTA
+**Problem:** No visible "Get in touch" or "Download CV" button in the main content area. These actions only exist in the sidebar or command palette.
+**Change:** Add a small, visible row of action buttons (Email, LinkedIn, GitHub, Download CV) in the Patient Summary section. Style them as GP system action buttons to reinforce the theme. Keep it compact — not a hero CTA, but unmissable.
 
-### Critical
-1. **Sidebar must become a bottom nav bar at <600px** — The current sidebar is a 304px-wide overlay on mobile, leaving only 96px for content at 400px. At viewport widths below 600px, replace the sidebar with a **bottom navigation bar** that:
-   - **Collapsed state (default):** A slim fixed bar along the bottom edge of the screen with icon-based navigation items (like a mobile tab bar / iOS-style bottom nav). Should not obscure content — main content area accounts for its height.
-   - **Expanded state (on tap/click):** Slides up as a drawer/sheet showing the full sidebar content (patient name, navigation links, etc.). Tapping the bar or a close affordance collapses it back down.
-   - The existing sidebar behavior for viewports ≥600px should remain completely unchanged.
-   - Use Framer Motion for the drawer slide animation, consistent with existing animation patterns.
-2. **KPI grid forces 2 columns** — `repeat(2, minmax(0, 1fr))` creates cramped cards at small widths. Values use `30px` font.
-3. **Timeline text silently clipped** — `overflow: hidden` on Card.tsx hides content with no visual indication (no ellipsis, no wrapping).
-4. **Project carousel cards too small** — At 400px with 2 cards per view, each card is only ~194px wide.
+### 4. Reduce Boot + Login Sequence Time
+**Files:** `src/components/BootSequence.tsx`, `src/components/LoginScreen.tsx`
+**Problem:** Boot (~6-8s) + Login (~4s) = ~10 seconds before content. Too slow for repeat visitors.
+**Change:** Reduce `TYPING_SPEED` multiplier to ~1.2 (from 2). Add `sessionStorage` detection — if user has visited before in this session, auto-skip directly to dashboard. Ensure skip button still appears early for first-time visitors.
 
-### Important
-5. **Constellation graph** — 520px height at <768px may be disproportionate; needs better sizing.
-6. **No sub-480px breakpoint** — The smallest Tailwind breakpoint is `xs: 480px`, leaving 320-479px unhandled.
+### 5. Resolve Last Consultation / Timeline Duplication
+**Files:** `src/components/tiles/LastConsultationCard.tsx`, `src/components/tiles/TimelineInterventionsSubsection.tsx`
+**Problem:** Current role appears twice — once as LastConsultationCard and again as first timeline accordion entry. Redundant.
+**Change:** Differentiate LastConsultationCard as a summary-only card (role, org, band, date range, one-line summary) without the full bullet points. The full details should only appear in the timeline accordion. Add a "Current" badge to the first timeline accordion entry.
 
-### Minor
-8. **Padding/spacing** — `p-5` (20px) main content + `24px` card padding eats significant space at 400px.
-9. **Detail panel header** — Close button (44px) + title cramped at narrow widths.
-10. **Skills/medications grid** — May need column count reduction at small widths.
+### 6. Fix Text-Tertiary Contrast Ratio
+**File:** `src/index.css`
+**Problem:** `--text-tertiary: #8DA8A5` on `--bg-dashboard: #F0F5F4` yields ~2.8:1 contrast, failing WCAG AA.
+**Change:** Darken `--text-tertiary` to at least `#6B8886` (achieves ~4.5:1 on `#F0F5F4`). Verify the change looks good across dates, helper text, and monospace metadata.
 
-## Requirements
+### 7. Add Mobile Identity Bar
+**Problem:** On mobile, no name or identity marker is visible without opening the drawer. Recruiters on mobile have no visual anchor.
+**Change:** Add a compact identity bar at the top of mobile layout showing "CHARLWOOD, Andrew" and brief role title. Only visible on mobile (below `lg` breakpoint where sidebar is hidden). Style it like a GP system patient banner strip.
 
-- **All text must be visible** — no text clipped by `overflow: hidden` without ellipsis or wrapping. Truncated text needs `text-overflow: ellipsis` with title attribute for accessibility.
-- **All interactive elements must be reachable** — nothing hidden off-screen or behind other elements.
-- **Touch targets** — minimum 44x44px for interactive elements.
-- **Readable font sizes** — minimum 12px body text, 14px primary content.
-- **No horizontal scroll** — page must never scroll horizontally at any target viewport.
-- **Maintain visual identity** — keep PMR aesthetic, teal/coral palette, existing design language. Adapt proportionally, don't radically redesign.
-- **Respect existing patterns** — use Tailwind classes where possible, use existing CSS custom properties, follow project conventions.
+### 8. Simplify KPI Section Header Language
+**File:** The KPI/metrics section component
+**Problem:** "LATEST RESULTS (CLICK TO VIEW FULL REFERENCE RANGE)" is deep medical jargon that non-healthcare visitors won't understand.
+**Change:** Change to "KEY METRICS" or "IMPACT HIGHLIGHTS". Update the helper text to "Select a metric to inspect methodology, impact, and outcomes" (if not already). Keep the excellent metric cards unchanged.
+
+### 9. Add Detail Panel Exit Animation
+**Files:** `src/components/DetailPanel.tsx`
+**Problem:** Panel has `panel-slide-in` animation but closes instantly. `panel-slide-out` keyframe exists in CSS but is unused.
+**Change:** Implement exit animation — either wire up the existing `panel-slide-out` keyframe via a closing state, or use Framer Motion's `AnimatePresence`. The panel should slide out before unmounting.
+
+### 10. Fix marginBottom Typo
+**File:** `src/components/tiles/LastConsultationCard.tsx` (around line 89)
+**Problem:** `marginBottom: '1=px'` — typo, should be `'1px'` or appropriate value.
+**Change:** Fix the typo. Check surrounding styles for the correct intended value.
+
+### 11. Add Arrow Navigation to Desktop Projects Carousel
+**File:** `src/components/tiles/ProjectsTile.tsx` — `ContinuousScrollCarousel` component (lines ~356–480)
+**Problem:** The ContinuousScrollCarousel (desktop ≥1024px) auto-scrolls but offers no manual browsing.
+**Change:**
+- Add prev/next arrow buttons (ChevronLeft, ChevronRight from lucide-react) positioned absolutely at left/right edges, vertically centered
+- Style following the existing FullscreenButton pattern: `var(--surface)` background, `var(--border)` border, opacity hover effect, subtle shadow
+- Arrow click handler: jump one card width + gap = `((viewportWidth - 36) / 4) + 12` pixels
+- Apply temporary CSS transition on the track (`transform 0.4s ease`) for smooth animated jump; remove transition after completion so rAF loop isn't fighting CSS
+- Handle wrapping: keep offset within `[0, firstSetWidth)` using modulo
+- Pause/resume: on arrow click set `isPausedRef = true`, clear existing timeout, start 6-second timeout to resume auto-scroll
+- Existing hover pause/resume still works independently
+- Rapid clicks: each click resets the 6s timeout; transition handles overlapping clicks by snapping to current offset
+- Reduced motion: arrows still work (instant jump, no transition), auto-scroll stays disabled per existing logic
 
 ## Success Criteria
 
 All of the following must be true:
-
-- [ ] `npm run lint` passes with zero errors
-- [ ] `npm run typecheck` passes with zero errors
-- [ ] `npm run build` succeeds
-- [ ] At 320px viewport: no horizontal scrollbar, all text readable, no content clipped without indication
-- [ ] At 360px viewport: same as above
-- [ ] At 375px viewport: same as above
-- [ ] At 390px viewport: same as above
-- [ ] At 400px viewport: same as above (primary target)
-- [ ] At 414px viewport: same as above
-- [ ] At 430px viewport: same as above
-- [ ] At <600px: sidebar is replaced by a bottom nav bar with collapsed (tab bar) and expanded (drawer) states
-- [ ] Bottom nav bar does not obscure page content in collapsed state (content has bottom padding/margin to account for it)
-- [ ] Bottom nav drawer expands on tap and shows full navigation content
-- [ ] Bottom nav drawer can be collapsed back down
-- [ ] At ≥600px: existing sidebar behavior is completely unchanged
-- [ ] KPI cards are readable with appropriate font sizing
-- [ ] Timeline entries show full text or have proper ellipsis truncation
-- [ ] Project carousel cards are adequately sized (consider 1 card per view if needed)
-- [ ] Constellation graph fits within viewport without excessive scrolling
-- [ ] Desktop/tablet layouts (768px+) remain unchanged and unbroken
-
-## Constraints
-
-- Do NOT change boot sequence, ECG animation, or login screen (already handle small screens)
-- Do NOT change D3 force simulation logic — only container sizing
-- Do NOT add new npm dependencies
-- Do NOT remove existing features or functionality
-- Keep changes minimal and focused — fix responsiveness, don't redesign
-- Preserve all existing breakpoint behavior for md (768px) and above
-
-## Visual Validation Method
-
-Use Playwright MCP to:
-1. Navigate to `http://localhost:5173` (dev server must be running)
-2. Get past boot sequence + ECG + login to reach dashboard
-3. Set viewport to each target width × 812px height
-4. Take screenshots of dashboard at each viewport
-5. Visually inspect for: overflow, clipping, cramped text, unreachable elements
-6. Scroll through full page and verify no content is hidden
+- [ ] Profile summary is structured data, not a text wall — feels clinical
+- [ ] Project cards display `resultSummary` when available
+- [ ] Contact/Download CV actions are visible in the main content area
+- [ ] Boot + login sequence completes in ~5 seconds or less for first visit; instant skip for return visitors
+- [ ] LastConsultationCard is a distinct summary (no duplication with timeline)
+- [ ] `--text-tertiary` passes WCAG AA contrast (4.5:1) on dashboard background
+- [ ] Mobile shows identity/name without opening drawer
+- [ ] KPI header uses plain language, not clinical jargon
+- [ ] Detail panel has exit animation (slide out, not instant disappear)
+- [ ] marginBottom typo is fixed
+- [ ] Desktop projects carousel has prev/next arrow buttons
+- [ ] Arrow buttons pause auto-scroll for 6s then resume
+- [ ] `npm run lint` passes
+- [ ] `npm run typecheck` passes
+- [ ] `npm run build` passes
+- [ ] No regressions — existing functionality preserved
 
 ## Status
 
-Track progress here. When all success criteria are met, print LOOP_COMPLETE.
+Track progress here. Mark items complete as you go.
+When all success criteria are met, print LOOP_COMPLETE.
