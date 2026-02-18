@@ -13,6 +13,12 @@ interface ProjectItemProps {
   slideWidth: string
   cardMinHeight: number
   onClick: () => void
+  index: number
+  total: number
+  cardRef?: (el: HTMLDivElement | null) => void
+  onArrowKey?: (direction: -1 | 1) => void
+  onEscape?: () => void
+  isInert?: boolean
 }
 
 function ProjectItem({
@@ -20,6 +26,12 @@ function ProjectItem({
   slideWidth,
   cardMinHeight,
   onClick,
+  index,
+  total,
+  cardRef,
+  onArrowKey,
+  onEscape,
+  isInert,
 }: ProjectItemProps) {
   const dotColor = PROJECT_STATUS_COLORS[project.status]
   const livePillLabel = project.demoUrl ? 'Live Demo' : project.externalUrl ? 'Live' : null
@@ -30,15 +42,28 @@ function ProjectItem({
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
         onClick()
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        onArrowKey?.(-1)
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        onArrowKey?.(1)
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        onEscape?.()
       }
     },
-    [onClick],
+    [onClick, onArrowKey, onEscape],
   )
 
   const maxVisibleResults = 4
 
   return (
     <div
+      role="group"
+      aria-roledescription="slide"
+      aria-label={`Project ${index + 1} of ${total}: ${project.name}`}
+      aria-hidden={isInert || undefined}
       style={{
         flex: `0 0 ${slideWidth}`,
         minWidth: 0,
@@ -46,8 +71,9 @@ function ProjectItem({
       }}
     >
       <div
+        ref={cardRef}
         role="button"
-        tabIndex={0}
+        tabIndex={isInert ? -1 : 0}
         onClick={onClick}
         onKeyDown={handleKeyDown}
         style={{
@@ -392,6 +418,8 @@ function EmblaProjectsCarousel() {
   const slideWidth = slidesPerView === 1 ? '100%' : 'calc(50% - 6px)'
   const cardMinHeight = wrapperWidth < 480 ? 148 : wrapperWidth < 640 ? 168 : 182
 
+  const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, align: 'start' },
     [Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })],
@@ -435,17 +463,41 @@ function EmblaProjectsCarousel() {
     }
   }, [emblaApi, onSelect])
 
+  const handleArrowKey = useCallback((currentIndex: number, direction: -1 | 1) => {
+    const nextIndex = (currentIndex + direction + investigations.length) % investigations.length
+    cardRefs.current.get(nextIndex)?.focus()
+    emblaApi?.scrollTo(nextIndex)
+  }, [emblaApi])
+
+  const handleEscape = useCallback(() => {
+    wrapperRef.current?.focus()
+  }, [])
+
   return (
-    <div ref={wrapperRef}>
+    <div
+      ref={wrapperRef}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Significant Interventions"
+      tabIndex={-1}
+    >
       <div ref={emblaRef} style={{ overflow: 'hidden' }}>
         <div style={{ display: 'flex', gap: '12px' }}>
-          {investigations.map((project) => (
+          {investigations.map((project, i) => (
             <ProjectItem
               key={project.id}
               project={project}
               slideWidth={slideWidth}
               cardMinHeight={cardMinHeight}
               onClick={() => openPanel({ type: 'project', investigation: project })}
+              index={i}
+              total={investigations.length}
+              cardRef={(el) => {
+                if (el) cardRefs.current.set(i, el)
+                else cardRefs.current.delete(i)
+              }}
+              onArrowKey={(dir) => handleArrowKey(i, dir)}
+              onEscape={handleEscape}
             />
           ))}
         </div>
@@ -502,6 +554,8 @@ function ContinuousScrollCarousel() {
       : false,
   )
   const resumeTimeoutRef = useRef<number>(0)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
   const jumpByCards = useCallback((direction: 1 | -1) => {
     const trackEl = trackRef.current
@@ -620,6 +674,16 @@ function ContinuousScrollCarousel() {
     isPausedRef.current = value
   }
 
+  const handleArrowKey = useCallback((currentIndex: number, direction: -1 | 1) => {
+    const nextIndex = (currentIndex + direction + investigations.length) % investigations.length
+    cardRefs.current.get(nextIndex)?.focus()
+    jumpByCards(direction)
+  }, [jumpByCards])
+
+  const handleEscape = useCallback(() => {
+    containerRef.current?.focus()
+  }, [])
+
   const arrowStyle: React.CSSProperties = {
     position: 'absolute',
     top: '50%',
@@ -642,7 +706,14 @@ function ContinuousScrollCarousel() {
   }
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div
+      ref={containerRef}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Significant Interventions"
+      tabIndex={-1}
+      style={{ position: 'relative' }}
+    >
       <div
         ref={viewportRef}
         style={{ overflow: 'hidden' }}
@@ -668,15 +739,25 @@ function ContinuousScrollCarousel() {
             <div
               key={setIndex}
               ref={setIndex === 0 ? firstSetRef : undefined}
+              aria-hidden={setIndex === 1 || undefined}
               style={{ display: 'flex', gap: '12px', paddingRight: '12px', flexShrink: 0 }}
             >
-              {investigations.map((project) => (
+              {investigations.map((project, i) => (
                 <ProjectItem
                   key={`${setIndex}-${project.id}`}
                   project={project}
                   slideWidth={slideWidth}
                   cardMinHeight={cardMinHeight}
                   onClick={() => openPanel({ type: 'project', investigation: project })}
+                  index={i}
+                  total={investigations.length}
+                  isInert={setIndex === 1}
+                  cardRef={setIndex === 0 ? (el) => {
+                    if (el) cardRefs.current.set(i, el)
+                    else cardRefs.current.delete(i)
+                  } : undefined}
+                  onArrowKey={setIndex === 0 ? (dir) => handleArrowKey(i, dir) : undefined}
+                  onEscape={setIndex === 0 ? handleEscape : undefined}
                 />
               ))}
             </div>
