@@ -44,11 +44,22 @@ function SkipButton({ onSkip }: { onSkip: () => void }) {
 }
 
 function App() {
-  const [phase, setPhase] = useState<Phase>('boot')
+  const [phase, setPhase] = useState<Phase>(() => {
+    if (typeof window !== 'undefined' && sessionStorage.getItem('portfolio-visited')) {
+      return 'pmr'
+    }
+    return 'boot'
+  })
 
   useEffect(() => {
     initModel()
   }, [])
+
+  useEffect(() => {
+    if (phase === 'pmr') {
+      sessionStorage.setItem('portfolio-visited', '1')
+    }
+  }, [phase])
 
   const skipToDashboard = () => setPhase('pmr')
 
@@ -78,7 +89,7 @@ function App() {
           <LoginScreen onComplete={() => setPhase('pmr')} />
         )}
 
-        {phase === 'boot' && (
+        {(phase === 'boot' || phase === 'login') && (
           <SkipButton onSkip={skipToDashboard} />
         )}
       </div>

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useRef, ReactNode } from 'react'
 import { DetailPanelContent } from '@/types/pmr'
 
 interface DetailPanelContextValue {
@@ -6,6 +6,7 @@ interface DetailPanelContextValue {
   openPanel: (content: DetailPanelContent) => void
   closePanel: () => void
   isOpen: boolean
+  isClosing: boolean
 }
 
 const DetailPanelContext = createContext<DetailPanelContextValue | undefined>(
@@ -18,14 +19,27 @@ interface DetailPanelProviderProps {
 
 export function DetailPanelProvider({ children }: DetailPanelProviderProps) {
   const [content, setContent] = useState<DetailPanelContent | null>(null)
+  const [isClosing, setIsClosing] = useState(false)
+  const closeTimerRef = useRef<number>(0)
 
-  const openPanel = (newContent: DetailPanelContent) => {
+  const openPanel = useCallback((newContent: DetailPanelContent) => {
+    // If we're in the middle of closing, cancel it
+    if (closeTimerRef.current) {
+      window.clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = 0
+    }
+    setIsClosing(false)
     setContent(newContent)
-  }
+  }, [])
 
-  const closePanel = () => {
-    setContent(null)
-  }
+  const closePanel = useCallback(() => {
+    setIsClosing(true)
+    closeTimerRef.current = window.setTimeout(() => {
+      setIsClosing(false)
+      setContent(null)
+      closeTimerRef.current = 0
+    }, 250) // match panel-slide-out duration
+  }, [])
 
   const isOpen = content !== null
 
@@ -34,6 +48,7 @@ export function DetailPanelProvider({ children }: DetailPanelProviderProps) {
     openPanel,
     closePanel,
     isOpen,
+    isClosing,
   }
 
   return (

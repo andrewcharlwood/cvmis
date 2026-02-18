@@ -1,12 +1,13 @@
 import React from 'react'
-import { FileText, ChevronRight } from 'lucide-react'
+import { FileText, ChevronRight, Mail, Linkedin, Github, Download } from 'lucide-react'
 import { CardHeader } from '../Card'
 import { ParentSection } from '../ParentSection'
 import { kpis } from '@/data/kpis'
 import type { KPI } from '@/types/pmr'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
-import { getLatestResultsCopy, getProfileSectionTitle, getProfileSummaryText } from '@/lib/profile-content'
+import { getLatestResultsCopy, getProfileSectionTitle, getStructuredProfile } from '@/lib/profile-content'
 import { KPI_COLORS } from '@/lib/theme-colors'
+import { useIsMobileNav } from '@/hooks/useIsMobileNav'
 import { ProjectsCarousel } from './ProjectsTile'
 
 interface MetricCardProps {
@@ -107,15 +108,66 @@ function MetricCard({ kpi }: MetricCardProps) {
   )
 }
 
+const ACTION_LINKS = [
+  { label: 'Email', href: 'mailto:andy@charlwood.xyz', icon: Mail, external: false },
+  { label: 'LinkedIn', href: 'https://linkedin.com/in/andycharlwood', icon: Linkedin, external: true },
+  { label: 'GitHub', href: 'https://github.com/andycharlwood', icon: Github, external: true },
+  { label: 'Download CV', href: '/References/CV_v4.md', icon: Download, external: true },
+] as const
+
+const actionButtonStyles: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px',
+  padding: '6px 12px',
+  fontSize: '12px',
+  fontWeight: 600,
+  fontFamily: 'var(--font-geist-mono)',
+  letterSpacing: '0.03em',
+  textTransform: 'uppercase',
+  borderRadius: 'var(--radius-sm)',
+  border: '1px solid var(--border)',
+  background: 'var(--surface)',
+  color: 'var(--accent)',
+  cursor: 'pointer',
+  transition: 'background-color 150ms, border-color 150ms',
+  textDecoration: 'none',
+}
+
 export function PatientSummaryTile() {
-  const summaryText = getProfileSummaryText()
+  const structuredProfile = getStructuredProfile()
   const latestResultsCopy = getLatestResultsCopy()
   const sectionTitle = getProfileSectionTitle()
+  const isMobile = useIsMobileNav()
 
   const profileTextStyles: React.CSSProperties = {
     fontSize: '15px',
     lineHeight: '1.65',
     color: 'var(--text-primary)',
+  }
+
+  const fieldsGridStyles: React.CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: isMobile ? '1fr' : 'auto 1fr',
+    gap: isMobile ? '2px 0' : '6px 16px',
+    borderTop: '1px solid var(--border-light)',
+    paddingTop: '14px',
+    marginTop: '14px',
+  }
+
+  const fieldLabelStyles: React.CSSProperties = {
+    fontSize: '12px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
+    color: 'var(--text-tertiary)',
+    fontFamily: 'var(--font-geist-mono)',
+  }
+
+  const fieldValueStyles: React.CSSProperties = {
+    fontSize: '13px',
+    fontWeight: 600,
+    color: 'var(--text-primary)',
+    marginBottom: isMobile ? '8px' : undefined,
   }
 
   const kpiGridStyles: React.CSSProperties = {
@@ -125,8 +177,33 @@ export function PatientSummaryTile() {
 
   return (
     <ParentSection title={sectionTitle} tileId="patient-summary">
-      {/* Profile text */}
-      <div style={profileTextStyles}>{summaryText}</div>
+      {/* Presenting complaint */}
+      <div style={profileTextStyles}>{structuredProfile.presentingComplaint}</div>
+
+      {/* Structured profile fields */}
+      <div style={fieldsGridStyles}>
+        {structuredProfile.fields.map((field) => (
+          <React.Fragment key={field.label}>
+            <span style={fieldLabelStyles}>{field.label}</span>
+            <span style={fieldValueStyles}>{field.value}</span>
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* Contact / CTA action bar */}
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px' }}>
+        {ACTION_LINKS.map((action) => (
+          <a
+            key={action.label}
+            href={action.href}
+            {...(action.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+            style={actionButtonStyles}
+          >
+            <action.icon size={13} aria-hidden="true" />
+            {action.label}
+          </a>
+        ))}
+      </div>
 
       {/* Latest Results subsection */}
       <div style={{ marginTop: '28px' }}>

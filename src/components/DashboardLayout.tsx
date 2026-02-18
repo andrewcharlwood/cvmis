@@ -299,6 +299,43 @@ export function DashboardLayout() {
             paddingBottom: isMobileNav ? 'calc(56px + env(safe-area-inset-bottom) + 16px)' : undefined,
           }}
         >
+          {isMobileNav && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 16px',
+                background: 'var(--accent)',
+                borderRadius: 'var(--radius-sm)',
+                marginBottom: '12px',
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    color: '#FFFFFF',
+                    letterSpacing: '0.04em',
+                    fontFamily: 'var(--font-ui)',
+                  }}
+                >
+                  CHARLWOOD, Andrew
+                </div>
+                <div
+                  style={{
+                    fontSize: '11px',
+                    color: 'rgba(255,255,255,0.75)',
+                    fontFamily: 'var(--font-geist-mono)',
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  Informatics Pharmacist · NHS Norfolk & Waveney ICB
+                </div>
+              </div>
+            </div>
+          )}
           <div className="dashboard-grid">
             {/* PatientSummaryTile — full width (includes Latest Results subsection) */}
             <div ref={patientSummaryRef}>

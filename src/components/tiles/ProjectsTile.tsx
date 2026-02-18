@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { investigations } from '@/data/investigations'
 import { CardHeader } from '../Card'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
@@ -167,6 +168,21 @@ function ProjectItem({
             {project.requestedYear}
           </span>
         </div>
+
+        {project.resultSummary && (
+          <div
+            style={{
+              fontSize: '12px',
+              fontWeight: 700,
+              fontFamily: 'var(--font-geist-mono)',
+              color: 'var(--accent)',
+              letterSpacing: '-0.01em',
+              lineHeight: 1.3,
+            }}
+          >
+            {project.resultSummary}
+          </div>
+        )}
 
         <div
           style={{
@@ -391,6 +407,56 @@ function ContinuousScrollCarousel() {
       ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
       : false,
   )
+  const resumeTimeoutRef = useRef<number>(0)
+
+  const jumpByCards = useCallback((direction: 1 | -1) => {
+    const trackEl = trackRef.current
+    const firstSetEl = firstSetRef.current
+    if (!trackEl || !firstSetEl) return
+
+    const gap = 12
+    const cardsPerView = 4
+    const totalGap = (cardsPerView - 1) * gap
+    const cardWidth = (viewportWidth - totalGap) / cardsPerView
+    const jumpPx = cardWidth + gap
+
+    // Pause auto-scroll
+    isPausedRef.current = true
+    window.clearTimeout(resumeTimeoutRef.current)
+
+    // Apply CSS transition for smooth jump
+    if (!prefersReducedMotion) {
+      trackEl.style.transition = 'transform 0.4s ease'
+    }
+
+    // Calculate new offset
+    const setWidth = firstSetEl.offsetWidth
+    let newOffset = offsetRef.current + (direction * jumpPx)
+    if (setWidth > 0) {
+      newOffset = ((newOffset % setWidth) + setWidth) % setWidth
+    }
+    offsetRef.current = newOffset
+    trackEl.style.transform = `translate3d(-${newOffset}px, 0, 0)`
+
+    // Remove transition after completion
+    if (!prefersReducedMotion) {
+      const transitionEnd = () => {
+        trackEl.style.transition = ''
+      }
+      trackEl.addEventListener('transitionend', transitionEnd, { once: true })
+    }
+
+    // Resume auto-scroll after 6s
+    resumeTimeoutRef.current = window.setTimeout(() => {
+      isPausedRef.current = false
+    }, 6000)
+  }, [viewportWidth, prefersReducedMotion])
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(resumeTimeoutRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     const viewportEl = viewportRef.current
@@ -460,46 +526,91 @@ function ContinuousScrollCarousel() {
     isPausedRef.current = value
   }
 
+  const arrowStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    width: '32px',
+    height: '32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
+    borderRadius: '50%',
+    cursor: 'pointer',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+    color: 'var(--text-secondary)',
+    transition: 'opacity 150ms, background-color 150ms',
+    zIndex: 2,
+    opacity: 0.7,
+    padding: 0,
+  }
+
   return (
-    <div
-      ref={viewportRef}
-      style={{ overflow: 'hidden' }}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-          setPaused(false)
-        }
-      }}
-    >
+    <div style={{ position: 'relative' }}>
       <div
-        ref={trackRef}
-        style={{
-          display: 'flex',
-          width: 'max-content',
-          willChange: 'transform',
-          transform: 'translate3d(0, 0, 0)',
+        ref={viewportRef}
+        style={{ overflow: 'hidden' }}
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onFocusCapture={() => setPaused(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+            setPaused(false)
+          }
         }}
       >
-        {[0, 1].map((setIndex) => (
-          <div
-            key={setIndex}
-            ref={setIndex === 0 ? firstSetRef : undefined}
-            style={{ display: 'flex', gap: '12px', paddingRight: '12px', flexShrink: 0 }}
-          >
-            {investigations.map((project) => (
-              <ProjectItem
-                key={`${setIndex}-${project.id}`}
-                project={project}
-                slideWidth={slideWidth}
-                cardMinHeight={cardMinHeight}
-                onClick={() => openPanel({ type: 'project', investigation: project })}
-              />
-            ))}
-          </div>
-        ))}
+        <div
+          ref={trackRef}
+          style={{
+            display: 'flex',
+            width: 'max-content',
+            willChange: 'transform',
+            transform: 'translate3d(0, 0, 0)',
+          }}
+        >
+          {[0, 1].map((setIndex) => (
+            <div
+              key={setIndex}
+              ref={setIndex === 0 ? firstSetRef : undefined}
+              style={{ display: 'flex', gap: '12px', paddingRight: '12px', flexShrink: 0 }}
+            >
+              {investigations.map((project) => (
+                <ProjectItem
+                  key={`${setIndex}-${project.id}`}
+                  project={project}
+                  slideWidth={slideWidth}
+                  cardMinHeight={cardMinHeight}
+                  onClick={() => openPanel({ type: 'project', investigation: project })}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
+
+      {/* Left arrow */}
+      <button
+        onClick={() => jumpByCards(-1)}
+        aria-label="Previous project"
+        style={{ ...arrowStyle, left: '-4px' }}
+        onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
+        onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.7' }}
+      >
+        <ChevronLeft size={16} />
+      </button>
+
+      {/* Right arrow */}
+      <button
+        onClick={() => jumpByCards(1)}
+        aria-label="Next project"
+        style={{ ...arrowStyle, right: '-4px' }}
+        onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
+        onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.7' }}
+      >
+        <ChevronRight size={16} />
+      </button>
     </div>
   )
 }

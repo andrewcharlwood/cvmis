@@ -54,11 +54,11 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       setIsLoading(true)
       addTimeout(() => {
         setIsExiting(true)
-        // After dissolve completes (~600ms), remove overlay and reveal dashboard
+        // After dissolve completes (~400ms), remove overlay and reveal dashboard
         addTimeout(() => {
           requestFocusAfterLogin()
           onComplete()
-        }, prefersReducedMotion ? 0 : 600)
+        }, prefersReducedMotion ? 0 : 400)
       }, prefersReducedMotion ? 0 : 600)
     }, 100)
   }, [canLogin, isExiting, isLoading, onComplete, requestFocusAfterLogin, prefersReducedMotion, addTimeout])
@@ -100,10 +100,10 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
               setTypingComplete(true)
               // Button becomes interactive — user clicks to proceed
             }
-          }, 60)
-        }, 300)
+          }, 40)
+        }, 200)
       }
-    }, 80)
+    }, 55)
   }, [prefersReducedMotion, addTimeout])
 
   // Focus the login button when login becomes available for keyboard accessibility
@@ -147,7 +147,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
     // Full motion: 400ms card entrance + 1000ms logo animation + 100ms pause = 1500ms
     const startTimeout = addTimeout(() => {
       startLoginSequence()
-    }, prefersReducedMotion ? 400 : 1500)
+    }, prefersReducedMotion ? 400 : 600)
 
     // Capture ref value for cleanup
     const pendingTimeouts = timeoutRefs.current

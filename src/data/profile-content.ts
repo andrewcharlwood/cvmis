@@ -4,8 +4,18 @@ export const profileContent: DeepReadonly<ProfileContent> = {
   profile: {
     sectionTitle: 'Patient Summary',
     patientSummaryNarrative: 'Healthcare leader combining clinical pharmacy expertise with proficiency in Python, SQL, and data analytics, self-taught over the past decade through a drive to find root causes in data and build the most efficient solutions to complex problems. Currently leading population health analytics for NHS Norfolk & Waveney ICB, serving a population of 1.2 million. Experienced in working with messy, real-world prescribing data at scale to deliver actionable insights — from financial scenario modelling and pharmaceutical rebate negotiation to algorithm design and population-level pathway development. Proven track record of identifying and prioritising efficiency programmes worth £14.6M+ through automated, data-driven analysis. Skilled at translating complex clinical, financial, and analytical requirements into clear recommendations for executive stakeholders.',
+    structuredProfile: {
+      presentingComplaint: 'Healthcare leader combining clinical pharmacy expertise with proficiency in Python, SQL, and data analytics. Currently leading population health analytics for NHS Norfolk & Waveney ICB, serving 1.2 million.',
+      fields: [
+        { label: 'Specialisation', value: 'Population Health Analytics & Medicines Optimisation' },
+        { label: 'Current System', value: 'NHS Norfolk & Waveney ICB' },
+        { label: 'Population', value: '1.2 million' },
+        { label: 'Focus Areas', value: 'Prescribing analytics, financial modelling, algorithm design, data pipelines' },
+        { label: 'Key Achievement', value: '£14.6M+ efficiency programmes identified' },
+      ],
+    },
     latestResults: {
-      title: 'LATEST RESULTS (CLICK TO VIEW FULL REFERENCE RANGE)',
+      title: 'KEY METRICS',
       rightText: 'Updated February 2026',
       helperText: 'Select a metric to inspect methodology, impact, and outcomes.',
       evidenceCta: 'Click to view evidence',

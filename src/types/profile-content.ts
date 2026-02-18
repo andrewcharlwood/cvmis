@@ -80,10 +80,21 @@ export interface SkillsUICopy {
   readonly categories: ReadonlyArray<SkillsCategoryCopyEntry>
 }
 
+export interface StructuredProfileField {
+  readonly label: string
+  readonly value: string
+}
+
+export interface StructuredProfile {
+  readonly presentingComplaint: string
+  readonly fields: ReadonlyArray<StructuredProfileField>
+}
+
 export interface ProfileContent {
   readonly profile: {
     readonly sectionTitle: string
     readonly patientSummaryNarrative: string
+    readonly structuredProfile: StructuredProfile
     readonly latestResults: LatestResultsCopy
     readonly sidebar: SidebarCopy
   }

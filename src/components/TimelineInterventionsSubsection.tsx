@@ -62,6 +62,24 @@ function TimelineInterventionItem({
               <span className={isEducation ? 'timeline-intervention-pill timeline-intervention-pill--education' : 'timeline-intervention-pill'}>
                 {interventionLabel}
               </span>
+              {entity.dateRange.end === null && (
+                <span
+                  style={{
+                    fontSize: '9px',
+                    fontWeight: 700,
+                    fontFamily: 'var(--font-geist-mono)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    padding: '2px 7px',
+                    borderRadius: '9999px',
+                    background: 'rgba(34, 197, 94, 0.12)',
+                    color: '#16a34a',
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                  }}
+                >
+                  Current
+                </span>
+              )}
               <div
                 style={{
                   fontSize: '14px',

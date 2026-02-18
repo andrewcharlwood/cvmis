@@ -62,7 +62,7 @@ function getDotColor(content: DetailPanelContent): CardHeaderProps['dotColor'] {
 }
 
 export function DetailPanel() {
-  const { content, closePanel, isOpen } = useDetailPanel()
+  const { content, closePanel, isOpen, isClosing } = useDetailPanel()
   const panelRef = useRef<HTMLDivElement>(null)
   const titleId = 'detail-panel-title'
 
@@ -83,7 +83,7 @@ export function DetailPanel() {
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen, closePanel])
 
-  if (!isOpen || !content) return null
+  if ((!isOpen && !isClosing) || !content) return null
 
   const width = widthMap[content.type]
   const title = getPanelTitle(content)
@@ -101,6 +101,8 @@ export function DetailPanel() {
           backdropFilter: 'blur(var(--backdrop-blur))',
           zIndex: 1000,
           animation: 'backdrop-fade-in 150ms ease-out',
+          opacity: isClosing ? 0 : 1,
+          transition: 'opacity 200ms ease-out',
         }}
         onClick={closePanel}
         aria-hidden="true"
@@ -124,7 +126,7 @@ export function DetailPanel() {
           zIndex: 1001,
           display: 'flex',
           flexDirection: 'column',
-          animation: 'panel-slide-in 250ms ease-out',
+          animation: isClosing ? 'panel-slide-out 250ms ease-in forwards' : 'panel-slide-in 250ms ease-out',
         }}
       >
         {/* Header */}

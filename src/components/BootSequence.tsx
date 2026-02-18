@@ -59,7 +59,7 @@ interface TypedLine {
 
 // Global speed multiplier for typing animation.
 // 1.0 = default (~3.3s typing). Lower = faster, higher = slower.
-const TYPING_SPEED = 2
+const TYPING_SPEED = 1.0
 
 const COLORS = {
   bright: '#00ff41',
@@ -87,8 +87,8 @@ const BOOT_CONFIG: BootConfig = {
   timing: {
     lineDelay: 220,
     cursorBlinkInterval: 300,
-    holdAfterComplete: 600,
-    loadingDuration: 1200,
+    holdAfterComplete: 200,
+    loadingDuration: 600,
     fadeOutDuration: 500,
     cursorShrinkDuration: 400,
   },

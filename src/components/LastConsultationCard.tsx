@@ -86,7 +86,7 @@ export function LastConsultationCard({ highlightedRoleId, focusRelatedIds }: Las
           display: 'flex',
           flexWrap: 'wrap',
           gap: '20px',
-          marginBottom: '1=px',
+          marginBottom: '10px',
           paddingBottom: '14px',
           borderBottom: '1px solid var(--border-light)',
           cursor: 'pointer',
@@ -126,51 +126,11 @@ export function LastConsultationCard({ highlightedRoleId, focusRelatedIds }: Las
           fontSize: '15px',
           fontWeight: 600,
           color: consultation.orgColor ?? 'var(--accent)',
-          marginBottom: '12px',
+          marginBottom: '4px',
         }}
       >
         {consultation.role}
       </div>
-
-      <ul
-        style={{
-          listStyle: 'none',
-          padding: 0,
-          margin: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '7px',
-          marginBottom: '0px',
-        }}
-      >
-        {consultation.examination.map((bullet, index) => (
-          <li
-            key={index}
-            style={{
-              fontSize: '14px',
-              color: 'var(--text-primary)',
-              paddingLeft: '16px',
-              lineHeight: '1.5',
-              position: 'relative',
-            }}
-          >
-            <span
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                left: '0',
-                top: '8px',
-                width: '5px',
-                height: '5px',
-                borderRadius: '50%',
-                backgroundColor: consultation.orgColor ?? 'var(--accent)',
-                opacity: 0.5,
-              }}
-            />
-            {bullet}
-          </li>
-        ))}
-      </ul>
 
       <button
         onClick={handleOpenPanel}
