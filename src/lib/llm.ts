@@ -8,14 +8,8 @@ export interface ChatMessage {
 export const LLM_MODEL = 'z-ai/glm-5'
 export const LLM_DISPLAY_NAME = 'GLM-5'
 
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
-
-function getApiKey(): string | undefined {
-  return import.meta.env.VITE_OPEN_ROUTER_API_KEY as string | undefined
-}
-
 export function isLLMAvailable(): boolean {
-  return !!getApiKey()
+  return true
 }
 
 export function buildSystemPrompt(): string {
@@ -44,22 +38,12 @@ function buildRequestBody(
 export async function* sendChatMessage(
   messages: ChatMessage[],
 ): AsyncGenerator<string> {
-  const apiKey = getApiKey()
-  if (!apiKey) {
-    throw new Error('LLM API key not configured')
-  }
-
   const systemPrompt = buildSystemPrompt()
   const body = buildRequestBody(messages, systemPrompt)
 
-  const response = await fetch(OPENROUTER_API_URL, {
+  const response = await fetch('/api/chat', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-      'HTTP-Referer': window.location.origin,
-      'X-Title': 'Andy Charlwood Portfolio',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
 

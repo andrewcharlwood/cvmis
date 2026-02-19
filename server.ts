@@ -104,6 +104,56 @@ app.post('/api/contact', async (req, res) => {
   }
 })
 
+// Chat proxy endpoint — keeps API key server-side
+app.post('/api/chat', async (req, res) => {
+  const apiKey = process.env.OPEN_ROUTER_API_KEY
+  if (!apiKey) {
+    return res.status(500).json({ error: 'LLM API key not configured' })
+  }
+
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': req.headers.origin || req.headers.referer || '',
+        'X-Title': 'Andy Charlwood Portfolio',
+      },
+      body: JSON.stringify(req.body),
+    })
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: `LLM API error: ${response.status}` })
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.setHeader('Cache-Control', 'no-cache')
+    res.setHeader('Connection', 'keep-alive')
+
+    const reader = response.body?.getReader()
+    if (!reader) {
+      return res.status(500).json({ error: 'No response body' })
+    }
+
+    const pump = async () => {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        res.write(value)
+      }
+      res.end()
+    }
+    await pump()
+  } catch (error) {
+    console.error('Chat proxy error:', error)
+    if (!res.headersSent) {
+      return res.status(500).json({ error: 'Failed to proxy chat request' })
+    }
+    res.end()
+  }
+})
+
 // SPA fallback
 app.get('*', (_req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'))
