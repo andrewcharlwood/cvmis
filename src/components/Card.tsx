@@ -74,7 +74,7 @@ export function CardHeader({ dotColor, title, rightText }: CardHeaderProps) {
     textTransform: 'none',
     letterSpacing: 'normal',
     color: 'var(--text-tertiary)',
-    fontFamily: "'Geist Mono', monospace",
+    fontFamily: 'var(--font-geist-mono)',
     marginLeft: 'auto',
   }
 

@@ -77,7 +77,7 @@ export function PhoneCaptcha({ phone }: PhoneCaptchaProps) {
           style={{
             fontSize: '11px',
             color: error ? 'var(--alert, #e53935)' : 'var(--text-tertiary)',
-            fontFamily: 'Geist Mono, monospace',
+            fontFamily: 'var(--font-geist-mono)',
             transition: 'color 150ms',
           }}
         >
@@ -99,7 +99,7 @@ export function PhoneCaptcha({ phone }: PhoneCaptchaProps) {
               width: '36px',
               padding: '3px 4px',
               fontSize: '12px',
-              fontFamily: 'Geist Mono, monospace',
+              fontFamily: 'var(--font-geist-mono)',
               border: `1px solid ${error ? 'var(--alert, #e53935)' : 'var(--border)'}`,
               borderRadius: '4px',
               background: 'var(--surface)',

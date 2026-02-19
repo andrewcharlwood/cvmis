@@ -72,7 +72,7 @@ export default {
         mono: ['Fira Code', 'monospace'],
         ui: ['Elvaro Grotesque', 'system-ui', 'sans-serif'],
         'ui-alt': ['Blumir', 'system-ui', 'sans-serif'],
-        geist: ['Geist Mono', 'Fira Code', 'monospace'],
+        geist: ['Interval Mono', 'Fira Code', 'monospace'],
       },
       boxShadow: {
         // GP System three-tier shadow system

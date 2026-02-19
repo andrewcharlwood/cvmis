@@ -115,7 +115,7 @@ export function MobileOverviewHeader({ onSearchClick }: MobileOverviewHeaderProp
             <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>
               CHARLWOOD, Andrew
             </div>
-            <div style={{ fontSize: '12px', fontFamily: 'Geist Mono, monospace', color: 'var(--text-secondary)' }}>
+            <div style={{ fontSize: '12px', fontFamily: 'var(--font-geist-mono)', color: 'var(--text-secondary)' }}>
               {sidebarCopy.roleTitle}
             </div>
           </div>
@@ -130,7 +130,7 @@ export function MobileOverviewHeader({ onSearchClick }: MobileOverviewHeaderProp
           ].map(({ label, value, mono }) => (
             <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', padding: '2px 0' }}>
               <span style={{ color: 'var(--text-tertiary)' }}>{label}</span>
-              <span style={{ color: 'var(--text-primary)', fontWeight: 500, textAlign: 'right', fontFamily: mono ? 'Geist Mono, monospace' : undefined, fontSize: mono ? '12px' : undefined, letterSpacing: mono ? '0.12em' : undefined }}>
+              <span style={{ color: 'var(--text-primary)', fontWeight: 500, textAlign: 'right', fontFamily: mono ? 'var(--font-geist-mono)' : undefined, fontSize: mono ? '12px' : undefined, letterSpacing: mono ? '0.12em' : undefined }}>
                 {value}
               </span>
             </div>
@@ -167,7 +167,7 @@ export function MobileOverviewHeader({ onSearchClick }: MobileOverviewHeaderProp
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         {/* Download CV — full width */}
         <a
-          href="/References/CV_v4.md"
+          href="/Andrew_Charlwood_CV.pdf"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Download CV"
@@ -214,7 +214,7 @@ export function MobileOverviewHeader({ onSearchClick }: MobileOverviewHeaderProp
             <Send size={16} />
           </button>
           <a
-            href="https://linkedin.com/in/andycharlwood"
+            href="https://www.linkedin.com/in/andrewcharlwood/"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="LinkedIn profile"
@@ -233,7 +233,7 @@ export function MobileOverviewHeader({ onSearchClick }: MobileOverviewHeaderProp
             <Linkedin size={16} />
           </a>
           <a
-            href="https://github.com/andycharlwood"
+            href="https://github.com/andrewcharlwood"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub profile"

@@ -66,6 +66,34 @@
   font-display: swap;
 }
 
+/* Monospace — Interval Mono */
+@font-face {
+  font-family: 'Interval Mono';
+  src: url('/Fonts/IntervalMono/WOFF/TBJInterval-Light.woff2') format('woff2'),
+       url('/Fonts/IntervalMono/WOFF/TBJInterval-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interval Mono';
+  src: url('/Fonts/IntervalMono/WOFF/TBJInterval-Regular.woff2') format('woff2'),
+       url('/Fonts/IntervalMono/WOFF/TBJInterval-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Interval Mono';
+  src: url('/Fonts/IntervalMono/WOFF/TBJInterval-Bold.woff2') format('woff2'),
+       url('/Fonts/IntervalMono/WOFF/TBJInterval-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Premium UI fonts — Blumir (alternative) */
 @font-face {
   font-family: 'Blumir';
@@ -89,8 +117,8 @@
   --muted: #94A3B8;
   --card-bg: #FFFFFF;
   --radius: 16px;
-  --font-primary: 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-secondary: 'Inter Tight', system-ui, sans-serif;
+  --font-primary: 'Elvaro Grotesque', system-ui, sans-serif;
+  --font-secondary: 'Blumir', system-ui, sans-serif;
 
   /* Typography — Elvaro Grotesque primary, Blumir alternative */
   --font-ui: 'Elvaro Grotesque', system-ui, sans-serif;
@@ -131,7 +159,7 @@
   --shadow-md: 0 2px 8px rgba(26,43,42,0.08);
   --shadow-lg: 0 8px 32px rgba(26,43,42,0.12);
   --font-body: var(--font-ui);
-  --font-mono-dashboard: 'Geist Mono', 'Fira Code', monospace;
+  --font-mono-dashboard: 'Interval Mono', 'Fira Code', monospace;
 
   /* Detail panel */
   --panel-narrow: 400px;

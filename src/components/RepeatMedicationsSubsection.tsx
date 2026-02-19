@@ -100,7 +100,7 @@ function SkillRow({ skill, yearsSuffix, onClick, onHighlight, isDimmedByFocus = 
           style={{
             fontSize: '12px',
             color: 'var(--text-tertiary)',
-            fontFamily: '"Geist Mono", monospace',
+            fontFamily: 'var(--font-geist-mono)',
           }}
         >
           {skill.frequency} · {skill.yearsOfExperience} {yearsSuffix}
@@ -182,7 +182,7 @@ function CategorySection({
           style={{
             fontSize: '11px',
             color: 'var(--text-tertiary)',
-            fontFamily: '"Geist Mono", monospace',
+            fontFamily: 'var(--font-geist-mono)',
             whiteSpace: 'nowrap',
           }}
         >

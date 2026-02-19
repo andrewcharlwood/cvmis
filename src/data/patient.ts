@@ -9,7 +9,7 @@ export const patient: Patient = {
   address: 'Norwich, UK',
   phone: '07795553088',
   email: 'andy@charlwood.xyz',
-  linkedin: 'linkedin.com/in/andycharlwood',
+  linkedin: 'linkedin.com/in/andrewcharlwood',
   status: 'Active',
   badge: 'Open to opportunities',
   qualification: 'MPharm (Hons) 2:1',

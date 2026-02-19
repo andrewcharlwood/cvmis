@@ -233,7 +233,7 @@ export function DashboardLayout() {
       case 'download': {
         // For now, open the CV file or trigger a download
         // This can be wired to an actual PDF when available
-        window.open('/References/CV_v4.md', '_blank')
+        window.open('/Andrew_Charlwood_CV.pdf', '_blank')
         break
       }
       case 'panel': {

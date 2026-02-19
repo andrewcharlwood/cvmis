@@ -252,7 +252,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                   style={{
                     width: '100%',
                     padding: '9px 11px',
-                    fontFamily: "'Geist Mono', 'Fira Code', monospace",
+                    fontFamily: 'var(--font-geist-mono)',
                     fontSize: 'clamp(13px, 1.2vw, 15px)',
                     backgroundColor: activeField === 'username' ? 'var(--surface, #FFFFFF)' : 'var(--bg-dashboard, #F0F5F4)',
                     border: activeField === 'username' ? '1px solid var(--accent, #0D6E6E)' : '1px solid var(--border-light, #E4EDEB)',
@@ -294,7 +294,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                   style={{
                     width: '100%',
                     padding: '9px 11px',
-                    fontFamily: "'Geist Mono', 'Fira Code', monospace",
+                    fontFamily: 'var(--font-geist-mono)',
                     fontSize: 'clamp(13px, 1.2vw, 15px)',
                     backgroundColor: activeField === 'password' ? 'var(--surface, #FFFFFF)' : 'var(--bg-dashboard, #F0F5F4)',
                     border: activeField === 'password' ? '1px solid var(--accent, #0D6E6E)' : '1px solid var(--border-light, #E4EDEB)',
@@ -370,7 +370,7 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
                 />
                 <span
                   style={{
-                    fontFamily: "var(--font-geist-mono, 'Geist Mono', monospace)",
+                    fontFamily: 'var(--font-geist-mono)',
                     fontSize: '12px',
                     color: connectionState === 'connected' ? 'var(--success, #059669)' : 'var(--alert, #DC2626)',
                     transition: prefersReducedMotion ? 'none' : 'color 300ms ease',

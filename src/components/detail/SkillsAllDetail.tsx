@@ -91,7 +91,7 @@ export function SkillsAllDetail({ category }: SkillsAllDetailProps) {
                   style={{
                     fontSize: '10px',
                     color: 'var(--text-tertiary)',
-                    fontFamily: '"Geist Mono", monospace',
+                    fontFamily: 'var(--font-geist-mono)',
                     whiteSpace: 'nowrap',
                   }}
                 >
@@ -193,7 +193,7 @@ function SkillRow({ skill, yearsSuffix, onClick }: SkillRowProps) {
           style={{
             fontSize: '10.5px',
             color: 'var(--text-tertiary)',
-            fontFamily: '"Geist Mono", monospace',
+            fontFamily: 'var(--font-geist-mono)',
           }}
         >
           {skill.frequency} · {skill.yearsOfExperience} {yearsSuffix}

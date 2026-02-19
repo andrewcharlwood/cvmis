@@ -310,7 +310,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
             <div
               style={{
                 fontSize: '13px',
-                fontFamily: 'Geist Mono, monospace',
+                fontFamily: 'var(--font-geist-mono)',
                 fontWeight: 400,
                 color: 'var(--text-secondary)',
                 marginTop: '2px',
@@ -341,7 +341,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                   style={{
                     color: 'var(--text-primary)',
                     fontWeight: 500,
-                    fontFamily: 'Geist Mono, monospace',
+                    fontFamily: 'var(--font-geist-mono)',
                     fontSize: '12px',
                     letterSpacing: '0.12em',
                   }}
@@ -434,7 +434,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
               </div>
             </div>
             <a
-              href="/References/CV_v4.md"
+              href="/Andrew_Charlwood_CV.pdf"
               target="_blank"
               rel="noopener noreferrer"
                   style={{
@@ -543,7 +543,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                 </button>
                 <div style={{ display: 'flex', gap: '6px' }}>
                   <a
-                    href="https://linkedin.com/in/andycharlwood"
+                    href="https://www.linkedin.com/in/andrewcharlwood/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="sidebar-control"
@@ -568,7 +568,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                     LinkedIn
                   </a>
                   <a
-                    href="https://github.com/andycharlwood"
+                    href="https://github.com/andrewcharlwood"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="sidebar-control"
