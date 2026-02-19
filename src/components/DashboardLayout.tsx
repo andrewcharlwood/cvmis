@@ -15,6 +15,7 @@ const RepeatMedicationsSubsection = lazy(() => import('./RepeatMedicationsSubsec
 const ChatWidget = lazy(() => import('./ChatWidget').then(m => ({ default: m.ChatWidget })))
 import { useActiveSection } from '@/hooks/useActiveSection'
 import { useIsMobileNav } from '@/hooks/useIsMobileNav'
+import { useIsTabletOrBelow } from '@/hooks/useIsTabletOrBelow'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { timelineConsultations, timelineEntities } from '@/data/timeline'
 import { skills } from '@/data/skills'
@@ -46,6 +47,7 @@ export function DashboardLayout() {
   const [chronologyHeight, setChronologyHeight] = useState<number | null>(null)
   const [constellationReady, setConstellationReady] = useState(false)
   const isMobileNav = useIsMobileNav()
+  const isTabletOrBelow = useIsTabletOrBelow()
   const chronologyRef = useRef<HTMLDivElement>(null)
   const patientSummaryRef = useRef<HTMLDivElement>(null)
   const constellationWrapperRef = useRef<HTMLDivElement>(null)
@@ -186,15 +188,17 @@ export function DashboardLayout() {
   )
 
   const handleNodeHighlight = useCallback((id: string | null) => {
+    if (isTabletOrBelow) return
     setHighlightedNodeId(id)
     setGlobalFocusId(id)
-  }, [])
+  }, [isTabletOrBelow])
 
   const handleNodeHover = useCallback((id: string | null) => {
+    if (isTabletOrBelow) return
     const nodeType = id ? nodeTypeById.get(id) : null
     setHighlightedRoleId(nodeType !== 'skill' ? id : null)
     setGlobalFocusId(id)
-  }, [nodeTypeById])
+  }, [isTabletOrBelow, nodeTypeById])
 
   // Global Ctrl+K listener to open command palette
   useEffect(() => {
