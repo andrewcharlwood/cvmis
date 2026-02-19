@@ -4,11 +4,18 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ExpandableCardShell } from './ExpandableCardShell'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import { timelineEntities, timelineConsultations } from '@/data/timeline'
+import { documents } from '@/data/documents'
 import { getExperienceEducationUICopy } from '@/lib/profile-content'
 import type { TimelineEntity } from '@/types/pmr'
+
+const timelineToDocumentId: Record<string, string> = {
+  'nhs-mary-seacole-2018': 'doc-mary-seacole',
+  'uea-mpharm-2011': 'doc-mpharm',
+  'highworth-alevels-2009': 'doc-alevels',
+}
 import { hexToRgba, motionSafeTransition } from '@/lib/utils'
 
-const VISIBLE_COUNT = 4
+const VISIBLE_COUNT = 5
 
 interface TimelineInterventionItemProps {
   entity: TimelineEntity
@@ -304,6 +311,12 @@ export function TimelineInterventionsSubsection({ onNodeHighlight, highlightedRo
   }, [])
 
   const handleViewFull = useCallback((entity: TimelineEntity) => {
+    if (entity.kind === 'education') {
+      const docId = timelineToDocumentId[entity.id]
+      const doc = docId ? documents.find((d) => d.id === docId) : undefined
+      if (doc) openPanel({ type: 'education', document: doc })
+      return
+    }
     const consultation = consultationsById.get(entity.id)
     if (!consultation) return
     openPanel({ type: 'career-role', consultation })

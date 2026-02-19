@@ -66,6 +66,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
       'stakeholder-engagement',
       'change-management',
       'healthcare-leadership',
+      'team-development',
     ],
     skillStrengths: {
       'data-analysis': 1.0,
@@ -88,6 +89,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
       'stakeholder-engagement': 0.9,
       'change-management': 0.7,
       'healthcare-leadership': 0.9,
+      'team-development': 0.8,
     },
   },
   {
@@ -149,6 +151,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
       'stakeholder-engagement',
       'change-management',
       'healthcare-leadership',
+      'team-development',
     ],
     skillStrengths: {
       'data-analysis': 0.95,
@@ -171,6 +174,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
       'stakeholder-engagement': 0.9,
       'change-management': 0.7,
       'healthcare-leadership': 0.85,
+      'team-development': 0.75,
     },
   },
   {
@@ -281,6 +285,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
       'change-management',
       'stakeholder-engagement',
       'healthcare-leadership',
+      'team-development',
     ],
     skillStrengths: {
       'data-analysis': 0.7,
@@ -290,6 +295,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
       'change-management': 0.6,
       'stakeholder-engagement': 0.6,
       'healthcare-leadership': 0.7,
+      'team-development': 0.8,
     },
   },
   {
@@ -376,12 +382,49 @@ const timelineEntitySeeds: TimelineEntity[] = [
     },
   },
   {
+    id: 'nhs-mary-seacole-2018',
+    kind: 'education',
+    title: 'Mary Seacole Programme',
+    graphLabel: 'Mary Seacole',
+    organization: 'NHS Leadership Academy',
+    orgColor: '#6B21A8',
+    dateRange: {
+      start: '2018-01-01',
+      end: '2018-12-31',
+      display: '2018',
+      startYear: 2018,
+      endYear: 2018,
+    },
+    description: 'Formal NHS leadership qualification providing theoretical grounding in healthcare leadership approaches, change management, and system-level thinking. Achieved programme score of 78%.',
+    details: [
+      'Programme score: 78%',
+      'Healthcare leadership and change management',
+      'System-level thinking and leading without authority',
+    ],
+    outcomes: [
+      'Theoretical grounding in healthcare leadership approaches',
+      'Enhanced change management capabilities',
+      'System-level strategic thinking skills',
+    ],
+    codedEntries: [
+      { code: 'LDR001', description: 'NHS Leadership qualification — 78%' },
+      { code: 'CHG001', description: 'Change management and system-level thinking' },
+    ],
+    skills: ['healthcare-leadership', 'change-management', 'stakeholder-engagement', 'team-development'],
+    skillStrengths: {
+      'healthcare-leadership': 0.7,
+      'change-management': 0.6,
+      'stakeholder-engagement': 0.5,
+      'team-development': 0.5,
+    },
+  },
+  {
     id: 'uea-mpharm-2011',
     kind: 'education',
     title: 'MPharm (Hons) 2:1',
     graphLabel: 'MPharm',
     organization: 'University of East Anglia',
-    orgColor: '#7B2D8E',
+    orgColor: '#6B21A8',
     dateRange: {
       start: '2011-09-01',
       end: '2015-06-30',
@@ -416,7 +459,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
     title: 'A-Levels',
     graphLabel: 'A-Levels',
     organization: 'Highworth Grammar School',
-    orgColor: '#9C27B0',
+    orgColor: '#6B21A8',
     dateRange: {
       start: '2009-09-01',
       end: '2011-06-30',

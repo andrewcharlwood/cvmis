@@ -4,8 +4,8 @@ import {
   BarChart3, Code2, Database, LayoutDashboard, Bot, FileCode2,
   Pill, Users, FileCheck, Stethoscope,
   TrendingUp, Route, BookOpen, Store,
-  Presentation, Calculator, Banknote, Handshake, RefreshCw, Crown,
-  ChevronRight,
+  Presentation, Calculator, Banknote, Handshake, RefreshCw,
+  GitBranch, Workflow, UserPlus, ChevronRight,
 } from 'lucide-react'
 import { skills } from '@/data/skills'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
@@ -16,7 +16,8 @@ const iconMap: Record<string, LucideIcon> = {
   BarChart3, Code2, Database, LayoutDashboard, Bot, FileCode2,
   Pill, Users, FileCheck, Stethoscope,
   TrendingUp, Route, BookOpen, Store,
-  Presentation, Calculator, Banknote, Handshake, RefreshCw, Crown,
+  Presentation, Calculator, Banknote, Handshake, RefreshCw,
+  GitBranch, Workflow, UserPlus,
 }
 
 interface SkillsAllDetailProps {
@@ -35,12 +36,21 @@ export function SkillsAllDetail({ category }: SkillsAllDetailProps) {
     }
   }, [category])
 
+  const frequencyRank = (freq: string): number => {
+    if (freq.includes('daily')) return freq.startsWith('4') ? 0 : freq.startsWith('3') ? 1 : freq.startsWith('1') ? 3 : 2
+    if (freq === 'Daily') return 4
+    if (freq.includes('weekly')) return freq.startsWith('2') ? 5 : freq.startsWith('1') ? 6 : 7
+    if (freq === 'Weekly') return 7
+    if (freq === 'Bi-monthly') return 8
+    return 9 // As needed
+  }
+
   const groupedSkills = skillsCopy.categories.map(({ id, label }) => ({
     id,
     label,
     skills: skills
       .filter((s) => s.category === id)
-      .sort((a, b) => b.yearsOfExperience - a.yearsOfExperience),
+      .sort((a, b) => frequencyRank(a.frequency) - frequencyRank(b.frequency)),
   }))
 
   const handleSkillClick = (skill: SkillMedication) => {

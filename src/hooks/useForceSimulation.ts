@@ -26,6 +26,10 @@ function hashString(input: string): number {
   return Math.abs(hash)
 }
 
+function isRoleNode(type: string): boolean {
+  return type === 'role'
+}
+
 function isEntityNode(type: string): boolean {
   return type === 'role' || type === 'education'
 }
@@ -48,7 +52,8 @@ function getHeight(width: number, containerHeight?: number | null): number {
   return 400
 }
 
-const roleNodes = constellationNodes.filter(n => (n.type === 'role' || n.type === 'education') && !HIDDEN_ENTITY_IDS.has(n.id))
+const roleNodes = constellationNodes.filter(n => n.type === 'role' && !HIDDEN_ENTITY_IDS.has(n.id))
+const educationNodes = constellationNodes.filter(n => n.type === 'education' && !HIDDEN_ENTITY_IDS.has(n.id))
 
 export function useForceSimulation(
   svgRef: React.RefObject<SVGSVGElement | null>,
@@ -84,7 +89,8 @@ export function useForceSimulation(
 
     svg.selectAll('*').remove()
 
-    const years = roleNodes.map(n => fractionalYear(n))
+    const allEntityNodes = [...roleNodes, ...educationNodes]
+    const years = allEntityNodes.map(n => fractionalYear(n))
     const minYear = Math.min(...years)
     const maxYear = Math.max(...years)
 
@@ -301,6 +307,16 @@ export function useForceSimulation(
     const skillZoneLeft = sidePadding + srActive
     const skillZoneWidth = skillZoneRight - skillZoneLeft
 
+    // Education nodes sit on the left side, timeline-anchored on Y
+    const educationInitialMap = new Map<string, { x: number; y: number }>()
+    const eduX = skillZoneLeft + rw / 2 + (isMobile ? 8 : Math.round(12 * sf))
+    educationNodes.forEach((edu) => {
+      educationInitialMap.set(edu.id, {
+        x: eduX,
+        y: yScale(fractionalYear(edu)),
+      })
+    })
+
     // Pre-compute skill homeY and group by role-set to offset overlaps
     const skillRoleKey = new Map<string, string>() // skillId -> sorted role key
     const skillBaseY = new Map<string, number>()   // skillId -> base homeY
@@ -312,7 +328,7 @@ export function useForceSimulation(
       skillRoleKey.set(n.id, key)
 
       const positions = roleIds
-        .map(roleId => roleInitialMap.get(roleId))
+        .map(roleId => roleInitialMap.get(roleId) ?? educationInitialMap.get(roleId))
         .filter(Boolean) as Array<{ x: number; y: number }>
       const baseY = positions.length > 0
         ? positions.reduce((sum, p) => sum + p.y, 0) / positions.length
@@ -336,7 +352,11 @@ export function useForceSimulation(
     })
 
     const nodes: SimNode[] = visibleNodeData.map(n => {
-      if (isEntityNode(n.type)) {
+      if (n.type === 'education') {
+        const pos = educationInitialMap.get(n.id)!
+        return { ...n, x: pos.x, y: pos.y, vx: 0, vy: 0, homeX: pos.x, homeY: pos.y }
+      }
+      if (isRoleNode(n.type)) {
         const pos = roleInitialMap.get(n.id)!
         return { ...n, x: pos.x, y: pos.y, vx: 0, vy: 0, homeX: pos.x, homeY: pos.y }
       }
@@ -517,9 +537,9 @@ export function useForceSimulation(
         })
       })
 
-    // Entity connectors to timeline
+    // Role connectors to timeline (education nodes on left don't connect)
     const roleConnectors = connectorGroup.selectAll('line.role-connector')
-      .data(nodes.filter(n => isEntityNode(n.type)))
+      .data(nodes.filter(n => isRoleNode(n.type)))
       .join('line')
       .attr('class', 'role-connector')
       .attr('stroke', 'var(--border)')
@@ -539,13 +559,15 @@ export function useForceSimulation(
         .id(d => d.id)
         .distance(isMobile ? 56 : Math.round(120 * sf))
         .strength(d => (d as SimLink).strength * 0.15))
-      .force('x', d3.forceX<SimNode>(d => d.homeX).strength(d => isEntityNode(d.type) ? 1.0 : 0.6))
+      .force('x', d3.forceX<SimNode>(d => d.homeX).strength(d =>
+        isRoleNode(d.type) ? 1.0 : d.type === 'education' ? 0.9 : 0.6
+      ))
       .force('y', d3.forceY<SimNode>(d => {
         if (isEntityNode(d.type)) {
           return yScale(fractionalYear(d))
         }
         return d.homeY
-      }).strength(d => isEntityNode(d.type) ? 0.98 : 0.25))
+      }).strength(d => isRoleNode(d.type) ? 0.98 : d.type === 'education' ? 0.85 : 0.25))
       .force('collide', d3.forceCollide<SimNode>(d =>
         isEntityNode(d.type) ? Math.max(rw, rh) / 2 + (isMobile ? 8 : Math.round(10 * sf)) : srActive + (isMobile ? 14 : Math.round(16 * sf))
       ).iterations(3))
@@ -556,8 +578,11 @@ export function useForceSimulation(
 
     const renderTick = () => {
       nodes.forEach(d => {
-        if (isEntityNode(d.type)) {
+        if (isRoleNode(d.type)) {
           d.x = Math.max(rw / 2 + 6, Math.min(axisX - roleGap - rw / 2 + rw / 2, d.x))
+          d.y = Math.max(rh / 2 + topPadding, Math.min(height - rh / 2 - bottomPadding, d.y))
+        } else if (d.type === 'education') {
+          d.x = Math.max(rw / 2 + 6, Math.min(skillZoneRight, d.x))
           d.y = Math.max(rh / 2 + topPadding, Math.min(height - rh / 2 - bottomPadding, d.y))
         } else {
           d.x = Math.max(srActive + 6, Math.min(skillZoneRight, d.x))
