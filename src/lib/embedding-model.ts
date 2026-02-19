@@ -1,18 +1,15 @@
-import { env, pipeline, type FeatureExtractionPipeline } from '@xenova/transformers'
-
-// Serve model files from /models/ (Vite serves public/ at root)
-env.localModelPath = '/models/'
-env.allowRemoteModels = false
-env.useBrowserCache = false
-
-let extractor: FeatureExtractionPipeline | null = null
+let extractor: import('@xenova/transformers').FeatureExtractionPipeline | null = null
 let loading = false
 
 export async function initModel(): Promise<void> {
   if (extractor || loading) return
   loading = true
   try {
-    extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2') as FeatureExtractionPipeline
+    const { env, pipeline } = await import('@xenova/transformers')
+    env.localModelPath = '/models/'
+    env.allowRemoteModels = false
+    env.useBrowserCache = false
+    extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2') as import('@xenova/transformers').FeatureExtractionPipeline
   } catch {
     // Silently swallow — model unavailable, semantic search won't activate
   } finally {

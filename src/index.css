@@ -5,15 +5,6 @@
 /* Premium UI fonts — Elvaro Grotesque (primary) */
 @font-face {
   font-family: 'Elvaro Grotesque';
-  src: url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Light.woff2') format('woff2'),
-       url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Light.woff') format('woff');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Elvaro Grotesque';
   src: url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Regular.woff2') format('woff2'),
        url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Regular.woff') format('woff');
   font-weight: 400;
@@ -48,48 +39,12 @@
   font-display: swap;
 }
 
-@font-face {
-  font-family: 'Elvaro Grotesque';
-  src: url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-ExtraBold.woff2') format('woff2'),
-       url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-ExtraBold.woff') format('woff');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Elvaro Grotesque';
-  src: url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Black.woff2') format('woff2'),
-       url('/Fonts/Elvaro Grotesque Sans Family/WOFF/TBJElvaro-Black.woff') format('woff');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* Monospace — Interval Mono */
-@font-face {
-  font-family: 'Interval Mono';
-  src: url('/Fonts/IntervalMono/WOFF/TBJInterval-Light.woff2') format('woff2'),
-       url('/Fonts/IntervalMono/WOFF/TBJInterval-Light.woff') format('woff');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
 @font-face {
   font-family: 'Interval Mono';
   src: url('/Fonts/IntervalMono/WOFF/TBJInterval-Regular.woff2') format('woff2'),
        url('/Fonts/IntervalMono/WOFF/TBJInterval-Regular.woff') format('woff');
   font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Interval Mono';
-  src: url('/Fonts/IntervalMono/WOFF/TBJInterval-Bold.woff2') format('woff2'),
-       url('/Fonts/IntervalMono/WOFF/TBJInterval-Bold.woff') format('woff');
-  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }

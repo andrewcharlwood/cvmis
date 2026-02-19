@@ -56,10 +56,9 @@ function App() {
   })
 
   useEffect(() => {
-    initModel()
-  }, [])
-
-  useEffect(() => {
+    if (phase === 'login' || phase === 'pmr') {
+      initModel()
+    }
     if (phase === 'pmr') {
       sessionStorage.setItem('portfolio-visited', String(Date.now()))
     }

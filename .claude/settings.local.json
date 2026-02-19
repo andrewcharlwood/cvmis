@@ -54,7 +54,14 @@
       "Bash(npx eslint:*)",
       "Bash(git checkout:*)",
       "mcp__plugin_playwright_playwright__browser_hover",
-      "mcp__plugin_playwright_playwright__browser_run_code"
+      "mcp__plugin_playwright_playwright__browser_run_code",
+      "WebFetch(domain:pagespeed.web.dev)",
+      "WebFetch(domain:www.googleapis.com)",
+      "Bash(find:*)",
+      "Bash(du -sh:*)",
+      "Bash(sudo apt-get install:*)",
+      "Bash(pdftotext:*)",
+      "Bash(pdftoppm:*)"
     ]
   }
 }

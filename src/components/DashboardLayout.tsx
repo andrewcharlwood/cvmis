@@ -1,17 +1,18 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import Sidebar from './Sidebar'
 import { MobileBottomNav } from './MobileBottomNav'
-import { CommandPalette } from './CommandPalette'
-import { DetailPanel } from './DetailPanel'
 import { PatientSummaryTile } from './tiles/PatientSummaryTile'
 import { ParentSection } from './ParentSection'
-import CareerConstellation from './constellation/CareerConstellation'
 import { TimelineInterventionsSubsection } from './TimelineInterventionsSubsection'
-import { RepeatMedicationsSubsection } from './RepeatMedicationsSubsection'
 import { LastConsultationCard } from './LastConsultationCard'
-import { ChatWidget } from './ChatWidget'
 import { MobileOverviewHeader } from './MobileOverviewHeader'
+
+const CommandPalette = lazy(() => import('./CommandPalette').then(m => ({ default: m.CommandPalette })))
+const DetailPanel = lazy(() => import('./DetailPanel').then(m => ({ default: m.DetailPanel })))
+const CareerConstellation = lazy(() => import('./constellation/CareerConstellation'))
+const RepeatMedicationsSubsection = lazy(() => import('./RepeatMedicationsSubsection').then(m => ({ default: m.RepeatMedicationsSubsection })))
+const ChatWidget = lazy(() => import('./ChatWidget').then(m => ({ default: m.ChatWidget })))
 import { useActiveSection } from '@/hooks/useActiveSection'
 import { useIsMobileNav } from '@/hooks/useIsMobileNav'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
@@ -329,22 +330,26 @@ export function DashboardLayout() {
                   </div>
                 </div>
                 <div ref={constellationWrapperRef} className="pathway-graph-sticky">
-                  <CareerConstellation
-                    onRoleClick={handleRoleClick}
-                    onSkillClick={handleSkillClick}
-                    onNodeHover={handleNodeHover}
-                    highlightedNodeId={highlightedNodeId}
-                    containerHeight={chronologyHeight}
-                    animationReady={constellationReady}
-                    globalFocusActive={globalFocusId !== null}
-                  />
+                  <Suspense fallback={null}>
+                    <CareerConstellation
+                      onRoleClick={handleRoleClick}
+                      onSkillClick={handleSkillClick}
+                      onNodeHover={handleNodeHover}
+                      highlightedNodeId={highlightedNodeId}
+                      containerHeight={chronologyHeight}
+                      animationReady={constellationReady}
+                      globalFocusActive={globalFocusId !== null}
+                    />
+                  </Suspense>
                 </div>
 
 
               </div>
 
               <div data-tile-id="section-skills" style={{ marginTop: '22px' }}>
-                <RepeatMedicationsSubsection onNodeHighlight={handleNodeHighlight} focusRelatedIds={focusRelatedIds} />
+                <Suspense fallback={null}>
+                  <RepeatMedicationsSubsection onNodeHighlight={handleNodeHighlight} focusRelatedIds={focusRelatedIds} />
+                </Suspense>
               </div>
             </ParentSection>
           </div>
@@ -352,17 +357,23 @@ export function DashboardLayout() {
       </div>
 
       {/* Command palette overlay */}
-      <CommandPalette
-        isOpen={commandPaletteOpen}
-        onClose={handlePaletteClose}
-        onAction={handlePaletteAction}
-      />
+      <Suspense fallback={null}>
+        <CommandPalette
+          isOpen={commandPaletteOpen}
+          onClose={handlePaletteClose}
+          onAction={handlePaletteAction}
+        />
+      </Suspense>
 
       {/* Detail panel */}
-      <DetailPanel />
+      <Suspense fallback={null}>
+        <DetailPanel />
+      </Suspense>
 
       {/* Floating chat widget */}
-      <ChatWidget onAction={handlePaletteAction} />
+      <Suspense fallback={null}>
+        <ChatWidget onAction={handlePaletteAction} />
+      </Suspense>
 
       {/* Mobile bottom navigation */}
       <MobileBottomNav
