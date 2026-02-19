@@ -221,7 +221,7 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
             data-chat-panel
             className="fixed z-[90] font-ui
               inset-0 rounded-none max-md:z-[101]
-              md:inset-auto md:bottom-[88px] md:right-6 md:rounded-xl"
+              md:inset-auto md:bottom-[88px] md:right-6 md:rounded-xl lg:bottom-[100px] xl:bottom-[112px]"
             style={{
               background: 'var(--surface)',
               border: '1px solid var(--border-light)',

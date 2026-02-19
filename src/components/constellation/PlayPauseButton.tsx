@@ -41,7 +41,7 @@ export const PlayPauseButton: React.FC<PlayPauseButtonProps> = ({
 
       setScrolling(true)
       clearTimeout(debounceRef.current)
-      debounceRef.current = window.setTimeout(() => setScrolling(false), 1000)
+      debounceRef.current = window.setTimeout(() => setScrolling(false), 500)
     }
 
     scrollParent.addEventListener('scroll', update, { passive: true })
