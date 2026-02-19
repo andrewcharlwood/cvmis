@@ -168,16 +168,22 @@ export function LoginScreen({ onComplete }: LoginScreenProps) {
       className="fixed inset-0 flex items-center justify-center"
       style={{
         zIndex: 110,
-        backgroundColor: 'rgba(240, 245, 244, 0.7)',
-        backdropFilter: `blur(${BACKDROP_BLUR_PX}px)`,
-        WebkitBackdropFilter: `blur(${BACKDROP_BLUR_PX}px)`,
+      }}
+      initial={{
+        backgroundColor: 'rgba(0, 0, 0, 1)',
+        backdropFilter: 'blur(0px)',
+        WebkitBackdropFilter: 'blur(0px)',
       }}
       animate={isExiting ? {
         backgroundColor: 'rgba(240, 245, 244, 0)',
         backdropFilter: 'blur(0px)',
         WebkitBackdropFilter: 'blur(0px)',
-      } : {}}
-      transition={isExiting ? { duration: 0.6, ease: 'easeOut' } : {}}
+      } : {
+        backgroundColor: 'rgba(240, 245, 244, 0.7)',
+        backdropFilter: `blur(${BACKDROP_BLUR_PX}px)`,
+        WebkitBackdropFilter: `blur(${BACKDROP_BLUR_PX}px)`,
+      }}
+      transition={isExiting ? { duration: 0.6, ease: 'easeOut' } : { duration: 0.6, ease: 'easeOut' }}
       role="dialog"
       aria-label="Clinical system login"
       aria-modal="true"

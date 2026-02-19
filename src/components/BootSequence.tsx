@@ -339,17 +339,18 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
     return () => clearTimeout(timer)
   }, [phase])
 
-  // Fade phase: wait for animations to finish, then complete
+  // Fade phase: notify parent immediately so login can mount alongside fade
   useEffect(() => {
     if (phase !== 'fading') return
 
-    const completeTimer = setTimeout(() => {
+    onComplete()
+
+    const hideTimer = setTimeout(() => {
       setIsVisible(false)
       setPhase('done')
-      onComplete()
     }, BOOT_CONFIG.timing.fadeOutDuration)
 
-    return () => clearTimeout(completeTimer)
+    return () => clearTimeout(hideTimer)
   }, [phase, onComplete])
 
   // Reduced motion: skip animation
