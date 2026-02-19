@@ -97,34 +97,41 @@ export function DashboardLayout() {
   }, [globalFocusId, nodeTypeById, skillToRoles, roleToSkills])
 
   // Signal constellation animation readiness:
-  // Desktop (>=768): when patient summary scrolls out of view (graph is side-by-side)
-  // Mobile (<768): when the constellation itself scrolls into view (single-column layout)
+  // Desktop (>=768): patient summary scrolls out of view OR constellation enters viewport
+  // Mobile (<768): constellation scrolls into view
   useEffect(() => {
     const isMobile = window.innerWidth < 768
+    const observers: IntersectionObserver[] = []
 
-    if (isMobile) {
-      const el = constellationWrapperRef.current
-      if (!el) return
-      const observer = new IntersectionObserver(
+    // Always observe the constellation entering the viewport
+    const constellationEl = constellationWrapperRef.current
+    if (constellationEl) {
+      const chartObserver = new IntersectionObserver(
         ([entry]) => {
           if (entry.isIntersecting) setConstellationReady(true)
         },
-        { threshold: 0.1 },
+        { threshold: 0.5 },
       )
-      observer.observe(el)
-      return () => observer.disconnect()
-    } else {
-      const el = patientSummaryRef.current
-      if (!el) return
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (!entry.isIntersecting) setConstellationReady(true)
-        },
-        { threshold: 0 },
-      )
-      observer.observe(el)
-      return () => observer.disconnect()
+      chartObserver.observe(constellationEl)
+      observers.push(chartObserver)
     }
+
+    // Desktop: also trigger when patient summary scrolls out of view
+    if (!isMobile) {
+      const summaryEl = patientSummaryRef.current
+      if (summaryEl) {
+        const summaryObserver = new IntersectionObserver(
+          ([entry]) => {
+            if (!entry.isIntersecting) setConstellationReady(true)
+          },
+          { threshold: 0 },
+        )
+        summaryObserver.observe(summaryEl)
+        observers.push(summaryObserver)
+      }
+    }
+
+    return () => observers.forEach((o) => o.disconnect())
   }, [])
 
   // Measure the chronology stream height so the constellation graph can match it
