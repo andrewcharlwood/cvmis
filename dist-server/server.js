@@ -6,8 +6,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.json());
-// Serve static files from Vite build
-app.use(express.static(path.join(__dirname, 'dist')));
+// Serve static files from Vite build (dist/ is at project root, one level up from dist-server/)
+app.use(express.static(path.join(__dirname, '..', 'dist')));
 // Contact API endpoint
 app.post('/api/contact', async (req, res) => {
     const { name, organisation, email, subject, message } = req.body;
@@ -141,7 +141,7 @@ app.post('/api/chat', async (req, res) => {
 });
 // SPA fallback
 app.get('*', (_req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
 });
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
