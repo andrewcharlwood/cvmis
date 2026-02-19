@@ -72,7 +72,7 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!hasInteracted.current) setShowNudge(true)
-    }, 12_000)
+    }, 5_000)
     return () => clearTimeout(timer)
   }, [])
 
@@ -722,7 +722,7 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
           <motion.div
             initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0, transition: motionSafeTransition(0.25, 'easeOut') }}
-            exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 4, transition: { duration: 0.2, ease: 'easeIn' } }}
+            exit={{ opacity: 0, transition: { duration: 0 } }}
             className="fixed z-[101] right-4 md:right-6 pointer-events-none"
             style={{
               /* Position above button: button-bottom + button-height + gap */

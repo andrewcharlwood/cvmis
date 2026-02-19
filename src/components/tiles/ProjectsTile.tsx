@@ -539,8 +539,25 @@ function ContinuousScrollCarousel() {
       : false,
   )
   const resumeTimeoutRef = useRef<number>(0)
+  const resumeTimestampRef = useRef<number | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+
+  const RESUME_DELAY_MS = 10000
+  const RAMP_DURATION_MS = 2000
+
+  const pauseCarousel = useCallback(() => {
+    isPausedRef.current = true
+    window.clearTimeout(resumeTimeoutRef.current)
+  }, [])
+
+  const scheduleResume = useCallback(() => {
+    window.clearTimeout(resumeTimeoutRef.current)
+    resumeTimeoutRef.current = window.setTimeout(() => {
+      isPausedRef.current = false
+      resumeTimestampRef.current = performance.now()
+    }, RESUME_DELAY_MS)
+  }, [])
 
   const jumpByCards = useCallback((direction: 1 | -1) => {
     const trackEl = trackRef.current
@@ -553,9 +570,7 @@ function ContinuousScrollCarousel() {
     const cardWidth = (viewportWidth - totalGap) / cardsPerView
     const jumpPx = cardWidth + gap
 
-    // Pause auto-scroll
-    isPausedRef.current = true
-    window.clearTimeout(resumeTimeoutRef.current)
+    pauseCarousel()
 
     // Apply CSS transition for smooth jump
     if (!prefersReducedMotion) {
@@ -579,11 +594,8 @@ function ContinuousScrollCarousel() {
       trackEl.addEventListener('transitionend', transitionEnd, { once: true })
     }
 
-    // Resume auto-scroll after 6s
-    resumeTimeoutRef.current = window.setTimeout(() => {
-      isPausedRef.current = false
-    }, 6000)
-  }, [viewportWidth, prefersReducedMotion])
+    scheduleResume()
+  }, [viewportWidth, prefersReducedMotion, pauseCarousel, scheduleResume])
 
   useEffect(() => {
     return () => {
@@ -629,9 +641,19 @@ function ContinuousScrollCarousel() {
       const deltaSeconds = (timestamp - lastTime) / 1000
       lastTime = timestamp
       if (!isPausedRef.current) {
+        let speedMultiplier = 1
+        if (resumeTimestampRef.current !== null) {
+          const elapsed = timestamp - resumeTimestampRef.current
+          if (elapsed < RAMP_DURATION_MS) {
+            const t = elapsed / RAMP_DURATION_MS
+            speedMultiplier = 1 - Math.pow(1 - t, 2)
+          } else {
+            resumeTimestampRef.current = null
+          }
+        }
         const setWidth = firstSetEl.offsetWidth
         if (setWidth > 0) {
-          offsetRef.current += speedPxPerSecond * deltaSeconds
+          offsetRef.current += speedPxPerSecond * speedMultiplier * deltaSeconds
           if (offsetRef.current >= setWidth) offsetRef.current -= setWidth
           trackEl.style.transform = `translate3d(-${offsetRef.current}px, 0, 0)`
         }
@@ -654,10 +676,6 @@ function ContinuousScrollCarousel() {
     if (viewportWidth < 1440) return 196
     return 214
   }, [viewportWidth])
-
-  const setPaused = (value: boolean) => {
-    isPausedRef.current = value
-  }
 
   const handleArrowKey = useCallback((currentIndex: number, direction: -1 | 1) => {
     const nextIndex = (currentIndex + direction + investigations.length) % investigations.length
@@ -702,12 +720,12 @@ function ContinuousScrollCarousel() {
       <div
         ref={viewportRef}
         style={{ overflow: 'hidden' }}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-        onFocusCapture={() => setPaused(true)}
+        onMouseEnter={() => pauseCarousel()}
+        onMouseLeave={() => scheduleResume()}
+        onFocusCapture={() => pauseCarousel()}
         onBlurCapture={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-            setPaused(false)
+            scheduleResume()
           }
         }}
       >
