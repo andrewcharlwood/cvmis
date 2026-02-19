@@ -1,10 +1,10 @@
 import React from 'react'
 import type { LucideIcon } from 'lucide-react'
 import {
-  BarChart3, Code2, Database, PieChart, FileCode2,
-  Sheet, GitBranch, Workflow, Pill, Users, FileCheck,
-  TrendingUp, Route, ShieldAlert, Banknote, Handshake,
-  MessageSquare, UserPlus, RefreshCw, Calculator, Presentation,
+  BarChart3, Code2, Database, LayoutDashboard, Bot, FileCode2,
+  Pill, Users, FileCheck, Stethoscope,
+  TrendingUp, Route, BookOpen, Store,
+  Presentation, Calculator, Banknote, Handshake, RefreshCw, Crown,
   ChevronRight,
 } from 'lucide-react'
 import { CardHeader } from './Card'
@@ -14,10 +14,10 @@ import { getSkillsUICopy } from '@/lib/profile-content'
 import type { SkillMedication } from '@/types/pmr'
 
 const iconMap: Record<string, LucideIcon> = {
-  BarChart3, Code2, Database, PieChart, FileCode2,
-  Sheet, GitBranch, Workflow, Pill, Users, FileCheck,
-  TrendingUp, Route, ShieldAlert, Banknote, Handshake,
-  MessageSquare, UserPlus, RefreshCw, Calculator, Presentation,
+  BarChart3, Code2, Database, LayoutDashboard, Bot, FileCode2,
+  Pill, Users, FileCheck, Stethoscope,
+  TrendingUp, Route, BookOpen, Store,
+  Presentation, Calculator, Banknote, Handshake, RefreshCw, Crown,
 }
 
 

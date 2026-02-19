@@ -131,14 +131,14 @@ export interface SkillMedication {
   frequency: string
   startYear: number
   yearsOfExperience: number
-  category: 'Technical' | 'Domain' | 'Leadership'
+  category: 'Technical' | 'Clinical' | 'Strategic'
   status: 'Active' | 'Historical'
   icon: string
   prescribingHistory?: PrescribingHistoryEntry[]
 }
 
 // Skill categories for grouped display
-export type SkillCategory = 'Technical' | 'Domain' | 'Leadership'
+export type SkillCategory = 'Technical' | 'Clinical' | 'Strategic'
 
 // Extended KPI with story content for detail panel
 export interface KPIStory {

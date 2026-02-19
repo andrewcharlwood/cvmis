@@ -67,7 +67,7 @@ export interface ExperienceEducationUICopy {
 }
 
 export interface SkillsCategoryCopyEntry {
-  readonly id: 'Technical' | 'Domain' | 'Leadership'
+  readonly id: 'Technical' | 'Clinical' | 'Strategic'
   readonly label: string
 }
 

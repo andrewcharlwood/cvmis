@@ -9,8 +9,8 @@ interface SkillDetailProps {
 // Category display names
 const categoryLabels: Record<SkillMedication['category'], string> = {
   Technical: 'Technical',
-  Domain: 'Healthcare Domain',
-  Leadership: 'Strategic & Leadership',
+  Clinical: 'Clinical',
+  Strategic: 'Strategic',
 }
 
 export function SkillDetail({ skill }: SkillDetailProps) {

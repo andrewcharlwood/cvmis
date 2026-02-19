@@ -67,8 +67,8 @@ export const profileContent: DeepReadonly<ProfileContent> = {
       viewAllLabel: 'View all',
       categories: [
         { id: 'Technical', label: 'Technical' },
-        { id: 'Domain', label: 'Healthcare Domain' },
-        { id: 'Leadership', label: 'Strategic & Leadership' },
+        { id: 'Clinical', label: 'Clinical' },
+        { id: 'Strategic', label: 'Strategic' },
       ],
     },
   },
