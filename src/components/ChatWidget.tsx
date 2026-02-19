@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo, type KeyboardEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
 import {
   sendChatMessage,
   isLLMAvailable,
@@ -58,6 +59,7 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
+  const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set())
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -195,11 +197,11 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
             variants={panelVariants}
             role="dialog"
             aria-label="Chat with AI about Andy"
+            data-chat-panel
             className="fixed z-[90] font-ui
               inset-0 rounded-none max-md:z-[101]
               md:inset-auto md:bottom-[88px] md:right-6 md:rounded-xl"
             style={{
-              width: undefined,
               background: 'var(--surface)',
               border: '1px solid var(--border-light)',
               boxShadow: 'var(--shadow-lg)',
@@ -211,7 +213,7 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
           >
             <style>{`
               @media (min-width: 768px) {
-                [data-chat-panel] { width: 380px; max-height: 480px; }
+                [data-chat-panel] { width: clamp(380px, 30vw, 500px); height: calc(66vh); }
               }
               @media (max-width: 767px) {
                 [data-chat-panel] {
@@ -225,12 +227,12 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
               }
             `}</style>
             <div
-              data-chat-panel
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 width: '100%',
                 height: '100%',
+                minHeight: 0,
               }}
             >
               {/* Header */}
@@ -408,42 +410,118 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
                           overflow: 'hidden',
                         }}
                       >
-                        <div style={{ padding: '10px 14px', whiteSpace: 'pre-wrap' }}>
-                          {getDisplayText(msg.content)}
+                        <div style={{ padding: '10px 14px', whiteSpace: msg.role === 'user' ? 'pre-wrap' : undefined }}>
+                          {msg.role === 'assistant' ? (
+                            <div className="chat-markdown">
+                              <ReactMarkdown>{getDisplayText(msg.content)}</ReactMarkdown>
+                            </div>
+                          ) : (
+                            getDisplayText(msg.content)
+                          )}
                         </div>
 
-                        {referencedItems.length > 0 && (
-                          <div
-                            style={{
-                              borderTop: '1px solid var(--border-light)',
-                              padding: '6px 8px',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: '2px',
-                            }}
-                          >
-                            {referencedItems.map((item) => {
-                              const IconComponent = iconByType[item.iconType]
-                              const colorStyle = iconColorStyles[item.iconVariant]
+                        {referencedItems.length > 0 && (() => {
+                          const isExpanded = expandedItems.has(i)
+                          const visibleItems = isExpanded ? referencedItems : referencedItems.slice(0, 3)
+                          const hasMore = referencedItems.length > 3
 
-                              return (
+                          return (
+                            <div
+                              style={{
+                                borderTop: '1px solid var(--border-light)',
+                                padding: '6px 8px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '2px',
+                              }}
+                            >
+                              {visibleItems.map((item) => {
+                                const IconComponent = iconByType[item.iconType]
+                                const colorStyle = iconColorStyles[item.iconVariant]
+
+                                return (
+                                  <button
+                                    key={item.id}
+                                    onClick={() => handleItemClick(item)}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '8px',
+                                      padding: '6px 8px',
+                                      borderRadius: '6px',
+                                      border: 'none',
+                                      background: 'transparent',
+                                      cursor: 'pointer',
+                                      width: '100%',
+                                      textAlign: 'left',
+                                      transition: 'background-color 100ms ease-out',
+                                      fontSize: '12px',
+                                      fontFamily: 'inherit',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.backgroundColor = 'var(--accent-light)'
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.backgroundColor = 'transparent'
+                                    }}
+                                  >
+                                    <div
+                                      style={{
+                                        width: '22px',
+                                        height: '22px',
+                                        borderRadius: '5px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0,
+                                        background: colorStyle.background,
+                                        color: colorStyle.color,
+                                      }}
+                                    >
+                                      {IconComponent && <IconComponent size={12} />}
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <div
+                                        style={{
+                                          fontWeight: 500,
+                                          color: 'var(--text-primary)',
+                                          whiteSpace: 'nowrap',
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                        }}
+                                      >
+                                        {item.title}
+                                      </div>
+                                      <div
+                                        style={{
+                                          fontSize: '11px',
+                                          color: 'var(--text-tertiary)',
+                                          whiteSpace: 'nowrap',
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          marginTop: '-1px',
+                                        }}
+                                      >
+                                        {item.subtitle}
+                                      </div>
+                                    </div>
+                                  </button>
+                                )
+                              })}
+                              {hasMore && !isExpanded && (
                                 <button
-                                  key={item.id}
-                                  onClick={() => handleItemClick(item)}
+                                  onClick={() => setExpandedItems((prev) => new Set(prev).add(i))}
                                   style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                    padding: '6px 8px',
+                                    padding: '5px 8px',
                                     borderRadius: '6px',
                                     border: 'none',
                                     background: 'transparent',
                                     cursor: 'pointer',
-                                    width: '100%',
+                                    fontSize: '11.5px',
+                                    fontFamily: 'inherit',
+                                    color: 'var(--accent)',
                                     textAlign: 'left',
                                     transition: 'background-color 100ms ease-out',
-                                    fontSize: '12px',
-                                    fontFamily: 'inherit',
                                   }}
                                   onMouseEnter={(e) => {
                                     e.currentTarget.style.backgroundColor = 'var(--accent-light)'
@@ -452,51 +530,12 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
                                     e.currentTarget.style.backgroundColor = 'transparent'
                                   }}
                                 >
-                                  <div
-                                    style={{
-                                      width: '22px',
-                                      height: '22px',
-                                      borderRadius: '5px',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      flexShrink: 0,
-                                      background: colorStyle.background,
-                                      color: colorStyle.color,
-                                    }}
-                                  >
-                                    {IconComponent && <IconComponent size={12} />}
-                                  </div>
-                                  <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div
-                                      style={{
-                                        fontWeight: 500,
-                                        color: 'var(--text-primary)',
-                                        whiteSpace: 'nowrap',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                      }}
-                                    >
-                                      {item.title}
-                                    </div>
-                                    <div
-                                      style={{
-                                        fontSize: '11px',
-                                        color: 'var(--text-tertiary)',
-                                        whiteSpace: 'nowrap',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        marginTop: '-1px',
-                                      }}
-                                    >
-                                      {item.subtitle}
-                                    </div>
-                                  </div>
+                                  See {referencedItems.length - 3} more related items
                                 </button>
-                              )
-                            })}
-                          </div>
-                        )}
+                              )}
+                            </div>
+                          )
+                        })()}
                       </div>
                     </div>
                   )

@@ -5,8 +5,8 @@ export interface ChatMessage {
   content: string
 }
 
-export const LLM_MODEL = 'z-ai/glm-5'
-export const LLM_DISPLAY_NAME = 'GLM-5'
+export const LLM_MODEL = 'google/gemini-3-flash-preview'
+export const LLM_DISPLAY_NAME = 'Gemini 3 Flash'
 
 export function isLLMAvailable(): boolean {
   return true
