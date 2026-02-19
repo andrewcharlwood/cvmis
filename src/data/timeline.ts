@@ -91,7 +91,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
     band: '8b',
     description: 'Driving data analytics strategy for medicines optimisation, developing bespoke datasets and analytical frameworks from messy, real-world GP prescribing data to identify efficiency opportunities and address health inequalities across the integrated care system.',
     details: [
-      'Managed £220M prescribing budget with sophisticated forecasting models identifying cost pressures and enabling proactive financial planning for ICB board reporting',
+      'Managed £215M prescribing budget with sophisticated forecasting models identifying cost pressures and enabling proactive financial planning for ICB board reporting',
       'Collaborated with ICB data engineering to create a comprehensive dm+d medicines data table: standardised strength calculations, oral morphine equivalent conversions, and Anticholinergic Burden scoring, providing a single source of truth for all medicines analytics',
       'Led financial scenario modelling for a system-wide DOAC switching programme, building an interactive Power BI dashboard incorporating rebate mechanics, clinician switching capacity, workforce constraints, and patent expiry timelines',
       'Renegotiated pharmaceutical rebate terms ahead of patent expiry, securing improved commercial position for the ICB',
@@ -105,7 +105,7 @@ const timelineEntitySeeds: TimelineEntity[] = [
       'Team data fluency improved through training, documentation, and self-serve Power BI tools',
     ],
     codedEntries: [
-      { code: 'BUD001', description: 'Budget management: £220M prescribing oversight' },
+      { code: 'BUD001', description: 'Budget management: £215M prescribing oversight' },
       { code: 'DAT001', description: 'Data infrastructure: dm+d integration, single source of truth' },
       { code: 'MOD001', description: 'Financial modelling: DOAC switching, rebate negotiation' },
       { code: 'MON001', description: 'CD monitoring: population-scale OME tracking' },

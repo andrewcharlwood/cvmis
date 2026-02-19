@@ -227,7 +227,7 @@ export const skills: SkillMedication[] = [
     status: 'Active',
     icon: 'Banknote',
     prescribingHistory: [
-      { year: 2024, description: 'Started: £220M prescribing budget oversight' },
+      { year: 2024, description: 'Started: £215M prescribing budget oversight' },
       { year: 2024, description: 'Increased: Forecasting model development' },
       { year: 2025, description: 'Current: Proactive financial planning, pressure identification' },
     ],

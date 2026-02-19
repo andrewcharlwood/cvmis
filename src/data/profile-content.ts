@@ -81,7 +81,7 @@ export const profileContent: DeepReadonly<ProfileContent> = {
         kpiId: 'savings',
       },
       {
-        title: '£220M Budget Oversight',
+        title: '£215M Budget Oversight',
         subtitle: 'Prescribing budget with forecasting models',
         keywords: '220m budget oversight analytical accountability icb board financial planning forecasting prescribing expenditure',
         kpiId: 'budget',

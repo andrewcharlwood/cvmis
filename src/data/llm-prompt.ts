@@ -24,7 +24,7 @@ Led population health initiatives and data-driven medicines optimisation, report
 ### [exp-deputy-head-2024] Deputy Head, Population Health & Data Analysis
 NHS Norfolk & Waveney ICB | Jul 2024 to Present (substantive role)
 Driving data analytics strategy for medicines optimisation, developing bespoke datasets and analytical frameworks from messy, real-world GP prescribing data to identify efficiency opportunities and address health inequalities across the integrated care system.
-- Managed £220M prescribing budget with sophisticated forecasting models identifying cost pressures and enabling proactive financial planning for ICB board reporting
+- Managed £215M prescribing budget with sophisticated forecasting models identifying cost pressures and enabling proactive financial planning for ICB board reporting
 - Collaborated with the ICB data engineering team to create a comprehensive dm+d medicines data table integrating all Dictionary of Medicines and Devices products with standardised strength calculations, oral morphine equivalent conversions, and Anticholinergic Burden scoring, providing a single source of truth for all medicines analytics
 - Led financial scenario modelling for a system-wide DOAC switching programme, building an interactive Power BI dashboard incorporating rebate mechanics, clinician switching capacity, workforce constraints, and patent expiry timelines to quantify risk trade-offs for senior decision-makers
 - Renegotiated pharmaceutical rebate terms ahead of patent expiry, securing improved commercial position for the ICB

@@ -7,7 +7,7 @@ export const alerts: Alert[] = [
     icon: 'AlertTriangle',
   },
   {
-    message: '£220M BUDGET OVERSIGHT',
+    message: '£215M BUDGET OVERSIGHT',
     severity: 'amber',
     icon: 'AlertCircle',
   },

@@ -22,6 +22,7 @@ export const bulletListStyle: CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   gap: '8px',
+  listStyleType: 'disc',
 }
 
 export const bodyTextStyle: CSSProperties = {

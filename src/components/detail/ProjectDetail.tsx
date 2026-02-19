@@ -67,7 +67,7 @@ export function ProjectDetail({ investigation }: ProjectDetailProps) {
       {/* Methodology */}
       <div>
         <h3 style={sectionHeadingStyle}>Methodology</h3>
-        <p style={paragraphStyle}>{investigation.methodology}</p>
+        <p style={{ ...paragraphStyle, whiteSpace: 'pre-line' }}>{investigation.methodology}</p>
       </div>
 
       {/* Tech stack tags */}

@@ -6,7 +6,6 @@ import { investigations } from '@/data/investigations'
 import { CardHeader } from '../Card'
 import { useDetailPanel } from '@/contexts/DetailPanelContext'
 import type { Investigation } from '@/types/pmr'
-import { PROJECT_STATUS_COLORS } from '@/lib/theme-colors'
 
 interface ProjectItemProps {
   project: Investigation
@@ -33,7 +32,6 @@ function ProjectItem({
   onEscape,
   isInert,
 }: ProjectItemProps) {
-  const dotColor = PROJECT_STATUS_COLORS[project.status]
   const livePillLabel = project.demoUrl ? 'Live Demo' : project.externalUrl ? 'Live' : null
   const [isHovered, setIsHovered] = useState(false)
 
@@ -239,19 +237,6 @@ function ProjectItem({
             gap: '8px',
           }}
         >
-          {!livePillLabel && (
-            <div
-              style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: dotColor,
-                flexShrink: 0,
-                marginTop: '4px',
-              }}
-              aria-hidden="true"
-            />
-          )}
           <span style={{ flex: 1, fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
             {project.name}
             {livePillLabel && (
@@ -292,9 +277,9 @@ function ProjectItem({
         {project.resultSummary && (
           <div
             style={{
-              fontSize: '12px',
-              fontWeight: 700,
-              fontFamily: 'var(--font-geist-mono)',
+              fontSize: '13px',
+              fontWeight: 400,
+              //fontFamily: 'var(--font-geist-mono)',
               color: 'var(--accent)',
               letterSpacing: '-0.01em',
               lineHeight: 1.3,

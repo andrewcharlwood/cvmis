@@ -65,6 +65,27 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
 
   const llmAvailable = isLLMAvailable()
 
+  // Nudge bubble: show once after 12s if user hasn't opened chat yet
+  const [showNudge, setShowNudge] = useState(false)
+  const hasInteracted = useRef(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!hasInteracted.current) setShowNudge(true)
+    }, 12_000)
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    if (!showNudge) return
+    const dismiss = () => {
+      hasInteracted.current = true
+      setShowNudge(false)
+    }
+    window.addEventListener('click', dismiss, { once: true })
+    return () => window.removeEventListener('click', dismiss)
+  }, [showNudge])
+
   // Build palette map for looking up items by ID
   const paletteMap = useMemo(() => {
     const items = buildPaletteData()
@@ -649,35 +670,140 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
         initial="hidden"
         animate="visible"
         variants={buttonVariants}
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => {
+          hasInteracted.current = true
+          setShowNudge(false)
+          setIsOpen((prev) => !prev)
+        }}
         aria-label={isOpen ? 'Close chat' : 'Open chat'}
-        className={`fixed z-[101] cursor-pointer flex items-center justify-center bottom-4 right-4 h-10 w-10 md:bottom-6 md:right-6 md:h-12 md:w-12${isOpen ? ' max-md:!hidden' : ''}`}
+        className={`fixed z-[101] cursor-pointer flex items-center justify-center bottom-4 right-4 h-12 w-12 md:bottom-6 md:right-6 md:h-14 md:w-14 lg:h-16 lg:w-16 xl:h-[4.5rem] xl:w-[4.5rem]${isOpen ? ' max-md:!hidden' : ''}`}
         style={{
           bottom: isMobileNav ? 'calc(56px + env(safe-area-inset-bottom) + 16px)' : undefined,
           borderRadius: '50%',
           border: 'none',
           background: 'var(--accent)',
+          opacity: 0.85,
           color: '#FFFFFF',
           boxShadow: 'var(--shadow-md)',
-          transition: 'box-shadow 150ms ease-out, transform 150ms ease-out',
+          animation: prefersReducedMotion ? 'none' : 'chat-pulse 3s ease-in-out infinite',
+          transition: 'box-shadow 150ms ease-out, transform 150ms ease-out, opacity 150ms ease-out',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.boxShadow = 'var(--shadow-lg)'
           e.currentTarget.style.transform = 'scale(1.05)'
+          e.currentTarget.style.opacity = '1'
+          e.currentTarget.style.animation = 'none'
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.boxShadow = 'var(--shadow-md)'
           e.currentTarget.style.transform = 'scale(1)'
+          e.currentTarget.style.opacity = '0.85'
+          e.currentTarget.style.animation = prefersReducedMotion ? 'none' : 'chat-pulse 3s ease-in-out infinite'
         }}
       >
-        {isOpen ? <X size={20} strokeWidth={2} /> : <MessageCircle size={20} strokeWidth={2} />}
+        {isOpen ? (
+          <>
+            <X size={22} strokeWidth={2} className="lg:hidden" />
+            <X size={26} strokeWidth={2} className="hidden lg:block xl:hidden" />
+            <X size={30} strokeWidth={2} className="hidden xl:block" />
+          </>
+        ) : (
+          <>
+            <MessageCircle size={22} strokeWidth={2} className="lg:hidden" />
+            <MessageCircle size={26} strokeWidth={2} className="hidden lg:block xl:hidden" />
+            <MessageCircle size={30} strokeWidth={2} className="hidden xl:block" />
+          </>
+        )}
       </motion.button>
+
+      {/* Nudge bubble */}
+      <AnimatePresence>
+        {showNudge && !isOpen && (
+          <motion.div
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0, transition: motionSafeTransition(0.25, 'easeOut') }}
+            exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 4, transition: { duration: 0.2, ease: 'easeIn' } }}
+            className="fixed z-[101] right-4 md:right-6 pointer-events-none"
+            style={{
+              /* Position above button: button-bottom + button-height + gap */
+              bottom: isMobileNav
+                ? 'calc(56px + env(safe-area-inset-bottom) + 72px)'
+                : undefined,
+            }}
+          >
+            {/* Mobile: above 48px button at bottom-4 */}
+            <div
+              className="md:hidden px-3 py-2 rounded-xl text-xs font-medium max-w-[200px]"
+              style={{
+                position: 'fixed',
+                bottom: isMobileNav ? undefined : 'calc(16px + 48px + 10px)',
+                right: '16px',
+                background: 'var(--surface)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border)',
+                boxShadow: 'var(--shadow-md)',
+              }}
+            >
+              Hey! I can help you learn more about Andy.
+            </div>
+            {/* md: above 56px button at bottom-6 */}
+            <div
+              className="hidden md:block lg:hidden px-3.5 py-2.5 rounded-xl text-sm font-medium max-w-[240px]"
+              style={{
+                position: 'fixed',
+                bottom: 'calc(24px + 56px + 10px)',
+                right: '24px',
+                background: 'var(--surface)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border)',
+                boxShadow: 'var(--shadow-md)',
+              }}
+            >
+              Hey! I can help you learn more about Andy.
+            </div>
+            {/* lg: above 64px button */}
+            <div
+              className="hidden lg:block xl:hidden px-4 py-3 rounded-xl text-base font-medium max-w-[280px]"
+              style={{
+                position: 'fixed',
+                bottom: 'calc(24px + 64px + 12px)',
+                right: '24px',
+                background: 'var(--surface)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border)',
+                boxShadow: 'var(--shadow-md)',
+              }}
+            >
+              Hey! I can help you learn more about Andy.
+            </div>
+            {/* xl: above 72px button */}
+            <div
+              className="hidden xl:block px-5 py-3 rounded-2xl text-base font-medium max-w-[300px]"
+              style={{
+                position: 'fixed',
+                bottom: 'calc(24px + 72px + 14px)',
+                right: '24px',
+                background: 'var(--surface)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border)',
+                boxShadow: 'var(--shadow-md)',
+              }}
+            >
+              Hey! I can help you learn more about Andy.
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Spinner keyframes */}
       <style>{`
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        @keyframes chat-pulse {
+          0%, 100% { transform: scale(1); opacity: 0.85; }
+          50% { transform: scale(1.06); opacity: 0.85; }
         }
       `}</style>
     </>
