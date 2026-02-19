@@ -736,7 +736,9 @@ export function ChatWidget({ onAction }: ChatWidgetProps) {
               className="md:hidden px-3 py-2 rounded-xl text-xs font-medium max-w-[200px]"
               style={{
                 position: 'fixed',
-                bottom: isMobileNav ? undefined : 'calc(16px + 48px + 10px)',
+                bottom: isMobileNav
+                  ? 'calc(56px + env(safe-area-inset-bottom) + 16px + 48px + 10px)'
+                  : 'calc(16px + 48px + 10px)',
                 right: '16px',
                 background: 'var(--surface)',
                 color: 'var(--text-primary)',

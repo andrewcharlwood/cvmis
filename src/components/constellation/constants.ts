@@ -45,9 +45,10 @@ export const SKILL_GLOW_STD_DEVIATION = 2.5
 export const SKILL_ACTIVE_STROKE_OPACITY = 0.1
 
 // Skill overlap offsets
-export const SKILL_Y_OFFSET_STEP = 25
-export const SKILL_Y_OFFSET_STEP_MOBILE = 20
+export const SKILL_Y_OFFSET_STEP = 35
+export const SKILL_Y_OFFSET_STEP_MOBILE = 26
 export const SKILL_Y_GLOBAL_OFFSET_RATIO = -0.05
+export const SKILL_Y_CENTER_BLEND = 0.55
 export const SKILL_X_OVERLAP_MAX_RATIO = 1
 // Entry animation
 export const ENTRY_GUIDE_FADE_MS = 200

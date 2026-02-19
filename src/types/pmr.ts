@@ -128,6 +128,7 @@ export interface KPI {
 export interface SkillMedication {
   id: string
   name: string
+  shortName?: string
   frequency: string
   startYear: number
   yearsOfExperience: number

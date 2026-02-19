@@ -13,7 +13,7 @@ import {
   SKILL_STROKE_WIDTH, SKILL_STROKE_OPACITY, SKILL_SIZE_ROLE_FACTOR,
   SKILL_GLOW_STD_DEVIATION,
   SKILL_Y_OFFSET_STEP, SKILL_Y_OFFSET_STEP_MOBILE,
-  SKILL_Y_GLOBAL_OFFSET_RATIO, SKILL_X_OVERLAP_MAX_RATIO,
+  SKILL_Y_GLOBAL_OFFSET_RATIO, SKILL_Y_CENTER_BLEND, SKILL_X_OVERLAP_MAX_RATIO,
 } from '@/components/constellation/constants'
 import type { SimNode, SimLink, LayoutParams } from '@/components/constellation/types'
 
@@ -357,7 +357,9 @@ export function useForceSimulation(
         homeX = Math.max(skillZoneLeft, Math.min(skillZoneRight, homeX))
       }
 
-      const homeY = (skillBaseY.get(n.id) ?? height * 0.5) + (skillYOffset.get(n.id) ?? 0) - height * SKILL_Y_GLOBAL_OFFSET_RATIO
+      const rawHomeY = (skillBaseY.get(n.id) ?? height * 0.5) + (skillYOffset.get(n.id) ?? 0) - height * SKILL_Y_GLOBAL_OFFSET_RATIO
+      const belowCenter = height * 0.6
+      const homeY = rawHomeY * (1 - SKILL_Y_CENTER_BLEND) + belowCenter * SKILL_Y_CENTER_BLEND
 
       return { ...n, x: homeX, y: homeY, vx: 0, vy: 0, homeX, homeY }
     })

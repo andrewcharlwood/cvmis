@@ -5,6 +5,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'data-analysis',
     name: 'Data Analysis',
+    shortName: 'Data Analysis',
     frequency: '4x daily',
     startYear: 2016,
     yearsOfExperience: 10,
@@ -53,6 +54,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'dashboard-dev',
     name: 'Dashboard Development',
+    shortName: 'Dashboards',
     frequency: 'Weekly',
     startYear: 2023,
     yearsOfExperience: 3,
@@ -67,7 +69,8 @@ export const skills: SkillMedication[] = [
   },
   {
     id: 'ai-prompt-engineering',
-    name: 'AI & Prompt Engineering',
+    name: 'AI Integration & Automation',
+    shortName: 'AI Integration',
     frequency: '4x daily',
     startYear: 2024,
     yearsOfExperience: 2,
@@ -82,9 +85,10 @@ export const skills: SkillMedication[] = [
   {
     id: 'javascript-typescript',
     name: 'JavaScript / TypeScript',
+    shortName: 'JS / TS',
     frequency: 'As needed',
     startYear: 2020,
-    yearsOfExperience: 6,
+    yearsOfExperience: 4,
     category: 'Technical',
     status: 'Active',
     icon: 'FileCode2',
@@ -95,10 +99,45 @@ export const skills: SkillMedication[] = [
     ],
   },
 
+  {
+    id: 'algorithm-design',
+    name: 'Algorithm Design',
+    shortName: 'Algorithms',
+    frequency: 'Weekly',
+    startYear: 2018,
+    yearsOfExperience: 8,
+    category: 'Technical',
+    status: 'Active',
+    icon: 'GitBranch',
+    prescribingHistory: [
+      { year: 2018, description: 'Started: Automation logic for pharmacy processes' },
+      { year: 2022, description: 'Increased: Blueteq form generation, clinical rule engines' },
+      { year: 2024, description: 'Advanced: CD monitoring OME calculations, switching algorithm (14,000 patients)' },
+      { year: 2025, description: 'Current: Incentive scheme automation, population-level patient identification' },
+    ],
+  },
+  {
+    id: 'data-pipelines',
+    name: 'Data Pipelines',
+    shortName: 'Pipelines',
+    frequency: 'Weekly',
+    startYear: 2023,
+    yearsOfExperience: 3,
+    category: 'Technical',
+    status: 'Active',
+    icon: 'Workflow',
+    prescribingHistory: [
+      { year: 2023, description: 'Started: ETL processes for Blueteq integration' },
+      { year: 2024, description: 'Increased: dm+d standardisation, morphine conversions' },
+      { year: 2025, description: 'Current: ICS-wide data infrastructure' },
+    ],
+  },
+
   // Clinical (8 skills)
   {
     id: 'medicines-optimisation',
     name: 'Medicines Optimisation',
+    shortName: 'Medicines Opt.',
     frequency: '3–4x daily',
     startYear: 2016,
     yearsOfExperience: 10,
@@ -115,6 +154,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'population-health',
     name: 'Population Health',
+    shortName: 'Pop. Health',
     frequency: 'Daily',
     startYear: 2024,
     yearsOfExperience: 2,
@@ -129,6 +169,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'nice-ta',
     name: 'NICE TA Implementation',
+    shortName: 'NICE TA',
     frequency: '1–2x weekly',
     startYear: 2022,
     yearsOfExperience: 4,
@@ -144,6 +185,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'health-system-prescribing',
     name: 'Health System Prescribing Mgmt',
+    shortName: 'Prescribing Mgmt',
     frequency: 'Daily',
     startYear: 2024,
     yearsOfExperience: 2,
@@ -158,6 +200,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'health-economics',
     name: 'Health Economics',
+    shortName: 'Health Econ.',
     frequency: '1–2x daily',
     startYear: 2022,
     yearsOfExperience: 4,
@@ -173,6 +216,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'clinical-pathways',
     name: 'Clinical Pathways',
+    shortName: 'Pathways',
     frequency: 'Daily',
     startYear: 2022,
     yearsOfExperience: 4,
@@ -188,6 +232,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'formulary-commissioning',
     name: 'Formulary & Commissioning',
+    shortName: 'Formulary',
     frequency: 'Weekly',
     startYear: 2022,
     yearsOfExperience: 4,
@@ -203,6 +248,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'community-pharmacy',
     name: 'Community Pharmacy Practice',
+    shortName: 'Community Pharm.',
     frequency: 'As needed',
     startYear: 2015,
     yearsOfExperience: 11,
@@ -220,6 +266,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'executive-comms',
     name: 'Executive Communication',
+    shortName: 'Exec. Comms',
     frequency: 'Bi-monthly',
     startYear: 2024,
     yearsOfExperience: 2,
@@ -234,6 +281,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'financial-modelling',
     name: 'Financial Scenario Modelling',
+    shortName: 'Financial Modelling',
     frequency: 'Weekly',
     startYear: 2022,
     yearsOfExperience: 4,
@@ -249,6 +297,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'budget-management',
     name: 'Budget Management',
+    shortName: 'Budget Mgmt',
     frequency: '2x weekly',
     startYear: 2024,
     yearsOfExperience: 2,
@@ -264,6 +313,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'stakeholder-engagement',
     name: 'Stakeholder Engagement',
+    shortName: 'Stakeholders',
     frequency: 'Daily',
     startYear: 2022,
     yearsOfExperience: 4,
@@ -279,6 +329,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'change-management',
     name: 'Change Management',
+    shortName: 'Change Mgmt',
     frequency: 'As needed',
     startYear: 2016,
     yearsOfExperience: 10,
@@ -289,6 +340,7 @@ export const skills: SkillMedication[] = [
   {
     id: 'healthcare-leadership',
     name: 'Healthcare Leadership',
+    shortName: 'Leadership',
     frequency: 'Daily',
     startYear: 2018,
     yearsOfExperience: 8,
