@@ -96,9 +96,9 @@ export function KPIDetail({ kpi }: KPIDetailProps) {
         <p style={paragraphStyle}>{context}</p>
       </div>
 
-      {/* Your role paragraph */}
+      {/* My role paragraph */}
       <div>
-        <h3 style={sectionHeadingStyle}>Your Role</h3>
+        <h3 style={sectionHeadingStyle}>My Role</h3>
         <p style={paragraphStyle}>{role}</p>
       </div>
 
