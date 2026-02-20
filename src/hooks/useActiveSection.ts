@@ -1,12 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
-const sectionTileMap: Record<string, string> = {
-  'patient-summary': 'overview',
-  'section-experience': 'experience',
-  'section-skills': 'skills',
-}
+const MOBILE_NAV_QUERY = '(max-width: 599px)'
 
 const SCROLL_BOTTOM_THRESHOLD = 40
+
+function buildSectionTileMap(isMobile: boolean): Record<string, string> {
+  return {
+    'mobile-overview': 'overview',
+    'patient-summary': isMobile ? 'summary' : 'overview',
+    'section-experience': 'experience',
+    'section-skills': 'skills',
+  }
+}
 
 /**
  * Hook to track which section is currently visible using IntersectionObserver.
@@ -20,6 +25,7 @@ const SCROLL_BOTTOM_THRESHOLD = 40
 export function useActiveSection(): string {
   const [activeSection, setActiveSection] = useState<string>('overview')
   const scrollOverrideRef = useRef<string | null>(null)
+  const sectionTileMapRef = useRef(buildSectionTileMap(window.matchMedia(MOBILE_NAV_QUERY).matches))
 
   const updateFromScroll = useCallback((root: HTMLElement) => {
     const { scrollTop, scrollHeight, clientHeight } = root
@@ -35,6 +41,15 @@ export function useActiveSection(): string {
     } else {
       scrollOverrideRef.current = null
     }
+  }, [])
+
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_NAV_QUERY)
+    const handleChange = (e: MediaQueryListEvent) => {
+      sectionTileMapRef.current = buildSectionTileMap(e.matches)
+    }
+    mq.addEventListener('change', handleChange)
+    return () => mq.removeEventListener('change', handleChange)
   }, [])
 
   useEffect(() => {
@@ -57,8 +72,8 @@ export function useActiveSection(): string {
         )
 
         const tileId = mostVisible.target.getAttribute('data-tile-id')
-        if (tileId && sectionTileMap[tileId]) {
-          setActiveSection(sectionTileMap[tileId])
+        if (tileId && sectionTileMapRef.current[tileId]) {
+          setActiveSection(sectionTileMapRef.current[tileId])
         }
       },
       {
