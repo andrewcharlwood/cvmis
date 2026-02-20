@@ -232,7 +232,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
                 width: '100%',
               }}
             >
-              <CvmisLogo cssHeight="48px" />
+              <CvmisLogo cssHeight="50px" />
                           <button
               type="button"
               onClick={onSearchClick}
@@ -240,7 +240,6 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
               aria-label={sidebarCopy.searchAriaLabel}
               style={{
                 width: '100%',
-                minHeight: '44px',
                 border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-sm)',
                 background: 'var(--surface)',
@@ -253,7 +252,7 @@ export default function Sidebar({ activeSection, onNavigate, onSearchClick }: Si
               }}
             >
               <Search size={16} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} aria-hidden="true" />
-              <span style={{ flex: 1, textAlign: 'left', fontSize: '13px' }}>
+              <span style={{ flex: 1, textAlign: 'left', fontSize: '13px', padding: '5px 0' }}>
                 {sidebarCopy.searchLabel}
               </span>
               <kbd

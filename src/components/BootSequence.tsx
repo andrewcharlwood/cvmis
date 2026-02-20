@@ -569,5 +569,3 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
   )
 }
 
-export type { BootConfig, BootLine, BootLineType }
-export { BOOT_CONFIG }

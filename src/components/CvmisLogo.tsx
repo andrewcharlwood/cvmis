@@ -28,9 +28,9 @@ const FAN_RIGHT_STAGGER_S = 0       // stagger delay for right pill (s)
 const TOTAL_ANIMATION_MS = FAN_DELAY_AFTER_RISE_MS + FAN_DURATION_S * 1000
 
 // Overlap blend: multiply blend on fanning capsules (used by US-005)
-export const OVERLAY_BLEND_START_PROGRESS = 0.2  // fan progress at which blend fades in
-export const OVERLAP_BLEND_MAX_OPACITY = 0.3     // max blend opacity (20%)
-export const OVERLAP_BLEND_TRANSITION_DURATION_S = FAN_DURATION_S * (1 - OVERLAY_BLEND_START_PROGRESS)
+const OVERLAY_BLEND_START_PROGRESS = 0.2  // fan progress at which blend fades in
+const OVERLAP_BLEND_MAX_OPACITY = 0.3     // max blend opacity (20%)
+const OVERLAP_BLEND_TRANSITION_DURATION_S = FAN_DURATION_S * (1 - OVERLAY_BLEND_START_PROGRESS)
 
 // Pivot point: bottom-center of the pill stack (in viewBox coords)
 const PX = 300

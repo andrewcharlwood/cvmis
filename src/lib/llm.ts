@@ -5,14 +5,14 @@ export interface ChatMessage {
   content: string
 }
 
-export const LLM_MODEL = 'google/gemini-3-flash-preview'
+const LLM_MODEL = 'google/gemini-3-flash-preview'
 export const LLM_DISPLAY_NAME = 'Gemini 3 Flash'
 
 export function isLLMAvailable(): boolean {
   return true
 }
 
-export function buildSystemPrompt(): string {
+function buildSystemPrompt(): string {
   return LLM_SYSTEM_PROMPT
 }
 

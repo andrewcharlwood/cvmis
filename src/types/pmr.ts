@@ -109,12 +109,6 @@ export interface Tag {
   colorVariant: 'teal' | 'amber' | 'green'
 }
 
-export interface Alert {
-  message: string
-  severity: 'alert' | 'amber'
-  icon: string
-}
-
 export interface KPI {
   id: string
   value: string

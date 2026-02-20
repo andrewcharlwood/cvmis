@@ -7,10 +7,16 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Environment
 .env
+
+# Dependencies
 node_modules
+
+# Build output
 dist
 dist-ssr
+dist-server
 *.local
 
 # Editor directories and files
@@ -27,7 +33,40 @@ dist-ssr
 # TypeScript
 *.tsbuildinfo
 
-#Playwrite Screenshots
+# Playwright screenshots
 *.png
+!public/meta.png
 
+# AI agent tooling
+.claude/
+.codex/
+.ralph/
+.playwright-mcp/
+AGENTS.md
+PROMPT.md
+hats.yml
+ralph.yml
+scripts/ralph/
+scripts/benchmark-results/
+
+# Reference / personal materials
+References/
+
+# Font source archives (used fonts are in public/fonts/)
+Fonts/
+
+# Logo animation source (Remotion)
+LogoAnimation/
+
+# Design notes
+carousel-design-debate*.md
+
+# Misc
+*:Zone.Identifier
+__MACOSX
+andy-charlwood-cv@0.0.0
+lighthouse.pdf
+logo/
+graph.png
+node
 nul

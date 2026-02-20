@@ -495,16 +495,9 @@ export const timelineEntities: TimelineEntity[] = [...timelineEntitySeeds].sort(
   return b.dateRange.start.localeCompare(a.dateRange.start)
 })
 
-export const timelineCareerEntities: TimelineEntity[] = timelineEntities.filter(
+const timelineCareerEntities: TimelineEntity[] = timelineEntities.filter(
   (entity) => entity.kind === 'career',
 )
-
-export const timelineEducationEntities: TimelineEntity[] = timelineEntities.filter(
-  (entity) => entity.kind === 'education',
-)
-
-// Compatibility alias retained for downstream consumers that still import role entities.
-export const timelineRoleEntities = timelineCareerEntities
 
 function mapTimelineToConsultation(entity: TimelineEntity): Consultation {
   const codedEntries: CodedEntry[] = entity.codedEntries ?? entity.details.map((detail, index) => ({

@@ -66,7 +66,7 @@ export function MobileOverviewHeader({ onSearchClick }: MobileOverviewHeaderProp
     >
       {/* Logo + Search row */}
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', marginBottom: '12px' }}>
-        <CvmisLogo cssHeight="40px" />
+        <CvmisLogo cssHeight="50px" />
         <button
           type="button"
           onClick={onSearchClick}

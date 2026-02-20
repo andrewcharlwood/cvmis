@@ -1,6 +1,5 @@
 // Sizing
 export const MIN_HEIGHT = 400
-export const MOBILE_FALLBACK_HEIGHT = 520
 export const ROLE_WIDTH = 104
 export const ROLE_HEIGHT = 32
 export const ROLE_RX = 16
@@ -50,12 +49,6 @@ export const SKILL_Y_OFFSET_STEP_MOBILE = 26
 export const SKILL_Y_GLOBAL_OFFSET_RATIO = -0.05
 export const SKILL_Y_CENTER_BLEND = 0.55
 export const SKILL_X_OVERLAP_MAX_RATIO = 1
-// Entry animation
-export const ENTRY_GUIDE_FADE_MS = 200
-export const ENTRY_ROLE_STAGGER_MS = 80
-export const ENTRY_ROLE_DURATION_MS = 300
-export const ENTRY_SKILL_STAGGER_MS = 30
-export const ENTRY_SKILL_DURATION_MS = 250
 
 // Timeline animation
 export const ANIM_CHRONOLOGICAL_ENABLED = true
@@ -66,8 +59,6 @@ export const ANIM_LINK_DRAW_MS = 600
 export const ANIM_LINK_STAGGER_MS = 200
 export const ANIM_REINFORCEMENT_MS = 700
 export const ANIM_STEP_GAP_MS = 1000
-export const ANIM_HOLD_MS = 15000
-export const ANIM_RESET_MS = 800
 export const ANIM_RESTART_DELAY_MS = 400
 
 export const ANIM_SETTLE_ALPHA = 0.05
