@@ -79,7 +79,3 @@ src/
 - **Palette**: GP system-inspired greens, teals, and greys
 - **Fonts**: Elvaro Grotesque (UI), Geist Mono / Fira Code (mono), Plus Jakarta Sans / Inter Tight (fallback)
 - **Breakpoints**: xxs 360px, xs 480px, sm 640px, md 768px, lg 1024px, xl 1280px
-
-## License
-
-Private - All rights reserved.
